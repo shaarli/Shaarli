@@ -2,7 +2,7 @@
     <div id="logo" title="Share your links !" onclick="document.location='?';"></div>
     <div style="float:right; font-style:italic; color:#bbb; text-align:right; padding:0 5 0 0;" class="nomobile">Shaare your links...<br>
         {if="!empty($linkcount)"}{$linkcount} links{/if}</div>
-    <span id="shaarli_title"><a href="?">{$shaarlititle|htmlspecialchars}</a></span>
+    <span id="shaarli_title"><a href="{$titleLink}">{$shaarlititle|htmlspecialchars}</a></span>
   
 {if="!empty($_GET['source']) && $_GET['source']=='bookmarklet'"}
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}

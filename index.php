@@ -105,6 +105,7 @@ if (empty($GLOBALS['redirector'])) $GLOBALS['redirector']='';
 if (empty($GLOBALS['disablesessionprotection'])) $GLOBALS['disablesessionprotection']=false;
 if (empty($GLOBALS['disablejquery'])) $GLOBALS['disablejquery']=false;
 if (empty($GLOBALS['privateLinkByDefault'])) $GLOBALS['privateLinkByDefault']=false;
+if (empty($GLOBALS['titleLink'])) $GLOBALS['titleLink']='?';
 // I really need to rewrite Shaarli with a proper configuation manager.
 
 // Run config screen if first run:
@@ -657,6 +658,7 @@ class pageBuilder
         $this->tpl->assign('pagetitle','Shaarli');
         $this->tpl->assign('privateonly',!empty($_SESSION['privateonly'])); // Show only private links ?
         if (!empty($GLOBALS['title'])) $this->tpl->assign('pagetitle',$GLOBALS['title']);
+        if (!empty($GLOBALS['titleLink'])) $this->tpl->assign('titleLink',$GLOBALS['titleLink']);
         if (!empty($GLOBALS['pagetitle'])) $this->tpl->assign('pagetitle',$GLOBALS['pagetitle']);
         $this->tpl->assign('shaarlititle',empty($GLOBALS['title']) ? 'Shaarli': $GLOBALS['title'] );
         return;
@@ -1395,6 +1397,7 @@ function renderPage()
                     $tz = $_POST['continent'].'/'.$_POST['city'];
             $GLOBALS['timezone'] = $tz;
             $GLOBALS['title']=$_POST['title'];
+            $GLOBALS['titleLink']=$_POST['titleLink'];
             $GLOBALS['redirector']=$_POST['redirector'];
             $GLOBALS['disablesessionprotection']=!empty($_POST['disablesessionprotection']);
             $GLOBALS['disablejquery']=!empty($_POST['disablejquery']);
@@ -2257,6 +2260,7 @@ function writeConfig()
     if (is_file($GLOBALS['config']['CONFIG_FILE']) && !isLoggedIn()) die('You are not authorized to alter config.'); // Only logged in user can alter config.
     $config='<?php $GLOBALS[\'login\']='.var_export($GLOBALS['login'],true).'; $GLOBALS[\'hash\']='.var_export($GLOBALS['hash'],true).'; $GLOBALS[\'salt\']='.var_export($GLOBALS['salt'],true).'; ';
     $config .='$GLOBALS[\'timezone\']='.var_export($GLOBALS['timezone'],true).'; date_default_timezone_set('.var_export($GLOBALS['timezone'],true).'); $GLOBALS[\'title\']='.var_export($GLOBALS['title'],true).';';
+    $config .= '$GLOBALS[\'titleLink\']='.var_export($GLOBALS['titleLink'],true).'; ';
     $config .= '$GLOBALS[\'redirector\']='.var_export($GLOBALS['redirector'],true).'; ';
     $config .= '$GLOBALS[\'disablesessionprotection\']='.var_export($GLOBALS['disablesessionprotection'],true).'; ';
     $config .= '$GLOBALS[\'disablejquery\']='.var_export($GLOBALS['disablejquery'],true).'; ';
