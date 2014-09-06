@@ -1588,6 +1588,7 @@ function renderPage()
  					}
             }
             if ($url=='') $url='?'.smallHash($linkdate); // In case of empty URL, this is just a text (with a link that point to itself)
+            if ($title=='') $title='Note : '; // In case of empty URL, this is just a text (with a link that point to itself)
             $link = array('linkdate'=>$linkdate,'title'=>$title,'url'=>$url,'description'=>$description,'tags'=>$tags,'private'=>$private);
         }
 
