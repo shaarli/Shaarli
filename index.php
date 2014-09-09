@@ -26,7 +26,7 @@ $GLOBALS['config']['CACHEDIR'] = 'cache'; // Cache directory for thumbnails for 
 $GLOBALS['config']['PAGECACHE'] = 'pagecache'; // Page cache directory.
 $GLOBALS['config']['ENABLE_LOCALCACHE'] = true; // Enable Shaarli to store thumbnail in a local cache. Disable to reduce web space usage.
 $GLOBALS['config']['PUBSUBHUB_URL'] = ''; // PubSubHubbub support. Put an empty string to disable, or put your hub url here to enable.
-$GLOBALS['config']['RAINTPL_TMP'] = 'tmp' ; // Raintpl cache directory
+$GLOBALS['config']['RAINTPL_TMP'] = 'tmp/' ; // Raintpl cache directory
 $GLOBALS['config']['RAINTPL_TPL'] = 'tpl/' ; // Raintpl template directory (keep the trailling slash!)
 $GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt'; // For updates check of Shaarli.
 $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
