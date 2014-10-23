@@ -1,19 +1,20 @@
-![Shaarli logo](http://sebsauvage.net/wiki/lib/exe/fetch.php?media=php:php_shaarli:php_shaarli_logo_inkscape_w600_transp-nq8.png)
+![Shaarli logo](https://cdn.mediacru.sh/W2NGCIHB3quT.png)
 
 Shaarli, the personal, minimalist, super-fast, no-database delicious clone.
 
 You want to share the links you discover ? Shaarli is a minimalist delicious clone you can install on your own website.
-It is designed to be personal (single-user), fast and handy. 
+It is designed to be personal (single-user), fast and handy.
 
 
-Features:
+## Features:
 
  * Minimalist design (simple is beautiful)
  * **FAST**
  * Dead-simple installation: Drop the files, open the page. No database required.
  * Easy to use: Single button in your browser to bookmark a page
- * Save URL, title, description (unlimited size). Classify links with tags (with autocomplete)
- * Tag renaming, merging and deletion.
+ * Save URL, title, description (unlimited size).
+ * Classify, search and filter links with tags.
+ * Tag autcompletion, renaming, merging and deletion.
  * Automatic thumbnails for various services (imgur, imageshack.us, flickr, youtube, vimeo, dailymotion…)
  * Automatic conversion of URLs to clickable links in descriptions. Support for http/ftp/file/apt/magnet protocols.
  * Save links as public or private
@@ -32,40 +33,42 @@ Features:
  * Also works with javascript disabled
  * Can import/export Netscape bookmarks (for import/export from/to Firefox, Opera, Chrome, Delicious…)
  * Brute force protected login form
- * Protected against [XSRF](http://en.wikipedia.org/wiki/Cross-site_request_forgery), session cookie hijacking.
  * Automatic removal of annoying FeedBurner/Google FeedProxy parameters in URL (?utm_source…)
- * Shaarli is a bookmarking application, but you can use it for micro-blogging (like Twitter), a pastebin, an online notepad, a snippet repository, etc.
- * You will be automatically notified by a discreet popup if a new version is available
  * Pages are easy to customize (using CSS and simple RainTPL templates)
+ * Protected against [XSRF](http://en.wikipedia.org/wiki/Cross-site_request_forgery), session cookie hijacking.
+ * You will be automatically notified by a discreet popup if a new version is available
+ * **Shaarli is a bookmarking application, but you can use it for micro-blogging (like Twitter), a pastebin, an online notepad, a snippet repository, etc. See [Usage examples](https://github.com/shaarli/Shaarli/wiki#usage-examples)**
+
+## Links
+ * [Wiki/documentation](https://github.com/shaarli/Shaarli/wiki)
+ * [Bugs/Feature requests/Discussion](https://github.com/shaarli/Shaarli/issues/)
 
 
-Requires php 5.1
+## Installing
+Shaarli requires php 5.1
 
-More information on the project page:
-http://sebsauvage.net/wiki/doku.php?id=php:shaarli
+ * Download the latest stable release from https://github.com/shaarli/Shaarli/releases
+ * Unpack the archive in a directory on your web server
+ * Visit this directory from a web browser.
+ * Choose login, password, timezone and page title. Save.
 
-------------------------------------------------------------------------------
+_To get the development version, download https://github.com/shaarli/Shaarli/archive/master.zip or `git clone https://github.com/shaarli/Shaarli`_
 
-Shaarli is distributed under the zlib/libpng License:
+## Upgrading
+Delete all files and directories except the `data` directory, then unzip the new version of Shaarli.  
+You will not lose your links and you will not have to reconfigure it.
 
-Copyright (c) 2011 Sébastien SAUVAGE (sebsauvage.net)
 
-This software is provided 'as-is', without any express or implied warranty.
-In no event will the authors be held liable for any damages arising from
-the use of this software.
+## Screenshots
 
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it 
-freely, subject to the following restrictions:
+[![](https://cdn.mediacru.sh/AjZc6-emICeO.png)](https://cdn.mediacru.sh/kE8SyD-PvGuC.png)  [![](https://cdn.mediacru.sh/MfC-DzklMYs2.png)](https://cdn.mediacru.sh/iqTvO1-yP9pU.png) [![](https://cdn.mediacru.sh/dxmXskaubYcg.png)](https://cdn.mediacru.sh/mMoi31f94wdL.png) [![](https://cdn.mediacru.sh/-ptB2veFivBp.png)](https://cdn.mediacru.sh/GcoZPZmCZ-DR.png) [![](https://cdn.mediacru.sh/QmRdTAr8x427.png)](https://cdn.mediacru.sh/TDDujpMWT31q.png)
 
-  1. The origin of this software must not be misrepresented; you must not 
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would
-     be appreciated but is not required.
+## About
 
-  2. Altered source versions must be plainly marked as such, and must
-     not be misrepresented as being the original software.
+Original Project page: http://sebsauvage.net/wiki/doku.php?id=php:shaarli  
+Shaarli is developed by [Sébastien SAUVAGE](http://sebsauvage.net) and [contributors](COPYING).
 
-  3. This notice may not be removed or altered from any source distribution.
+Shaarli is [Free Software](https://en.wikipedia.org/wiki/Free_software) distributed under the [zlib/libpng License](http://www.gzip.org/zlib/zlib_license.html)
 
-------------------------------------------------------------------------------
+This friendly fork is maintained by the community at https://github.com/shaarli/Shaarli
+

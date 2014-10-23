@@ -44,6 +44,11 @@ Files: ins/qr.min.js
 License: GPLv3
 Copyright: (C) 2014 Alasdair Mercer, http://neocotic.com
 
+Files: images/sprites.png
+License: SIL Open Font License (http://scripts.sil.org/OFL)
+Copyright: (C) 2014 Dave Gandy, http://twitter.com/davegandy
+Copyright: (C) 2014 nodiscc (nodiscc@gmail.com)
+
 --------------------------------------------------------
 ZLIB/LIBPNG LICENSE
 

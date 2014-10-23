@@ -7,19 +7,21 @@
 {if="!empty($_GET['source']) && $_GET['source']=='bookmarklet'"}
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}
 {else}
-    <a href="?" class="nomobile">Home</a>
+    <a href="?" class="nomobile"><img style='background-position: -96px 0;'/></a>
     {if="isLoggedIn()"}
-        <a href="?do=logout">Logout</a><a href="?do=tools">Tools</a><a href="?do=addlink"><b>Add link</b></a>
+        <a href="?do=logout"><img style='background-position: -240px 0;'/>Logout</a><a href="?do=tools"><img style='background-position: -256px 0;'/>Tools</a><a href="?do=addlink"><img style='background-position: -112px 0;'/><b>Add link</b></a>
     {elseif="$GLOBALS['config']['OPEN_SHAARLI']"}
-        <a href="?do=tools">Tools</a><a href="?do=addlink"><b>Add link</b></a>
+        <a href="?do=tools">Tools<img style='background-position: -256px 0;'/></a><a href="?do=addlink"><img style='background-position: -112px 0;'/><b>Add link</b></a>
     {else}
-        <a href="?do=login">Login</a>
+        <a href="?do=login"><img style='background-position: -32px 0;'/>Login</a>
     {/if}
-    <a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile">RSS Feed</a>
-    <a href="{$feedurl}?do=atom{$searchcrits}" style="padding-left:10px;" class="nomobile">ATOM Feed</a>
-    <a href="?do=tagcloud">Tag cloud</a>
-    <a href="?do=picwall{$searchcrits}">Picture wall</a>
-    <a href="?do=daily">Daily</a>
+    <a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile"><img style='background-position: -176px 0;'/>Subscribe</a>
+    {if="$GLOBALS['config']['SHOW_ATOM']"}
+        <a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile"><img style='background-position: -176px 0;'/>ATOM Feed</a>
+    {/if}
+    <a href="?do=tagcloud"><img style='background-position: -208px 0;'/> Tag cloud</a>
+    <a href="?do=picwall{$searchcrits}"><img style='background-position: -224px 0;'/> Picture wall</a>
+    <a href="?do=daily"><img style='background-position: -0px 0;'/> Daily</a>
 {/if}
     <div class="clear"></div>
 

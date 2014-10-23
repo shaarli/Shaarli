@@ -74,6 +74,7 @@ h1 { font-size:20pt; font-weight:bold; font-style:italic; margin-bottom:20px; }
 	left:-1px;  
 	padding:4px 2px 2px 2px;
 	background-color:#f0f0f0;
+	
 
 	-webkit-border-radius:0px 6px 6px 0px;
 	-moz-border-radius:0px 6px 6px 0px;
@@ -86,6 +87,10 @@ h1 { font-size:20pt; font-weight:bold; font-style:italic; margin-bottom:20px; }
 	-o-box-shadow:0px 0px 3px 0px #333333;
 	-ms-box-shadow:0px 0px 3px 0px #333333;
 	box-shadow:0px 0px 3px 0px #333333;
+}
+
+.button_edit {
+	background-position: -112px 0;
 }
 
 #pageheader #logo{
@@ -132,12 +137,38 @@ cursor:pointer;
 	text-decoration:none;
 }
 
+#pageheader .toolbar {
+	width: 16px;
+	height: 16px;
+	display: block;
+
+}
+
+
+#pageheader .toolbar a.btn-home { background-position: -112px 0; }
+#pageheader .toolbar a.btn-tools { background-position: -32px 0; }
+#pageheader .toolbar a.btn-addlink { background-position: -96px 0; }
+#pageheader .toolbar a.btn-rss { background-position: -80px 0; }
+#pageheader .toolbar a.btn-tagcloud { background-position: -64px 0; }
+#pageheader .toolbar a.btn-picturewall { background-position: -48px 0; }
+#pageheader .toolbar a.btn-daily { background-position: -16px 0; }
+
 #toolsdiv a{
 	clear:both;
 }
 #toolsdiv a span{
 	color:#ffffff;
 }
+
+#pageheader img, .button_edit {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	vertical-align: bottom;
+	background: no-repeat url(../images/sprites.png);
+}
+
+
 .linksperpage,.tagfilter,.searchform,.addform {
 	background-color: #dedede;
 	background: -webkit-gradient(linear, 0 0, 0 bottom, from(#dedede), to(#ffffff));
