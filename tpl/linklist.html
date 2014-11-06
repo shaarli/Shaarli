@@ -51,7 +51,7 @@
                 {if="$GLOBALS['config']['ARCHIVE_ORG']"}
                 <span class="linkarchive"><a href="https://web.archive.org/web/{$value.url|htmlspecialchars}">archive</a> - </span>
                 {if condition="$GLOBALS['config']['LINKLIST_PLUGINS']=='readityourself'"}
-                    <span class="linkreadable"><a href="{$GLOBALS['config']['READITYOURSELF_URL']}readityourself.php?url={$value.url|htmlspecialchars}">readityourself</a> - </span>
+                    <span class="linkreadable"><a href="{$GLOBALS['config']['READITYOURSELF_URL']}readityourself.php?url={urlencode($value.url)|htmlspecialchars}">readityourself</a> - </span>
                 {/if}
                 <div style="position:relative;display:inline;"><a href="http://qrfree.kaywa.com/?l=1&s=8&d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}" 
                     onclick="showQrCode(this); return false;" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}"><img src="images/qrcode.png#" width="13" height="13" title="QR-Code"></a></div> - 
