@@ -34,6 +34,8 @@ $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency 
                                           // Note: You must have publisher.php in the same directory as Shaarli index.php
 $GLOBALS['config']['ARCHIVE_ORG'] = false; // For each link, add a link to an archived version on archive.org
 $GLOBALS['config']['READITYOURSELF_URL'] = 'https://example.com/readityourself/' // URL of the readityourself service (example: 'http://www.readityourself.net/')
+$GLOBALS['config']['READITYOURSELF_URL'] = 'http://www.readityourself.net//'; // URL of the readityourself service (example: 'http://www.readityourself.net/')
+$GLOBALS['config']['LINKLIST_PLUGINS'] = 'readityourself';
 // -----------------------------------------------------------------------------------------------
 // You should not touch below (or at your own risks!)
 // Optional config file.
