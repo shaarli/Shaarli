@@ -22,6 +22,10 @@
     <a href="?do=tagcloud">Tag cloud</a>
     <a href="?do=picwall{$searchcrits}">Picture wall</a>
     <a href="?do=daily">Daily</a>
+    {loop="$GLOBALS['config']['TOOLBAR_PLUGINS']"}
+        {$pluginpath="plugins/$value/$value"}
+        {include="$pluginpath"}
+    {/loop}
 {/if}
     <div class="clear"></div>
 

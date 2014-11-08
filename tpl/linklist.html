@@ -48,11 +48,13 @@
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
-                {if="$GLOBALS['config']['ARCHIVE_ORG']"}
-                <span class="linkarchive"><a href="https://web.archive.org/web/{$value.url|htmlspecialchars}">archive</a> - </span>
-                {/if}
-                <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&s=8&d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
-                    onclick="showQrCode(this); return false;" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}"><img src="images/qrcode.png#" title="QR-Code"></a></div> -
+                {loop="$GLOBALS['config']['LINKLIST_PLUGINS']"}
+                    {$linkurl=$value1.url}
+                    {$pluginpath="plugins/$value/$value"}
+                    <span>{include="$pluginpath"}</span>
+                {/loop}
+                <div style="position:relative;display:inline;"><a href="http://qrfree.kaywa.com/?l=1&s=8&d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}" 
+                    onclick="showQrCode(this); return false;" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}"><img src="images/qrcode.png#" width="13" height="13" title="QR-Code"></a></div> - 
                 <a href={$value.url|htmlspecialchars}><span class="linkurl" title="Short link">{$value.url|htmlspecialchars}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
@@ -68,12 +70,12 @@
 
 </div>
 
-    {include="page.footer"}
+    {include="page.footer"} 
 
 <script language="JavaScript">
 // Remove any displayed QR-Code
 function remove_qrcode()
-{
+{ 
     var elem = document.getElementById("permalinkQrcode");
     if (elem) elem.parentNode.removeChild(elem);
     return false;
@@ -81,7 +83,7 @@ function remove_qrcode()
 
 // Show the QR-Code of a permalink (when the QR-Code icon is clicked).
 function showQrCode(caller,loading=false)
-{
+{ 
     // Dynamic javascript lib loading: We only load qr.js if the QR code icon is clicked:
     if (typeof(qr)=='undefined') // Load qr.js only if not present.
     {
@@ -97,18 +99,18 @@ function showQrCode(caller,loading=false)
 
     // Remove previous qrcode if present.
     remove_qrcode();
-
+    
     // Build the div which contains the QR-Code:
     var element = document.createElement('div');
     element.id="permalinkQrcode";
 	// Make QR-Code div commit sepuku when clicked:
     if ( element.attachEvent ){ element.attachEvent('onclick', 'this.parentNode.removeChild(this);' ); } // Damn IE
     else { element.setAttribute('onclick', 'this.parentNode.removeChild(this);' ); }
-
+    
     // Build the QR-Code:
     var image = qr.image({size: 8,value: caller.dataset.permalink});
     if (image)
-    {
+    { 
         element.appendChild(image);
         element.innerHTML+= "<br>Click to close";
         caller.parentNode.appendChild(element);
