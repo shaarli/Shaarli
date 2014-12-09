@@ -15,9 +15,9 @@
     {else}
         <a href="?do=login">Login</a>
     {/if}
-    <a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile">RSS Feed</a>
+    <a href="?do=rss{$searchcrits}" class="nomobile">RSS Feed</a>
     {if="$GLOBALS['config']['SHOW_ATOM']"}
-        <a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a>
+        <a href="?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a>
     {/if}
     <a href="?do=tagcloud">Tag cloud</a>
     <a href="?do=picwall{$searchcrits}">Picture wall</a>
