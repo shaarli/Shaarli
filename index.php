@@ -32,8 +32,7 @@ $GLOBALS['config']['RAINTPL_TPL'] = 'tpl/' ; // Raintpl template directory (keep
 $GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt'; // For updates check of Shaarli.
 $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
                                           // Note: You must have publisher.php in the same directory as Shaarli index.php
-$GLOBALS['config']['LINKLIST_PLUGINS'] = array('readityourself', 'archiveorg');
-$GLOBALS['config']['TOOLBAR_PLUGINS'] = array();
+$GLOBALS['config']['PLUGINS'] = array('readityourself', 'archiveorg', 'playvideos');
 // -----------------------------------------------------------------------------------------------
 // You should not touch below (or at your own risks!)
 // Optional config file.

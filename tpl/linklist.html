@@ -51,7 +51,7 @@
                 {loop="$GLOBALS['config']['LINKLIST_PLUGINS']"}
                     {$linkurl=$value1.url}
                     {$linkshorturl=$value1.linkdate|smallHash}
-                    {$pluginpath="plugins/$value/$value"}
+                    {$pluginpath="plugins/$value/$value.linklist"}
                     <span>{include="$pluginpath"}</span>
                 {/loop}
                 <a href={$value.url|htmlspecialchars}><span class="linkurl" title="Short link">{$value.url|htmlspecialchars}</span></a><br>
