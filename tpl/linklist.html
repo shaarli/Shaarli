@@ -48,7 +48,7 @@
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
-                {loop="$GLOBALS['config']['LINKLIST_PLUGINS']"}
+                {loop="$GLOBALS['config']['PLUGINS']"}
                     {$linkurl=$value1.url}
                     {$linkshorturl=$value1.linkdate|smallHash}
                     {$pluginpath="plugins/$value/$value.linklist"}
