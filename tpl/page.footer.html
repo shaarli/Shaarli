@@ -7,3 +7,9 @@
 {if="isLoggedIn()"}
 <script language="JavaScript">function confirmDeleteLink() { var agree=confirm("Are you sure you want to delete this link ?"); if (agree) return true ; else return false ; }</script>
 {/if}
+{loop="$GLOBALS['config']['PLUGINS']"}
+    {$linkurl=$value1.url}
+    {$linkshorturl=$value1.linkdate|smallHash}
+    {$pluginpath="plugins/$value/$value.footer"}
+    <span>{include="$pluginpath"}</span>
+{/loop}
