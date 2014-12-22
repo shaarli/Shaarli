@@ -1184,6 +1184,12 @@ function showDaily()
     exit;
 }
 
+// Renders the linklist
+function showLinkList($PAGE, $LINKSDB) {
+    buildLinkList($PAGE,$LINKSDB); // Compute list of links to display
+    $PAGE->renderPage('linklist');
+}
+
 
 // ------------------------------------------------------------------------------------------
 // Render HTML page (according to URL parameters and user rights)
@@ -1191,12 +1197,50 @@ function renderPage()
 {
     $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
 
+    $PAGE = new pageBuilder;
+    // This may not be used in a few cases, like logging out. Don't care.
+    //  1) this removes repeated initialization
+    //  2) this allows us to setup the plugin system
+    // Build the plugin list
+    $linklist_plugins = array();
+    $footer_plugins   = array();
+    $toolbar_plugins  = array();
+    foreach ($GLOBALS['config']['PLUGINS'] as $plugin) {
+        // Checking where the plugins should be inserted
+        // Basically, if $plugin.linklist.html exists, we need to use it as a
+        // linklist plugin, if $plugin.header.html exists we need to use it as a
+        // header plugin, and so on. This way we don't have to check for existance
+        // in the template. This reduces logic in the templates and makes them
+        // more maintainable.
+
+        $plugin_base = sprintf('plugins/%s/%s', $plugin, $plugin);
+        $plugin_linklist = $plugin_base . ".linklist";
+        $plugin_footer   = $plugin_base . ".footer";
+        $plugin_toolbar  = $plugin_base . ".toolbar";
+        // We don't need the .html, RainTPL automatically adds in when inserting the template.
+        // (Also it crashes horribly if we add the .html because it searches for $plugin.html.html)
+        // We also need to concat tpl/ after because the path will be different once we ask rtpl to render
+        if (file_exists($GLOBALS['config']['RAINTPL_TPL'] . $plugin_toolbar . ".html")) {
+            $toolbar_plugins[] = $plugin_toolbar;
+        }
+
+        if (file_exists($GLOBALS['config']['RAINTPL_TPL'] . $plugin_linklist . ".html")) {
+            $linklist_plugins[] = $plugin_linklist;
+        }
+
+        if (file_exists($GLOBALS['config']['RAINTPL_TPL'] . $plugin_footer . ".html")) {
+            $footer_plugins[] = $plugin_footer;
+        }
+    }
+    $PAGE->assign("plugins_footer", $footer_plugins);
+    $PAGE->assign("plugins_toolbar", $toolbar_plugins);
+    $PAGE->assign("plugins_linklist", $linklist_plugins);
+
     // -------- Display login form.
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=login'))
     {
         if ($GLOBALS['config']['OPEN_SHAARLI']) { header('Location: ?'); exit; }  // No need to login for open Shaarli
         $token=''; if (ban_canLogin()) $token=getToken(); // Do not waste token generation if not useful.
-        $PAGE = new pageBuilder;
         $PAGE->assign('token',$token);
         $PAGE->assign('returnurl',(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER']:''));
         $PAGE->renderPage('loginform');
@@ -1234,7 +1278,6 @@ function renderPage()
                 $linksToDisplay[]=$link; // Add to array.
             }
         }
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('linksToDisplay',$linksToDisplay);
         $PAGE->renderPage('picwall');
@@ -1254,7 +1297,6 @@ function renderPage()
         {
             $tagList[$key] = array('count'=>$value,'size'=>max(40*$value/$maxcount,8));
         }
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('tags',$tagList);
         $PAGE->renderPage('tagcloud');
@@ -1357,9 +1399,7 @@ function renderPage()
 			exit;
 		}
 
-        $PAGE = new pageBuilder;
-        buildLinkList($PAGE,$LINKSDB); // Compute list of links to display
-        $PAGE->renderPage('linklist');
+        showLinkList($PAGE, $LINKSDB);
         exit; // Never remove this one! All operations below are reserved for logged in user.
     }
 
@@ -1368,7 +1408,6 @@ function renderPage()
     // -------- Display the Tools menu if requested (import/export/bookmarklet...)
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=tools'))
     {
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('pageabsaddr',indexUrl());
         $PAGE->renderPage('tools');
@@ -1395,7 +1434,6 @@ function renderPage()
         }
         else // show the change password form.
         {
-            $PAGE = new pageBuilder;
             $PAGE->assign('linkcount',count($LINKSDB));
             $PAGE->assign('token',getToken());
             $PAGE->renderPage('changepassword');
@@ -1426,7 +1464,6 @@ function renderPage()
         }
         else // Show the configuration form.
         {
-            $PAGE = new pageBuilder;
             $PAGE->assign('linkcount',count($LINKSDB));
             $PAGE->assign('token',getToken());
             $PAGE->assign('title',htmlspecialchars( empty($GLOBALS['title']) ? '' : $GLOBALS['title'] , ENT_QUOTES));
@@ -1444,7 +1481,6 @@ function renderPage()
     {
         if (empty($_POST['fromtag']))
         {
-            $PAGE = new pageBuilder;
             $PAGE->assign('linkcount',count($LINKSDB));
             $PAGE->assign('token',getToken());
             $PAGE->renderPage('changetag');
@@ -1490,7 +1526,6 @@ function renderPage()
     // -------- User wants to add a link without using the bookmarklet: Show form.
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=addlink'))
     {
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->renderPage('addlink');
         exit;
@@ -1555,7 +1590,6 @@ function renderPage()
     {
         $link = $LINKSDB[$_GET['edit_link']];  // Read database
         if (!$link) { header('Location: ?'); exit; } // Link not found in database.
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('link',$link);
         $PAGE->assign('link_is_new',false);
@@ -1623,7 +1657,6 @@ function renderPage()
             $link = array('linkdate'=>$linkdate,'title'=>$title,'url'=>$url,'description'=>$description,'tags'=>$tags,'private'=>$private);
         }
 
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('link',$link);
         $PAGE->assign('link_is_new',$link_is_new);
@@ -1638,7 +1671,6 @@ function renderPage()
     {
         if (empty($_GET['what']))
         {
-            $PAGE = new pageBuilder;
             $PAGE->assign('linkcount',count($LINKSDB));
             $PAGE->renderPage('export');
             exit;
@@ -1692,7 +1724,6 @@ HTML;
     // -------- Show upload/import dialog:
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=import'))
     {
-        $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
         $PAGE->assign('token',getToken());
         $PAGE->assign('maxfilesize',getMaxFileSize());
@@ -1701,10 +1732,8 @@ HTML;
     }
 
     // -------- Otherwise, simply display search form and links:
-    $PAGE = new pageBuilder;
     $PAGE->assign('linkcount',count($LINKSDB));
-    buildLinkList($PAGE,$LINKSDB); // Compute list of links to display
-    $PAGE->renderPage('linklist');
+    showLinkList($PAGE, $LINKSDB);
     exit;
 }
 
@@ -1864,12 +1893,16 @@ function buildLinkList($PAGE,$LINKSDB)
         $link = $linksToDisplay[$keys[$i]];
         $link['description']=nl2br(keepMultipleSpaces(text2clickable(htmlspecialchars($link['description']))));
         $title=$link['title'];
+        // Is this really necessary ? A simple CSS selector would do the job
         $classLi =  $i%2!=0 ? '' : 'publicLinkHightLight';
         $link['class'] = ($link['private']==0 ? $classLi : 'private');
         $link['localdate']=linkdate2locale($link['linkdate']);
+        // How about sorting that when we register it so that we don't call sort on the same
+        // list over and over and over again for no reason
         $taglist = explode(' ',$link['tags']);
         uasort($taglist, 'strcasecmp');
         $link['taglist']=$taglist;
+        $link['shorturl'] = smallHash($link['linkdate']);
         $linkDisp[$keys[$i]] = $link;
         $i++;
     }

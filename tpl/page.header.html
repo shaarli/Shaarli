@@ -3,7 +3,7 @@
     <div id="linkcount" class="nomobile">Shaare your links...<br>
         {if="!empty($linkcount)"}{$linkcount} links{/if}</div>
     <span id="shaarli_title"><a href="{$titleLink}">{$shaarlititle|htmlspecialchars}</a></span>
-  
+
 {if="!empty($_GET['source']) && $_GET['source']=='bookmarklet'"}
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}
 {else}
@@ -22,9 +22,8 @@
     <a href="?do=tagcloud">Tag cloud</a>
     <a href="?do=picwall{$searchcrits}">Picture wall</a>
     <a href="?do=daily">Daily</a>
-    {loop="$GLOBALS['config']['PLUGINS']"}
-        {$pluginpath="plugins/$value/$value.toolbar"}
-        {include="$pluginpath"}
+    {loop="$plugins_toolbar"}
+        {include="$value"}
     {/loop}
 {/if}
     <div class="clear"></div>

@@ -30,7 +30,7 @@
     <ul>
         {loop="links"}
         <li{if="$value.class"} class="{$value.class}"{/if}>
-            <a name="{$value.linkdate|smallHash}" id="{$value.linkdate|smallHash}"></a>
+            <a name="{$value.shortlink}" id="{$value.shortlink}"></a>
             <div class="thumbnail">{$value.url|thumbnail}</div>
             <div class="linkcontainer">
                 {if="isLoggedIn()"}
@@ -44,16 +44,19 @@
                 <br>
                 {if="$value.description"}<div class="linkdescription">{$value.description}</div>{/if}
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{$value.localdate|htmlspecialchars} - permalink</a> - </span>
+                    <span class="linkdate" title="Permalink"><a href="?{$value.shortlink}">{$value.localdate|htmlspecialchars} - permalink</a> - </span>
                 {else}
-                    <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
+                    <span class="linkdate" title="Short link here"><a href="?{$value.shortlink}">permalink</a> - </span>
                 {/if}
-                {loop="$GLOBALS['config']['PLUGINS']"}
-                    {$linkurl=$value1.url}
-                    {$linkshorturl=$value1.linkdate|smallHash}
-                    {$pluginpath="plugins/$value/$value.linklist"}
-                    <span>{include="$pluginpath"}</span>
+                <!-- We need to assign those because include'ing changes the scope for $value, and
+                looping does too
+                Funfact: don't add spaces when assigning. IT doesn't assign and prints the value -->
+                {$link=$value}
+
+                {loop="$plugins_linklist"}
+                    <span>{include="$value"}</span>
                 {/loop}
+
                 <a href={$value.url|htmlspecialchars}><span class="linkurl" title="Short link">{$value.url|htmlspecialchars}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
@@ -69,7 +72,7 @@
 
 </div>
 
-    {include="page.footer"} 
+    {include="page.footer"}
 
 
 </body>
