@@ -11,3 +11,7 @@ pagecache
 
 # Ignore raintpl generated pages
 *.rtpl.php
+
+# PhpStorm / IntelliJ
+.idea/
+*.iml
