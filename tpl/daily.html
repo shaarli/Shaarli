@@ -28,7 +28,7 @@
                                 <img src="../images/squiggle2.png" width="25" height="26" title="permalink" alt="permalink">
                             </a>
                         </div>
-                        {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
+                        {if="$options.display.hide_timestamps || $logged_in"}
                             <div class="dailyEntryLinkdate">
                                 <a href="?{$link.linkdate|smallHash}">{$link.localdate}</a>
                             </div>

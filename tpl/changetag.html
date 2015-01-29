@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>{include="includes"}
-{if="empty($GLOBALS['disablejquery'])"}<script src="inc/jquery.min.js#"></script><script src="inc/jquery-ui.min.js#"></script>{/if}
+{if="!$options.security.disable_jquery"}<script src="inc/jquery.min.js#"></script><script src="inc/jquery-ui.min.js#"></script>{/if}
 </head>
 <body onload="document.changetag.fromtag.focus();">
 <div id="pageheader">
@@ -15,7 +15,7 @@
 <script>function confirmDeleteTag() { var agree=confirm("Are you sure you want to delete this tag from all links ?"); if (agree) return true ; else return false ; }</script>
 </div>
 {include="page.footer"}
-{if="($GLOBALS['config']['OPEN_SHAARLI'] || isLoggedIn()) && empty($GLOBALS['disablejquery'])"}
+{if="($options.security.open_shaarli || $logged_in) && !$options.security.disable_jquery"}
 <script>
 $(document).ready(function()
 {

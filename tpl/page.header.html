@@ -8,15 +8,15 @@
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}
 {else}
     <a href="?" class="nomobile">Home</a>
-    {if="isLoggedIn()"}
+    {if="$logged_in"}
         <a href="?do=logout">Logout</a><a href="?do=tools">Tools</a><a href="?do=addlink"><b>Add link</b></a>
-    {elseif="$GLOBALS['config']['OPEN_SHAARLI']"}
+    {elseif="$options.security.open_shaarli"}
         <a href="?do=tools">Tools</a><a href="?do=addlink"><b>Add link</b></a>
     {else}
         <a href="?do=login">Login</a>
     {/if}
     <a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile">RSS Feed</a>
-    {if="$GLOBALS['config']['SHOW_ATOM']"}
+    {if="$options.display.show_atom"}
         <a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a>
     {/if}
     <a href="?do=tagcloud">Tag cloud</a>
