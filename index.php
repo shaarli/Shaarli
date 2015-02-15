@@ -1546,7 +1546,36 @@ function renderPage()
 
         // If we are called from the bookmarklet, we must close the popup:
         if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
-        header('Location: ?'); // After deleting the link, redirect to the home page.
+        // Pick where we're going to redirect
+        // =============================================================
+        // Basically, we can't redirect to where we were previously if it was a permalink
+        // or an edit_link, because it would 404.
+        // Cases:
+        //    - /             : nothing in $_GET, redirect to self
+        //    - /?page        : redirect to self
+        //    - /?searchterm  : redirect to self (there might be other links) 
+        //    - /?searchtags  : redirect to self
+        //    - /permalink    : redirect to / (the link does not exist anymore)
+        //    - /?edit_link   : redirect to / (the link does not exist anymore)
+        // PHP treats the permalink as a $_GET variable, so we need to check if every condition for self
+        // redirect is not satisfied, and only then redirect to /
+        $location = "?";
+        // Self redirection
+        if (count($_GET) == 0    ||
+            isset($_GET['page']) ||
+            isset($_GET['searchterm']) ||
+            isset($_GET['searchtags'])) {
+            
+            if (isset($_POST['returnurl']))
+                $location = $_POST['returnurl']; // Handle redirects given by the form
+            
+            if ($location === "?" && 
+                isset($_SERVER['HTTP_REFERER'])) { // Handle HTTP_REFERER in case we're not coming from the same place.
+                $location = $_SERVER['HTTP_REFERER'];
+            }
+        }
+
+        header('Location: ' . $location); // After deleting the link, redirect to the home page.
         exit;
     }
 
