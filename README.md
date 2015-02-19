@@ -8,6 +8,8 @@ It is designed to be personal (single-user), fast and handy.
 
 ## Features:
 
+[![Join the chat at https://gitter.im/shaarli/Shaarli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/shaarli/Shaarli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
  * Minimalist design (simple is beautiful)
  * **FAST**
  * Dead-simple installation: Drop the files, open the page. No database required.
