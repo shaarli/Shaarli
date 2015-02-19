@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>{include="includes"}
-{if="empty($GLOBALS['disablejquery'])"}<script src="inc/jquery-1.11.2.min.js#"></script><script src="inc/jquery-ui-1.11.2.min.js#"></script>{/if}
+{if="!$options.security.disable_jquery"}<script src="inc/jquery-1.11.2.min.js#"></script><script src="inc/jquery-ui-1.11.2.min.js#"></script>{/if}
 </head>
 <body
 {if="$link.title==''"}onload="document.linkform.lf_title.focus();"
@@ -16,7 +16,7 @@
 	        <i>Title</i><br><input type="text" name="lf_title" value="{$link.title|htmlspecialchars}" class="lf_input"><br>
 	        <i>Description</i><br><textarea name="lf_description" rows="4" cols="25">{$link.description|htmlspecialchars}</textarea><br>
 	        <i>Tags</i><br><input type="text" id="lf_tags" name="lf_tags" value="{$link.tags|htmlspecialchars}" class="lf_input"><br>
-	        {if="($link_is_new && $GLOBALS['privateLinkByDefault']==true) || $link.private == true"}
+	        {if="($link_is_new && $options.security.private_links_by_default) || $link.private == true"}
             <input type="checkbox" checked="checked" name="lf_private" id="lf_private">
             &nbsp;<label for="lf_private"><i>Private</i></label><br>
             {else}
@@ -32,7 +32,7 @@
 	</div>
 </div>
 {include="page.footer"}
-{if="($GLOBALS['config']['OPEN_SHAARLI'] || isLoggedIn()) && empty($GLOBALS['disablejquery'])"}
+{if="($options.security.open_shaarli || $logged_in) && $options.security.disable_jquery"}
 <script>
 $(document).ready(function()
 {

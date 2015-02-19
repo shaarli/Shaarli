@@ -1,4 +1,19 @@
 <?php
+
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Yaml.php"; 
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Unescaper.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Escaper.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Parser.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Dumper.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Inline.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Exception/ExceptionInterface.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Exception/RuntimeException.php";
+require_once "vendor/symfony/yaml/Symfony/Component/Yaml/Exception/ParseException.php";
+require_once "inc/rain.tpl.class.php"; //include Rain TPL
+use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Yaml\Dumper;
+use Symfony\Component\Yaml\Yaml;
+
 // Shaarli 0.0.42 beta - Shaare your links...
 // The personal, minimalist, super-fast, no-database Delicious clone. By sebsauvage.net
 // http://sebsauvage.net/wiki/doku.php?id=php:shaarli
@@ -9,36 +24,111 @@
 // Some hosts do not define a default timezone in php.ini,
 // so we have to do this for avoid the strict standard error.
 date_default_timezone_set('UTC');
+// Try to generate a conf.yaml file from the defaults if it doesn't exist yet.
+// If we can't even find a default file, just abort everything and ask the user to grab a copy
+// We honestly can't do shit here.
+if (!file_exists(__DIR__.'/data/conf.yaml')) {
+    if (!copy(__DIR__.'/data/conf.dist.yaml', __DIR__.'/data/conf.yaml')) {
+        trigger_error("[FATAL] Could not find a default configuration file to generate a conf.yaml. ".
+                      "Please retrieve a copy of conf.dist.yaml on https://github.com/shaarli/Shaarli/data/conf.dist.yaml",
+                      E_USER_ERROR);
+    }
+}
 
-// -----------------------------------------------------------------------------------------------
-// Hardcoded parameter (These parameters can be overwritten by creating the file /data/options.php)
-$GLOBALS['config']['DATADIR'] = 'data'; // Data subdirectory
-$GLOBALS['config']['CONFIG_FILE'] = $GLOBALS['config']['DATADIR'].'/config.php'; // Configuration file (user login/password)
-$GLOBALS['config']['DATASTORE'] = $GLOBALS['config']['DATADIR'].'/datastore.php'; // Data storage file.
-$GLOBALS['config']['LINKS_PER_PAGE'] = 20; // Default links per page.
-$GLOBALS['config']['IPBANS_FILENAME'] = $GLOBALS['config']['DATADIR'].'/ipbans.php'; // File storage for failures and bans.
-$GLOBALS['config']['BAN_AFTER'] = 4;        // Ban IP after this many failures.
-$GLOBALS['config']['BAN_DURATION'] = 1800;  // Ban duration for IP address after login failures (in seconds) (1800 sec. = 30 minutes)
-$GLOBALS['config']['OPEN_SHAARLI'] = false; // If true, anyone can add/edit/delete links without having to login
-$GLOBALS['config']['HIDE_TIMESTAMPS'] = false; // If true, the moment when links were saved are not shown to users that are not logged in.
-$GLOBALS['config']['SHOW_ATOM'] = false; // If true, an extra "ATOM feed" button will be displayed in the toolbar
-$GLOBALS['config']['ENABLE_THUMBNAILS'] = true; // Enable thumbnails in links.
-$GLOBALS['config']['CACHEDIR'] = 'cache'; // Cache directory for thumbnails for SLOW services (like flickr)
-$GLOBALS['config']['PAGECACHE'] = 'pagecache'; // Page cache directory.
-$GLOBALS['config']['ENABLE_LOCALCACHE'] = true; // Enable Shaarli to store thumbnail in a local cache. Disable to reduce web space usage.
-$GLOBALS['config']['PUBSUBHUB_URL'] = ''; // PubSubHubbub support. Put an empty string to disable, or put your hub url here to enable.
-$GLOBALS['config']['RAINTPL_TMP'] = 'tmp/' ; // Raintpl cache directory  (keep the trailing slash!)
-$GLOBALS['config']['RAINTPL_TPL'] = 'tpl/' ; // Raintpl template directory (keep the trailing slash!)
-$GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt'; // For updates check of Shaarli.
-$GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
-                                          // Note: You must have publisher.php in the same directory as Shaarli index.php
-$GLOBALS['config']['ARCHIVE_ORG'] = false; // For each link, add a link to an archived version on archive.org
-$GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
-// -----------------------------------------------------------------------------------------------
-// You should not touch below (or at your own risks!)
-// Optional config file.
-if (is_file($GLOBALS['config']['DATADIR'].'/options.php')) require($GLOBALS['config']['DATADIR'].'/options.php');
+$yaml = new Parser();
+$config = $yaml->parse(file_get_contents(__DIR__.'/data/conf.yaml'));
 
+// Load old style options.php if it exists, and delete it afterwards
+// I'm going to be assuming that people haven't moved their options.php
+// from the default data/ directory. If they did, well it's time for some
+// good old fashioned conf.yaml editing.
+if (file_exists(option('dirs.data') . 'options.php')) {
+    include option('dirs.data') . 'options.php';
+    compat_loadFromPHPSettings();
+    unlink(__DIR__.option('dirs.data').'options.php'); // Delete it. rip.   
+    writeConfig();
+}
+function compat_loadFromPHPSettings() {
+    if (isset($GLOBALS['config']['DATADIR']))
+        option_set('dirs.data', $GLOBALS['config']['DATADIR']);
+    if (isset($GLOBALS['config']['CONFIG_FILE'] ))
+        option_set('files.user', $GLOBALS['config']['CONFIG_FILE']);
+    if (isset($GLOBALS['config']['DATASTORE'] ))
+        option_set('files.datastore', $GLOBALS['config']['DATASTORE']);
+    if (isset($GLOBALS['config']['LINKS_PER_PAGE'] ))
+        option_set('display.links_per_page', $GLOBALS['config']['LINKS_PER_PAGE']);
+    if (isset($GLOBALS['config']['IPBANS_FILENAME'] ))
+        option_set('files.ipbans', $GLOBALS['config']['IPBANS_FILENAME']);
+    if (isset($GLOBALS['config']['BAN_AFTER'] ))
+        option_set('bans.ban_after', $GLOBALS['config']['BAN_AFTER'] );
+    if (isset($GLOBALS['config']['BAN_DURATION']))
+        option_set('bans.ban_duration', $GLOBALS['config']['BAN_DURATION']);
+    if (isset($GLOBALS['config']['OPEN_SHAARLI'] ))
+        option_set('security.open_shaarli', $GLOBALS['config']['OPEN_SHAARLI']);
+    if (isset($GLOBALS['config']['HIDE_TIMESTAMPS'] ))
+        option_set('display.hide_timestamps', $GLOBALS['config']['HIDE_TIMESTAMPS']);
+    if (isset($GLOBALS['config']['SHOW_ATOM'] ))
+        option_set('display.show_atom', $GLOBALS['config']['SHOW_ATOM'] );
+    if (isset($GLOBALS['config']['ENABLE_THUMBNAILS'] ))
+        option_set('display.enable_thumbnails', $GLOBALS['config']['ENABLE_THUMBNAILS'] );
+    if (isset($GLOBALS['config']['CACHEDIR'] ))
+        option_set('dirs.cache', $GLOBALS['config']['CACHEDIR'] );
+    if (isset($GLOBALS['config']['PAGECACHE'] ))
+        option_set('dirs.pagecache', $GLOBALS['config']['PAGECACHE']);
+    if (isset($GLOBALS['config']['ENABLE_LOCALCACHE'] ))
+        option_set('cache.enable', $GLOBALS['config']['ENABLE_LOCALCACHE']);
+    if (isset($GLOBALS['config']['PUBSUBHUB_URL'] ))
+        option_set('pubsubhub.url', $GLOBALS['config']['PUBSUBHUB_URL']);
+    if (isset($GLOBALS['config']['RAINTPL_TMP'] ))
+        option_set('dirs.raintpl_temp', $GLOBALS['config']['RAINTPL_TMP']);
+    if (isset($GLOBALS['config']['RAINTPL_TPL'] ))
+        option_set('dirs.raintpl_templates', $GLOBALS['config']['RAINTPL_TPL'] );
+    if (isset($GLOBALS['config']['UPDATECHECK_FILENAME'] ))
+        option_set('files.update', $GLOBALS['config']['UPDATECHECK_FILENAME']);
+    if (isset($GLOBALS['config']['UPDATECHECK_INTERVAL'] ))
+        option_set('update.interval', $GLOBALS['config']['UPDATECHECK_INTERVAL']);
+    if (isset($GLOBALS['config']['ARCHIVE_ORG'] ))
+        option_set('plugins.archive_org', $GLOBALS['config']['ARCHIVE_ORG']);
+    if (isset($GLOBALS['config']['ENABLE_RSS_PERMALINKS'] ))
+        option_set('rss.permalink_in_title', !$GLOBALS['config']['ENABLE_RSS_PERMALINKS']);
+}
+
+function option($path) {
+    global $config;
+    if ($path == '') 
+        return $config;
+
+    $path_as_array = explode('.', $path);
+    $currentRef = $config;
+    foreach ($path_as_array as $key) {
+        if (!isset($currentRef[$key]))
+            throw new Exception("Could not find config option $path".var_dump($currentRef[$key]));    
+
+        $currentRef = $currentRef[$key];
+    }
+
+    return $currentRef;
+}
+
+function option_set($path, $val) {
+    global $config;
+    if ($path == '') 
+        return;
+
+    $path_as_array = explode('.', $path);
+    
+    // Get a reference so we modify it globally. Otherwise we'd modify it in the copy.
+    // Which can be useful I guess.
+    $currentRef = &$config;
+    foreach ($path_as_array as $key) {
+        if (!isset($currentRef[$key]))
+            throw new Exception("Could not find config option $path".var_dump($currentRef[$key]));    
+
+        $currentRef = &$currentRef[$key];
+    }     
+    $currentRef = $val;
+}
+// -----------------------------------------------------------------------------------------------
 define('shaarli_version','0.0.42 beta');
 define('PHPPREFIX','<?php /* '); // Prefix to encapsulate data in PHP code.
 define('PHPSUFFIX',' */ ?>'); // Suffix to encapsulate data in PHP code.
@@ -64,12 +154,14 @@ ini_set('memory_limit', '128M');  // Try to set max upload file size and read (M
 ini_set('post_max_size', '16M');
 ini_set('upload_max_filesize', '16M');
 checkphpversion();
-error_reporting(E_ALL^E_WARNING);  // See all error except warnings.
-//error_reporting(-1); // See all errors (for debugging only)
 
-include "inc/rain.tpl.class.php"; //include Rain TPL
-raintpl::$tpl_dir = $GLOBALS['config']['RAINTPL_TPL']; // template directory
-raintpl::$cache_dir = $GLOBALS['config']['RAINTPL_TMP']; // cache directory
+if (option('dev'))
+    error_reporting(E_ALL);  // See every single error. Do not release until there's no warnings.
+else
+    error_reporting(0); // Let's not show stuff in production and try to handle everything
+
+raintpl::$tpl_dir   = option('dirs.raintpl_templates'); // template directory
+raintpl::$cache_dir = option('dirs.raintpl_temp'); // cache directory
 
 ob_start();  // Output buffering for the page cache.
 
@@ -92,20 +184,10 @@ header("Pragma: no-cache");
 // Directories creations (Note that your web host may require different rights than 705.)
 if (!is_writable(realpath(dirname(__FILE__)))) die('<pre>ERROR: Shaarli does not have the right to write in its own directory.</pre>');
 
-// Handling of old config file which do not have the new parameters.
-if (empty($GLOBALS['title'])) $GLOBALS['title']='Shared links on '.htmlspecialchars(indexUrl());
-if (empty($GLOBALS['timezone'])) $GLOBALS['timezone']=date_default_timezone_get();
-if (empty($GLOBALS['redirector'])) $GLOBALS['redirector']='';
-if (empty($GLOBALS['disablesessionprotection'])) $GLOBALS['disablesessionprotection']=false;
-if (empty($GLOBALS['disablejquery'])) $GLOBALS['disablejquery']=false;
-if (empty($GLOBALS['privateLinkByDefault'])) $GLOBALS['privateLinkByDefault']=false;
-if (empty($GLOBALS['titleLink'])) $GLOBALS['titleLink']='?';
-// I really need to rewrite Shaarli with a proper configuation manager.
-
 // Run config screen if first run:
-if (!is_file($GLOBALS['config']['CONFIG_FILE'])) install();
+if (!is_file(option('dirs.data') . option('files.user'))) install();
 
-require $GLOBALS['config']['CONFIG_FILE'];  // Read login/password hash into $GLOBALS.
+require option('dirs.data') . option('files.user');  // Read login/password hash into $GLOBALS.
 
 // a token depending of deployment salt, user password, and the current ip
 define('STAY_SIGNED_IN_TOKEN', sha1($GLOBALS['hash'].$_SERVER["REMOTE_ADDR"].$GLOBALS['salt']));
@@ -130,19 +212,21 @@ function checkphpversion()
 //         other= the available version.
 function checkUpdate()
 {
+    $update_file = option('dirs.data') . option('files.update');
     if (!isLoggedIn()) return ''; // Do not check versions for visitors.
 
     // Get latest version number at most once a day.
-    if (!is_file($GLOBALS['config']['UPDATECHECK_FILENAME']) || (filemtime($GLOBALS['config']['UPDATECHECK_FILENAME'])<time()-($GLOBALS['config']['UPDATECHECK_INTERVAL'])))
+    if (!is_file($update_file) || 
+        (filemtime($update_file) < time() - option('update.interval')))
     {
         $version=shaarli_version;
         list($httpstatus,$headers,$data) = getHTTP('https://raw.githubusercontent.com/shaarli/Shaarli/master/shaarli_version.txt',2);
         if (strpos($httpstatus,'200 OK')!==false) $version=$data;
         // If failed, never mind. We don't want to bother the user with that.
-        file_put_contents($GLOBALS['config']['UPDATECHECK_FILENAME'],$version); // touch file date
+        file_put_contents($update_file, $version); // touch file date
     }
     // Compare versions:
-    $newestversion=file_get_contents($GLOBALS['config']['UPDATECHECK_FILENAME']);
+    $newestversion=file_get_contents($update_file);
     if (version_compare($newestversion,shaarli_version)==1) return $newestversion;
     return '';
 }
@@ -164,7 +248,7 @@ class pageCache
     public function __construct($url,$shouldBeCached)
     {
         $this->url = $url;
-        $this->filename = $GLOBALS['config']['PAGECACHE'].'/'.sha1($url).'.cache';
+        $this->filename = option('dirs.pagecache').sha1($url).'.cache';
         $this->shouldBeCached = $shouldBeCached;
     }
 
@@ -188,14 +272,14 @@ class pageCache
     // (call with pageCache::purgeCache())
     public static function purgeCache()
     {
-        if (is_dir($GLOBALS['config']['PAGECACHE']))
+        if (is_dir(option('dirs.pagecache')))
         {
-            $handler = opendir($GLOBALS['config']['PAGECACHE']);
+            $handler = opendir(option('dirs.pagecache'));
             if ($handler!==false)
             {
                 while (($filename = readdir($handler))!==false)
                 {
-                    if (endsWith($filename,'.cache')) { unlink($GLOBALS['config']['PAGECACHE'].'/'.$filename); }
+                    if (endsWith($filename,'.cache')) { unlink(option('dirs.pagecache').$filename); }
                 }
                 closedir($handler);
             }
@@ -210,7 +294,7 @@ class pageCache
 function logm($message)
 {
     $t = strval(date('Y/m/d_H:i:s')).' - '.$_SERVER["REMOTE_ADDR"].' - '.strval($message)."\n";
-    file_put_contents($GLOBALS['config']['DATADIR'].'/log.txt',$t,FILE_APPEND);
+    file_put_contents(option('dirs.data').'log.txt',$t,FILE_APPEND);
 }
 
 // Same as nl2br(), but escapes < and >
@@ -238,7 +322,7 @@ function smallHash($text)
 // Function inspired from http://www.php.net/manual/en/function.preg-replace.php#85722
 function text2clickable($url)
 {
-    $redir = empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'];
+    $redir = empty(option('redirector')) ? '' : option('redirector');
     return preg_replace('!(((?:https?|ftp|file)://|apt:|magnet:)\S+[[:alnum:]]/?)!si','<a href="'.$redir.'$1" rel="nofollow">$1</a>',$url);
 }
 
@@ -265,12 +349,13 @@ function autoLocale()
 // ------------------------------------------------------------------------------------------
 // PubSubHubbub protocol support (if enabled)  [UNTESTED]
 // (Source: http://aldarone.fr/les-flux-rss-shaarli-et-pubsubhubbub/ )
-if (!empty($GLOBALS['config']['PUBSUBHUB_URL'])) include './publisher.php';
+if (!empty(option('pubsubhub.url'))) 
+    include './publisher.php';
 function pubsubhub()
 {
-    if (!empty($GLOBALS['config']['PUBSUBHUB_URL']))
+    if (!empty(option('pubsubhub.url')))
     {
-       $p = new Publisher($GLOBALS['config']['PUBSUBHUB_URL']);
+       $p = new Publisher(option('pubsubhub.url'));
        $topic_url = array (
                        indexUrl().'?do=atom',
                        indexUrl().'?do=rss'
@@ -316,7 +401,7 @@ function check_auth($login,$password)
 // Returns true if the user is logged in.
 function isLoggedIn()
 {
-    if ($GLOBALS['config']['OPEN_SHAARLI']) return true;
+    if (option('security.open_shaarli')) return true;
 
     if (!isset($GLOBALS['login'])) return false;  // Shaarli is not configured yet.
 
@@ -326,7 +411,10 @@ function isLoggedIn()
 		return true;
 	}
     // If session does not exist on server side, or IP address has changed, or session has expired, logout.
-    if (empty($_SESSION['uid']) || ($GLOBALS['disablesessionprotection']==false && $_SESSION['ip']!=allIPs()) || time()>=$_SESSION['expires_on'])
+    if (empty($_SESSION['uid']) || 
+        (option('security.disable_session_protection') == false && 
+        $_SESSION['ip']!=allIPs()) || 
+        time()>=$_SESSION['expires_on'])
     {
         logout();
         return false;
@@ -346,21 +434,27 @@ setcookie('shaarli_staySignedIn', FALSE, 0, WEB_PATH);
 // ------------------------------------------------------------------------------------------
 // Brute force protection system
 // Several consecutive failed logins will ban the IP address for 30 minutes.
-if (!is_file($GLOBALS['config']['IPBANS_FILENAME'])) file_put_contents($GLOBALS['config']['IPBANS_FILENAME'], "<?php\n\$GLOBALS['IPBANS']=".var_export(array('FAILURES'=>array(),'BANS'=>array()),true).";\n?>");
-include $GLOBALS['config']['IPBANS_FILENAME'];
+$ipbans_file = option('dirs.data') . option('files.ipbans');
+if (!is_file($ipbans_file)) 
+    file_put_contents($ipbans_file, "<?php\n\$GLOBALS['IPBANS']=" . var_export(array(
+                                                                                'FAILURES'=>array(),
+                                                                                'BANS'=>array()
+                                                                               ),true)
+                                                                  .";\n?>");
+include $ipbans_file;
 // Signal a failed login. Will ban the IP if too many failures:
 function ban_loginFailed()
 {
     $ip=$_SERVER["REMOTE_ADDR"]; $gb=$GLOBALS['IPBANS'];
     if (!isset($gb['FAILURES'][$ip])) $gb['FAILURES'][$ip]=0;
     $gb['FAILURES'][$ip]++;
-    if ($gb['FAILURES'][$ip]>($GLOBALS['config']['BAN_AFTER']-1))
+    if ($gb['FAILURES'][$ip]>(option('bans.ban_after')-1))
     {
-        $gb['BANS'][$ip]=time()+$GLOBALS['config']['BAN_DURATION'];
+        $gb['BANS'][$ip]=time()+option('bans.ban_duration');
         logm('IP address banned from login');
     }
     $GLOBALS['IPBANS'] = $gb;
-    file_put_contents($GLOBALS['config']['IPBANS_FILENAME'], "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
+    file_put_contents($ipbans_file, "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
 }
 
 // Signals a successful login. Resets failed login counter.
@@ -369,7 +463,7 @@ function ban_loginOk()
     $ip=$_SERVER["REMOTE_ADDR"]; $gb=$GLOBALS['IPBANS'];
     unset($gb['FAILURES'][$ip]); unset($gb['BANS'][$ip]);
     $GLOBALS['IPBANS'] = $gb;
-    file_put_contents($GLOBALS['config']['IPBANS_FILENAME'], "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
+    file_put_contents($ipbans_file, "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
 }
 
 // Checks if the user CAN login. If 'true', the user can try to login.
@@ -383,7 +477,7 @@ function ban_canLogin()
         {   // Ban expired, user can try to login again.
             logm('Ban lifted.');
             unset($gb['FAILURES'][$ip]); unset($gb['BANS'][$ip]);
-            file_put_contents($GLOBALS['config']['IPBANS_FILENAME'], "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
+            file_put_contents($ipbans_file, "<?php\n\$GLOBALS['IPBANS']=".var_export($gb,true).";\n?>");
             return true; // Ban has expired, user can login.
         }
         return false; // User is banned.
@@ -638,22 +732,26 @@ class pageBuilder
 
     private function initialize()
     {
-        $this->tpl = new RainTPL;
-        $this->tpl->assign('newversion',checkUpdate());
-        $this->tpl->assign('feedurl',htmlspecialchars(indexUrl()));
+        $config = option('');
+        $loggedin = isLoggedIn();
         $searchcrits=''; // Search criteria
         if (!empty($_GET['searchtags'])) $searchcrits.='&searchtags='.urlencode($_GET['searchtags']);
         elseif (!empty($_GET['searchterm'])) $searchcrits.='&searchterm='.urlencode($_GET['searchterm']);
+
+        $this->tpl = new RainTPL;
+        $this->tpl->assign('newversion',checkUpdate());
+        $this->tpl->assign('feedurl',htmlspecialchars(indexUrl()));
         $this->tpl->assign('searchcrits',$searchcrits);
         $this->tpl->assign('source',indexUrl());
         $this->tpl->assign('version',shaarli_version);
         $this->tpl->assign('scripturl',indexUrl());
         $this->tpl->assign('pagetitle','Shaarli');
         $this->tpl->assign('privateonly',!empty($_SESSION['privateonly'])); // Show only private links?
-        if (!empty($GLOBALS['title'])) $this->tpl->assign('pagetitle',$GLOBALS['title']);
-        if (!empty($GLOBALS['titleLink'])) $this->tpl->assign('titleLink',$GLOBALS['titleLink']);
-        if (!empty($GLOBALS['pagetitle'])) $this->tpl->assign('pagetitle',$GLOBALS['pagetitle']);
-        $this->tpl->assign('shaarlititle',empty($GLOBALS['title']) ? 'Shaarli': $GLOBALS['title'] );
+        $this->tpl->assign('pagetitle',option('display.page_title'));
+        $this->tpl->assign('titleLink',option('display.default_link_name'));
+        $this->tpl->assign('shaarlititle', empty(option('display.title')) ? 'Shaarli': option('display.title'));
+        $this->tpl->assign('options', $config);
+        $this->tpl->assign('logged_in', $loggedin);
         return;
     }
 
@@ -743,22 +841,23 @@ class linkdb implements Iterator, Countable, ArrayAccess
     // ---- Misc methods
     private function checkdb() // Check if db directory and file exists.
     {
-        if (!file_exists($GLOBALS['config']['DATASTORE'])) // Create a dummy database for example.
+        $datastore = option('dirs.data') . option('files.datastore');
+        if (!file_exists($datastore)) // Create a dummy database for example.
         {
              $this->links = array();
              $link = array('title'=>'Shaarli - sebsauvage.net','url'=>'http://sebsauvage.net/wiki/doku.php?id=php:shaarli','description'=>'Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login.','private'=>0,'linkdate'=>'20110914_190000','tags'=>'opensource software');
              $this->links[$link['linkdate']] = $link;
              $link = array('title'=>'My secret stuff... - Pastebin.com','url'=>'http://sebsauvage.net/paste/?8434b27936c09649#bR7XsXhoTiLcqCpQbmOpBi3rq2zzQUC5hBI7ZT1O3x8=','description'=>'SShhhh!!  I\'m a private link only YOU can see. You can delete me too.','private'=>1,'linkdate'=>'20110914_074522','tags'=>'secretstuff');
              $this->links[$link['linkdate']] = $link;
-             file_put_contents($GLOBALS['config']['DATASTORE'], PHPPREFIX.base64_encode(gzdeflate(serialize($this->links))).PHPSUFFIX); // Write database to disk
+             file_put_contents($datastore, PHPPREFIX.base64_encode(gzdeflate(serialize($this->links))).PHPSUFFIX); // Write database to disk
         }
     }
 
     // Read database from disk to memory
     private function readdb()
     {
-        // Read data
-        $this->links=(file_exists($GLOBALS['config']['DATASTORE']) ? unserialize(gzinflate(base64_decode(substr(file_get_contents($GLOBALS['config']['DATASTORE']),strlen(PHPPREFIX),-strlen(PHPSUFFIX))))) : array() );
+        $datastore = option('dirs.data') . option('files.datastore');
+        $this->links=(file_exists($datastore) ? unserialize(gzinflate(base64_decode(substr(file_get_contents($datastore),strlen(PHPPREFIX),-strlen(PHPSUFFIX))))) : array() );
         // Note that gzinflate is faster than gzuncompress. See: http://www.php.net/manual/en/function.gzdeflate.php#96439
 
         // If user is not logged in, filter private links.
@@ -778,7 +877,8 @@ class linkdb implements Iterator, Countable, ArrayAccess
     public function savedb()
     {
         if (!$this->loggedin) die('You are not authorized to change the database.');
-        file_put_contents($GLOBALS['config']['DATASTORE'], PHPPREFIX.base64_encode(gzdeflate(serialize($this->links))).PHPSUFFIX);
+        $datastore = option('dirs.data') . option('files.datastore');
+        file_put_contents($datastore, PHPPREFIX.base64_encode(gzdeflate(serialize($this->links))).PHPSUFFIX);
         invalidateCaches();
     }
 
@@ -896,7 +996,7 @@ function showRSS()
     // $usepermalink : If true, use permalink instead of final link.
     // User just has to add 'permalink' in URL parameters. e.g. http://mysite.com/shaarli/?do=rss&permalinks
     // Also enabled through a config option
-    $usepermalinks = isset($_GET['permalinks']) || !$GLOBALS['config']['ENABLE_RSS_PERMALINKS'];
+    $usepermalinks = isset($_GET['permalinks']) || option('rss.permalink_in_title');
 
     // Cache system
     $query = $_SERVER["QUERY_STRING"];
@@ -904,7 +1004,7 @@ function showRSS()
     $cached = $cache->cachedVersion(); if (!empty($cached)) { echo $cached; exit; }
 
     // If cached was not found (or not usable), then read the database and build the response:
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if user it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if user it not logged in).
 
     // Optionally filter the results:
     $linksToDisplay=array();
@@ -919,12 +1019,12 @@ function showRSS()
 
     $pageaddr=htmlspecialchars(indexUrl());
     echo '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">';
-    echo '<channel><title>'.htmlspecialchars($GLOBALS['title']).'</title><link>'.$pageaddr.'</link>';
+    echo '<channel><title>'.htmlspecialchars(option('display.title')).'</title><link>'.$pageaddr.'</link>';
     echo '<description>Shared links</description><language>en-en</language><copyright>'.$pageaddr.'</copyright>'."\n\n";
-    if (!empty($GLOBALS['config']['PUBSUBHUB_URL']))
+    if (!empty(option('pubsubhub.url')))
     {
         echo '<!-- PubSubHubbub Discovery -->';
-        echo '<link rel="hub" href="'.htmlspecialchars($GLOBALS['config']['PUBSUBHUB_URL']).'" xmlns="http://www.w3.org/2005/Atom" />';
+        echo '<link rel="hub" href="'.htmlspecialchars(option('pubsubhub.url')).'" xmlns="http://www.w3.org/2005/Atom" />';
         echo '<link rel="self" href="'.htmlspecialchars($pageaddr).'?do=rss" xmlns="http://www.w3.org/2005/Atom" />';
         echo '<!-- End Of PubSubHubbub Discovery -->';
     }
@@ -941,7 +1041,7 @@ function showRSS()
             echo '<item><title>'.htmlspecialchars($link['title']).'</title><guid isPermaLink="true">'.$guid.'</guid><link>'.$guid.'</link>';
         else
             echo '<item><title>'.htmlspecialchars($link['title']).'</title><guid isPermaLink="false">'.$guid.'</guid><link>'.$absurl.'</link>';
-        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) echo '<pubDate>'.htmlspecialchars($rfc822date)."</pubDate>\n";
+        if (!option('display.hide_timestamps') || isLoggedIn()) echo '<pubDate>'.htmlspecialchars($rfc822date)."</pubDate>\n";
         if ($link['tags']!='') // Adding tags to each RSS entry (as mentioned in RSS specification)
         {
             foreach(explode(' ',$link['tags']) as $tag) { echo '<category domain="'.htmlspecialchars($pageaddr).'">'.htmlspecialchars($tag).'</category>'."\n"; }
@@ -978,7 +1078,7 @@ function showATOM()
     $cached = $cache->cachedVersion(); if (!empty($cached)) { echo $cached; exit; }
     // If cached was not found (or not usable), then read the database and build the response:
 
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
 
 
     // Optionally filter the results:
@@ -1010,7 +1110,7 @@ function showATOM()
             $entries.='<link href="'.$guid.'" /><id>'.$guid.'</id>';
         else
             $entries.='<link href="'.$absurl.'" /><id>'.$guid.'</id>';
-        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) $entries.='<updated>'.htmlspecialchars($iso8601date).'</updated>';
+        if (!option('display.hide_timestamps') || isLoggedIn()) $entries.='<updated>'.htmlspecialchars($iso8601date).'</updated>';
 
         // Add permalink in description
         $descriptionlink = htmlspecialchars('(<a href="'.$guid.'">Permalink</a>)');
@@ -1028,13 +1128,13 @@ function showATOM()
         $i++;
     }
     $feed='<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">';
-    $feed.='<title>'.htmlspecialchars($GLOBALS['title']).'</title>';
-    if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) $feed.='<updated>'.htmlspecialchars($latestDate).'</updated>';
+    $feed.='<title>'.htmlspecialchars(option('display.title')).'</title>';
+    if (!option('display.hide_timestamps') || isLoggedIn()) $feed.='<updated>'.htmlspecialchars($latestDate).'</updated>';
     $feed.='<link rel="self" href="'.htmlspecialchars(serverUrl().$_SERVER["REQUEST_URI"]).'" />';
-    if (!empty($GLOBALS['config']['PUBSUBHUB_URL']))
+    if (!empty(option('pubsubhub.url')))
     {
         $feed.='<!-- PubSubHubbub Discovery -->';
-        $feed.='<link rel="hub" href="'.htmlspecialchars($GLOBALS['config']['PUBSUBHUB_URL']).'" />';
+        $feed.='<link rel="hub" href="'.htmlspecialchars(option('pubsubhub.url')).'" />';
         $feed.='<!-- End Of PubSubHubbub Discovery -->';
     }
     $feed.='<author><name>'.htmlspecialchars($pageaddr).'</name><uri>'.htmlspecialchars($pageaddr).'</uri></author>';
@@ -1059,7 +1159,7 @@ function showDailyRSS()
     $cache = new pageCache(pageUrl(),startsWith($query,'do=dailyrss') && !isLoggedIn());
     $cached = $cache->cachedVersion(); if (!empty($cached)) { echo $cached; exit; }
     // If cached was not found (or not usable), then read the database and build the response:
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
 
     /* Some Shaarlies may have very few links, so we need to look
        back in time (rsort()) until we have enough days ($nb_of_days).
@@ -1084,7 +1184,7 @@ function showDailyRSS()
     header('Content-Type: application/rss+xml; charset=utf-8');
     $pageaddr=htmlspecialchars(indexUrl());
     echo '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0">';
-    echo '<channel><title>Daily - '.htmlspecialchars($GLOBALS['title']).'</title><link>'.$pageaddr.'</link>';
+    echo '<channel><title>Daily - '.htmlspecialchars(option('display.title')).'</title><link>'.$pageaddr.'</link>';
     echo '<description>Daily shared links</description><language>en-en</language><copyright>'.$pageaddr.'</copyright>'."\n";
 
     foreach($days as $day=>$linkdates) // For each day.
@@ -1092,7 +1192,7 @@ function showDailyRSS()
         $daydate = utf8_encode(strftime('%A %d, %B %Y',linkdate2timestamp($day.'_000000'))); // Full text date
         $rfc822date = linkdate2rfc822($day.'_000000');
         $absurl=htmlspecialchars(indexUrl().'?do=daily&day='.$day);  // Absolute URL of the corresponding "Daily" page.
-        echo '<item><title>'.htmlspecialchars($GLOBALS['title'].' - '.$daydate).'</title><guid>'.$absurl.'</guid><link>'.$absurl.'</link>';
+        echo '<item><title>'.htmlspecialchars(option('display.title').' - '.$daydate).'</title><guid>'.$absurl.'</guid><link>'.$absurl.'</link>';
         echo '<pubDate>'.htmlspecialchars($rfc822date)."</pubDate>";
 
         // Build the HTML body of this RSS entry.
@@ -1127,7 +1227,7 @@ function showDailyRSS()
 // "Daily" page.
 function showDaily()
 {
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
 
 
     $day=Date('Ymd',strtotime('-1 day')); // Yesterday, in format YYYYMMDD.
@@ -1193,12 +1293,12 @@ function showDaily()
 // Render HTML page (according to URL parameters and user rights)
 function renderPage()
 {
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
 
     // -------- Display login form.
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=login'))
     {
-        if ($GLOBALS['config']['OPEN_SHAARLI']) { header('Location: ?'); exit; }  // No need to login for open Shaarli
+        if (option('security.open_shaarli')) { header('Location: ?'); exit; }  // No need to login for open Shaarli
         $token=''; if (ban_canLogin()) $token=getToken(); // Do not waste token generation if not useful.
         $PAGE = new pageBuilder;
         $PAGE->assign('token',$token);
@@ -1383,7 +1483,7 @@ function renderPage()
     // -------- User wants to change his/her password.
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=changepasswd'))
     {
-        if ($GLOBALS['config']['OPEN_SHAARLI']) die('You are not supposed to change a password on an Open Shaarli.');
+        if (option('security.open_shaarli')) die('You are not supposed to change a password on an Open Shaarli.');
         if (!empty($_POST['setpassword']) && !empty($_POST['oldpassword']))
         {
             if (!tokenOk($_POST['token'])) die('Wrong token.'); // Go away!
@@ -1418,14 +1518,14 @@ function renderPage()
             if (!empty($_POST['continent']) && !empty($_POST['city']))
                 if (isTZvalid($_POST['continent'],$_POST['city']))
                     $tz = $_POST['continent'].'/'.$_POST['city'];
-            $GLOBALS['timezone'] = $tz;
-            $GLOBALS['title']=$_POST['title'];
-            $GLOBALS['titleLink']=$_POST['titleLink'];
-            $GLOBALS['redirector']=$_POST['redirector'];
-            $GLOBALS['disablesessionprotection']=!empty($_POST['disablesessionprotection']);
-            $GLOBALS['disablejquery']=!empty($_POST['disablejquery']);
-            $GLOBALS['privateLinkByDefault']=!empty($_POST['privateLinkByDefault']);
-            $GLOBALS['config']['ENABLE_RSS_PERMALINKS']= !empty($_POST['enableRssPermalinks']);
+            option_set('display.timezone', $tz);
+            option_set('display.title',    $_POST['title']);
+            option_set('display.default_link_name', $_POST['titleLink']);
+            option_set('redirector',       $_POST['redirector']);
+            option_set('security.disable_session_protection', !empty($_POST['disablesessionprotection']));
+            option_set('security.disable_jquery',   !empty($_POST['disablejquery']));
+            option_set('security.private_links_by_default',   !empty($_POST['privateLinkByDefault']));
+	    option_set('rss.permalink_in_title', empty($_POST['enableRssPermalinks']));
             writeConfig();
             echo '<script>alert("Configuration was saved.");document.location=\'?do=tools\';</script>';
             exit;
@@ -1435,9 +1535,9 @@ function renderPage()
             $PAGE = new pageBuilder;
             $PAGE->assign('linkcount',count($LINKSDB));
             $PAGE->assign('token',getToken());
-            $PAGE->assign('title',htmlspecialchars( empty($GLOBALS['title']) ? '' : $GLOBALS['title'] , ENT_QUOTES));
-            $PAGE->assign('redirector',htmlspecialchars( empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'] , ENT_QUOTES));
-            list($timezone_form,$timezone_js) = templateTZform($GLOBALS['timezone']);
+            $PAGE->assign('title',htmlspecialchars( empty(option('display.title')) ? '' : option('display.title') , ENT_QUOTES));
+            $PAGE->assign('redirector',htmlspecialchars( empty(option('redirector')) ? '' : option('redirector') , ENT_QUOTES));
+            list($timezone_form,$timezone_js) = templateTZform(option('display.timezone'));
             $PAGE->assign('timezone_form',$timezone_form); // FIXME: Put entire tz form generation in template?
             $PAGE->assign('timezone_js',$timezone_js);
             $PAGE->renderPage('configure');
@@ -1746,8 +1846,8 @@ HTML;
 // Process the import file form.
 function importFile()
 {
-    if (!(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI'])) { die('Not allowed.'); }
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    if (!(isLoggedIn() || option('security.open_shaarli'))) { die('Not allowed.'); }
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
     $filename=$_FILES['filetoupload']['name'];
     $filesize=$_FILES['filetoupload']['size'];
     $data=file_get_contents($_FILES['filetoupload']['tmp_name']);
@@ -1882,7 +1982,7 @@ function buildLinkList($PAGE,$LINKSDB)
     $keys=array(); foreach($linksToDisplay as $key=>$value) { $keys[]=$key; } // Stupid and ugly. Thanks PHP.
 
     // If there is only a single link, we change on-the-fly the title of the page.
-    if (count($linksToDisplay)==1) $GLOBALS['pagetitle'] = $linksToDisplay[$keys[0]]['title'].' - '.$GLOBALS['title'];
+    if (count($linksToDisplay)==1) option_set('display.page_title', $linksToDisplay[$keys[0]]['title'].' - '.option('display.title'));
 
     // Select articles according to paging.
     $pagecount = ceil(count($keys)/$_SESSION['LINKS_PER_PAGE']);
@@ -1926,7 +2026,7 @@ function buildLinkList($PAGE,$LINKSDB)
     $PAGE->assign('result_count',count($linksToDisplay));
     $PAGE->assign('search_type',$search_type);
     $PAGE->assign('search_crits',$search_crits);
-    $PAGE->assign('redirector',empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector']); // Optional redirector URL.
+    $PAGE->assign('redirector',empty(option('redirector')) ? '' : option('redirector')); // Optional redirector URL.
     $PAGE->assign('token',$token);
     $PAGE->assign('links',$linkDisp);
     return;
@@ -1943,7 +2043,7 @@ function buildLinkList($PAGE,$LINKSDB)
 // Return an empty array if no thumbnail available.
 function computeThumbnail($url,$href=false)
 {
-    if (!$GLOBALS['config']['ENABLE_THUMBNAILS']) return array();
+    if (!option('display.enable_thumbnails')) return array();
     if ($href==false) $href=$url;
 
     // For most hosts, the URL of the thumbnail can be easily deduced from the URL of the link.
@@ -2011,7 +2111,7 @@ function computeThumbnail($url,$href=false)
     // So we deport the thumbnail generation in order not to slow down page generation
     // (and we also cache the thumbnail)
 
-    if (!$GLOBALS['config']['ENABLE_LOCALCACHE']) return array(); // If local cache is disabled, no thumbnails for services which require the use a local cache.
+    if (!option('cache.enable')) return array(); // If local cache is disabled, no thumbnails for services which require the use a local cache.
 
     if ($domain=='flickr.com' || endsWith($domain,'.flickr.com')
         || $domain=='vimeo.com'
@@ -2089,7 +2189,7 @@ function lazyThumbnail($url,$href=false)
     $html='<a href="'.htmlspecialchars($t['href']).'">';
 
     // Lazy image (only loaded by JavaScript when in the viewport).
-    if (!empty($GLOBALS['disablejquery'])) // (except if jQuery is disabled)
+    if (!empty(option('security.disable_jquery'))) // (except if jQuery is disabled)
         $html.='<img class="lazyimage" src="'.htmlspecialchars($t['src']).'"';
     else
         $html.='<img class="lazyimage" src="#" data-original="'.htmlspecialchars($t['src']).'"';
@@ -2150,12 +2250,12 @@ function install()
         if (!empty($_POST['continent']) && !empty($_POST['city']))
             if (isTZvalid($_POST['continent'],$_POST['city']))
                 $tz = $_POST['continent'].'/'.$_POST['city'];
-        $GLOBALS['timezone'] = $tz;
+        option_set('display.timezone', $tz);
         // Everything is ok, let's create config file.
         $GLOBALS['login'] = $_POST['setlogin'];
         $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
         $GLOBALS['hash'] = sha1($_POST['setpassword'].$GLOBALS['login'].$GLOBALS['salt']);
-        $GLOBALS['title'] = (empty($_POST['title']) ? 'Shared links on '.htmlspecialchars(indexUrl()) : $_POST['title'] );
+        option_set('display.title', (empty($_POST['title']) ? 'Shared links on '.htmlspecialchars(indexUrl()) : $_POST['title'] ));
         writeConfig();
         echo '<script>alert("Shaarli is now configured. Please enter your login/password and start shaaring your links!");document.location=\'?do=login\';</script>';
         exit;
@@ -2183,7 +2283,9 @@ function templateTZform($ptz=false)
     {
         // Try to split the provided timezone.
         if ($ptz==false) { $l=timezone_identifiers_list(); $ptz=$l[0]; }
-        $spos=strpos($ptz,'/'); $pcontinent=substr($ptz,0,$spos); $pcity=substr($ptz,$spos+1);
+        $spos=strpos($ptz,'/'); 
+	$pcontinent = substr($ptz,0,$spos); 
+	$pcity=substr($ptz,$spos+1);
 
         // Display config form:
         $timezone_form = '';
@@ -2276,7 +2378,7 @@ function processWS()
 {
     if (empty($_GET['ws']) || empty($_GET['term'])) return;
     $term = $_GET['term'];
-    $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
+    $LINKSDB=new linkdb(isLoggedIn() || option('security.open_shaarli'));  // Read links from database (and filter private links if used it not logged in).
     header('Content-Type: application/json; charset=utf-8');
 
     // Search in tags (case insensitive, cumulative search)
@@ -2315,17 +2417,23 @@ function processWS()
 // (otherwise, the function simply returns.)
 function writeConfig()
 {
-    if (is_file($GLOBALS['config']['CONFIG_FILE']) && !isLoggedIn()) die('You are not authorized to alter config.'); // Only logged in user can alter config.
-    $config='<?php $GLOBALS[\'login\']='.var_export($GLOBALS['login'],true).'; $GLOBALS[\'hash\']='.var_export($GLOBALS['hash'],true).'; $GLOBALS[\'salt\']='.var_export($GLOBALS['salt'],true).'; ';
-    $config .='$GLOBALS[\'timezone\']='.var_export($GLOBALS['timezone'],true).'; date_default_timezone_set('.var_export($GLOBALS['timezone'],true).'); $GLOBALS[\'title\']='.var_export($GLOBALS['title'],true).';';
-    $config .= '$GLOBALS[\'titleLink\']='.var_export($GLOBALS['titleLink'],true).'; ';
-    $config .= '$GLOBALS[\'redirector\']='.var_export($GLOBALS['redirector'],true).'; ';
-    $config .= '$GLOBALS[\'disablesessionprotection\']='.var_export($GLOBALS['disablesessionprotection'],true).'; ';
-    $config .= '$GLOBALS[\'disablejquery\']='.var_export($GLOBALS['disablejquery'],true).'; ';
-    $config .= '$GLOBALS[\'privateLinkByDefault\']='.var_export($GLOBALS['privateLinkByDefault'],true).'; ';
-    $config .= '$GLOBALS[\'config\'][\'ENABLE_RSS_PERMALINKS\']='.var_export($GLOBALS['config']['ENABLE_RSS_PERMALINKS'], true).'; ';
-    $config .= ' ?>';
-    if (!file_put_contents($GLOBALS['config']['CONFIG_FILE'],$config) || strcmp(file_get_contents($GLOBALS['config']['CONFIG_FILE']),$config)!=0)
+    $config = option('');
+    $config_file = option('dirs.data') . option('files.user');
+    if (is_file($config_file) && !isLoggedIn()) {
+        trigger_error('You are not authorized to alter config.', E_USER_ERROR);  // Only logged in user can alter config.
+    }
+    $user ='<?php $GLOBALS[\'login\']='.var_export($GLOBALS['login'],true).';'.
+                   '$GLOBALS[\'hash\']=' .var_export($GLOBALS['hash'],true) .';'.
+                   '$GLOBALS[\'salt\']='.var_export($GLOBALS['salt'],true)  .';';
+
+    if (!file_put_contents($config_file,$user) || strcmp(file_get_contents($config_file),$user) !=0)
+    {
+        echo '<script>alert("Shaarli could not create the config file. Please make sure Shaarli has the right to write in the folder is it installed in.");document.location=\'?\';</script>';
+        exit;
+    }
+
+    $conf = Yaml::dump($config, 2);
+    if (!file_put_contents(__DIR__.'/data/conf.yaml', $conf) || strcmp(file_get_contents(__DIR__.'/data/conf.yaml'), $conf) != 0)
     {
         echo '<script>alert("Shaarli could not create the config file. Please make sure Shaarli has the right to write in the folder is it installed in.");document.location=\'?\';</script>';
         exit;
@@ -2349,18 +2457,18 @@ function genThumbnail()
 
     // Let's see if we don't already have the image for this URL in the cache.
     $thumbname=hash('sha1',$_GET['url']).'.jpg';
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$thumbname))
+    if (is_file(option('dirs.cache').$thumbname))
     {   // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname);
+        echo file_get_contents(option('dirs.cache').$thumbname);
         return;
     }
     // We may also serve a blank image (if service did not respond)
     $blankname=hash('sha1',$_GET['url']).'.gif';
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$blankname))
+    if (is_file(option('dirs.cache').$blankname))
     {
         header('Content-Type: image/gif');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname);
+        echo file_get_contents(option('dirs.cache').$blankname);
         return;
     }
 
@@ -2405,7 +2513,7 @@ function genThumbnail()
             list($httpstatus,$headers,$data) = getHTTP($imageurl,10); // Image is 240x120, so 10 seconds to download should be enough.
             if (strpos($httpstatus,'200 OK')!==false)
             {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
+                file_put_contents(option('dirs.cache').$thumbname,$data); // Save image to cache.
                 header('Content-Type: image/jpeg');
                 echo $data;
                 return;
@@ -2427,7 +2535,7 @@ function genThumbnail()
             list($httpstatus,$headers,$data) = getHTTP($imageurl,10);
             if (strpos($httpstatus,'200 OK')!==false)
             {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
+                file_put_contents(option('dirs.cache').$thumbname,$data); // Save image to cache.
                 header('Content-Type: image/jpeg');
                 echo $data;
                 return;
@@ -2451,7 +2559,7 @@ function genThumbnail()
                 list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
                 if (strpos($httpstatus,'200 OK')!==false)
                 {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+                    $filepath=option('dirs.cache').$thumbname;
                     file_put_contents($filepath,$data); // Save image to cache.
                     if (resizeImage($filepath))
                     {
@@ -2480,7 +2588,7 @@ function genThumbnail()
                 list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
                 if (strpos($httpstatus,'200 OK')!==false)
                 {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+                    $filepath=option('dirs.cache').$thumbname;
                     file_put_contents($filepath,$data); // Save image to cache.
                     if (resizeImage($filepath))
                     {
@@ -2499,7 +2607,7 @@ function genThumbnail()
         list($httpstatus,$headers,$data) = getHTTP($url,30);  // We allow 30 seconds max to download (and downloads are limited to 4 Mb)
         if (strpos($httpstatus,'200 OK')!==false)
         {
-            $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+            $filepath=option('dirs.cache').$thumbname;
             file_put_contents($filepath,$data); // Save image to cache.
             if (resizeImage($filepath))
             {
@@ -2513,7 +2621,7 @@ function genThumbnail()
 
     // Otherwise, return an empty image (8x8 transparent gif)
     $blankgif = base64_decode('R0lGODlhCAAIAIAAAP///////yH5BAEKAAEALAAAAAAIAAgAAAIHjI+py+1dAAA7');
-    file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname,$blankgif); // Also put something in cache so that this URL is not requested twice.
+    file_put_contents(option('dirs.cache').$blankname,$blankgif); // Also put something in cache so that this URL is not requested twice.
     header('Content-Type: image/gif');
     echo $blankgif;
 }
@@ -2565,6 +2673,6 @@ if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=a
 if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=dailyrss')) { showDailyRSS(); exit; }
 if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=daily')) { showDaily(); exit; }
 if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'ws=')) { processWS(); exit; } // Webservices (for jQuery/jQueryUI)
-if (!isset($_SESSION['LINKS_PER_PAGE'])) $_SESSION['LINKS_PER_PAGE']=$GLOBALS['config']['LINKS_PER_PAGE'];
+if (!isset($_SESSION['LINKS_PER_PAGE'])) $_SESSION['LINKS_PER_PAGE']=option('display.links_per_page');
 renderPage();
 ?>

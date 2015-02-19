@@ -4,6 +4,6 @@
 {if="$newversion"}
     <div id="newversion"><span id="version_id">&#x25CF;</span> Shaarli {$newversion|htmlspecialchars} is <a href="https://github.com/shaarli/Shaarli/releases">available</a>.</div>
 {/if}
-{if="isLoggedIn()"}
+{if="$logged_in"}
 <script>function confirmDeleteLink() { var agree=confirm("Are you sure you want to delete this link ?"); if (agree) return true ; else return false ; }</script>
 {/if}

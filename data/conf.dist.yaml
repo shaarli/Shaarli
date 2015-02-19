@@ -1,0 +1,40 @@
+dev: true
+dirs:
+    data: data/
+    cache: cache/
+    pagecache: pagecache/
+    raintpl_temp: tmp/
+    raintpl_templates: tpl/
+files:
+    user: config.php
+    datastore: datastore.php
+    ipbans: ipbans.php
+    update: lastupdatecheck.txt
+bans:
+    ban_after: 4
+    ban_duration: 1800
+display:
+    links_per_page: 20
+    hide_timestamps: false
+    show_atom: false
+    enable_thumbnails: true
+    title: 'Shared links'
+    page_title: ''
+    timezone: 'Europe/London'
+    default_link_name: '?'
+cache:
+    enable: true
+security:
+    open_shaarli: false
+    disable_session_protection: false
+    disable_jquery: false
+    private_links_by_default: false
+pubsubhub:
+    url: ''
+update:
+    interval: 86400
+rss:
+    permalink_in_title: true
+redirector: ''
+plugins:
+    archive_org: true

@@ -63,6 +63,10 @@ Copyright: 2011-2012, Federico Ulfo <rainelemental@gmail.com>
            2011-2012, The Rain Team <hello@raintm.com>
 License: LGPL-3+ (https://www.gnu.org/licenses/lgpl-3.0.txt)
 
+Files: vendor/symfony/*
+License: MIT (http://opensource.org/licenses/MIT)
+Copyright: (C) 2004-2015 Fabien Potencier http://symfony.com/
+
 ----------------------------------------------------
 ZLIB/LIBPNG LICENSE
 
