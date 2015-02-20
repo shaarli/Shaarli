@@ -2050,11 +2050,18 @@ function computeThumbnail($url,$href=false)
     if (!$GLOBALS['config']['ENABLE_LOCALCACHE']) return array(); // If local cache is disabled, no thumbnails for services which require the use a local cache.
 
     if ($domain=='flickr.com' || endsWith($domain,'.flickr.com')
+        || $domain=='www.heise.de' || $domain=='heise.de'
         || $domain=='vimeo.com'
         || $domain=='ted.com' || endsWith($domain,'.ted.com')
         || $domain=='xkcd.com' || endsWith($domain,'.xkcd.com')
     )
     {
+        if ($domain=='www.heise.de' || $domain=='heise.de')
+        {   // Make sure this URL points to a article (/-xxx... where xxx is numeric)
+            $path = parse_url($url,PHP_URL_PATH);
+            if (preg_match('!/tp/!',$path)) return array(); // Telepolis - usually no image.
+            if (!preg_match('!-\d+(\.html.*)?$!',$path)) return array(); // This is not a single article URL.
+        }
         if ($domain=='vimeo.com')
         {   // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
             $path = parse_url($url,PHP_URL_PATH);
@@ -2512,6 +2519,63 @@ function genThumbnail()
             if (!empty($matches[1]))
             {   // Let's download the image.
                 $imageurl=$matches[1];
+                list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
+                if (strpos($httpstatus,'200 OK')!==false)
+                {
+                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+                    file_put_contents($filepath,$data); // Save image to cache.
+                    if (resizeImage($filepath))
+                    {
+                        header('Content-Type: image/jpeg');
+                        echo file_get_contents($filepath);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    elseif ($domain=='www.heise.de' || $domain=='heise.de')
+    {
+        // header('Debug-Domain: ' . $domain);
+        // header('Debug-Location: ' . $url);
+        list($httpstatus,$headers,$data) = getHTTP($url,5);
+        for ($count = 0; !empty($headers['Location']) && count < 10 ; $count++) {
+          // follow redirect
+          $location = $headers['Location'];
+          // header('Debug-Location' . $count . ': ' . $location);
+          // make $location url absolute if necessary
+          if ( '/' === substr($location, 0, 1) )
+            $location = $domain . $headers['Location'];
+          if ( 'http://' !== substr($location, 0, 7) )
+            $location = 'http://' . $location;
+          // header('Debug-Redirect' . $count . ': ' . $location);
+          list($httpstatus,$headers,$data) = getHTTP($location,5);
+        }
+        if (strpos($httpstatus,'200 OK')!==false)
+        {
+            // Extract the link to the thumbnail
+            preg_match('!<figure\s+class="aufmacherbild">\s+<img\s+src="([^"]+)"!mi',$data,$matches);
+            if (empty($matches[1]))
+              preg_match('!<figure\s+class="anrissbild_gross"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
+            if (empty($matches[1]))
+              preg_match('!<span\s+class="bild_rechts"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
+            if (empty($matches[1]))
+              preg_match('!<span\s+class="bild_zentriert"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
+            if (empty($matches[1]))
+              preg_match('!<figure[^>]*>\s*<img\s+src="(.+?)"!mi',$data,$matches);
+            if (empty($matches[1]))
+              preg_match('!class="[^"]+?\s+artikel_gross".+?<img\s+src="([^"]+)"!mi',$data,$matches);
+            if (!empty($matches[1]))
+            {   // Let's download the image.
+                $imageurl=$matches[1];
+                // header('Debug-ImageUrl0: ' . $imageurl);
+                if ( '//' === substr($imageurl, 0, 2) )
+                  $imageurl = 'http:' . $imageurl;
+                // header('Debug-ImageUrl1: ' . $imageurl);
+                if ( '/' === substr($imageurl, 0, 1) )
+                  $imageurl = 'http://' . $domain . $imageurl;
+                // header('Debug-ImageUrl2: ' . $imageurl);
                 list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
                 if (strpos($httpstatus,'200 OK')!==false)
                 {
