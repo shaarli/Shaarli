@@ -901,10 +901,19 @@ class linkdb implements Iterator, Countable, ArrayAccess
     public function allTags()
     {
         $tags=array();
-        foreach($this->links as $link)
-            foreach(explode(' ',$link['tags']) as $tag)
-                if (!empty($tag)) $tags[$tag]=(empty($tags[$tag]) ? 1 : $tags[$tag]+1);
-        arsort($tags); // Sort tags by usage (most used tag first)
+        foreach($this->links as $link) {
+            foreach(explode(' ',$link['tags']) as $tag) {
+                $tags[$tag]['count'] = (empty($tags[$tag]['count'])) ? 1 : $tags[$tag]['count'] + 1;
+                $tags[$tag]['linkdate'] = (empty($tags[$tag]['linkdate']) || $link['linkdate'] > $tags[$tag]['linkdate']) ? $link['linkdate'] : $tags[$tag]['linkdate'];
+            }
+        }
+        foreach ($tags as $key => $row) {
+            $occurrences[$key]  = $row['count'];
+            $linkdate[$key] = $row['linkdate'];
+        }
+
+        // Sort by date, then occurrences
+        array_multisort($linkdate, SORT_DESC, $occurrences, SORT_DESC, $tags);
         return $tags;
     }
 
@@ -1287,13 +1296,13 @@ function renderPage()
         $tags= $LINKSDB->allTags();
         // We sort tags alphabetically, then choose a font size according to count.
         // First, find max value.
-        $maxcount=0; foreach($tags as $key=>$value) $maxcount=max($maxcount,$value);
+        $maxcount=0; foreach($tags as $key=>$value) $maxcount=max($maxcount,$value['count']);
         ksort($tags);
         $tagList=array();
         foreach($tags as $key=>$value)
 	// Tag font size scaling: default 15 and 30 logarithm bases affect scaling, 22 and 6 are arbitrary font sizes for max and min sizes.
         {
-            $tagList[$key] = array('count'=>$value,'size'=>log($value, 15) / log($maxcount, 30) * (22-6) + 6);
+            $tagList[$key] = array('count'=>$value['count'],'size'=>log($value['count'], 15) / log($maxcount, 30) * (22-6) + 6);
         }
         $PAGE = new pageBuilder;
         $PAGE->assign('linkcount',count($LINKSDB));
@@ -1593,7 +1602,7 @@ function renderPage()
         // Cases:
         //    - /             : nothing in $_GET, redirect to self
         //    - /?page        : redirect to self
-        //    - /?searchterm  : redirect to self (there might be other links) 
+        //    - /?searchterm  : redirect to self (there might be other links)
         //    - /?searchtags  : redirect to self
         //    - /permalink    : redirect to / (the link does not exist anymore)
         //    - /?edit_link   : redirect to / (the link does not exist anymore)
@@ -2309,7 +2318,7 @@ if (!function_exists('json_encode')) {
 // e.g. index.php?ws=tags&term=minecr
 function processWS()
 {
-    if (empty($_GET['ws']) || empty($_GET['term'])) return;
+    if (empty($_GET['ws'])) return;
     $term = $_GET['term'];
     $LINKSDB=new linkdb(isLoggedIn() || $GLOBALS['config']['OPEN_SHAARLI']);  // Read links from database (and filter private links if used it not logged in).
     header('Content-Type: application/json; charset=utf-8');
@@ -2326,7 +2335,7 @@ function processWS()
         {
             if (startsWith($key,$last,$case=false) && !in_array($key,$tags)) $suggested[$addtags.$key.' ']=0;
         }
-        echo json_encode(array_keys($suggested));
+        echo json_encode(array_keys(array_slice($suggested, 0 , 10)));
         exit;
     }
 
@@ -2339,7 +2348,7 @@ function processWS()
         {
             if (startsWith($key,$term,$case=true)) $suggested[$key]=0;
         }
-        echo json_encode(array_keys($suggested));
+        echo json_encode(array_keys(array_slice($suggested, 0, 10)));
         exit;
     }
 }
