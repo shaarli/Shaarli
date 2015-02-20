@@ -2051,6 +2051,10 @@ function computeThumbnail($url,$href=false)
 
     if ($domain=='flickr.com' || endsWith($domain,'.flickr.com')
         || $domain=='www.heise.de' || $domain=='heise.de'
+        || $domain=='www.golem.de'
+        || $domain=='www.spiegel.de' || $domain=='spiegel.de'
+        || $domain=='www.sueddeutsche.de' || $domain=='sz.de'
+        || $domain=='netzpolitik.org'
         || $domain=='vimeo.com'
         || $domain=='ted.com' || endsWith($domain,'.ted.com')
         || $domain=='xkcd.com' || endsWith($domain,'.xkcd.com')
@@ -2061,6 +2065,11 @@ function computeThumbnail($url,$href=false)
             $path = parse_url($url,PHP_URL_PATH);
             if (preg_match('!/tp/!',$path)) return array(); // Telepolis - usually no image.
             if (!preg_match('!-\d+(\.html.*)?$!',$path)) return array(); // This is not a single article URL.
+        }
+        if ($domain=='www.golem.de')
+        {   // Make sure this URL points to a article (/-xxx-xxx.html where xxx is numeric)
+            $path = parse_url($url,PHP_URL_PATH);
+            if (!preg_match('!-\d{4}-\d{5,}\.html$!',$path)) return array(); // This is not a single article URL.
         }
         if ($domain=='vimeo.com')
         {   // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
@@ -2535,7 +2544,11 @@ function genThumbnail()
         }
     }
 
-    elseif ($domain=='www.heise.de' || $domain=='heise.de')
+    elseif ($domain=='www.heise.de' || $domain=='heise.de'
+    	|| $domain=='www.golem.de' || $domain=='www.spiegel.de'
+    	|| $domain=='spiegel.de'
+    	|| $domain=='www.sueddeutsche.de' || $domain=='sz.de'
+    	|| $domain=='netzpolitik.org')
     {
         // header('Debug-Domain: ' . $domain);
         // header('Debug-Location: ' . $url);
@@ -2555,17 +2568,7 @@ function genThumbnail()
         if (strpos($httpstatus,'200 OK')!==false)
         {
             // Extract the link to the thumbnail
-            preg_match('!<figure\s+class="aufmacherbild">\s+<img\s+src="([^"]+)"!mi',$data,$matches);
-            if (empty($matches[1]))
-              preg_match('!<figure\s+class="anrissbild_gross"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
-            if (empty($matches[1]))
-              preg_match('!<span\s+class="bild_rechts"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
-            if (empty($matches[1]))
-              preg_match('!<span\s+class="bild_zentriert"[^>]*>\s+<img\s+src="([^"]+)"!mi',$data,$matches);
-            if (empty($matches[1]))
-              preg_match('!<figure[^>]*>\s*<img\s+src="(.+?)"!mi',$data,$matches);
-            if (empty($matches[1]))
-              preg_match('!class="[^"]+?\s+artikel_gross".+?<img\s+src="([^"]+)"!mi',$data,$matches);
+            preg_match('!<meta[^>]+?(?:property|name)="og:image"[^>]*?\s+content="([^"]+)"!i',$data,$matches);
             if (!empty($matches[1]))
             {   // Let's download the image.
                 $imageurl=$matches[1];
