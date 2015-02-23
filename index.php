@@ -32,7 +32,6 @@ $GLOBALS['config']['RAINTPL_TPL'] = 'tpl/' ; // Raintpl template directory (keep
 $GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt'; // For updates check of Shaarli.
 $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
                                           // Note: You must have publisher.php in the same directory as Shaarli index.php
-$GLOBALS['config']['ARCHIVE_ORG'] = false; // For each link, add a link to an archived version on archive.org
 $GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
 // -----------------------------------------------------------------------------------------------
 // You should not touch below (or at your own risks!)

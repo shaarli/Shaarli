@@ -48,9 +48,6 @@
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
-                {if="$GLOBALS['config']['ARCHIVE_ORG']"}
-                <span class="linkarchive"><a href="https://web.archive.org/web/{$value.url|htmlspecialchars}">archive</a> - </span>
-                {/if}
                 <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&amp;s=8&amp;d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
                     onclick="return showQrCode(this);" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}">
 		    <img src="images/qrcode.png#" alt="QR-Code" title="{$value.localdate|htmlspecialchars}"></a></div> -
