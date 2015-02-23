@@ -1972,6 +1972,7 @@ function buildLinkList($PAGE,$LINKSDB)
         $taglist = explode(' ',$link['tags']);
         uasort($taglist, 'strcasecmp');
         $link['taglist']=$taglist;
+        $link['shorturl'] = smallHash($link['linkdate']);
         $linkDisp[$keys[$i]] = $link;
         $i++;
     }
