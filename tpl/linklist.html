@@ -50,7 +50,14 @@
                 {/if}
                 <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&amp;s=8&amp;d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
                     onclick="return showQrCode(this);" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}">
-		    <img src="images/qrcode.png#" alt="QR-Code" title="{$value.localdate|htmlspecialchars}"></a></div> -
+                   <img src="images/qrcode.png#" alt="QR-Code" title="{$value.localdate|htmlspecialchars}"></a></div> -
+                <!-- We need to assign those because include'ing changes the scope for $value, and
+                looping does too
+                Funfact: don't add spaces when assigning. IT doesn't assign and prints the value -->
+                {$link=$value}
+                {loop="$plugins_linklist"}
+                    <span>{include="$value"}</span>
+                {/loop}
                 <a href="{$value.url|htmlspecialchars}"><span class="linkurl" title="Short link">{$value.url|htmlspecialchars}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
