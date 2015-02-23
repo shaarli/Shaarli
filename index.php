@@ -1246,6 +1246,7 @@ function renderPage()
     $linklist_plugins = array();
     $footer_plugins = array();
     $toolbar_plugins = array();
+    $includes_plugins = array();
     foreach ($GLOBALS['config']['PLUGINS'] as $plugin) {
         // Checking where the plugins should be inserted
         // Basically, if $plugin.linklist.html exists, we need to use it as a
@@ -1257,6 +1258,8 @@ function renderPage()
         $plugin_linklist = $plugin_base . ".linklist";
         $plugin_footer = $plugin_base . ".footer";
         $plugin_toolbar = $plugin_base . ".toolbar";
+        $plugin_includes  = $plugin_base . ".includes";
+
         // We don't need the .html, RainTPL automatically adds in when inserting the template.
         // (Also it crashes horribly if we add the .html because it searches for $plugin.html.html)
         // We also need to concat tpl/ after because the path will be different once we ask rtpl to render
@@ -1269,11 +1272,15 @@ function renderPage()
         if (file_exists($GLOBALS['config']['RAINTPL_TPL'] . $plugin_footer . ".html")) {
             $footer_plugins[] = $plugin_footer;
         }
+        if (file_exists($GLOBALS['config']['RAINTPL_TPL'] . $plugin_include . ".html")) {
+            $includes_plugins[] = $plugin_includes;
+        }
+
     }
     $PAGE->assign("plugins_footer", $footer_plugins);
     $PAGE->assign("plugins_toolbar", $toolbar_plugins);
     $PAGE->assign("plugins_linklist", $linklist_plugins);
-    
+    $PAGE->assign("plugins_includes", $linklist_includes);
 
     // -------- Display login form.
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=login'))
