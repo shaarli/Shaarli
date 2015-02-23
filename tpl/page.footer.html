@@ -7,3 +7,6 @@
 {if="isLoggedIn()"}
 <script>function confirmDeleteLink() { var agree=confirm("Are you sure you want to delete this link ?"); if (agree) return true ; else return false ; }</script>
 {/if}
+{loop="$plugins_footer"}
+	<span>{include="$value"}</span>
+{/loop}
