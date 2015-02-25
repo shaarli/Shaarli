@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>{include="includes"}
-{if="empty($GLOBALS['disablejquery'])"}<script src="inc/jquery.min.js#"></script><script src="inc/jquery-ui.min.js#"></script>{/if}
+{if="empty($GLOBALS['disablejquery'])"}<script src="inc/jquery-1.11.2.min.js#"></script><script src="inc/jquery-ui-1.11.2.min.js#"></script>{/if}
 </head>
 <body onload="document.changetag.fromtag.focus();">
 <div id="pageheader">
@@ -19,7 +19,13 @@
 <script>
 $(document).ready(function()
 {
-    $('#fromtag').autocomplete({source:'{$source}?ws=singletag',minLength:1});
+    $('#fromtag').autocomplete({
+		source:'{$source}?ws=singletag',minLength:0,
+		focus: function( event, ui ) {
+			event.preventDefault(); // without this: keyboard movements reset the input to ''
+			$(this).val(ui.item.label);
+		}
+	});
 });
 </script>
 {/if}
