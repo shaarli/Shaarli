@@ -2391,7 +2391,19 @@ function genThumbnail()
     if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$thumbname))
     {   // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname);
+        $filename = $GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+        // header_remove("Cache-Control");
+        header("Cache-Control: must-revalidate");
+        header_remove("Pragma");
+        // header('Debug-File:' . $filename);
+        header('Expires: ' . gmdate(DATE_RFC1123, time() + 7*24*60*60));
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= filemtime($filename)) {
+          header('HTTP/1.0 304 Not Modified');
+        } else {
+          header("Last-Modified: " . date(DATE_RFC1123, filemtime($filename)));
+          header('Content-Length: ' . filesize($filename));
+          readfile($filename);
+        }
         return;
     }
     // We may also serve a blank image (if service did not respond)
