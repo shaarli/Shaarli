@@ -2582,7 +2582,10 @@ function resizeImage($filepath)
     $i=strpos($header,'GIF8'); if (($i!==false) && ($i==0)) $im = imagecreatefromgif($filepath); // Well this is crude, but it should be enough.
     $i=strpos($header,'PNG'); if (($i!==false) && ($i==1)) $im = imagecreatefrompng($filepath);
     $i=strpos($header,'JFIF'); if ($i!==false) $im = imagecreatefromjpeg($filepath);
-    if (!$im) return false;  // Unable to open image (corrupted or not an image)
+    if (!$im) {
+    	unlink($filepath); // purge left-over in case of broken image. Doing it here is DRY but implicit (less obvious). Maybe the function should become 'resizeImageOrPurgeOnFailure($filepath)'
+    	return false;  // Unable to open image (corrupted or not an image)
+    }
     $w = imagesx($im);
     $h = imagesy($im);
     $ystart = 0; $yheight=$h;
