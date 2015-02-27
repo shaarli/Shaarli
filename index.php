@@ -1983,6 +1983,11 @@ function buildLinkList($PAGE,$LINKSDB)
 // Returns an associative array with thumbnail attributes (src,href,width,height,style,alt)
 // Some of them may be missing.
 // Return an empty array if no thumbnail available.
+//
+// So this function makes the choice if there's
+// - a ready-to use thumbnail on the internets (bandwidth stealing)
+// - an image somewhere that should be downloaded, scaled, cached serverside and used via /?do=genthumbnail
+// - no thumbnail available.
 function computeThumbnail($url,$href=false)
 {
     if (!$GLOBALS['config']['ENABLE_THUMBNAILS']) return array();
@@ -1991,26 +1996,38 @@ function computeThumbnail($url,$href=false)
     // For most hosts, the URL of the thumbnail can be easily deduced from the URL of the link.
     // (e.g. http://www.youtube.com/watch?v=spVypYk4kto --->  http://img.youtube.com/vi/spVypYk4kto/default.jpg )
     //                                     ^^^^^^^^^^^                                 ^^^^^^^^^^^
-    $domain = parse_url($url,PHP_URL_HOST);
-    if ($domain=='youtube.com' || $domain=='www.youtube.com')
+    // this could easily go into a config file a la data/options.php, e.g. data/thumbnails.php:
+    $url_patterns_steal_bandwidth = array(
+        '!^https?://(?:www\.)?YouTube\.com(?::\d+)?/.*?(?:[\?&]v=([^\?&#]+).*$!i'=>array(
+            // this array becomes the attributes of <img .../>
+            'alt'=>'YouTube thumbnail', // optional, default: '\\0 thumbnail',
+            'src'=>'https://img.youtube.com/vi/\\1/default.jpg',
+            // optional: 'style', default: 'max-width:120px; max-height:150px'
+        ),
+        '!^https?://(?:www\.)?YouTu\.be(?::\d+)?/([^\?&#/]+).*$!i'=>array(
+            'alt'=>'YouTube thumbnail',
+            'src'=>'https://img.youtube.com/vi/\\1/default.jpg',
+        ),
+        '!^https?://(?:www\.)?(pix\.toile-libre\.org)(?::\d+)?/.*?[?&]img=([^\?&#/]+).*$!i'=>array(
+            'alt'=>'\\1 thumbnail', // example: re-use the original domain name.
+            'src'=>'http://pix.toile-libre.org/upload/thumb/\\2',
+        ),
+    );
+
+    foreach($url_patterns_steal_bandwidth as $pattern=>$img_tpl)
     {
-        parse_str(parse_url($url,PHP_URL_QUERY), $params); // Extract video ID and get thumbnail
-        if (!empty($params['v'])) return array('src'=>'https://img.youtube.com/vi/'.$params['v'].'/default.jpg',
-                                               'href'=>$href,'width'=>'120','height'=>'90','alt'=>'YouTube thumbnail');
-    }
-    if ($domain=='youtu.be') // Youtube short links
-    {
-        $path = parse_url($url,PHP_URL_PATH);
-        return array('src'=>'https://img.youtube.com/vi'.$path.'/default.jpg',
-                     'href'=>$href,'width'=>'120','height'=>'90','alt'=>'YouTube thumbnail');
-    }
-    if ($domain=='pix.toile-libre.org') // pix.toile-libre.org image hosting
-    {
-        parse_str(parse_url($url,PHP_URL_QUERY), $params); // Extract image filename.
-        if (!empty($params) && !empty($params['img'])) return array('src'=>'http://pix.toile-libre.org/upload/thumb/'.urlencode($params['img']),
-                                                                    'href'=>$href,'style'=>'max-width:120px; max-height:150px','alt'=>'pix.toile-libre.org thumbnail');
+        $src = preg_replace($pattern, $img_tpl['src'], $url, 1, $count);
+        if (0 < $count) {
+            $img = $img_tpl;
+            $img['href'] = $href;
+            $img['src'] = $src;
+            $img['alt'] = preg_replace($pattern, empty($img['alt']) ? '\\0 thumbnail' : $img['alt'], $url, 1);
+            if(empty($img['style'])) $img['style'] = 'max-width:120px; max-height:150px';
+            return $img;
+        }
     }
 
+    $domain = parse_url($url,PHP_URL_HOST);
     if ($domain=='imgur.com')
     {
         $path = parse_url($url,PHP_URL_PATH);
@@ -2055,39 +2072,36 @@ function computeThumbnail($url,$href=false)
 
     if (!$GLOBALS['config']['ENABLE_LOCALCACHE']) return array(); // If local cache is disabled, no thumbnails for services which require the use a local cache.
 
-    if ($domain=='flickr.com' || endsWith($domain,'.flickr.com')
-        || $domain=='vimeo.com'
-        || $domain=='ted.com' || endsWith($domain,'.ted.com')
-        || $domain=='xkcd.com' || endsWith($domain,'.xkcd.com')
-    )
+    // this could easily go into a config file a la data/options.php, e.g. data/thumbnails.php:
+    $url_patterns_genthumbnail = array(
+        // value array becomes the attributes of <img..> 'src' automatically set, all others optional.
+        '!^https?://(?:www\.)?xkcd\.com(?::\d+)?/.*?/\d+!i'=>array(),     // Make sure this URL points to a single comic (/xxx... where xxx is numeric)
+        '!^https?://(?:www\.)?vimeo\.com(?::\d+)?/.*?/\d+!i'=>array(),    // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
+        '!^https?://(?:www\.)?ted\.com(?::\d+)?/talks/!i'=>array(),       // Make sure this TED URL points to a video (/talks/...)
+        '!^https?://(?:www\.)?(flickr)\.com(?::\d+)?/!i'=>array(),
+        '!^https?://(?:www\.)?(itunes\.apple|imdb)\.com(?::\d+)?/!i'=>array(),
+        '!^https?://(?:www\.)?(heise|golem|spiegel|sz|nachdenkseiten|netzpolitik)\.de(?::\d+)?/!i'=>array(),
+    );
+
+    $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
+    foreach($url_patterns_genthumbnail as $pattern=>$img_tpl)
     {
-        if ($domain=='vimeo.com')
-        {   // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
-            $path = parse_url($url,PHP_URL_PATH);
-            if (!preg_match('!/\d+.+?!',$path)) return array(); // This is not a single video URL.
+        if (preg_match($pattern, $url)) {
+            $img = $img_tpl;
+            $img['href'] = $href;
+            $img['src'] = indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url);
+            $img['alt'] = preg_replace($pattern, empty($img['alt']) ? '\\0 thumbnail' : $img['alt'], $url, 1);
+            if(empty($img['style'])) $img['style'] = 'max-width:120px; max-height:150px';
+            return $img;
         }
-        if ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
-        {   // Make sure this URL points to a single comic (/xxx... where xxx is numeric)
-            $path = parse_url($url,PHP_URL_PATH);
-            if (!preg_match('!/\d+.+?!',$path)) return array();
-        }
-        if ($domain=='ted.com' || endsWith($domain,'.ted.com'))
-        {   // Make sure this TED URL points to a video (/talks/...)
-            $path = parse_url($url,PHP_URL_PATH);
-            if ("/talks/" !== substr($path,0,7)) return array(); // This is not a single video URL.
-        }
-        $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
-        return array('src'=>indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url),
-                     'href'=>$href,'width'=>'120','style'=>'height:auto;','alt'=>'thumbnail');
     }
 
     // For all other, we try to make a thumbnail of links ending with .jpg/jpeg/png/gif
-    // Technically speaking, we should download ALL links and check their Content-Type to see if they are images.
+    // Technically speaking, we should download (or HTTP HEAD) ALL links and check their Content-Type to see if they are images.
     // But using the extension will do.
     $ext=strtolower(pathinfo($url,PATHINFO_EXTENSION));
     if ($ext=='jpg' || $ext=='jpeg' || $ext=='png' || $ext=='gif')
     {
-        $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
         return array('src'=>indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url),
                      'href'=>$href,'width'=>'120','style'=>'height:auto;','alt'=>'thumbnail');
     }
@@ -2098,7 +2112,7 @@ function computeThumbnail($url,$href=false)
 
 // Returns the HTML code to display a thumbnail for a link
 // with a link to the original URL.
-// Understands various services (youtube.com...)
+// Understands various services (youtube.com...) - see computeThumbnail(...)
 // Input: $url = URL for which the thumbnail must be found.
 //        $href = if provided, this URL will be followed instead of $url
 // Returns '' if no thumbnail available.
