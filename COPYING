@@ -24,7 +24,7 @@ Files: inc/reset.css
 License: BSD (http://opensource.org/licenses/BSD-3-Clause)
 Copyright: (c) 2010, Yahoo! Inc. 
 
-Files: images/calendar.png, images/edit_icon.png, images/feed-icon-14x14.png, images/private.png, images/private_16x16.png, images/private_16x16_active.png, images/qrcode.png, images/tag_blue.png
+Files: images/calendar.png, images/edit_icon.png, images/feed-icon-14x14.png, images/private.png, images/private_16x16.png, images/private_16x16_active.png, tpl/plugins/qrcode/qrcode.png, images/tag_blue.png
 License: CC-BY (http://creativecommons.org/licenses/by/3.0/)
 Copyright: (c) 2014 Yusuke Kamiyamane
 Source: http://p.yusukekamiyamane.com/
@@ -54,7 +54,7 @@ Files: inc/blazy*.js
 License: MIT License (http://opensource.org/licenses/MIT)
 Copyright: (C) Bjoern Klinggaard - @bklinggaard - http://dinbror.dk/blazy
 
-Files: inc/qr.js
+Files: tpl/plugins/qrcode/qr.*js
 License: GPLv3 License (http://opensource.org/licenses/gpl-3.0)
 Copyright: (C) 2014 Alasdair Mercer, http://neocotic.com, https://github.com/neocotic/qr.js
 
