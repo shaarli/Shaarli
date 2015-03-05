@@ -33,7 +33,7 @@ $GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/las
 $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
                                           // Note: You must have publisher.php in the same directory as Shaarli index.php
 $GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
-$GLOBALS['config']['PLUGINS'] = array('qrcode'); // List of enabled plugins
+$GLOBALS['config']['PLUGINS'] = array('archiveorg', 'playvideos', 'qrcode', 'readityourself', 'wallabag'); // List of enabled plugins
 $GLOBALS['config']['WALLABAG_URL'] = "https://demo.wallabag.org/"; // Base URL for the Wallabag plugin. You probably want to change this to your own wallabag instance
 // -----------------------------------------------------------------------------------------------
 // You should not touch below (or at your own risks!)
