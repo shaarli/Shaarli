@@ -183,7 +183,7 @@
         }
     }
     if (!o) {
-        t("inc/jquery.min.js", function () {
+        t("tpl/plugins/playvideos/jquery-1.11.2.min.js", function () {
             return e(jQuery.noConflict(true))
         })
     }
