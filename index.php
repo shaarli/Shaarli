@@ -2388,31 +2388,30 @@ function genThumbnail()
     if ($sign!=$_GET['hmac']) die('Naughty boy!');
 
     // Let's see if we don't already have the image for this URL in the cache.
-    $thumbname=hash('sha1',$_GET['url']).'.jpg';   {
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$thumbname))
+    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.hash('sha1',$_GET['url']).'.jpg';
+    if (is_file($filepath))
         // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
-        $filename = $GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
         // Allow clients to cache thumbnails, expire after 7 days
         header("Cache-Control: must-revalidate");
         header_remove("Pragma");
         header('Expires: ' . gmdate(DATE_RFC1123, time() + 7*24*60*60));
-        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= filemtime($filename)) {
-            header('HTTP/1.0 304 Not Modified');
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= filemtime($filepath)) {
+        header('HTTP/1.0 304 Not Modified');
         }
         else {
-            header("Last-Modified: " . date(DATE_RFC1123, filemtime($filename)));
-            header('Content-Length: ' . filesize($filename));
-            readfile($filename);
+            header("Last-Modified: " . date(DATE_RFC1123, filemtime($filepath)));
+            header('Content-Length: ' . filesize($filepath));
+            readfile($filepath);
         }
         return;
     }
     // We may also serve a blank image (if service did not respond)
-    $blankname=hash('sha1',$_GET['url']).'.gif';
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$blankname))
+    $blankpath=$GLOBALS['config']['CACHEDIR'].'/'.hash('sha1',$_GET['url']).'.gif';
+    if (is_file($blankpath))
     {
         header('Content-Type: image/gif');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname);
+        readfile($blankpath);
         return;
     }
 
@@ -2565,7 +2564,7 @@ function genThumbnail()
 
     // Otherwise, return an empty image (8x8 transparent gif)
     $blankgif = base64_decode('R0lGODlhCAAIAIAAAP///////yH5BAEKAAEALAAAAAAIAAgAAAIHjI+py+1dAAA7');
-    file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname,$blankgif); // Also put something in cache so that this URL is not requested twice.
+    file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankpath,$blankgif); // Also put something in cache so that this URL is not requested twice.
     header('Content-Type: image/gif');
     echo $blankgif;
 }
