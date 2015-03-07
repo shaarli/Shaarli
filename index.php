@@ -2419,103 +2419,7 @@ function genThumbnail()
     $url = $_GET['url'];
     $domain = parse_url($url,PHP_URL_HOST);
 
-    if ($domain=='flickr.com' || endsWith($domain,'.flickr.com'))
-    {
-        // Crude replacement to handle new flickr domain policy (They prefer www. now)
-        $url = str_replace('http://flickr.com/','http://www.flickr.com/',$url);
-
-        // Is this a link to an image, or to a flickr page ?
-        $imageurl='';
-        if (endswith(parse_url($url,PHP_URL_PATH),'.jpg'))
-        {  // This is a direct link to an image. e.g. http://farm1.staticflickr.com/5/5921913_ac83ed27bd_o.jpg
-            preg_match('!(http://farm\d+\.staticflickr\.com/\d+/\d+_\w+_)\w.jpg!',$url,$matches);
-            if (!empty($matches[1])) $imageurl=$matches[1].'m.jpg';
-        }
-        else // This is a flickr page (html)
-        {
-            list($httpstatus,$headers,$data) = getHTTP($url,20); // Get the flickr html page.
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                // flickr now nicely provides the URL of the thumbnail in each flickr page.
-                preg_match('!<link rel=\"image_src\" href=\"(.+?)\"!',$data,$matches);
-                if (!empty($matches[1])) $imageurl=$matches[1];
-
-                // In albums (and some other pages), the link rel="image_src" is not provided,
-                // but flickr provides:
-                // <meta property="og:image" content="http://farm4.staticflickr.com/3398/3239339068_25d13535ff_z.jpg" />
-                if ($imageurl=='')
-                {
-                    preg_match('!<meta property=\"og:image\" content=\"(.+?)\"!',$data,$matches);
-                    if (!empty($matches[1])) $imageurl=$matches[1];
-                }
-            }
-        }
-
-        if ($imageurl!='')
-        {   // Let's download the image.
-            list($httpstatus,$headers,$data) = getHTTP($imageurl,10); // Image is 240x120, so 10 seconds to download should be enough.
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
-                header('Content-Type: image/jpeg');
-                echo $data;
-                return;
-            }
-        }
-    }
-
-    elseif ($domain=='vimeo.com' )
-    {
-        // This is more complex: we have to perform a HTTP request, then parse the result.
-        // Maybe we should deport this to JavaScript ? Example: http://stackoverflow.com/questions/1361149/get-img-thumbnails-from-vimeo/4285098#4285098
-        $vid = substr(parse_url($url,PHP_URL_PATH),1);
-        list($httpstatus,$headers,$data) = getHTTP('https://vimeo.com/api/v2/video/'.htmlspecialchars($vid).'.php',5);
-        if (strpos($httpstatus,'200 OK')!==false)
-        {
-            $t = unserialize($data);
-            $imageurl = $t[0]['thumbnail_medium'];
-            // Then we download the image and serve it to our client.
-            list($httpstatus,$headers,$data) = getHTTP($imageurl,10);
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
-                header('Content-Type: image/jpeg');
-                echo $data;
-                return;
-            }
-        }
-    }
-
-    elseif ($domain=='ted.com' || endsWith($domain,'.ted.com'))
-    {
-        // The thumbnail for TED talks is located in the <link rel="image_src" [...]> tag on that page
-        // http://www.ted.com/talks/mikko_hypponen_fighting_viruses_defending_the_net.html
-        // <link rel="image_src" href="http://images.ted.com/images/ted/28bced335898ba54d4441809c5b1112ffaf36781_389x292.jpg" />
-        list($httpstatus,$headers,$data) = getHTTP($url,5);
-        if (strpos($httpstatus,'200 OK')!==false)
-        {
-            // Extract the link to the thumbnail
-            preg_match('!link rel="image_src" href="(http://images.ted.com/images/ted/.+_\d+x\d+\.jpg)"!',$data,$matches);
-            if (!empty($matches[1]))
-            {   // Let's download the image.
-                $imageurl=$matches[1];
-                list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
-                if (strpos($httpstatus,'200 OK')!==false)
-                {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-                    file_put_contents($filepath,$data); // Save image to cache.
-                    if (resizeImage($filepath))
-                    {
-                        header('Content-Type: image/jpeg');
-                        echo file_get_contents($filepath);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    elseif ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
+    if ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
     {
         // There is no thumbnail available for xkcd comics, so download the whole image and resize it.
         // http://xkcd.com/327/
@@ -2527,38 +2431,38 @@ function genThumbnail()
             preg_match('!<img src="(http://imgs.xkcd.com/comics/.*)" title="[^s]!',$data,$matches);
             if (!empty($matches[1]))
             {   // Let's download the image.
-                $imageurl=$matches[1];
-                list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
-                if (strpos($httpstatus,'200 OK')!==false)
-                {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-                    file_put_contents($filepath,$data); // Save image to cache.
-                    if (resizeImage($filepath))
-                    {
-                        header('Content-Type: image/jpeg');
-                        echo file_get_contents($filepath);
-                        return;
-                    }
-                }
+            list($httpstatus,$headers,$data) = getHTTP($matches[1],20); // No control on image size, so wait long enough.
+            if (saveThumbnailToCacheAndRespond($data,$filepath))
+                return;
             }
         }
     }
 
     else
     {
-        // For all other domains, we try to download the image and make a thumbnail.
-        list($httpstatus,$headers,$data) = getHTTP($url,30);  // We allow 30 seconds max to download (and downloads are limited to 4 Mb)
-        if (strpos($httpstatus,'200 OK')!==false)
+        list($httpstatus,$headers,$data) = getHTTP($url,5);
+        // Try to extract the thumbnail source URL from the (assumed) html page:
+        $xogimage = '\s+(?:property|name)\s*=\s*["\']og:image(?::secure_url|:url)?["\']'; // see http://ogp.me/
+        $xcontent = '\s+content\s*=\s*["\']([^"\']+)["\']';
+        $xrel = '\s+rel\s*=\s*["\'](?:image_src)["\']'; // see http://microformats.org/wiki/existing-rel-values#formats
+        $xhref = '\s+href\s*=\s*["\']([^"\']+)["\']';
+        if( preg_match('/<meta'.'[^>]*?'.'(?:'.$xogimage.'[^>]*?'.$xcontent.'|'.$xcontent.'[^>]*?'.$xogimage.')[^>]*>/mi',$data,$matches) ||
+            preg_match('/<link'.'[^>]*?'.'(?:'.$xrel.'[^>]*?'.$href.'|'.$href.'[^>]*?'.$xrel.')[^>]*>/mi',$data,$matches))
         {
-            $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-            file_put_contents($filepath,$data); // Save image to cache.
-            if (resizeImage($filepath))
-            {
-                header('Content-Type: image/jpeg');
-                echo file_get_contents($filepath);
-                return;
-            }
+            // download the image into $dat
+            $imageurl = empty($matches[1]) ? $matches[2] : $matches[1];
+            $imageurl = html_entity_decode($imageurl);
+            // naively make url absolute - there's much more to it, see http://nadeausoftware.com/articles/2008/05/php_tip_how_parse_and_build_urls
+            $protocol = empty($_SERVER['HTTPS']) ? 'http' : 'https'; // take protocol from request
+            if ( startsWith($imageurl, '//') )
+                $imageurl = $protocol.':'.$imageurl;
+            elseif ( startsWith($imageurl, '/') )
+                $imageurl = $protocol.':'.'//'.$domain.$imageurl;
+            list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
         }
+    // assume $data now contains an image:
+    if (saveThumbnailToCacheAndRespond($data,$filepath))
+        return;
     }
 
 
@@ -2567,6 +2471,16 @@ function genThumbnail()
     file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankpath,$blankgif); // Also put something in cache so that this URL is not requested twice.
     header('Content-Type: image/gif');
     echo $blankgif;
+}
+
+function saveThumbnailToCacheAndRespond($data,$filepath)
+{
+    file_put_contents($filepath,$data); // Save image to cache.
+    if (!resizeImage($filepath))
+        return false;
+    header('Content-Type: image/jpeg');
+    readfile($filepath); // proper caching headers come with 2nd request.
+    return true;
 }
 
 // Make a thumbnail of the image (to width: 120 pixels)
