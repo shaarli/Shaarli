@@ -2389,7 +2389,7 @@ function genThumbnail()
 
     // Let's see if we don't already have the image for this URL in the cache.
     $filepath=$GLOBALS['config']['CACHEDIR'].'/'.hash('sha1',$_GET['url']).'.jpg';
-    if (is_file($filepath))
+    if (is_file($filepath)) {
         // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
         // Allow clients to cache thumbnails, expire after 7 days
