@@ -2388,11 +2388,23 @@ function genThumbnail()
     if ($sign!=$_GET['hmac']) die('Naughty boy!');
 
     // Let's see if we don't already have the image for this URL in the cache.
-    $thumbname=hash('sha1',$_GET['url']).'.jpg';
+    $thumbname=hash('sha1',$_GET['url']).'.jpg';   {
     if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$thumbname))
-    {   // We have the thumbnail, just serve it:
+        // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname);
+        $filename = $GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
+        // Allow clients to cache thumbnails, expire after 7 days
+        header("Cache-Control: must-revalidate");
+        header_remove("Pragma");
+        header('Expires: ' . gmdate(DATE_RFC1123, time() + 7*24*60*60));
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= filemtime($filename)) {
+            header('HTTP/1.0 304 Not Modified');
+        }
+        else {
+            header("Last-Modified: " . date(DATE_RFC1123, filemtime($filename)));
+            header('Content-Length: ' . filesize($filename));
+            readfile($filename);
+        }
         return;
     }
     // We may also serve a blank image (if service did not respond)
