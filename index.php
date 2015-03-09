@@ -2080,7 +2080,8 @@ function computeThumbnail($url,$href=false)
         '!^https?://(?:www\.)?ted\.com(?::\d+)?/talks/!i'=>array(),       // Make sure this TED URL points to a video (/talks/...)
         '!^https?://(?:www\.)?(flickr)\.com(?::\d+)?/!i'=>array(),
         '!^https?://(?:www\.)?(itunes\.apple|imdb)\.com(?::\d+)?/!i'=>array(),
-        '!^https?://(?:www\.)?(heise|golem|spiegel|sz|nachdenkseiten|netzpolitik)\.de(?::\d+)?/!i'=>array(),
+        '!^https?://.*/!i'=>array(),
+
     );
 
     $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
