@@ -1983,6 +1983,11 @@ function buildLinkList($PAGE,$LINKSDB)
 // Returns an associative array with thumbnail attributes (src,href,width,height,style,alt)
 // Some of them may be missing.
 // Return an empty array if no thumbnail available.
+//
+// So this function makes the choice if there's
+// - a ready-to use thumbnail on the internets (bandwidth stealing)
+// - an image somewhere that should be downloaded, scaled, cached serverside and used via /?do=genthumbnail
+// - no thumbnail available.
 function computeThumbnail($url,$href=false)
 {
     if (!$GLOBALS['config']['ENABLE_THUMBNAILS']) return array();
@@ -1991,26 +1996,38 @@ function computeThumbnail($url,$href=false)
     // For most hosts, the URL of the thumbnail can be easily deduced from the URL of the link.
     // (e.g. http://www.youtube.com/watch?v=spVypYk4kto --->  http://img.youtube.com/vi/spVypYk4kto/default.jpg )
     //                                     ^^^^^^^^^^^                                 ^^^^^^^^^^^
-    $domain = parse_url($url,PHP_URL_HOST);
-    if ($domain=='youtube.com' || $domain=='www.youtube.com')
+    // this could easily go into a config file a la data/options.php, e.g. data/thumbnails.php:
+    $url_patterns_steal_bandwidth = array(
+        '!^https?://(?:www\.)?YouTube\.com(?::\d+)?/.*?(?:[\?&]v=([^\?&#]+).*$!i'=>array(
+            // this array becomes the attributes of <img .../>
+            'alt'=>'YouTube thumbnail', // optional, default: '\\0 thumbnail',
+            'src'=>'https://img.youtube.com/vi/\\1/default.jpg',
+            // optional: 'style', default: 'max-width:120px; max-height:150px'
+        ),
+        '!^https?://(?:www\.)?YouTu\.be(?::\d+)?/([^\?&#/]+).*$!i'=>array(
+            'alt'=>'YouTube thumbnail',
+            'src'=>'https://img.youtube.com/vi/\\1/default.jpg',
+        ),
+        '!^https?://(?:www\.)?(pix\.toile-libre\.org)(?::\d+)?/.*?[?&]img=([^\?&#/]+).*$!i'=>array(
+            'alt'=>'\\1 thumbnail', // example: re-use the original domain name.
+            'src'=>'http://pix.toile-libre.org/upload/thumb/\\2',
+        ),
+    );
+
+    foreach($url_patterns_steal_bandwidth as $pattern=>$img_tpl)
     {
-        parse_str(parse_url($url,PHP_URL_QUERY), $params); // Extract video ID and get thumbnail
-        if (!empty($params['v'])) return array('src'=>'https://img.youtube.com/vi/'.$params['v'].'/default.jpg',
-                                               'href'=>$href,'width'=>'120','height'=>'90','alt'=>'YouTube thumbnail');
-    }
-    if ($domain=='youtu.be') // Youtube short links
-    {
-        $path = parse_url($url,PHP_URL_PATH);
-        return array('src'=>'https://img.youtube.com/vi'.$path.'/default.jpg',
-                     'href'=>$href,'width'=>'120','height'=>'90','alt'=>'YouTube thumbnail');
-    }
-    if ($domain=='pix.toile-libre.org') // pix.toile-libre.org image hosting
-    {
-        parse_str(parse_url($url,PHP_URL_QUERY), $params); // Extract image filename.
-        if (!empty($params) && !empty($params['img'])) return array('src'=>'http://pix.toile-libre.org/upload/thumb/'.urlencode($params['img']),
-                                                                    'href'=>$href,'style'=>'max-width:120px; max-height:150px','alt'=>'pix.toile-libre.org thumbnail');
+        $src = preg_replace($pattern, $img_tpl['src'], $url, 1, $count);
+        if (0 < $count) {
+            $img = $img_tpl;
+            $img['href'] = $href;
+            $img['src'] = $src;
+            $img['alt'] = preg_replace($pattern, empty($img['alt']) ? '\\0 thumbnail' : $img['alt'], $url, 1);
+            if(empty($img['style'])) $img['style'] = 'max-width:120px; max-height:150px';
+            return $img;
+        }
     }
 
+    $domain = parse_url($url,PHP_URL_HOST);
     if ($domain=='imgur.com')
     {
         $path = parse_url($url,PHP_URL_PATH);
@@ -2055,39 +2072,36 @@ function computeThumbnail($url,$href=false)
 
     if (!$GLOBALS['config']['ENABLE_LOCALCACHE']) return array(); // If local cache is disabled, no thumbnails for services which require the use a local cache.
 
-    if ($domain=='flickr.com' || endsWith($domain,'.flickr.com')
-        || $domain=='vimeo.com'
-        || $domain=='ted.com' || endsWith($domain,'.ted.com')
-        || $domain=='xkcd.com' || endsWith($domain,'.xkcd.com')
-    )
+    // this could easily go into a config file a la data/options.php, e.g. data/thumbnails.php:
+    $url_patterns_genthumbnail = array(
+        // value array becomes the attributes of <img..> 'src' automatically set, all others optional.
+        '!^https?://(?:www\.)?xkcd\.com(?::\d+)?/.*?/\d+!i'=>array(),     // Make sure this URL points to a single comic (/xxx... where xxx is numeric)
+        '!^https?://(?:www\.)?vimeo\.com(?::\d+)?/.*?/\d+!i'=>array(),    // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
+        '!^https?://(?:www\.)?ted\.com(?::\d+)?/talks/!i'=>array(),       // Make sure this TED URL points to a video (/talks/...)
+        '!^https?://(?:www\.)?(flickr)\.com(?::\d+)?/!i'=>array(),
+        '!^https?://(?:www\.)?(itunes\.apple|imdb)\.com(?::\d+)?/!i'=>array(),
+        '!^https?://(?:www\.)?(heise|golem|spiegel|sz|nachdenkseiten|netzpolitik)\.de(?::\d+)?/!i'=>array(),
+    );
+
+    $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
+    foreach($url_patterns_genthumbnail as $pattern=>$img_tpl)
     {
-        if ($domain=='vimeo.com')
-        {   // Make sure this vimeo URL points to a video (/xxx... where xxx is numeric)
-            $path = parse_url($url,PHP_URL_PATH);
-            if (!preg_match('!/\d+.+?!',$path)) return array(); // This is not a single video URL.
+        if (preg_match($pattern, $url)) {
+            $img = $img_tpl;
+            $img['href'] = $href;
+            $img['src'] = indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url);
+            $img['alt'] = preg_replace($pattern, empty($img['alt']) ? '\\0 thumbnail' : $img['alt'], $url, 1);
+            if(empty($img['style'])) $img['style'] = 'max-width:120px; max-height:150px';
+            return $img;
         }
-        if ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
-        {   // Make sure this URL points to a single comic (/xxx... where xxx is numeric)
-            $path = parse_url($url,PHP_URL_PATH);
-            if (!preg_match('!/\d+.+?!',$path)) return array();
-        }
-        if ($domain=='ted.com' || endsWith($domain,'.ted.com'))
-        {   // Make sure this TED URL points to a video (/talks/...)
-            $path = parse_url($url,PHP_URL_PATH);
-            if ("/talks/" !== substr($path,0,7)) return array(); // This is not a single video URL.
-        }
-        $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
-        return array('src'=>indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url),
-                     'href'=>$href,'width'=>'120','style'=>'height:auto;','alt'=>'thumbnail');
     }
 
     // For all other, we try to make a thumbnail of links ending with .jpg/jpeg/png/gif
-    // Technically speaking, we should download ALL links and check their Content-Type to see if they are images.
+    // Technically speaking, we should download (or HTTP HEAD) ALL links and check their Content-Type to see if they are images.
     // But using the extension will do.
     $ext=strtolower(pathinfo($url,PATHINFO_EXTENSION));
     if ($ext=='jpg' || $ext=='jpeg' || $ext=='png' || $ext=='gif')
     {
-        $sign = hash_hmac('sha256', $url, $GLOBALS['salt']); // We use the salt to sign data (it's random, secret, and specific to each installation)
         return array('src'=>indexUrl().'?do=genthumbnail&hmac='.htmlspecialchars($sign).'&url='.urlencode($url),
                      'href'=>$href,'width'=>'120','style'=>'height:auto;','alt'=>'thumbnail');
     }
@@ -2098,7 +2112,7 @@ function computeThumbnail($url,$href=false)
 
 // Returns the HTML code to display a thumbnail for a link
 // with a link to the original URL.
-// Understands various services (youtube.com...)
+// Understands various services (youtube.com...) - see computeThumbnail(...)
 // Input: $url = URL for which the thumbnail must be found.
 //        $href = if provided, this URL will be followed instead of $url
 // Returns '' if no thumbnail available.
@@ -2388,19 +2402,30 @@ function genThumbnail()
     if ($sign!=$_GET['hmac']) die('Naughty boy!');
 
     // Let's see if we don't already have the image for this URL in the cache.
-    $thumbname=hash('sha1',$_GET['url']).'.jpg';
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$thumbname))
+    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.hash('sha1',$_GET['url']).'.jpg';
+    if (is_file($filepath))
     {   // We have the thumbnail, just serve it:
         header('Content-Type: image/jpeg');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname);
+        // header_remove("Cache-Control");
+        header("Cache-Control: must-revalidate");
+        header_remove("Pragma");
+        // header('Debug-File:' . $filepath);
+        header('Expires: ' . gmdate(DATE_RFC1123, time() + 7*24*60*60));
+        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= filemtime($filepath)) {
+            header('HTTP/1.0 304 Not Modified');
+        } else {
+            header("Last-Modified: " . date(DATE_RFC1123, filemtime($filepath)));
+            header('Content-Length: ' . filesize($filepath));
+            readfile($filepath);
+        }
         return;
     }
     // We may also serve a blank image (if service did not respond)
-    $blankname=hash('sha1',$_GET['url']).'.gif';
-    if (is_file($GLOBALS['config']['CACHEDIR'].'/'.$blankname))
+    $blankpath=$GLOBALS['config']['CACHEDIR'].'/'.hash('sha1',$_GET['url']).'.gif';
+    if (is_file($blankpath))
     {
         header('Content-Type: image/gif');
-        echo file_get_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname);
+        readfile($blankpath);
         return;
     }
 
@@ -2408,103 +2433,7 @@ function genThumbnail()
     $url = $_GET['url'];
     $domain = parse_url($url,PHP_URL_HOST);
 
-    if ($domain=='flickr.com' || endsWith($domain,'.flickr.com'))
-    {
-        // Crude replacement to handle new flickr domain policy (They prefer www. now)
-        $url = str_replace('http://flickr.com/','http://www.flickr.com/',$url);
-
-        // Is this a link to an image, or to a flickr page ?
-        $imageurl='';
-        if (endswith(parse_url($url,PHP_URL_PATH),'.jpg'))
-        {  // This is a direct link to an image. e.g. http://farm1.staticflickr.com/5/5921913_ac83ed27bd_o.jpg
-            preg_match('!(http://farm\d+\.staticflickr\.com/\d+/\d+_\w+_)\w.jpg!',$url,$matches);
-            if (!empty($matches[1])) $imageurl=$matches[1].'m.jpg';
-        }
-        else // This is a flickr page (html)
-        {
-            list($httpstatus,$headers,$data) = getHTTP($url,20); // Get the flickr html page.
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                // flickr now nicely provides the URL of the thumbnail in each flickr page.
-                preg_match('!<link rel=\"image_src\" href=\"(.+?)\"!',$data,$matches);
-                if (!empty($matches[1])) $imageurl=$matches[1];
-
-                // In albums (and some other pages), the link rel="image_src" is not provided,
-                // but flickr provides:
-                // <meta property="og:image" content="http://farm4.staticflickr.com/3398/3239339068_25d13535ff_z.jpg" />
-                if ($imageurl=='')
-                {
-                    preg_match('!<meta property=\"og:image\" content=\"(.+?)\"!',$data,$matches);
-                    if (!empty($matches[1])) $imageurl=$matches[1];
-                }
-            }
-        }
-
-        if ($imageurl!='')
-        {   // Let's download the image.
-            list($httpstatus,$headers,$data) = getHTTP($imageurl,10); // Image is 240x120, so 10 seconds to download should be enough.
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
-                header('Content-Type: image/jpeg');
-                echo $data;
-                return;
-            }
-        }
-    }
-
-    elseif ($domain=='vimeo.com' )
-    {
-        // This is more complex: we have to perform a HTTP request, then parse the result.
-        // Maybe we should deport this to JavaScript ? Example: http://stackoverflow.com/questions/1361149/get-img-thumbnails-from-vimeo/4285098#4285098
-        $vid = substr(parse_url($url,PHP_URL_PATH),1);
-        list($httpstatus,$headers,$data) = getHTTP('https://vimeo.com/api/v2/video/'.htmlspecialchars($vid).'.php',5);
-        if (strpos($httpstatus,'200 OK')!==false)
-        {
-            $t = unserialize($data);
-            $imageurl = $t[0]['thumbnail_medium'];
-            // Then we download the image and serve it to our client.
-            list($httpstatus,$headers,$data) = getHTTP($imageurl,10);
-            if (strpos($httpstatus,'200 OK')!==false)
-            {
-                file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$thumbname,$data); // Save image to cache.
-                header('Content-Type: image/jpeg');
-                echo $data;
-                return;
-            }
-        }
-    }
-
-    elseif ($domain=='ted.com' || endsWith($domain,'.ted.com'))
-    {
-        // The thumbnail for TED talks is located in the <link rel="image_src" [...]> tag on that page
-        // http://www.ted.com/talks/mikko_hypponen_fighting_viruses_defending_the_net.html
-        // <link rel="image_src" href="http://images.ted.com/images/ted/28bced335898ba54d4441809c5b1112ffaf36781_389x292.jpg" />
-        list($httpstatus,$headers,$data) = getHTTP($url,5);
-        if (strpos($httpstatus,'200 OK')!==false)
-        {
-            // Extract the link to the thumbnail
-            preg_match('!link rel="image_src" href="(http://images.ted.com/images/ted/.+_\d+x\d+\.jpg)"!',$data,$matches);
-            if (!empty($matches[1]))
-            {   // Let's download the image.
-                $imageurl=$matches[1];
-                list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
-                if (strpos($httpstatus,'200 OK')!==false)
-                {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-                    file_put_contents($filepath,$data); // Save image to cache.
-                    if (resizeImage($filepath))
-                    {
-                        header('Content-Type: image/jpeg');
-                        echo file_get_contents($filepath);
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
-    elseif ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
+    if ($domain=='xkcd.com' || endsWith($domain,'.xkcd.com'))
     {
         // There is no thumbnail available for xkcd comics, so download the whole image and resize it.
         // http://xkcd.com/327/
@@ -2516,46 +2445,55 @@ function genThumbnail()
             preg_match('!<img src="(http://imgs.xkcd.com/comics/.*)" title="[^s]!',$data,$matches);
             if (!empty($matches[1]))
             {   // Let's download the image.
-                $imageurl=$matches[1];
-                list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
-                if (strpos($httpstatus,'200 OK')!==false)
-                {
-                    $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-                    file_put_contents($filepath,$data); // Save image to cache.
-                    if (resizeImage($filepath))
-                    {
-                        header('Content-Type: image/jpeg');
-                        echo file_get_contents($filepath);
-                        return;
-                    }
-                }
+                list($httpstatus,$headers,$data) = getHTTP($matches[1],20); // No control on image size, so wait long enough.
+                if (saveThumbnailToCacheAndRespond($data,$filepath))
+                    return;
             }
         }
     }
 
     else
     {
-        // For all other domains, we try to download the image and make a thumbnail.
-        list($httpstatus,$headers,$data) = getHTTP($url,30);  // We allow 30 seconds max to download (and downloads are limited to 4 Mb)
-        if (strpos($httpstatus,'200 OK')!==false)
-        {
-            $filepath=$GLOBALS['config']['CACHEDIR'].'/'.$thumbname;
-            file_put_contents($filepath,$data); // Save image to cache.
-            if (resizeImage($filepath))
-            {
-                header('Content-Type: image/jpeg');
-                echo file_get_contents($filepath);
-                return;
-            }
+        list($httpstatus,$headers,$data) = getHTTP($url,5);
+        // Try to extract the thumbnail source URL from the (assumed) html page:
+        $xogimage  = '\s+(?:property|name)\s*=\s*["\']og:image(?::secure_url|:url)?["\']'; // see http://ogp.me/
+        $xcontent  = '\s+content\s*=\s*["\']([^"\']+)["\']';
+        $xrel      = '\s+rel\s*=\s*["\'](?:image_src)["\']'; // see http://microformats.org/wiki/existing-rel-values#formats
+        $xhref     = '\s+href\s*=\s*["\']([^"\']+)["\']';
+        if( preg_match('/<meta'.'[^>]*?'.'(?:'.$xogimage.'[^>]*?'.$xcontent.'|'.$xcontent.'[^>]*?'.$xogimage.')[^>]*>/mi',$data,$matches)
+          || preg_match('/<link'.'[^>]*?'.'(?:'.$xrel.'[^>]*?'.$href.'|'.$href.'[^>]*?'.$xrel.')[^>]*>/mi',$data,$matches)
+        ) {
+            // download the image into $data
+            $imageurl = empty($matches[1]) ? $matches[2] : $matches[1];
+            $imageurl = html_entity_decode($imageurl);
+            // naively make url absolute - there's much more to it, see http://nadeausoftware.com/articles/2008/05/php_tip_how_parse_and_build_urls
+            $protocol = empty($_SERVER['HTTPS']) ? 'http' : 'https'; // take protocol from request
+            if ( startsWith($imageurl, '//') )
+                $imageurl = $protocol.':'.$imageurl;
+            elseif ( startsWith($imageurl, '/') )
+                $imageurl = $protocol.':'.'//'.$domain.$imageurl;
+            list($httpstatus,$headers,$data) = getHTTP($imageurl,20); // No control on image size, so wait long enough.
         }
+        // assume $data now contains an image:
+        if (saveThumbnailToCacheAndRespond($data,$filepath))
+            return;
     }
-
 
     // Otherwise, return an empty image (8x8 transparent gif)
     $blankgif = base64_decode('R0lGODlhCAAIAIAAAP///////yH5BAEKAAEALAAAAAAIAAgAAAIHjI+py+1dAAA7');
-    file_put_contents($GLOBALS['config']['CACHEDIR'].'/'.$blankname,$blankgif); // Also put something in cache so that this URL is not requested twice.
+    file_put_contents($blankpath,$blankgif); // Also put something in cache so that this URL is not requested twice.
     header('Content-Type: image/gif');
     echo $blankgif;
+}
+
+function saveThumbnailToCacheAndRespond($data,$filepath)
+{
+    file_put_contents($filepath,$data); // Save image to cache.
+    if (!resizeImage($filepath))
+        return false;
+    header('Content-Type: image/jpeg');
+    readfile($filepath); // proper caching headers come with 2nd request.
+    return true;
 }
 
 // Make a thumbnail of the image (to width: 120 pixels)
@@ -2571,7 +2509,10 @@ function resizeImage($filepath)
     $i=strpos($header,'GIF8'); if (($i!==false) && ($i==0)) $im = imagecreatefromgif($filepath); // Well this is crude, but it should be enough.
     $i=strpos($header,'PNG'); if (($i!==false) && ($i==1)) $im = imagecreatefrompng($filepath);
     $i=strpos($header,'JFIF'); if ($i!==false) $im = imagecreatefromjpeg($filepath);
-    if (!$im) return false;  // Unable to open image (corrupted or not an image)
+    if (!$im) {
+    	unlink($filepath); // purge left-over in case of broken image. Doing it here is DRY but implicit (less obvious). Maybe the function should become 'resizeImageOrPurgeOnFailure($filepath)'
+    	return false;  // Unable to open image (corrupted or not an image)
+    }
     $w = imagesx($im);
     $h = imagesy($im);
     $ystart = 0; $yheight=$h;
