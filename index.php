@@ -302,12 +302,17 @@ function keepMultipleSpaces($text)
 // (Note that is may not work on your server if the corresponding local is not installed.)
 function autoLocale()
 {
-    $loc='en_US'; // Default if browser does not send HTTP_ACCEPT_LANGUAGE
+    $attempts = array('en_US'); // Default if browser does not send HTTP_ACCEPT_LANGUAGE
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) // e.g. "fr,fr-fr;q=0.8,en;q=0.5,en-us;q=0.3"
     {   // (It's a bit crude, but it works very well. Preferred language is always presented first.)
-        if (preg_match('/([a-z]{2}(-[a-z]{2})?)/i',$_SERVER['HTTP_ACCEPT_LANGUAGE'],$matches)) $loc=$matches[1];
+        if (preg_match('/([a-z]{2})-?([a-z]{2})?/i',$_SERVER['HTTP_ACCEPT_LANGUAGE'],$matches)) {
+            $loc = $matches[1] . (!empty($matches[2]) ? '_' . strtoupper($matches[2]) : '');
+            $attempts = array($loc, str_replace('_', '-', $loc),
+                $loc . '_' . strtoupper($loc), $loc . '_' . $loc,
+                $loc . '-' . strtoupper($loc), $loc . '-' . $loc);
+        }
     }
-    setlocale(LC_TIME,$loc);  // LC_TIME = Set local for date/time format only.
+    setlocale(LC_TIME, $attempts);  // LC_TIME = Set local for date/time format only.
 }
 
 // ------------------------------------------------------------------------------------------
@@ -549,7 +554,7 @@ function endsWith($haystack,$needle,$case=true)
 function linkdate2timestamp($linkdate)
 {
     $Y=$M=$D=$h=$m=$s=0;
-    $r = sscanf($linkdate,'%4d%2d%2d_%2d%2d%2d',$Y,$M,$D,$h,$m,$s);
+    sscanf($linkdate,'%4d%2d%2d_%2d%2d%2d',$Y,$M,$D,$h,$m,$s);
     return mktime($h,$m,$s,$M,$D,$Y);
 }
 
