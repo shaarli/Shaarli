@@ -1127,10 +1127,12 @@ function showDailyRSS()
     foreach($days as $day=>$linkdates) // For each day.
     {
         $daydate = utf8_encode(strftime('%A %d, %B %Y',linkdate2timestamp($day.'_000000'))); // Full text date
-        $rfc822date = linkdate2rfc822($day.'_000000');
         $absurl=htmlspecialchars(indexUrl().'?do=daily&day='.$day);  // Absolute URL of the corresponding "Daily" page.
         echo '<item><title>'.htmlspecialchars($GLOBALS['title'].' - '.$daydate).'</title><guid>'.$absurl.'</guid><link>'.$absurl.'</link>';
-        echo '<pubDate>'.htmlspecialchars($rfc822date)."</pubDate>";
+        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) {
+            $rfc822date = linkdate2rfc822($day.'_000000');
+            echo '<pubDate>'.htmlspecialchars($rfc822date)."</pubDate>";
+        }
 
         // Build the HTML body of this RSS entry.
         $html='';
