@@ -1,6 +1,6 @@
 {loop="links"}
 	<h3><a href="{$value.url}">{$value.title|htmlspecialchars}</a></h3>
-	<small>{if="!$GLOBALS['config']['HIDE_TIMESTAMPS']"}{$value.localdate|htmlspecialchars} - {/if}{if="$value.tags"}{$value.tags|htmlspecialchars}{/if}<br>
+	<small>{if="!$GLOBALS['config']['HIDE_TIMESTAMPS']"}{function="strftime('%c', $value.timestamp|htmlspecialchars)"} - {/if}{if="$value.tags"}{$value.tags|htmlspecialchars}{/if}<br>
 	{$value.url|htmlspecialchars}</small><br>
 	{if="$value.thumbnail"}{$value.thumbnail}{/if}<br>
 	{if="$value.description"}{$value.formatedDescription}{/if}

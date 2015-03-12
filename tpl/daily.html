@@ -30,7 +30,7 @@
                         </div>
                         {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
                             <div class="dailyEntryLinkdate">
-                                <a href="?{$link.linkdate|smallHash}">{$link.localdate}</a>
+                                <a href="?{$link.linkdate|smallHash}">{function="strftime('%c', $link.timestamp)"}</a>
                             </div>
                         {/if}
                         {if="$link.tags"}

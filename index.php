@@ -567,16 +567,6 @@ function linkdate2iso8601($linkdate)
     return date('c',linkdate2timestamp($linkdate)); // 'c' is for ISO 8601 date format.
 }
 
-/*  Converts a linkdate time (YYYYMMDD_HHMMSS) of an article to a localized date format.
-    (used to display link date on screen)
-    The date format is automatically chosen according to locale/languages sniffed from browser headers (see autoLocale()). */
-function linkdate2locale($linkdate)
-{
-    return utf8_encode(strftime('%c',linkdate2timestamp($linkdate))); // %c is for automatic date format according to locale.
-    // Note that if you use a locale which is not installed on your webserver,
-    // the date will not be displayed in the chosen locale, but probably in US notation.
-}
-
 // Parse HTTP response headers and return an associative array.
 function http_parse_headers_shaarli( $headers )
 {
@@ -1142,7 +1132,7 @@ function showDailyRSS()
             $l = $LINKSDB[$linkdate];
             $l['formatedDescription']=nl2br(keepMultipleSpaces(text2clickable(htmlspecialchars($l['description']))));
             $l['thumbnail'] = thumbnail($l['url']);
-            $l['localdate']=linkdate2locale($l['linkdate']);
+            $l['timestamp'] = linkdate2timestamp($l['linkdate']);
             if (startsWith($l['url'],'?')) $l['url']=indexUrl().$l['url'];  // make permalink URL absolute
             $links[$linkdate]=$l;
         }
@@ -1190,7 +1180,7 @@ function showDaily()
         $linksToDisplay[$key]['taglist']=$taglist;
         $linksToDisplay[$key]['formatedDescription']=nl2br(keepMultipleSpaces(text2clickable(htmlspecialchars($link['description']))));
         $linksToDisplay[$key]['thumbnail'] = thumbnail($link['url']);
-        $linksToDisplay[$key]['localdate'] = linkdate2locale($link['linkdate']);
+        $linksToDisplay[$key]['timestamp'] = linkdate2timestamp($link['linkdate']);
     }
 
     /* We need to spread the articles on 3 columns.
@@ -1942,7 +1932,7 @@ function buildLinkList($PAGE,$LINKSDB)
         $title=$link['title'];
         $classLi =  $i%2!=0 ? '' : 'publicLinkHightLight';
         $link['class'] = ($link['private']==0 ? $classLi : 'private');
-        $link['localdate']=linkdate2locale($link['linkdate']);
+        $link['timestamp']=linkdate2timestamp($link['linkdate']);
         $taglist = explode(' ',$link['tags']);
         uasort($taglist, 'strcasecmp');
         $link['taglist']=$taglist;

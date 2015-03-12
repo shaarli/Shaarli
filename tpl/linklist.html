@@ -44,7 +44,7 @@
                 <br>
                 {if="$value.description"}<div class="linkdescription">{$value.description}</div>{/if}
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{$value.localdate|htmlspecialchars} - permalink</a> - </span>
+                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
@@ -53,7 +53,7 @@
                 {/if}
                 <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&amp;s=8&amp;d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
                     onclick="return showQrCode(this);" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}">
-		    <img src="images/qrcode.png#" alt="QR-Code" title="{$value.localdate|htmlspecialchars}"></a></div> -
+		    <img src="images/qrcode.png#" alt="QR-Code" title="{function="strftime('%c', $value.timestamp)"}"></a></div> -
                 <a href="{$value.url|htmlspecialchars}"><span class="linkurl" title="Short link">{$value.url|htmlspecialchars}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
