@@ -334,7 +334,7 @@ h1 {
     clear: both;
 }
 
-#headerform input.linkurl {
+#headerform .addform input[type=text] {
     width: 50%;
 }
 
