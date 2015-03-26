@@ -1998,7 +1998,7 @@ function computeThumbnail($url,$href=false)
     //                                     ^^^^^^^^^^^                                 ^^^^^^^^^^^
     // this could easily go into a config file a la data/options.php, e.g. data/thumbnails.php:
     $url_patterns_steal_bandwidth = array(
-        '!^https?://(?:www\.)?YouTube\.com(?::\d+)?/.*?(?:[\?&]v=([^\?&#]+).*$!i'=>array(
+        '!^https?://(?:www\.)?YouTube\.com(?::\d+)?/.*?[\?&]v=([^\?&#]+).*$!i'=>array(
             // this array becomes the attributes of <img .../>
             'alt'=>'YouTube thumbnail', // optional, default: '\\0 thumbnail',
             'src'=>'https://img.youtube.com/vi/\\1/default.jpg',
