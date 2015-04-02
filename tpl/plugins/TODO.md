@@ -7,7 +7,7 @@ https://github.com/shaarli/Shaarli/issues/181 -  Add Disqus or Isso comments box
  * http://posativ.org/isso/docs/quickstart/ and add `<script data-isso="//comments.example.tld/" src="//comments.example.tld/js/embed.min.js"></script>` to includes.html template; then add `<section id="isso-thread"></section>` in the linklist template where you want the comments (in the linklist_plugins loop for example)
  
 
-Problem: by default, thread is guessed from current url (only one thread per page).  
+Problem: by default, Isso thread ID is guessed from the current url (only one thread per page).  
 if we want multiple threads on a single page (shaarli linklist), we must use : the `data-isso-id` client config,
 with data-isso-id being the permalink of an item.
 
@@ -20,3 +20,5 @@ Another option, only display isso threads when current URL is a permalink (`\?(A
 when displaying only this link), and just display a "comments" button on each linklist item. Optionally show the comment
 count on each item using the API (http://posativ.org/isso/docs/extras/api/#get-comment-count). API requests can be done
 by raintpl `{function` or client-side with js. The former should be faster if isso and shaarli are on ther same server.
+
+Showing all full isso threads in the linklist would destroy layout
