@@ -6,6 +6,7 @@ Any Shaarli page should conform to this RainTPL template:
 <html>
 <head>{include="includes"}</head>
 <body>
+	<div class="wrapper">
 	<div id="pageheader">{include="page.header"}</div>
     You body goes here...
     {include="page.footer"}
