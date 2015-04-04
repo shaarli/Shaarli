@@ -24,6 +24,7 @@ Example: "Add new link" form:
 <html>
 <head>{include="includes"}</head>
 <body onload="document.addform.post.focus();">
+<div class="wrapper">
 <div id="pageheader">
 	{include="page.header"}
 	<div id="headerform">
