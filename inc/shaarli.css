@@ -1,5 +1,9 @@
 /* Cascading Stylesheet for Shaarli - https://github.com/shaarli/Shaarli */
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
     font-size: 10pt;
@@ -92,6 +96,12 @@ h1 {
     -o-border-radius: 0px 6px 6px 0px;
     -ms-border-radius: 0px 6px 6px 0px;
     border-radius: 0px 6px 6px 0px;
+}
+.wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin-bottom: -54px;
 }
 
 #pageheader #logo {
@@ -529,13 +539,18 @@ a.qrcode img {
     display: inline;
 }
 
+#footer, .push {
+    height: 54px;
+}
+
 #footer {
     font-size: 8pt;
     text-align: center;
     color: #888;
     clear: both;
     max-width: 30em;
-    margin: 15px auto 15px auto;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #footer a {
