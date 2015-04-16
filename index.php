@@ -35,6 +35,7 @@ $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency 
 $GLOBALS['config']['ARCHIVE_ORG'] = false; // For each link, add a link to an archived version on archive.org
 $GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
 $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = false;
+$GLOBALS['config']['UNSTABLE_IP'] = false;  // For people whose IP changes regularly (for example using a VPN). If true, STAY_SIGNED_IN_TOKEN won't use IP address
 // -----------------------------------------------------------------------------------------------
 // You should not touch below (or at your own risks!)
 // Optional config file.
@@ -108,8 +109,11 @@ if (!is_file($GLOBALS['config']['CONFIG_FILE'])) install();
 
 require $GLOBALS['config']['CONFIG_FILE'];  // Read login/password hash into $GLOBALS.
 
-// a token depending of deployment salt, user password, and the current ip
-define('STAY_SIGNED_IN_TOKEN', sha1($GLOBALS['hash'].$_SERVER["REMOTE_ADDR"].$GLOBALS['salt']));
+// a token depending of deployment salt, user password, and the current ip (unless the user has an unstable ip)
+if($GLOBALS['config']['UNSTABLE_IP'])
+	define('STAY_SIGNED_IN_TOKEN', sha1($GLOBALS['hash'].$GLOBALS['salt']));
+else
+	define('STAY_SIGNED_IN_TOKEN', sha1($GLOBALS['hash'].$_SERVER["REMOTE_ADDR"].$GLOBALS['salt']));
 
 autoLocale(); // Sniff browser language and set date format accordingly.
 header('Content-Type: text/html; charset=utf-8'); // We use UTF-8 for proper international characters handling.
