@@ -22,3 +22,7 @@ count on each item using the API (http://posativ.org/isso/docs/extras/api/#get-c
 by raintpl `{function` or client-side with js. The former should be faster if isso and shaarli are on ther same server.
 
 Showing all full isso threads in the linklist would destroy layout
+
+-----------------------------------------------------------
+
+http://www.git-attitude.fr/2014/11/04/git-rerere/ for the merge
