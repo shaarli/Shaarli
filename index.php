@@ -1555,7 +1555,7 @@ function renderPage()
         pubsubhub();
 
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         $returnurl = ( isset($_POST['returnurl']) ? $_POST['returnurl'] : '?' );
         $returnurl .= '#'.smallHash($linkdate);  // Scroll to the link which has been edited.
         if (strstr($returnurl, "do=addlink")) { $returnurl = '?'; } //if we come from ?do=addlink, set returnurl to homepage instead
@@ -1567,7 +1567,7 @@ function renderPage()
     if (isset($_POST['cancel_edit']))
     {
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         $returnurl = ( isset($_POST['returnurl']) ? $_POST['returnurl'] : '?' );
         $returnurl .= '#'.smallHash($_POST['lf_linkdate']);  // Scroll to the link which has been edited.
         header('Location: '.$returnurl); // After canceling, redirect to the page the user was on.
@@ -1586,7 +1586,7 @@ function renderPage()
         $LINKSDB->savedb(); // save to disk
 
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         // Pick where we're going to redirect
         // =============================================================
         // Basically, we can't redirect to where we were previously if it was a permalink

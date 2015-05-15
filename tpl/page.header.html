@@ -11,8 +11,8 @@
         <a href="{$titleLink}">{$shaarlititle|htmlspecialchars}</a>
     </span>
     </li>
-  
-{if="!empty($_GET['source']) && $_GET['source']=='bookmarklet'"}
+
+{if="!empty($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')"}
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}
 {else}
 <li><a href="?" class="nomobile">Home</a></li>
