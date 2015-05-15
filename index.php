@@ -309,8 +309,8 @@ function autoLocale()
         if (preg_match('/([a-z]{2})-?([a-z]{2})?/i',$_SERVER['HTTP_ACCEPT_LANGUAGE'],$matches)) {
             $loc = $matches[1] . (!empty($matches[2]) ? '_' . strtoupper($matches[2]) : '');
             $attempts = array($loc.'.UTF-8', $loc, str_replace('_', '-', $loc).'.UTF-8', str_replace('_', '-', $loc),
-                $loc . '_' . strtoupper($loc).'.UTF-8', $loc . '_' . strtoupper($loc), 
-                $loc . '_' . $loc.'.UTF-8', $loc . '_' . $loc, $loc . '-' . strtoupper($loc).'.UTF-8', 
+                $loc . '_' . strtoupper($loc).'.UTF-8', $loc . '_' . strtoupper($loc),
+                $loc . '_' . $loc.'.UTF-8', $loc . '_' . $loc, $loc . '-' . strtoupper($loc).'.UTF-8',
                 $loc . '-' . strtoupper($loc), $loc . '-' . $loc.'.UTF-8', $loc . '-' . $loc);
         }
     }
@@ -1594,7 +1594,7 @@ function renderPage()
         // Cases:
         //    - /             : nothing in $_GET, redirect to self
         //    - /?page        : redirect to self
-        //    - /?searchterm  : redirect to self (there might be other links) 
+        //    - /?searchterm  : redirect to self (there might be other links)
         //    - /?searchtags  : redirect to self
         //    - /permalink    : redirect to / (the link does not exist anymore)
         //    - /?edit_link   : redirect to / (the link does not exist anymore)
@@ -1954,7 +1954,7 @@ function buildLinkList($PAGE,$LINKSDB)
             strlen($link["url"]) === 7) {
             $link["url"] = indexUrl() . $link["url"];
         }
-        
+
         $linkDisp[$keys[$i]] = $link;
         $i++;
     }
