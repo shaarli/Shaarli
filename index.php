@@ -309,8 +309,8 @@ function autoLocale()
         if (preg_match('/([a-z]{2})-?([a-z]{2})?/i',$_SERVER['HTTP_ACCEPT_LANGUAGE'],$matches)) {
             $loc = $matches[1] . (!empty($matches[2]) ? '_' . strtoupper($matches[2]) : '');
             $attempts = array($loc.'.UTF-8', $loc, str_replace('_', '-', $loc).'.UTF-8', str_replace('_', '-', $loc),
-                $loc . '_' . strtoupper($loc).'.UTF-8', $loc . '_' . strtoupper($loc), 
-                $loc . '_' . $loc.'.UTF-8', $loc . '_' . $loc, $loc . '-' . strtoupper($loc).'.UTF-8', 
+                $loc . '_' . strtoupper($loc).'.UTF-8', $loc . '_' . strtoupper($loc),
+                $loc . '_' . $loc.'.UTF-8', $loc . '_' . $loc, $loc . '-' . strtoupper($loc).'.UTF-8',
                 $loc . '-' . strtoupper($loc), $loc . '-' . $loc.'.UTF-8', $loc . '-' . $loc);
         }
     }
@@ -1555,7 +1555,7 @@ function renderPage()
         pubsubhub();
 
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         $returnurl = ( isset($_POST['returnurl']) ? $_POST['returnurl'] : '?' );
         $returnurl .= '#'.smallHash($linkdate);  // Scroll to the link which has been edited.
         if (strstr($returnurl, "do=addlink")) { $returnurl = '?'; } //if we come from ?do=addlink, set returnurl to homepage instead
@@ -1567,7 +1567,7 @@ function renderPage()
     if (isset($_POST['cancel_edit']))
     {
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         $returnurl = ( isset($_POST['returnurl']) ? $_POST['returnurl'] : '?' );
         $returnurl .= '#'.smallHash($_POST['lf_linkdate']);  // Scroll to the link which has been edited.
         header('Location: '.$returnurl); // After canceling, redirect to the page the user was on.
@@ -1586,7 +1586,7 @@ function renderPage()
         $LINKSDB->savedb(); // save to disk
 
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && $_GET['source']=='bookmarklet') { echo '<script>self.close();</script>'; exit; }
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']==='firefox')) { echo '<script>self.close();</script>'; exit; }
         // Pick where we're going to redirect
         // =============================================================
         // Basically, we can't redirect to where we were previously if it was a permalink
@@ -1594,7 +1594,7 @@ function renderPage()
         // Cases:
         //    - /             : nothing in $_GET, redirect to self
         //    - /?page        : redirect to self
-        //    - /?searchterm  : redirect to self (there might be other links) 
+        //    - /?searchterm  : redirect to self (there might be other links)
         //    - /?searchtags  : redirect to self
         //    - /permalink    : redirect to / (the link does not exist anymore)
         //    - /?edit_link   : redirect to / (the link does not exist anymore)
@@ -1954,7 +1954,7 @@ function buildLinkList($PAGE,$LINKSDB)
             strlen($link["url"]) === 7) {
             $link["url"] = indexUrl() . $link["url"];
         }
-        
+
         $linkDisp[$keys[$i]] = $link;
         $i++;
     }
