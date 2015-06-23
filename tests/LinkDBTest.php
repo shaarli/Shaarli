@@ -37,12 +37,7 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
      */
     public static function setUpBeforeClass()
     {
-        self::$refDB = new ReferenceLinkDB();
-        self::$refDB->write(self::$testDatastore, PHPPREFIX, PHPSUFFIX);
-
         $GLOBALS['config']['DATASTORE'] = self::$testDatastore;
-        self::$publicLinkDB = new LinkDB(false);
-        self::$privateLinkDB = new LinkDB(true);
     }
 
     /**
@@ -50,7 +45,13 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $GLOBALS['config']['DATASTORE'] = self::$testDatastore;
+        self::$refDB = new ReferenceLinkDB();
+        self::$refDB->write(self::$testDatastore, PHPPREFIX, PHPSUFFIX);
+
+        $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = false;
+        self::$publicLinkDB = new LinkDB(false);
+        self::$privateLinkDB = new LinkDB(true);
+
         if (file_exists(self::$testDatastore)) {
             unlink(self::$testDatastore);
         }
@@ -214,6 +215,19 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(
             self::$refDB->countLinks(),
             self::$privateLinkDB->count()
+        );
+    }
+
+    /**
+     * Count existing links
+     */
+    public function testCountWithHiddenPublic()
+    {
+        $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = true;
+        self::$publicLinkDB = new LinkDB(false);
+        $this->assertEquals(
+            0,
+            self::$publicLinkDB->count()
         );
     }
 

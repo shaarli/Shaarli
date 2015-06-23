@@ -210,7 +210,7 @@ class LinkDB implements Iterator, Countable, ArrayAccess
     {
 
         // Public links are hidden and user not logged in => nothing to show
-        if ($GLOBALS['config']['HIDE_PUBLIC_LINKS'] && !isLoggedIn()) {
+        if ($GLOBALS['config']['HIDE_PUBLIC_LINKS'] && !$this->loggedIn) {
             $this->links = array();
             return;
         }
