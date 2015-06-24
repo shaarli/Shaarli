@@ -221,6 +221,10 @@ h1 {
     margin-left:24px;
 }
 
+.tagfilter div.awesomplete {
+    width: 15%;
+}
+
 .tagfilter #tagfilter_value {
     display: inline;
 }
@@ -374,6 +378,7 @@ h1 {
 }
 
 #editlinkform label {
+    cursor: pointer;
     color: #ffffff;
 }
 
