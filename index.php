@@ -72,7 +72,9 @@ error_reporting(E_ALL^E_WARNING);  // See all error except warnings.
 require_once 'application/LinkDB.php';
 require_once 'application/Utils.php';
 
-include "inc/rain.tpl.class.php"; //include Rain TPL
+//include Rain TPL
+require_once "application/rain.tpl.class.php";
+
 raintpl::$tpl_dir = $GLOBALS['config']['RAINTPL_TPL']; // template directory
 raintpl::$cache_dir = $GLOBALS['config']['RAINTPL_TMP']; // cache directory
 
