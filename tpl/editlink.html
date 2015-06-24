@@ -19,7 +19,7 @@
             <label for="lf_title"><i>Title</i></label><br><input type="text" name="lf_title" id="lf_title" value="{$link.title|htmlspecialchars}" class="lf_input"><br>
             <label for="lf_description"><i>Description</i></label><br><textarea name="lf_description" id="lf_description" rows="4" cols="25">{$link.description|htmlspecialchars}</textarea><br>
             <label for="lf_tags"><i>Tags</i></label><br>
-            <input type="text" id="lf_tags" name="lf_tags" id="lf_tags" value="{$link.tags|htmlspecialchars}" class="lf_input"
+            <input type="text" name="lf_tags" id="lf_tags" value="{$link.tags|htmlspecialchars}" class="lf_input"
                 data-list="{loop="$tags"}{$key}, {/loop}" data-multiple autocomplete="off" ><br>
 	        {if="($link_is_new && $GLOBALS['privateLinkByDefault']==true) || $link.private == true"}
             <input type="checkbox" checked="checked" name="lf_private" id="lf_private">
