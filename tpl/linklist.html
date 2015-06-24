@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link type="text/css" rel="stylesheet" href="../inc/awesomplete.css" />
+    <link type="text/css" rel="stylesheet" href="../assets/awesomplete.css" />
     {include="includes"}
 </head>
 <body>
@@ -107,7 +107,7 @@ function showQrCode(caller,loading)
         if (!loading)  // If javascript lib is still loading, do not append script to body.
         {
             var element = document.createElement("script");
-            element.src = "inc/qr-1.1.3.min.js";
+            element.src = "assets/qr-1.1.3.min.js";
             document.body.appendChild(element);
         }
         setTimeout(function() { showQrCode(caller,true);}, 200); // Retry in 200 milliseconds.
@@ -139,6 +139,6 @@ function showQrCode(caller,loading)
     return false;
 }
 </script>
-<script src="inc/awesomplete.min.js#"></script>
+<script src="assets/awesomplete.min.js#"></script>
 </body>
 </html>
