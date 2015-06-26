@@ -156,8 +156,8 @@ To change the configuration, create the file `data/options.php`, example:
 
 
 ### Changing theme
- * Shaarli's apparence can be modified by editing CSS rules in `inc/user.css`. This file allows to override rules defined in the main `inc/shaarli.css` (only add changed rules), or define a whole new theme.
- * Do not edit `inc/shaarli.css`! Your changes would be overriden when updating Shaarli.
+ * Shaarli's apparence can be modified by editing CSS rules in `assets/user.css`. This file allows to override rules defined in the main `assets/shaarli.css` (only add changed rules), or define a whole new theme.
+ * Do not edit `assets/shaarli.css`! Your changes would be overriden when updating Shaarli.
  * Some themes are available at https://github.com/shaarli/shaarli-themes.
 
 See also:
@@ -375,7 +375,7 @@ Here is the directory structure of Shaarli and the purpose of the different file
 ```
     index.php : Main program.
     COPYING : Shaarli license.
-    inc/ : Includes (libraries, CSS…)
+    assets/ : Includes (libraries, CSS…)
         shaarli.css : Shaarli stylesheet.
         jquery.min.js : jQuery javascript library.
         jquery-ui.min.js : jQuery-UI javascript library.

@@ -53,7 +53,7 @@ function get_http_response_code($theURL) {
  * This makes the code PHP-5 only (particularly the call to "get_headers")
  */
 function copyUserStyleFrom($url, $name, $knownStyles) {
-	$userStyle = $url."inc/user.css";
+	$userStyle = $url."assets/user.css";
 	if(in_array($url, $knownStyles)) {
 		// TODO add log message
 	} else {

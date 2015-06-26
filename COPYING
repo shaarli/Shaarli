@@ -21,7 +21,7 @@ Copyright: (c) 2011-2015 Sébastien SAUVAGE <sebsauvage@sebsauvage.net>
            (c) 2015 Miloš Jovanović <mjovanovic@gmail.com>
 
 
-Files: inc/reset.css
+Files: assets/reset.css
 License: BSD (http://opensource.org/licenses/BSD-3-Clause)
 Copyright: (c) 2010, Yahoo! Inc. 
 
@@ -47,20 +47,20 @@ Files: images/logo.png
 License: zlib/libpng
 Copyright: (c) 2011-2014 idleman idleman@idleman.fr
 
-Files: inc/blazy*.js
+Files: assets/blazy*.js
 License: MIT License (http://opensource.org/licenses/MIT)
 Copyright: (C) Bjoern Klinggaard - @bklinggaard - http://dinbror.dk/blazy
 
-Files: inc/qr.js
+Files: assets/qr.js
 License: GPLv3 License (http://opensource.org/licenses/gpl-3.0)
 Copyright: (C) 2014 Alasdair Mercer, http://neocotic.com, https://github.com/neocotic/qr.js
 
-Files: inc/rain.tpl.class.php
+Files: assets/rain.tpl.class.php
 Copyright: 2011-2012, Federico Ulfo <rainelemental@gmail.com>
            2011-2012, The Rain Team <hello@raintm.com>
 License: LGPL-3+ (https://www.gnu.org/licenses/lgpl-3.0.txt)
 
-Files: inc/awesomplete*
+Files: assets/awesomplete*
 License: MIT License (http://opensource.org/licenses/MIT)
 Copyright: (C) 2015 Lea Verou - https://github.com/LeaVerou/awesomplete
 
