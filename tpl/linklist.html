@@ -54,7 +54,7 @@
                 <br>
                 {if="$value.description"}<div class="linkdescription e-content">{$value.description}</div>{/if}
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                    <span class="linkdate dt-published" title="Permalink"><a href="?{$value.linkdate|smallHash}">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
+                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}"><time class="dt-published" datetime="{function="strftime('%c', $value.timestamp)"}">{function="strftime('%c', $value.timestamp)"}</time> - permalink</a> - </span>
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
