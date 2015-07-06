@@ -22,14 +22,14 @@
             <div id="daily_col{$counter+1}">
                 {loop="value"}
                     {$link=$value}
-                    <div class="dailyEntry">
+                    <article class="dailyEntry h-entry">
                         <div class="dailyEntryPermalink">
                             <a href="?{$link.linkdate|smallHash}">
                                 <img src="../images/squiggle2.png" width="25" height="26" title="permalink" alt="permalink">
                             </a>
                         </div>
                         {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                            <div class="dailyEntryLinkdate">
+                            <div class="dailyEntryLinkdate dt-published">
                                 <a href="?{$link.linkdate|smallHash}">{function="strftime('%c', $link.timestamp)"}</a>
                             </div>
                         {/if}
@@ -40,16 +40,16 @@
                                 {/loop}
                             </div>
                         {/if}
-                        <div class="dailyEntryTitle">
+                        <div class="dailyEntryTitle p-name">
                             <a href="{$link.url}">{$link.title}</a>
                         </div>
                         {if="$link.thumbnail"}
                             <div class="dailyEntryThumbnail">{$link.thumbnail}</div>
                         {/if}
-                        <div class="dailyEntryDescription">{$link.formatedDescription}</div>
+                        <div class="dailyEntryDescription p-name">{$link.formatedDescription}</div>
                     </div>
                 {/loop}
-            </div>
+            </article>
             {/if}
         {/loop}
     {else}
