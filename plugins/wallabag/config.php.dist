@@ -1,0 +1,3 @@
+<?php
+
+$GLOBALS['plugins']['WALLABAG_URL'] = 'https://demo.wallabag.org/';
