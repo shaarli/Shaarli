@@ -42,7 +42,7 @@
         <li{if="$value.class"} class="{$value.class}"{/if}>
             <a id="{$value.linkdate|smallHash}"></a>
             <div class="thumbnail">{$value.url|thumbnail}</div>
-            <div class="linkcontainer">
+            <article class="linkcontainer h-entry">
                 {if="isLoggedIn()"}
                     <div class="linkeditbuttons">
                         <form method="GET" class="buttoneditform"><input type="hidden" name="edit_link" value="{$value.linkdate}"><input type="image" alt="Edit" src="images/edit_icon.png#" title="Edit" class="button_edit"></form><br>
@@ -50,11 +50,11 @@
                         <input type="hidden" name="token" value="{$token}"><input type="hidden" name="delete_link"><input type="image" alt="Delete" src="images/delete_icon.png#" title="Delete" class="button_delete" onClick="return confirmDeleteLink();"></form>
                     </div>
                 {/if}
-                <span class="linktitle"><a href="{$redirector}{$value.url}">{$value.title}</a></span>
+                <span class="linktitle p-name"><a href="{$redirector}{$value.url}">{$value.title}</a></span>
                 <br>
-                {if="$value.description"}<div class="linkdescription">{$value.description}</div>{/if}
+                {if="$value.description"}<div class="linkdescription e-content">{$value.description}</div>{/if}
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
+                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}"><time class="dt-published" datetime="{function="strftime('%c', $value.timestamp)"}">{function="strftime('%c', $value.timestamp)"}</time> - permalink</a> - </span>
                 {else}
                     <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
                 {/if}
@@ -67,10 +67,10 @@
                 <a href="{$value.url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
-                    {loop="value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
+                    {loop="value.taglist"}<span class="linktag p-category" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
                     </div>
                 {/if}
-            </div>
+            </article>
         </li>
     {/loop}
     </ul>
