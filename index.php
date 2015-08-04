@@ -5,6 +5,7 @@
 // Licence: http://www.opensource.org/licenses/zlib-license.php
 // Requires: PHP 5.3.x
 // -----------------------------------------------------------------------------------------------
+ini_set('display_errors', false); // Full Path Disclosure https://github.com/sebsauvage/Shaarli/issues/222
 // NEVER TRUST IN PHP.INI
 // Some hosts do not define a default timezone in php.ini,
 // so we have to do this for avoid the strict standard error.
