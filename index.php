@@ -92,14 +92,16 @@ ini_set('session.use_only_cookies', 1);
 // Prevent PHP form using sessionID in URL if cookies are disabled.
 ini_set('session.use_trans_sid', false);
 
-// Regenerate session id if invalid or not defined in cookie.
-if (isset($_COOKIE['shaarli']) && !is_session_id_valid($_COOKIE['shaarli'])) {
-    $_COOKIE['shaarli'] = uniqid();
-}
 session_name('shaarli');
 // Start session if needed (Some server auto-start sessions).
 if (session_id() == '') {
     session_start();
+}
+
+// Regenerate session id if invalid or not defined in cookie.
+if (isset($_COOKIE['shaarli']) && !is_session_id_valid($_COOKIE['shaarli'])) {
+    session_regenerate_id(true);
+    $_COOKIE['shaarli'] = session_id();
 }
 
 include "inc/rain.tpl.class.php"; //include Rain TPL
