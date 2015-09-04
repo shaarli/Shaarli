@@ -156,7 +156,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase
      */
     public function testIsSessionIdValid()
     {
-        $this->assertTrue(is_session_id_valid('azertyuiop123456789AZERTYUIOP1aA'));
+        $this->assertTrue(is_session_id_valid('iXJWB-H1w439c02a4ff8770d3a652d344-QhXGZlJsBPQnaeAGaG,SmZFcYxYsxtjXdlslXQn8UyHB0ZkGZeiN5ZAsUsR38YcICkTe1197k7pt5g7b10nq2sqp4bfssf'));
     }
 
     /**
@@ -167,5 +167,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(is_session_id_valid(''));
         $this->assertFalse(is_session_id_valid(array()));
         $this->assertFalse(is_session_id_valid('c0ZqcWF3VFE2NmJBdm1HMVQ0ZHJ3UmZPbTFsNGhkNHI='));
+        $this->assertFalse(is_session_id_valid('c0asFsAfSffsAOfsdvZqcWF3VFE2d43asfNmJBdm1HMV3a8AsQ0ZHJ3UmZPbTFsNGhkNHI='));
     }
 }

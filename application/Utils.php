@@ -156,7 +156,7 @@ function is_session_id_valid($sessionId)
         return false;
     }
 
-    if (!preg_match('/^[a-z0-9]{2,32}$/i', $sessionId)) {
+    if (!preg_match('/^[-,a-z0-9]{1,128}$/i', $sessionId)) {
         return false;
     }
 
