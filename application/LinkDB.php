@@ -196,7 +196,7 @@ To learn how to use Shaarli, consult the link "Help/documentation" at the bottom
 
 You use the community supported version of the original Shaarli project, by Sebastien Sauvage.',
             'private'=>0,
-            'linkdate'=>'20110914_190000',
+            'linkdate'=> date('Ymd_His', strtotime('-1 minute')),
             'tags'=>'opensource software'
         );
         $this->_links[$link['linkdate']] = $link;
@@ -206,7 +206,7 @@ You use the community supported version of the original Shaarli project, by Seba
             'url'=>'http://sebsauvage.net/paste/?8434b27936c09649#bR7XsXhoTiLcqCpQbmOpBi3rq2zzQUC5hBI7ZT1O3x8=',
             'description'=>'Shhhh! I\'m a private link only YOU can see. You can delete me too.',
             'private'=>1,
-            'linkdate'=>'20110914_074522',
+            'linkdate'=> date('Ymd_His', strtotime('-2 minute')),
             'tags'=>'secretstuff'
         );
         $this->_links[$link['linkdate']] = $link;
