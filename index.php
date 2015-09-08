@@ -463,7 +463,7 @@ if (isset($_POST['login']))
 // You can append $_SERVER['SCRIPT_NAME'] to get the current script URL.
 function serverUrl()
 {
-    $https = (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS'])=='on')) || $_SERVER["SERVER_PORT"]=='443'; // HTTPS detection.
+    $https = (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS'])=='on')) || $_SERVER["SERVER_PORT"]=='443' || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'); // HTTPS detection.
     $serverport = ($_SERVER["SERVER_PORT"]=='80' || ($https && $_SERVER["SERVER_PORT"]=='443') ? '' : ':'.$_SERVER["SERVER_PORT"]);
     return 'http'.($https?'s':'').'://'.$_SERVER['SERVER_NAME'].$serverport;
 }
