@@ -128,6 +128,11 @@ class UtilsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('?', generateLocation($ref, 'localhost', array('test')));
     }
 
+    public function testGenerateLocationAnchor() {
+        $ref = '?#foo';
+        $this->assertEquals($ref, generateLocation($ref, 'localhost', array('addlink', 'post', 'edit_link')));
+    }
+
     /**
      * Test generate location - from other domain.
      */
