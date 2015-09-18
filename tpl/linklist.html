@@ -50,13 +50,13 @@
                         <input type="hidden" name="token" value="{$token}"><input type="hidden" name="delete_link"><input type="image" alt="Delete" src="images/delete_icon.png#" title="Delete" class="button_delete" onClick="return confirmDeleteLink();"></form>
                     </div>
                 {/if}
-                <span class="linktitle"><a href="{$redirector}{$value.url}">{$value.title}</a></span>
+                <span class="linktitle"><a href="{$redirector}{$value.url}" rel="noreferrer">{$value.title}</a></span>
                 <br>
                 {if="$value.description"}<div class="linkdescription">{$value.description}</div>{/if}
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
-                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
+                    <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}" rel="noreferrer">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
                 {else}
-                    <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
+                    <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}" rel="noreferrer">permalink</a> - </span>
                 {/if}
                 {if="$GLOBALS['config']['ARCHIVE_ORG']"}
                 <span class="linkarchive"><a href="https://web.archive.org/web/{$value.url}">archive</a> - </span>
@@ -64,7 +64,7 @@
                 <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&amp;s=8&amp;d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
                     onclick="return showQrCode(this);" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}">
 		    <img src="images/qrcode.png#" alt="QR-Code" title="{function="strftime('%c', $value.timestamp)"}"></a></div> -
-                <a href="{$value.url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
+                <a href="{$value.url}" rel="noreferrer"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
                     {loop="value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
