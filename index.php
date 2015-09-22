@@ -1356,9 +1356,9 @@ function renderPage()
         // If we are called from the bookmarklet, we must close the popup:
         if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) { echo '<script>self.close();</script>'; exit; }
         $returnurl = ( !empty($_POST['returnurl']) ? escape($_POST['returnurl']) : '?' );
-        $returnurl .= '#'.smallHash($_POST['lf_linkdate']);  // Scroll to the link which has been edited.
-        $location = generateLocation($returnurl, $_SERVER['HTTP_HOST'], array('addlink', 'post', 'edit_link'));
-        header('Location: '. $location); // After saving the link, redirect to the page the user was on.
+        $returnurl .= '#'.smallHash($linkdate);  // Scroll to the link which has been edited.
+        if (strstr($returnurl, "do=addlink")) { $returnurl = '?'; } //if we come from ?do=addlink, set returnurl to homepage instead
+        header('Location: '.$returnurl); // After saving the link, redirect to the page the user was on.
         exit;
     }
 
