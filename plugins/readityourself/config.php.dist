@@ -1,0 +1,3 @@
+<?php
+
+$GLOBALS['plugins']['READITYOUSELF_URL'] = 'http://someurl.com';

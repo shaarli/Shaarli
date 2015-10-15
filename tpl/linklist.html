@@ -17,12 +17,21 @@
             </datalist>
             <input type="submit" value="Search" class="bigbutton">
         </form>
+        {loop="$plugins_header.fields_toolbar"}
+            {$value}
+        {/loop}
     </div>
 </div>
 
 <div id="linklist">
 
     {include="linklist.paging"}
+
+    <div id="plugin_zone_start_linklist" class="plugin_zone">
+        {loop="$plugin_start_zone"}
+            {$value}
+        {/loop}
+    </div>
 
     {if="count($links)==0"}
         <div id="searchcriteria">Nothing found.</i></div>
@@ -40,7 +49,7 @@
     <ul>
         {loop="links"}
         <li{if="$value.class"} class="{$value.class}"{/if}>
-            <a id="{$value.linkdate|smallHash}"></a>
+            <a id="{$value.shorturl}"></a>
             <div class="thumbnail">{$value.url|thumbnail}</div>
             <div class="linkcontainer">
                 {if="isLoggedIn()"}
@@ -56,24 +65,31 @@
                 {if="!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()"}
                     <span class="linkdate" title="Permalink"><a href="?{$value.linkdate|smallHash}">{function="strftime('%c', $value.timestamp)"} - permalink</a> - </span>
                 {else}
-                    <span class="linkdate" title="Short link here"><a href="?{$value.linkdate|smallHash}">permalink</a> - </span>
+                    <span class="linkdate" title="Short link here"><a href="?{$value.shorturl}">permalink</a> - </span>
                 {/if}
-                {if="$GLOBALS['config']['ARCHIVE_ORG']"}
-                <span class="linkarchive"><a href="https://web.archive.org/web/{$value.url}">archive</a> - </span>
-                {/if}
-                <div class="linkqrcode"><a href="http://qrfree.kaywa.com/?l=1&amp;s=8&amp;d={$scripturl|urlencode}%3F{$value.linkdate|smallHash}"
-                    onclick="return showQrCode(this);" class="qrcode" data-permalink="{$scripturl}?{$value.linkdate|smallHash}">
-		    <img src="images/qrcode.png#" alt="QR-Code" title="{function="strftime('%c', $value.timestamp)"}"></a></div> -
+
+                {loop="$value.link_plugin"}
+                    <span>{$value}</span> -
+                {/loop}
+
                 <a href="{$value.url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
                     {loop="value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
                     </div>
                 {/if}
+
+
             </div>
         </li>
     {/loop}
     </ul>
+
+    <div id="plugin_zone_end_linklist" class="plugin_zone">
+        {loop="$plugin_end_zone"}
+            {$value}
+        {/loop}
+    </div>
 
     {include="linklist.paging"}
 
@@ -81,64 +97,6 @@
 
     {include="page.footer"}
 
-<script>
-// Remove any displayed QR-Code
-function remove_qrcode()
-{
-    var elem = document.getElementById("permalinkQrcode");
-    if (elem) elem.parentNode.removeChild(elem);
-    return false;
-}
-
-function isCanvasSupported(){
-    var elem = document.createElement('canvas');
-    return !!(elem.getContext && elem.getContext('2d'));
-}
-
-// Show the QR-Code of a permalink (when the QR-Code icon is clicked).
-function showQrCode(caller,loading)
-{
-    if( !isCanvasSupported() ) return true;
-
-    // Dynamic javascript lib loading: We only load qr.js if the QR code icon is clicked:
-    if (typeof(qr)=='undefined') // Load qr.js only if not present.
-    {
-        loading = typeof loading !== 'undefined' ? loading : false;
-        if (!loading)  // If javascript lib is still loading, do not append script to body.
-        {
-            var element = document.createElement("script");
-            element.src = "inc/qr-1.1.3.min.js";
-            document.body.appendChild(element);
-        }
-        setTimeout(function() { showQrCode(caller,true);}, 200); // Retry in 200 milliseconds.
-        return false;
-    }
-
-    // Remove previous qrcode if present.
-    remove_qrcode();
-
-    // Build the div which contains the QR-Code:
-    var element = document.createElement('div');
-    element.id="permalinkQrcode";
-
-    // Make QR-Code div commit sepuku when clicked:
-    element.addEventListener('click', remove_qrcode ); // Works on every canvas supported browser
-
-    // Build the QR-Code:
-    var image = qr.image({size: 8,value: caller.getAttribute('data-permalink')});
-    if (image)
-    {
-        element.appendChild(image);
-        element.innerHTML+= "<br>Click to close";
-        caller.parentNode.appendChild(element);
-    }
-    else
-    {
-        element.innerHTML="Your browser does not seem to be HTML5 compatible.";
-    }
-    return false;
-}
-</script>
 <script src="inc/awesomplete.min.js#"></script>
 </body>
 </html>

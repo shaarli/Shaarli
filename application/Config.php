@@ -56,7 +56,12 @@ function writeConfig($config, $isLoggedIn)
     foreach ($config['config'] as $key => $value) {
         $configStr .= '$GLOBALS[\'config\'][\''. $key .'\'] = '.var_export($config['config'][$key], true).';'. PHP_EOL;
     }
-    $configStr .= '?>';
+
+    if (isset($config['plugins'])) {
+        foreach ($config['plugins'] as $key => $value) {
+            $configStr .= '$GLOBALS[\'plugins\'][\''. $key .'\'] = '.var_export($config['plugins'][$key], true).';'. PHP_EOL;
+        }
+    }
 
     if (!file_put_contents($config['config']['CONFIG_FILE'], $configStr)
         || strcmp(file_get_contents($config['config']['CONFIG_FILE']), $configStr) != 0

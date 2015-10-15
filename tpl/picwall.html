@@ -5,15 +5,34 @@
 </head>
 <body>
 <div id="pageheader">{include="page.header"}</div>
+
+<div id="plugin_zone_start_picwall" class="plugin_zone">
+    {loop="$plugin_start_zone"}
+        {$value}
+    {/loop}
+</div>
+
 <div class="center">
         <div id="picwall_container">
             {loop="linksToDisplay"}
             <div class="picwall_pictureframe">
         	    {$value.thumbnail}<a href="{$value.url}"><span class="info">{$value.title}</span></a>
+                {loop="$value.picwall_plugin"}
+                    {$value}
+                {/loop}
             </div>
             {/loop}
         </div>
 </div>
+
+<div class="clear"></div>
+
+<div id="plugin_zone_end_picwall" class="plugin_zone">
+    {loop="$plugin_end_zone"}
+        {$value}
+    {/loop}
+</div>
+
 {include="page.footer"}
 
 <script>
