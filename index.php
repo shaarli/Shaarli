@@ -47,12 +47,12 @@ $GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency 
                                           // Note: You must have publisher.php in the same directory as Shaarli index.php
 $GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
 $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = false;
-//$GLOBALS['config']['ENABLED_PLUGINS'] = array(
-//    'qrcode', 'archiveorg', 'readityourself', 'demo_plugin', 'playvideos',
-//    'wallabag', 'markdown', 'addlink_toolbar',
-//);
+$GLOBALS['config']['ENABLED_PLUGINS'] = array(
+    'qrcode', 'archiveorg', 'readityourself', 'demo_plugin', 'playvideos',
+    'wallabag', 'markdown', 'addlink_toolbar',
+);
 // Warning: order matters.
-$GLOBALS['config']['ENABLED_PLUGINS'] = array();
+//$GLOBALS['config']['ENABLED_PLUGINS'] = array();
 
 // Default plugins, default config - will be overriden by config.php and then plugin's config.php file.
 $GLOBALS['plugins']['READITYOUSELF_URL'] = 'http://someurl.com';
