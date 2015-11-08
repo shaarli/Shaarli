@@ -11,14 +11,14 @@ require_once 'application/Config.php';
 class ConfigTest extends PHPUnit_Framework_TestCase
 {
     // Configuration input set.
-    private static $_configFields;
+    private static $configFields;
 
     /**
      * Executed before each test.
      */
     public function setUp()
     {
-        self::$_configFields = array(
+        self::$configFields = array(
             'login' => 'login',
             'hash' => 'hash',
             'salt' => 'salt',
@@ -44,8 +44,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
-        if (is_file(self::$_configFields['config']['CONFIG_FILE'])) {
-            unlink(self::$_configFields['config']['CONFIG_FILE']);
+        if (is_file(self::$configFields['config']['CONFIG_FILE'])) {
+            unlink(self::$configFields['config']['CONFIG_FILE']);
         }
     }
 
@@ -54,20 +54,20 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testWriteConfig()
     {
-        writeConfig(self::$_configFields, true);
+        writeConfig(self::$configFields, true);
 
-        include self::$_configFields['config']['CONFIG_FILE'];
-        $this->assertEquals(self::$_configFields['login'], $GLOBALS['login']);
-        $this->assertEquals(self::$_configFields['hash'], $GLOBALS['hash']);
-        $this->assertEquals(self::$_configFields['salt'], $GLOBALS['salt']);
-        $this->assertEquals(self::$_configFields['timezone'], $GLOBALS['timezone']);
-        $this->assertEquals(self::$_configFields['title'], $GLOBALS['title']);
-        $this->assertEquals(self::$_configFields['titleLink'], $GLOBALS['titleLink']);
-        $this->assertEquals(self::$_configFields['redirector'], $GLOBALS['redirector']);
-        $this->assertEquals(self::$_configFields['disablesessionprotection'], $GLOBALS['disablesessionprotection']);
-        $this->assertEquals(self::$_configFields['privateLinkByDefault'], $GLOBALS['privateLinkByDefault']);
-        $this->assertEquals(self::$_configFields['config']['config1'], $GLOBALS['config']['config1']);
-        $this->assertEquals(self::$_configFields['config']['config2'], $GLOBALS['config']['config2']);
+        include self::$configFields['config']['CONFIG_FILE'];
+        $this->assertEquals(self::$configFields['login'], $GLOBALS['login']);
+        $this->assertEquals(self::$configFields['hash'], $GLOBALS['hash']);
+        $this->assertEquals(self::$configFields['salt'], $GLOBALS['salt']);
+        $this->assertEquals(self::$configFields['timezone'], $GLOBALS['timezone']);
+        $this->assertEquals(self::$configFields['title'], $GLOBALS['title']);
+        $this->assertEquals(self::$configFields['titleLink'], $GLOBALS['titleLink']);
+        $this->assertEquals(self::$configFields['redirector'], $GLOBALS['redirector']);
+        $this->assertEquals(self::$configFields['disablesessionprotection'], $GLOBALS['disablesessionprotection']);
+        $this->assertEquals(self::$configFields['privateLinkByDefault'], $GLOBALS['privateLinkByDefault']);
+        $this->assertEquals(self::$configFields['config']['config1'], $GLOBALS['config']['config1']);
+        $this->assertEquals(self::$configFields['config']['config2'], $GLOBALS['config']['config2']);
     }
 
     /**
@@ -79,14 +79,14 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testWriteConfigFieldUpdate()
     {
-        writeConfig(self::$_configFields, true);
-        self::$_configFields['title'] = 'ok';
-        self::$_configFields['config']['config1'] = 'ok';
-        self::$_configFields['config']['config_new'] = 'ok';
-        self::$_configFields['new'] = 'should not be saved';
-        writeConfig(self::$_configFields, true);
+        writeConfig(self::$configFields, true);
+        self::$configFields['title'] = 'ok';
+        self::$configFields['config']['config1'] = 'ok';
+        self::$configFields['config']['config_new'] = 'ok';
+        self::$configFields['new'] = 'should not be saved';
+        writeConfig(self::$configFields, true);
 
-        include self::$_configFields['config']['CONFIG_FILE'];
+        include self::$configFields['config']['CONFIG_FILE'];
         $this->assertEquals('ok', $GLOBALS['title']);
         $this->assertEquals('ok', $GLOBALS['config']['config1']);
         $this->assertEquals('ok', $GLOBALS['config']['config_new']);
@@ -110,8 +110,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testWriteConfigMissingField()
     {
-        unset(self::$_configFields['login']);
-        writeConfig(self::$_configFields, true);
+        unset(self::$configFields['login']);
+        writeConfig(self::$configFields, true);
     }
 
     /**
@@ -119,7 +119,7 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testWriteConfigLoggedOutNoFile()
     {
-        writeConfig(self::$_configFields, false);
+        writeConfig(self::$configFields, false);
     }
 
     /**
@@ -129,8 +129,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testWriteConfigLoggedOutWithFile()
     {
-        file_put_contents(self::$_configFields['config']['CONFIG_FILE'], '');
-        writeConfig(self::$_configFields, false);
+        file_put_contents(self::$configFields['config']['CONFIG_FILE'], '');
+        writeConfig(self::$configFields, false);
     }
 
     /**
@@ -143,8 +143,8 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     public function testMergeDeprecatedConfig()
     {
         // init
-        writeConfig(self::$_configFields, true);
-        $configCopy = self::$_configFields;
+        writeConfig(self::$configFields, true);
+        $configCopy = self::$configFields;
         $invert = !$configCopy['privateLinkByDefault'];
         $configCopy['privateLinkByDefault'] = $invert;
 
@@ -155,10 +155,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_file($configCopy['config']['CONFIG_FILE']));
 
         // merge configs
-        mergeDeprecatedConfig(self::$_configFields, true);
+        mergeDeprecatedConfig(self::$configFields, true);
 
         // make sure updated field is changed
-        include self::$_configFields['config']['CONFIG_FILE'];
+        include self::$configFields['config']['CONFIG_FILE'];
         $this->assertEquals($invert, $GLOBALS['privateLinkByDefault']);
         $this->assertFalse(is_file($configCopy['config']['CONFIG_FILE']));
     }
@@ -168,10 +168,10 @@ class ConfigTest extends PHPUnit_Framework_TestCase
      */
     public function testMergeDeprecatedConfigNoFile()
     {
-        writeConfig(self::$_configFields, true);
-        mergeDeprecatedConfig(self::$_configFields, true);
+        writeConfig(self::$configFields, true);
+        mergeDeprecatedConfig(self::$configFields, true);
 
-        include self::$_configFields['config']['CONFIG_FILE'];
-        $this->assertEquals(self::$_configFields['login'], $GLOBALS['login']);
+        include self::$configFields['config']['CONFIG_FILE'];
+        $this->assertEquals(self::$configFields['login'], $GLOBALS['login']);
     }
 }

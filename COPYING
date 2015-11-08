@@ -1,4 +1,4 @@
-Files: * 
+Files: *
 License: zlib/libpng
 Copyright: (c) 2011-2015 Sébastien SAUVAGE <sebsauvage@sebsauvage.net>
            (c) 2011-2015 Alexandre Alapetite <alexandre@alapetite.fr>
@@ -31,9 +31,9 @@ Copyright: (c) 2011-2015 Sébastien SAUVAGE <sebsauvage@sebsauvage.net>
 
 Files: inc/reset.css
 License: BSD (http://opensource.org/licenses/BSD-3-Clause)
-Copyright: (c) 2010, Yahoo! Inc. 
+Copyright: (c) 2010, Yahoo! Inc.
 
-Files: images/calendar.png, images/edit_icon.png, images/feed-icon-14x14.png, images/private.png, images/private_16x16.png, images/private_16x16_active.png, images/qrcode.png, images/tag_blue.png
+Files: images/calendar.png, images/edit_icon.png, images/feed-icon-14x14.png, images/private.png, images/private_16x16.png, images/private_16x16_active.png, images/tag_blue.png
 License: CC-BY (http://creativecommons.org/licenses/by/3.0/)
 Copyright: (c) 2014 Yusuke Kamiyamane
 Source: http://p.yusukekamiyamane.com/
@@ -59,10 +59,6 @@ Files: inc/blazy*.js
 License: MIT License (http://opensource.org/licenses/MIT)
 Copyright: (C) Bjoern Klinggaard - @bklinggaard - http://dinbror.dk/blazy
 
-Files: inc/qr.js
-License: GPLv3 License (http://opensource.org/licenses/gpl-3.0)
-Copyright: (C) 2014 Alasdair Mercer, http://neocotic.com, https://github.com/neocotic/qr.js
-
 Files: inc/rain.tpl.class.php
 Copyright: 2011-2012, Federico Ulfo <rainelemental@gmail.com>
            2011-2012, The Rain Team <hello@raintm.com>
@@ -80,10 +76,10 @@ In no event will the authors be held liable for any damages arising from
 the use of this software.
 
 Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it 
+including commercial applications, and to alter it and redistribute it
 freely, subject to the following restrictions:
 
-  1. The origin of this software must not be misrepresented; you must not 
+  1. The origin of this software must not be misrepresented; you must not
      claim that you wrote the original software. If you use this software
      in a product, an acknowledgment in the product documentation would
      be appreciated but is not required.

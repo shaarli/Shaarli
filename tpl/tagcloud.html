@@ -4,9 +4,25 @@
 <body>
 	<div id="pageheader">{include="page.header"}</div>
 <div class="center">
+    <div id="plugin_zone_start_tagcloud" class="plugin_zone">
+        {loop="$plugin_start_zone"}
+            {$value}
+        {/loop}
+    </div>
+
     <div id="cloudtag">
         {loop="tags"}
-        <span class="count">{$value.count}</span><a href="?searchtags={$key|urlencode}" style="font-size:{$value.size}pt;">{$key}</a>
+            <span class="count">{$value.count}</span>
+            <a href="?searchtags={$key|urlencode}" style="font-size:{$value.size}pt;">{$key}</a>
+            {loop="$value.tag_plugin"}
+                {$value}
+            {/loop}
+        {/loop}
+    </div>
+
+    <div id="plugin_zone_end_tagcloud" class="plugin_zone">
+        {loop="$plugin_end_zone"}
+            {$value}
         {/loop}
     </div>
 </div>

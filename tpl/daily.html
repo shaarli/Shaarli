@@ -2,18 +2,43 @@
 <html>
 <head>{include="includes"}</head>
 <body>
-<div id="pageheader">{include="page.header"}</div>
+<div id="pageheader">
+    {include="page.header"}
+</div>
 <div class="daily">
-    <div class="dailyAbout">
-      All links of one day<br>in a single page.<br>
-	  {if="$previousday"} <a href="?do=daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
-	  - 
-	  {if="$nextday"}<a href="?do=daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
-      <br><br>
-	  <a href="?do=dailyrss" title="1 RSS entry per day"><img src="images/feed-icon-14x14.png#" alt="rss_feed">Daily RSS Feed</a>
+    <div id="plugin_zone_start_picwall" class="plugin_zone">
+        {loop="$plugin_start_zone"}
+            {$value}
+        {/loop}
     </div>
-    <div class="dailyTitle"><img src="../images/floral_left.png" width="51" height="50" class="nomobile" alt="floral_left"> The Daily Shaarli <img src="../images/floral_right.png" width="51" height="50" class="nomobile" alt="floral_right"></div>
-    <div class="dailyDate"><span class="nomobile">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span> {function="strftime('%A %d, %B %Y', $day)"} <span class="nomobile">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span></div>
+
+    <div class="dailyAbout">
+        All links of one day<br>in a single page.<br>
+        {if="$previousday"} <a href="?do=daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
+        -
+        {if="$nextday"}<a href="?do=daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
+        <br>
+
+        {loop="$daily_about_plugin"}
+            {$value}
+        {/loop}
+
+        <br>
+        <a href="?do=dailyrss" title="1 RSS entry per day"><img src="images/feed-icon-14x14.png#" alt="rss_feed">Daily RSS Feed</a>
+    </div>
+
+    <div class="dailyTitle">
+        <img src="../images/floral_left.png" width="51" height="50" class="nomobile" alt="floral_left">
+        The Daily Shaarli
+        <img src="../images/floral_right.png" width="51" height="50" class="nomobile" alt="floral_right">
+    </div>
+
+    <div class="dailyDate">
+        <span class="nomobile">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+        {function="strftime('%A %d, %B %Y', $day)"}
+        <span class="nomobile">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</span>
+    </div>
+
     <div class="clear"></div>
 
     {if="$linksToDisplay"}
@@ -47,6 +72,12 @@
                             <div class="dailyEntryThumbnail">{$link.thumbnail}</div>
                         {/if}
                         <div class="dailyEntryDescription">{$link.formatedDescription}</div>
+
+                        <div class="dailyEntryFooter">
+                            {loop="$link.link_plugin"}
+                                {$value}
+                            {/loop}
+                        </div>
                     </div>
                 {/loop}
             </div>
@@ -55,6 +86,14 @@
     {else}
          <div class="dailyNoEntry">No articles on this day.</div>
     {/if}
+
+    <div class="clear"></div>
+
+    <div id="plugin_zone_end_picwall" class="plugin_zone">
+        {loop="$plugin_end_zone"}
+            {$value}
+        {/loop}
+    </div>
     <div id="closing"><img src="../images/squiggle_closing.png" width="66" height="61" alt="-"></div>
 </div>
 {include="page.footer"}

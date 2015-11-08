@@ -11,7 +11,7 @@
         <a href="{$titleLink}">{$shaarlititle}</a>
     </span>
     </li>
-  
+
 {if="!empty($_GET['source']) && $_GET['source']=='bookmarklet'"}
     {ignore} When called as a popup from bookmarklet, do not display menu. {/ignore}
 {else}
@@ -33,6 +33,9 @@
     <li><a href="?do=tagcloud">Tag cloud</a></li>
     <li><a href="?do=picwall{$searchcrits}">Picture wall</a></li>
     <li><a href="?do=daily">Daily</a></li>
+    {loop="$plugins_header.buttons_toolbar"}
+        {$value}
+    {/loop}
 {/if}
   </ul>
 </div>

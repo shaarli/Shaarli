@@ -13,8 +13,8 @@
 #   - enable in php.ini
 
 BIN = vendor/bin
-PHP_SOURCE = index.php application tests
-PHP_COMMA_SOURCE = index.php,application,tests
+PHP_SOURCE = index.php application tests plugins
+PHP_COMMA_SOURCE = index.php,application,tests,plugins
 
 all: static_analysis_summary test
 

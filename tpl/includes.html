@@ -8,3 +8,6 @@
 <link type="text/css" rel="stylesheet" href="../inc/reset.css" />
 <link type="text/css" rel="stylesheet" href="../inc/shaarli.css" />
 {if="is_file('inc/user.css')"}<link type="text/css" rel="stylesheet" href="../inc/user.css" />{/if}
+{loop="$plugins_includes.css_files"}
+<link type="text/css" rel="stylesheet" href="{$value}#"/>
+{/loop}

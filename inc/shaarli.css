@@ -405,12 +405,12 @@ h1 {
 }
 */
 
-.linkdate, .linkarchive {
+.linkdate {
     font-size:8pt;
     color:#888;
 }
 
-.linkdate a, .linkarchive a {
+.linkdate a {
     color:#E28E3F;
 }
 
@@ -451,12 +451,12 @@ a.qrcode img {
     color: #F57900;
 }
 
-.linkdate, .linkarchive {
+.linkdate {
     font-size: 8pt;
     color: #888;
 }
 
-.linkdate a, .linkarchive a {
+.linkdate a {
     background-image: url('../images/calendar.png');
     padding: 2px 0 3px 20px;
     background-repeat: no-repeat;
