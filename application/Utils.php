@@ -97,12 +97,12 @@ function checkDateFormat($format, $string)
  */
 function generateLocation($referer, $host, $loopTerms = array())
 {
-    $final_referer = '?';
+    $finalReferer = '?';
 
     // No referer if it contains any value in $loopCriteria.
     foreach ($loopTerms as $value) {
         if (strpos($referer, $value) !== false) {
-            return $final_referer;
+            return $finalReferer;
         }
     }
 
@@ -111,11 +111,12 @@ function generateLocation($referer, $host, $loopTerms = array())
         $host = substr($host, 0, $pos);
     }
 
-    if (!empty($referer) && strpos(parse_url($referer, PHP_URL_HOST), $host) !== false) {
-        $final_referer = $referer;
+    $refererHost = parse_url($referer, PHP_URL_HOST);
+    if (!empty($referer) && (strpos($refererHost, $host) !== false || startsWith('?', $refererHost))) {
+        $finalReferer = $referer;
     }
 
-    return $final_referer;
+    return $finalReferer;
 }
 
 /**

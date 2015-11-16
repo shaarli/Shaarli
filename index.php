@@ -22,54 +22,120 @@ if (date_default_timezone_get() == '') {
     date_default_timezone_set('UTC');
 }
 
-// -----------------------------------------------------------------------------------------------
-// Hardcoded parameter (These parameters can be overwritten by editing the file /data/config.php)
-// You should not touch any code below (or at your own risks!)
-$GLOBALS['config']['DATADIR'] = 'data'; // Data subdirectory
-$GLOBALS['config']['CONFIG_FILE'] = $GLOBALS['config']['DATADIR'].'/config.php'; // Configuration file (user login/password)
-$GLOBALS['config']['DATASTORE'] = $GLOBALS['config']['DATADIR'].'/datastore.php'; // Data storage file.
-$GLOBALS['config']['LINKS_PER_PAGE'] = 20; // Default links per page.
-$GLOBALS['config']['IPBANS_FILENAME'] = $GLOBALS['config']['DATADIR'].'/ipbans.php'; // File storage for failures and bans.
-$GLOBALS['config']['BAN_AFTER'] = 4;        // Ban IP after this many failures.
-$GLOBALS['config']['BAN_DURATION'] = 1800;  // Ban duration for IP address after login failures (in seconds) (1800 sec. = 30 minutes)
-$GLOBALS['config']['OPEN_SHAARLI'] = false; // If true, anyone can add/edit/delete links without having to login
-$GLOBALS['config']['HIDE_TIMESTAMPS'] = false; // If true, the moment when links were saved are not shown to users that are not logged in.
-$GLOBALS['config']['SHOW_ATOM'] = false; // If true, an extra "ATOM feed" button will be displayed in the toolbar
-$GLOBALS['config']['ENABLE_THUMBNAILS'] = true; // Enable thumbnails in links.
-$GLOBALS['config']['CACHEDIR'] = 'cache'; // Cache directory for thumbnails for SLOW services (like flickr)
-$GLOBALS['config']['PAGECACHE'] = 'pagecache'; // Page cache directory.
-$GLOBALS['config']['ENABLE_LOCALCACHE'] = true; // Enable Shaarli to store thumbnail in a local cache. Disable to reduce web space usage.
-$GLOBALS['config']['PUBSUBHUB_URL'] = ''; // PubSubHubbub support. Put an empty string to disable, or put your hub url here to enable.
-$GLOBALS['config']['RAINTPL_TMP'] = 'tmp/' ; // Raintpl cache directory  (keep the trailing slash!)
-$GLOBALS['config']['RAINTPL_TPL'] = 'tpl/' ; // Raintpl template directory (keep the trailing slash!)
-$GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt'; // For updates check of Shaarli.
-$GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ; // Updates check frequency for Shaarli. 86400 seconds=24 hours
-                                          // Note: You must have publisher.php in the same directory as Shaarli index.php
-$GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;  // Enable RSS permalinks by default. This corresponds to the default behavior of shaarli before this was added as an option.
+/* -----------------------------------------------------------------------------
+ * Hardcoded parameters
+ * You should not touch any code below (or at your own risks!)
+ * (These parameters can be overwritten by editing the file /data/config.php)
+ * -----------------------------------------------------------------------------
+ */
+
+/*
+ * Shaarli directories & configuration files
+ */
+// Data subdirectory
+$GLOBALS['config']['DATADIR'] = 'data';
+
+// Main configuration file
+$GLOBALS['config']['CONFIG_FILE'] = $GLOBALS['config']['DATADIR'].'/config.php';
+
+// Link datastore
+$GLOBALS['config']['DATASTORE'] = $GLOBALS['config']['DATADIR'].'/datastore.php';
+
+// Banned IPs
+$GLOBALS['config']['IPBANS_FILENAME'] = $GLOBALS['config']['DATADIR'].'/ipbans.php';
+
+// For updates check of Shaarli
+$GLOBALS['config']['UPDATECHECK_FILENAME'] = $GLOBALS['config']['DATADIR'].'/lastupdatecheck.txt';
+
+// RainTPL cache directory (keep the trailing slash!)
+$GLOBALS['config']['RAINTPL_TMP'] = 'tmp/';
+// Raintpl template directory (keep the trailing slash!)
+$GLOBALS['config']['RAINTPL_TPL'] = 'tpl/';
+
+// Thuumbnail cache directory
+$GLOBALS['config']['CACHEDIR'] = 'cache';
+
+// Atom & RSS feed cache directory
+$GLOBALS['config']['PAGECACHE'] = 'pagecache';
+
+
+/*
+ * Global configuration
+ */
+// Ban IP after this many failures
+$GLOBALS['config']['BAN_AFTER'] = 4;
+// Ban duration for IP address after login failures (in seconds)
+$GLOBALS['config']['BAN_DURATION'] = 1800;
+
+// Feed options
+// Enable RSS permalinks by default.
+// This corresponds to the default behavior of shaarli before this was added as an option.
+$GLOBALS['config']['ENABLE_RSS_PERMALINKS'] = true;
+// If true, an extra "ATOM feed" button will be displayed in the toolbar
+$GLOBALS['config']['SHOW_ATOM'] = false;
+
+// Link display options
 $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = false;
+$GLOBALS['config']['HIDE_TIMESTAMPS'] = false;
+$GLOBALS['config']['LINKS_PER_PAGE'] = 20;
+
+// Open Shaarli (true): anyone can add/edit/delete links without having to login
+$GLOBALS['config']['OPEN_SHAARLI'] = false;
+
+// Thumbnails
+// Display thumbnails in links
+$GLOBALS['config']['ENABLE_THUMBNAILS'] = true;
+// Store thumbnails in a local cache
+$GLOBALS['config']['ENABLE_LOCALCACHE'] = true;
+
+// Update check frequency for Shaarli. 86400 seconds=24 hours
+$GLOBALS['config']['UPDATECHECK_INTERVAL'] = 86400 ;
+
+
+/*
+ * Plugin configuration
+ *
+ * Warning: order matters!
+ *
+ * These settings may be be overriden in:
+ *  - data/config.php
+ *  - each plugin's configuration file
+ */
 //$GLOBALS['config']['ENABLED_PLUGINS'] = array(
 //    'qrcode', 'archiveorg', 'readityourself', 'demo_plugin', 'playvideos',
 //    'wallabag', 'markdown', 'addlink_toolbar',
 //);
-// Warning: order matters.
 $GLOBALS['config']['ENABLED_PLUGINS'] = array('qrcode');
 
-// Default plugins, default config - will be overriden by config.php and then plugin's config.php file.
 //$GLOBALS['plugins']['WALLABAG_URL'] = 'https://demo.wallabag.org/';
-// -----------------------------------------------------------------------------------------------
+
+// PubSubHubbub support. Put an empty string to disable, or put your hub url here to enable.
+$GLOBALS['config']['PUBSUBHUB_URL'] = '';
+
+/*
+ * PHP configuration
+ */
 define('shaarli_version', '0.5.4');
+
 // http://server.com/x/shaarli --> /shaarli/
 define('WEB_PATH', substr($_SERVER["REQUEST_URI"], 0, 1+strrpos($_SERVER["REQUEST_URI"], '/', 0)));
 
-// PHP Settings
-ini_set('max_input_time','60');  // High execution time in case of problematic imports/exports.
-ini_set('memory_limit', '128M');  // Try to set max upload file size and read (May not work on some hosts).
+// High execution time in case of problematic imports/exports.
+ini_set('max_input_time','60');
+
+// Try to set max upload file size and read
+ini_set('memory_limit', '128M');
 ini_set('post_max_size', '16M');
 ini_set('upload_max_filesize', '16M');
-error_reporting(E_ALL^E_WARNING);  // See all error except warnings.
-//error_reporting(-1); // See all errors (for debugging only)
 
-// User configuration
+// See all error except warnings
+error_reporting(E_ALL^E_WARNING);
+// See all errors (for debugging only)
+//error_reporting(-1);
+
+/*
+ * User configuration
+ */
 if (is_file($GLOBALS['config']['CONFIG_FILE'])) {
     require_once $GLOBALS['config']['CONFIG_FILE'];
 }
@@ -1439,10 +1505,14 @@ function renderPage()
         pubsubhub();
 
         // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) { echo '<script>self.close();</script>'; exit; }
-        $returnurl = ( !empty($_POST['returnurl']) ? escape($_POST['returnurl']) : '?' );
-        $returnurl .= '#'.smallHash($_POST['lf_linkdate']);  // Scroll to the link which has been edited.
+        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) {
+            echo '<script>self.close();</script>';
+            exit;
+        }
+
+        $returnurl = !empty($_POST['returnurl']) ? escape($_POST['returnurl']): '?';
         $location = generateLocation($returnurl, $_SERVER['HTTP_HOST'], array('addlink', 'post', 'edit_link'));
+        $location .= '#'.smallHash($_POST['lf_linkdate']);  // Scroll to the link which has been edited.
         header('Location: '. $location); // After saving the link, redirect to the page the user was on.
         exit;
     }

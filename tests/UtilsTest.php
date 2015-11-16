@@ -118,6 +118,8 @@ class UtilsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($ref, generateLocation($ref, 'localhost'));
         $ref = 'http://localhost:8080/?test';
         $this->assertEquals($ref, generateLocation($ref, 'localhost:8080'));
+        $ref = '?localreferer#hash';
+        $this->assertEquals($ref, generateLocation($ref, 'localhost:8080'));
     }
 
     /**
