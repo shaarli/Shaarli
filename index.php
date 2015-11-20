@@ -251,6 +251,7 @@ function setup_login_state() {
 	$userIsLoggedIn = false; // By default, we do not consider the user as logged in;
 	$loginFailure = false; // If set to true, every attempt to authenticate the user will fail. This indicates that an important condition isn't met.
 	if ($GLOBALS['config']['OPEN_SHAARLI']) {
+	    fillSessionInfo();
 	    $userIsLoggedIn = true;
 	}
 	if (!isset($GLOBALS['login'])) {
