@@ -145,6 +145,7 @@ if (is_file($GLOBALS['config']['CONFIG_FILE'])) {
 
 // Shaarli library
 require_once 'application/ApplicationUtils.php';
+require_once 'application/Auth.php';
 require_once 'application/Cache.php';
 require_once 'application/CachedPage.php';
 require_once 'application/FileUtils.php';
@@ -272,7 +273,7 @@ function setup_login_state() {
 	$userIsLoggedIn = false; // By default, we do not consider the user as logged in;
 	$loginFailure = false; // If set to true, every attempt to authenticate the user will fail. This indicates that an important condition isn't met.
 	if (!isset($GLOBALS['login'])) {
-	    $userIsLoggedIn = false;  // Shaarli is not configured yet.
+	           $userIsLoggedIn = false;  // Shaarli is not configured yet.
 	    $loginFailure = true;
 	}
 	if (isset($_COOKIE['shaarli_staySignedIn']) &&
@@ -287,7 +288,7 @@ function setup_login_state() {
 	    ($GLOBALS['disablesessionprotection']==false && $_SESSION['ip']!=allIPs()) ||
 	    time() >= $_SESSION['expires_on'])
 	{
-	    logout();
+	    Auth::logout();
 	    $userIsLoggedIn = false;
 	    $loginFailure = true;
 	}
@@ -305,13 +306,17 @@ function setup_login_state() {
 }
 $userIsLoggedIn = setup_login_state();
 
+function isLoggedIn() {
+    return Auth::isLoggedIn();
+}
+
 // Checks if an update is available for Shaarli.
 // (at most once a day, and only for registered user.)
 // Output: '' = no new version.
 //         other= the available version.
 function checkUpdate()
 {
-    if (!isLoggedIn()) return ''; // Do not check versions for visitors.
+    if (!Auth::isLoggedIn()) return ''; // Do not check versions for visitors.
     if (empty($GLOBALS['config']['ENABLE_UPDATECHECK'])) return ''; // Do not check if the user doesn't want to.
 
     // Get latest version number at most once a day.
@@ -411,39 +416,6 @@ function fillSessionInfo() {
 	$_SESSION['expires_on']=time()+INACTIVITY_TIMEOUT;  // Set session expiration.
 }
 
-// Check that user/password is correct.
-function check_auth($login,$password)
-{
-    $hash = sha1($password.$login.$GLOBALS['salt']);
-    if ($login==$GLOBALS['login'] && $hash==$GLOBALS['hash'])
-    {   // Login/password is correct.
-		fillSessionInfo();
-        logm('Login successful');
-        return True;
-    }
-    logm('Login failed for user '.$login);
-    return False;
-}
-
-// Returns true if the user is logged in.
-function isLoggedIn()
-{
-    global $userIsLoggedIn;
-    return $userIsLoggedIn;
-}
-
-// Force logout.
-function logout() {
-    if (isset($_SESSION)) {
-        unset($_SESSION['uid']);
-        unset($_SESSION['ip']);
-        unset($_SESSION['username']);
-        unset($_SESSION['privateonly']);
-    }
-    setcookie('shaarli_staySignedIn', FALSE, 0, WEB_PATH);
-}
-
-
 // ------------------------------------------------------------------------------------------
 // Brute force protection system
 // Several consecutive failed logins will ban the IP address for 30 minutes.
@@ -497,7 +469,7 @@ function ban_canLogin()
 if (isset($_POST['login']))
 {
     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
-    if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
+    if (isset($_POST['password']) && Auth::tokenOk($_POST['token']) && (Auth::checkAuth($_POST['login'], $_POST['password'])))
     {   // Login/password is OK.
         ban_loginOk();
         // If user wants to keep the session cookie even after the browser closes:
@@ -629,25 +601,6 @@ function html_extract_title($html)
 // Token should be used in any form which acts on data (create,update,delete,import...).
 if (!isset($_SESSION['tokens'])) $_SESSION['tokens']=array();  // Token are attached to the session.
 
-// Returns a token.
-function getToken()
-{
-    $rnd = sha1(uniqid('',true).'_'.mt_rand().$GLOBALS['salt']);  // We generate a random string.
-    $_SESSION['tokens'][$rnd]=1;  // Store it on the server side.
-    return $rnd;
-}
-
-// Tells if a token is OK. Using this function will destroy the token.
-// true=token is OK.
-function tokenOk($token)
-{
-    if (isset($_SESSION['tokens'][$token]))
-    {
-        unset($_SESSION['tokens'][$token]); // Token is used: destroy it.
-        return true; // Token is OK.
-    }
-    return false; // Wrong token, or already used.
-}
 
 // ------------------------------------------------------------------------------------------
 /* This class is in charge of building the final page.
@@ -734,7 +687,7 @@ function showRSS()
     $cache = new CachedPage(
         $GLOBALS['config']['PAGECACHE'],
         page_url($_SERVER),
-        startsWith($query,'do=rss') && !isLoggedIn()
+        startsWith($query,'do=rss') && !Auth::isLoggedIn()
     );
     $cached = $cache->cachedVersion();
     if (! empty($cached)) {
@@ -745,7 +698,7 @@ function showRSS()
     // If cached was not found (or not usable), then read the database and build the response:
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
     // Read links from database (and filter private links if user it not logged in).
@@ -786,7 +739,7 @@ function showRSS()
             echo '<item><title>'.$link['title'].'</title><guid isPermaLink="true">'.$guid.'</guid><link>'.$guid.'</link>';
         else
             echo '<item><title>'.$link['title'].'</title><guid isPermaLink="false">'.$guid.'</guid><link>'.$absurl.'</link>';
-        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) echo '<pubDate>'.escape($rfc822date)."</pubDate>\n";
+        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || Auth::isLoggedIn()) echo '<pubDate>'.escape($rfc822date)."</pubDate>\n";
         if ($link['tags']!='') // Adding tags to each RSS entry (as mentioned in RSS specification)
         {
             foreach(explode(' ',$link['tags']) as $tag) { echo '<category domain="'.$pageaddr.'">'.$tag.'</category>'."\n"; }
@@ -822,7 +775,7 @@ function showATOM()
     $cache = new CachedPage(
         $GLOBALS['config']['PAGECACHE'],
         page_url($_SERVER),
-        startsWith($query,'do=atom') && !isLoggedIn()
+        startsWith($query,'do=atom') && !Auth::isLoggedIn()
     );
     $cached = $cache->cachedVersion();
     if (!empty($cached)) {
@@ -834,7 +787,7 @@ function showATOM()
     // Read links from database (and filter private links if used it not logged in).
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
 
@@ -868,7 +821,7 @@ function showATOM()
             $entries.='<link href="'.$guid.'" /><id>'.$guid.'</id>';
         else
             $entries.='<link href="'.$absurl.'" /><id>'.$guid.'</id>';
-        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) $entries.='<updated>'.escape($iso8601date).'</updated>';
+        if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || Auth::isLoggedIn()) $entries.='<updated>'.escape($iso8601date).'</updated>';
 
         // Add permalink in description
         $descriptionlink = '(<a href="'.$guid.'">Permalink</a>)';
@@ -887,7 +840,7 @@ function showATOM()
     }
     $feed='<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">';
     $feed.='<title>'.$GLOBALS['title'].'</title>';
-    if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || isLoggedIn()) $feed.='<updated>'.escape($latestDate).'</updated>';
+    if (!$GLOBALS['config']['HIDE_TIMESTAMPS'] || Auth::isLoggedIn()) $feed.='<updated>'.escape($latestDate).'</updated>';
     $feed.='<link rel="self" href="'.escape(server_url($_SERVER).$_SERVER["REQUEST_URI"]).'" />';
     if (!empty($GLOBALS['config']['PUBSUBHUB_URL']))
     {
@@ -916,7 +869,7 @@ function showDailyRSS() {
     $cache = new CachedPage(
         $GLOBALS['config']['PAGECACHE'],
         page_url($_SERVER),
-        startsWith($query,'do=dailyrss') && !isLoggedIn()
+        startsWith($query,'do=dailyrss') && !Auth::isLoggedIn()
     );
     $cached = $cache->cachedVersion();
     if (!empty($cached)) {
@@ -928,7 +881,7 @@ function showDailyRSS() {
     // Read links from database (and filter private links if used it not logged in).
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
 
@@ -1015,7 +968,7 @@ function showDaily()
 {
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
 
@@ -1083,7 +1036,7 @@ function showDaily()
         'nextday' => $nextday,
     );
     $pluginManager = PluginManager::getInstance();
-    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => isLoggedIn()));
+    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => Auth::isLoggedIn()));
 
     foreach ($data as $key => $value) {
         $PAGE->assign($key, $value);
@@ -1106,7 +1059,7 @@ function renderPage()
 {
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
 
@@ -1114,7 +1067,7 @@ function renderPage()
 
     // Determine which page will be rendered.
     $query = (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : '';
-    $targetPage = Router::findPage($query, $_GET, isLoggedIn());
+    $targetPage = Router::findPage($query, $_GET, Auth::isLoggedIn());
 
     // Call plugin hooks for header, footer and includes, specifying which page will be rendered.
     // Then assign generated data to RainTPL.
@@ -1129,7 +1082,7 @@ function renderPage()
         $pluginManager->executeHooks('render_' . $name, $plugin_data,
             array(
                 'target' => $targetPage,
-                'loggedin' => isLoggedIn()
+                'loggedin' => Auth::isLoggedIn()
             )
         );
         $PAGE->assign('plugins_' . $name, $plugin_data);
@@ -1139,7 +1092,13 @@ function renderPage()
     if ($targetPage == Router::$PAGE_LOGIN)
     {
         if ($GLOBALS['config']['OPEN_SHAARLI']) { header('Location: ?'); exit; }  // No need to login for open Shaarli
-        $token=''; if (ban_canLogin()) $token=getToken(); // Do not waste token generation if not useful.
+        
+        $token='';
+        if (ban_canLogin()) {
+            // Do not waste token generation if not useful.
+            $token = Auth::getToken();
+        }
+        
         $PAGE->assign('token',$token);
         $PAGE->assign('returnurl',(isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']):''));
         $PAGE->renderPage('loginform');
@@ -1149,7 +1108,7 @@ function renderPage()
     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=logout'))
     {
         invalidateCaches($GLOBALS['config']['PAGECACHE']);
-        logout();
+        Auth::logout();
         header('Location: ?');
         exit;
     }
@@ -1182,7 +1141,7 @@ function renderPage()
             'linkcount' => count($LINKSDB),
             'linksToDisplay' => $linksToDisplay,
         );
-        $pluginManager->executeHooks('render_picwall', $data, array('loggedin' => isLoggedIn()));
+        $pluginManager->executeHooks('render_picwall', $data, array('loggedin' => Auth::isLoggedIn()));
 
         foreach ($data as $key => $value) {
             $PAGE->assign($key, $value);
@@ -1212,7 +1171,7 @@ function renderPage()
             'linkcount' => count($LINKSDB),
             'tags' => $tagList,
         );
-        $pluginManager->executeHooks('render_tagcloud', $data, array('loggedin' => isLoggedIn()));
+        $pluginManager->executeHooks('render_tagcloud', $data, array('loggedin' => Auth::isLoggedIn()));
 
         foreach ($data as $key => $value) {
             $PAGE->assign($key, $value);
@@ -1322,7 +1281,7 @@ function renderPage()
     }
 
     // -------- Handle other actions allowed for non-logged in users:
-    if (!isLoggedIn())
+    if (!Auth::isLoggedIn())
     {
         // User tries to post new link but is not logged in:
         // Show login screen, then redirect to ?post=...
@@ -1372,7 +1331,9 @@ function renderPage()
         if ($GLOBALS['config']['OPEN_SHAARLI']) die('You are not supposed to change a password on an Open Shaarli.');
         if (!empty($_POST['setpassword']) && !empty($_POST['oldpassword']))
         {
-            if (!tokenOk($_POST['token'])) die('Wrong token.'); // Go away!
+            if (!Auth::tokenOk($_POST['token'])){
+                die('Wrong token.');
+            }
 
             // Make sure old password is correct.
             $oldhash = sha1($_POST['oldpassword'].$GLOBALS['login'].$GLOBALS['salt']);
@@ -1381,7 +1342,7 @@ function renderPage()
             $GLOBALS['salt'] = sha1(uniqid('',true).'_'.mt_rand()); // Salt renders rainbow-tables attacks useless.
             $GLOBALS['hash'] = sha1($_POST['setpassword'].$GLOBALS['login'].$GLOBALS['salt']);
             try {
-                writeConfig($GLOBALS, isLoggedIn());
+                writeConfig($GLOBALS, Auth::isLoggedIn());
             }
             catch(Exception $e) {
                 error_log(
@@ -1399,7 +1360,7 @@ function renderPage()
         else // show the change password form.
         {
             $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
+            $PAGE->assign('token',Auth::getToken());
             $PAGE->renderPage('changepassword');
             exit;
         }
@@ -1410,7 +1371,10 @@ function renderPage()
     {
         if (!empty($_POST['title']) )
         {
-            if (!tokenOk($_POST['token'])) die('Wrong token.'); // Go away!
+            if (!Auth::tokenOk($_POST['token'])) {
+                die('Wrong token.'); // Go away!
+            }
+
             $tz = 'UTC';
             if (!empty($_POST['continent']) && !empty($_POST['city']))
                 if (isTimeZoneValid($_POST['continent'],$_POST['city']))
@@ -1425,7 +1389,7 @@ function renderPage()
             $GLOBALS['config']['ENABLE_UPDATECHECK'] = !empty($_POST['updateCheck']);
             $GLOBALS['config']['HIDE_PUBLIC_LINKS'] = !empty($_POST['hidePublicLinks']);
             try {
-                writeConfig($GLOBALS, isLoggedIn());
+                writeConfig($GLOBALS, Auth::isLoggedIn());
             }
             catch(Exception $e) {
                 error_log(
@@ -1443,7 +1407,7 @@ function renderPage()
         else // Show the configuration form.
         {
             $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
+            $PAGE->assign('token',Auth::getToken());
             $PAGE->assign('title', empty($GLOBALS['title']) ? '' : $GLOBALS['title'] );
             $PAGE->assign('redirector', empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'] );
             list($timezone_form, $timezone_js) = generateTimeZoneForm($GLOBALS['timezone']);
@@ -1460,12 +1424,15 @@ function renderPage()
         if (empty($_POST['fromtag']))
         {
             $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
+            $PAGE->assign('token',Auth::getToken());
             $PAGE->assign('tags', $LINKSDB->allTags());
             $PAGE->renderPage('changetag');
             exit;
         }
-        if (!tokenOk($_POST['token'])) die('Wrong token.');
+
+        if (!Auth::tokenOk($_POST['token'])) {
+            die('Wrong token.');
+        }
 
         // Delete a tag:
         if (!empty($_POST['deletetag']) && !empty($_POST['fromtag']))
@@ -1513,7 +1480,10 @@ function renderPage()
     // -------- User clicked the "Save" button when editing a link: Save link to database.
     if (isset($_POST['save_edit']))
     {
-        if (!tokenOk($_POST['token'])) die('Wrong token.'); // Go away!
+        if (!Auth::tokenOk($_POST['token'])) {
+            die('Wrong token.');
+        }
+
         $tags = trim(preg_replace('/\s\s+/',' ', $_POST['lf_tags'])); // Remove multiple spaces.
         $tags = implode(' ', array_unique(explode(' ', $tags))); // Remove duplicates.
         $linkdate=$_POST['lf_linkdate'];
@@ -1558,7 +1528,9 @@ function renderPage()
     // -------- User clicked the "Delete" button when editing a link: Delete link from database.
     if (isset($_POST['delete_link']))
     {
-        if (!tokenOk($_POST['token'])) die('Wrong token.');
+        if (!Auth::tokenOk($_POST['token'])){
+            die('Wrong token.');
+        }
         // We do not need to ask for confirmation:
         // - confirmation is handled by JavaScript
         // - we are protected from XSRF by the token.
@@ -1611,7 +1583,7 @@ function renderPage()
             'linkcount' => count($LINKSDB),
             'link' => $link,
             'link_is_new' => false,
-            'token' => getToken(),
+            'token' => Auth::getToken(),
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
             'tags' => $LINKSDB->allTags(),
         );
@@ -1688,7 +1660,7 @@ function renderPage()
             'linkcount' => count($LINKSDB),
             'link' => $link,
             'link_is_new' => $link_is_new,
-            'token' => getToken(), // XSRF protection.
+            'token' => Auth::getToken(), // XSRF protection.
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
             'source' => (isset($_GET['source']) ? $_GET['source'] : ''),
             'tags' => $LINKSDB->allTags(),
@@ -1753,7 +1725,11 @@ HTML;
             echo '<script>alert("The file you are trying to upload is probably bigger than what this webserver can accept ('.getMaxFileSize().' bytes). Please upload in smaller chunks.");document.location=\''.escape($returnurl).'\';</script>';
             exit;
         }
-        if (!tokenOk($_POST['token'])) die('Wrong token.');
+
+        if (!Auth::tokenOk($_POST['token'])){
+            die('Wrong token.');
+        }
+
         importFile();
         exit;
     }
@@ -1762,7 +1738,7 @@ HTML;
     if ($targetPage == Router::$PAGE_IMPORT)
     {
         $PAGE->assign('linkcount',count($LINKSDB));
-        $PAGE->assign('token',getToken());
+        $PAGE->assign('token',Auth::getToken());
         $PAGE->assign('maxfilesize',getMaxFileSize());
         $PAGE->renderPage('import');
         exit;
@@ -1777,10 +1753,10 @@ HTML;
 // Process the import file form.
 function importFile()
 {
-    if (!isLoggedIn()) { die('Not allowed.'); }
+    if (!Auth::isLoggedIn()) { die('Not allowed.'); }
     $LINKSDB = new LinkDB(
         $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
+        Auth::isLoggedIn(),
         $GLOBALS['config']['HIDE_PUBLIC_LINKS']
     );
     $filename=$_FILES['filetoupload']['name'];
@@ -1957,7 +1933,7 @@ function buildLinkList($PAGE,$LINKSDB)
     $previous_page_url=''; if ($i!=count($keys)) $previous_page_url='?page='.($page+1).$searchterm.$searchtags;
     $next_page_url='';if ($page>1) $next_page_url='?page='.($page-1).$searchterm.$searchtags;
 
-    $token = ''; if (isLoggedIn()) $token=getToken();
+    $token = ''; if (Auth::isLoggedIn()) $token=Auth::getToken();
 
     // Fill all template fields.
     $data = array(
@@ -1976,7 +1952,7 @@ function buildLinkList($PAGE,$LINKSDB)
     );
 
     $pluginManager = PluginManager::getInstance();
-    $pluginManager->executeHooks('render_linklist', $data, array('loggedin' => isLoggedIn()));
+    $pluginManager->executeHooks('render_linklist', $data, array('loggedin' => Auth::isLoggedIn()));
 
     foreach ($data as $key => $value) {
         $PAGE->assign($key, $value);
@@ -2209,7 +2185,7 @@ function install()
         $GLOBALS['title'] = (empty($_POST['title']) ? 'Shared links on '.escape(index_url($_SERVER)) : $_POST['title'] );
         $GLOBALS['config']['ENABLE_UPDATECHECK'] = !empty($_POST['updateCheck']);
         try {
-            writeConfig($GLOBALS, isLoggedIn());
+            writeConfig($GLOBALS, Auth::isLoggedIn());
         }
         catch(Exception $e) {
             error_log(
@@ -2495,7 +2471,7 @@ function resizeImage($filepath)
 }
 
 try {
-    mergeDeprecatedConfig($GLOBALS, isLoggedIn());
+    mergeDeprecatedConfig($GLOBALS, Auth::isLoggedIn());
 } catch(Exception $e) {
     error_log(
         'ERROR while merging deprecated options.php file.' . PHP_EOL .
