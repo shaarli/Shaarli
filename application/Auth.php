@@ -27,9 +27,9 @@ class Auth {
     }
 
     /**
-     * Purges all cached pages
+     * Returns true if the user is logged in.
      *
-     * @return true if the user is logged in.
+     * @return bool
      */
     public static function isLoggedIn()
     {
