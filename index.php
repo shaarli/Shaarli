@@ -262,49 +262,7 @@ define('STAY_SIGNED_IN_TOKEN', sha1($GLOBALS['hash'].$_SERVER["REMOTE_ADDR"].$GL
 autoLocale(); // Sniff browser language and set date format accordingly.
 header('Content-Type: text/html; charset=utf-8'); // We use UTF-8 for proper international characters handling.
 
-//==================================================================================================
-// Checking session state (i.e. is the user still logged in)
-//==================================================================================================
-
-function setup_login_state() {
-	if ($GLOBALS['config']['OPEN_SHAARLI']) {
-	    return true;
-	}
-	$userIsLoggedIn = false; // By default, we do not consider the user as logged in;
-	$loginFailure = false; // If set to true, every attempt to authenticate the user will fail. This indicates that an important condition isn't met.
-	if (!isset($GLOBALS['login'])) {
-	           $userIsLoggedIn = false;  // Shaarli is not configured yet.
-	    $loginFailure = true;
-	}
-	if (isset($_COOKIE['shaarli_staySignedIn']) &&
-	    $_COOKIE['shaarli_staySignedIn']===STAY_SIGNED_IN_TOKEN &&
-	    !$loginFailure)
-	{
-	    fillSessionInfo();
-	    $userIsLoggedIn = true;
-	}
-	// If session does not exist on server side, or IP address has changed, or session has expired, logout.
-	if (empty($_SESSION['uid']) ||
-	    ($GLOBALS['disablesessionprotection']==false && $_SESSION['ip']!=allIPs()) ||
-	    time() >= $_SESSION['expires_on'])
-	{
-	    Auth::logout();
-	    $userIsLoggedIn = false;
-	    $loginFailure = true;
-	}
-	if (!empty($_SESSION['longlastingsession'])) {
-	    $_SESSION['expires_on']=time()+$_SESSION['longlastingsession']; // In case of "Stay signed in" checked.
-	}
-	else {
-	    $_SESSION['expires_on']=time()+INACTIVITY_TIMEOUT; // Standard session expiration date.
-	}
-	if (!$loginFailure) {
-	    $userIsLoggedIn = true;
-	}
-
-	return $userIsLoggedIn;
-}
-$userIsLoggedIn = setup_login_state();
+$userIsLoggedIn = Auth::loginState($GLOBALS);
 
 function isLoggedIn() {
     return Auth::isLoggedIn();
@@ -316,7 +274,11 @@ function isLoggedIn() {
 //         other= the available version.
 function checkUpdate()
 {
-    if (!Auth::isLoggedIn()) return ''; // Do not check versions for visitors.
+    if (!Auth::isLoggedIn()) {
+        // Do not check versions for visitors.
+        return '';
+    }
+
     if (empty($GLOBALS['config']['ENABLE_UPDATECHECK'])) return ''; // Do not check if the user doesn't want to.
 
     // Get latest version number at most once a day.
@@ -342,7 +304,7 @@ function checkUpdate()
 function logm($message)
 {
     $t = strval(date('Y/m/d_H:i:s')).' - '.$_SERVER["REMOTE_ADDR"].' - '.strval($message)."\n";
-    file_put_contents($GLOBAL['config']['LOG_FILE'], $t, FILE_APPEND);
+    file_put_contents($GLOBALS['config']['LOG_FILE'], $t, FILE_APPEND);
 }
 
 // In a string, converts URLs to clickable links.
@@ -469,7 +431,7 @@ function ban_canLogin()
 if (isset($_POST['login']))
 {
     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
-    if (isset($_POST['password']) && Auth::tokenOk($_POST['token']) && (Auth::checkAuth($_POST['login'], $_POST['password'])))
+    if (isset($_POST['password']) && Auth::tokenOk($_POST['token']) && (Auth::checkAuth($_POST['login'], $_POST['password'], $GLOBALS)))
     {   // Login/password is OK.
         ban_loginOk();
         // If user wants to keep the session cookie even after the browser closes:

@@ -6,18 +6,80 @@
 class Auth {
 
     /**
+     * Checking session state (i.e. is the user still logged in)
+     *
+     * @param array $global shaarli configuration
+     *
+     * @return bool
+     */
+    public static function loginState($globals)
+    {
+
+        if ($globals['config']['OPEN_SHAARLI']) {
+            return true;
+        }
+
+        // By default, we do not consider the user as logged in;
+        $userIsLoggedIn = false;
+
+        // If set to true, every attempt to authenticate the user
+        // will fail. This indicates that an important condition isn't met.
+        $loginFailure = false;
+
+        if (!isset($globals['login'])) {
+            // Shaarli is not configured yet.
+            $userIsLoggedIn = false;
+            $loginFailure = true;
+        }
+
+        if (isset($_COOKIE['shaarli_staySignedIn']) &&
+            $_COOKIE['shaarli_staySignedIn'] === STAY_SIGNED_IN_TOKEN &&
+            !$loginFailure) {
+            fillSessionInfo();
+            $userIsLoggedIn = true;
+        }
+
+        // If session does not exist on server side, or 
+        // IP address has changed, or session has expired, logout.
+        if (empty($_SESSION['uid']) || 
+            ($globals['disablesessionprotection'] == false &&
+                $_SESSION['ip'] != allIPs()) ||
+            time() >= $_SESSION['expires_on']) {
+            Auth::logout();
+            $userIsLoggedIn = false;
+            $loginFailure = true;
+        }
+
+        if (!empty($_SESSION['longlastingsession'])) {
+            // In case of "Stay signed in" checked.
+            $_SESSION['expires_on']=time()+$_SESSION['longlastingsession'];
+        }
+        else {
+            // Standard session expiration date.
+            $_SESSION['expires_on']=time()+INACTIVITY_TIMEOUT;
+        }
+
+        if (!$loginFailure) {
+            $userIsLoggedIn = true;
+        }
+
+        return $userIsLoggedIn;
+    }
+
+    /**
      * Check that user/password is correct.
      *
      * @param string $login username from post array
      * @param string $password from post array
+     * @param array $global shaarli configuration
      *
      * @return bool
      */
-    public static function checkAuth($login, $password)
+    public static function checkAuth($login, $password, $globals)
     {
-        $hash = sha1($password . $login . $GLOBALS['salt']);
+        $hash = sha1($password . $login . $globals['salt']);
 
-        if ($login == $GLOBALS['login'] && $hash == $GLOBALS['hash']) {
+        if ($login == $globals['login'] && $hash == $globals['hash']) {
             fillSessionInfo();
             logm('Login successful');
             return true;
