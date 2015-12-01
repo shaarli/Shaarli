@@ -1,23 +1,43 @@
 <!DOCTYPE html>
 <html>
-<head>{include="includes"}{$timezone_js}</head>
-<body onload="document.installform.setlogin.focus();">
-<div id="install">
-    <h1>Shaarli</h1>
-    It looks like it's the first time you run Shaarli. Please configure it:<br>
-    <form method="POST" action="#" name="installform" id="installform">
-        <table>
-            <tr><td><b>Login:</b></td><td><input type="text" name="setlogin" size="30"></td></tr>
-            <tr><td><b>Password:</b></td><td><input type="password" name="setpassword" size="30"></td></tr>
-            {$timezone_html}
-            <tr><td><b>Page title:</b></td><td><input type="text" name="title" size="30"></td></tr>
-            <tr><td valign="top"><b>Update:</b></td><td>
-                <input type="checkbox" name="updateCheck" id="updateCheck" checked="checked"><label for="updateCheck">&nbsp;Notify me when a new release is ready</label></td>
-            </tr>
-            <tr><td colspan="2"><input type="submit" name="Save" value="Save config" class="bigbutton"></td></tr>
-        </table>
+  <head>
+    <title>Shaarli - Setup</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico#" />
+    <link rel="stylesheet" type="text/css" href="inc/install.css#" />
+  </head>
+  <body onload="document.installform.setlogin.focus();">
+    <h1>Shaarli setup</h1>
+
+    <form method="POST" action="#" name="installform">
+      <fieldset>
+        <legend>Account information</legend>
+        <label for="setlogin">Login</label>
+        <input name="setlogin" type="text">
+        <br/>
+        <label for="setpassword">Password</label>
+        <input name="setpassword" type="password">
+      </fieldset>
+
+      <fieldset>
+        <legend>Main settings</legend>
+        <label for="title">Page title</label>
+        <input name="title" type="text">
+        <br/>
+        <label for="updateCheck">
+          Check for updates
+          <input type="checkbox" name="updateCheck" id="updateCheck" checked="checked">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Timezone</legend>
+        {$timezone_html}
+      </fieldset>
+      <p>
+        <input type="submit" name="Save" value="Save and go to the login page">
+      </p>
     </form>
-</div>
-{include="page.footer"}
-</body>
+    {$timezone_js}
+  </body>
 </html>

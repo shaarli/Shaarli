@@ -1,0 +1,16 @@
+/* Cascading stylesheet for the installation page */
+
+body {
+    font-family: "Trebuchet MS",Verdana,Arial,Helvetica,sans-serif;
+    margin: 0 20px;
+}
+
+form {
+    max-width: 400px;
+}
+
+label {
+    display: inline-block;
+    min-width: 80px;
+    text-align: right;
+}

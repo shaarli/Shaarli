@@ -597,30 +597,6 @@ a.qrcode img {
     text-decoration: none;
 }
 
-#install {
-    margin: 0 20px;
-}
-
-#installform {
-    border: 1px solid black;
-    padding: 10px;
-}
-
-#installform table {
-    border: none;
-}
-
-#installform td {
-    font-size: 10pt;
-    color: black;
-    padding: 10px 5px 10px 5px;
-    clear: left;
-}
-
-#installform input.bigbutton {
-    float: right;
-}
-
 #changepasswordform {
     color: #ccc;
     padding: 10px 5px 10px 5px;
