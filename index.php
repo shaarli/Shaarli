@@ -144,19 +144,26 @@ if (is_file($GLOBALS['config']['CONFIG_FILE'])) {
     require_once $GLOBALS['config']['CONFIG_FILE'];
 }
 
+// RainTPL HTML template engine
+require_once 'inc/rain.tpl.class.php';
+raintpl::$tpl_dir = $GLOBALS['config']['RAINTPL_TPL'];
+raintpl::$cache_dir = $GLOBALS['config']['RAINTPL_TMP'];
+
 // Shaarli library
 require_once 'application/ApplicationUtils.php';
 require_once 'application/Cache.php';
 require_once 'application/CachedPage.php';
+require_once 'application/Config.php';
 require_once 'application/FileUtils.php';
 require_once 'application/HttpUtils.php';
 require_once 'application/LinkDB.php';
+require_once 'application/PageContext.php';
+require_once 'application/PluginManager.php';
+require_once 'application/Router.php';
+require_once 'application/TemplateUtils.php';
 require_once 'application/TimeZone.php';
 require_once 'application/Url.php';
 require_once 'application/Utils.php';
-require_once 'application/Config.php';
-require_once 'application/PluginManager.php';
-require_once 'application/Router.php';
 
 // Ensure the PHP version is supported
 try {
@@ -196,10 +203,6 @@ if (isset($_COOKIE['shaarli']) && !is_session_id_valid($_COOKIE['shaarli'])) {
     session_regenerate_id(true);
     $_COOKIE['shaarli'] = session_id();
 }
-
-include "inc/rain.tpl.class.php"; //include Rain TPL
-raintpl::$tpl_dir = $GLOBALS['config']['RAINTPL_TPL']; // template directory
-raintpl::$cache_dir = $GLOBALS['config']['RAINTPL_TMP']; // cache directory
 
 $pluginManager = PluginManager::getInstance();
 $pluginManager->load($GLOBALS['config']['ENABLED_PLUGINS']);
@@ -610,93 +613,6 @@ function tokenOk($token)
 }
 
 // ------------------------------------------------------------------------------------------
-/* This class is in charge of building the final page.
-   (This is basically a wrapper around RainTPL which pre-fills some fields.)
-   p = new pageBuilder;
-   p.assign('myfield','myvalue');
-   p.renderPage('mytemplate');
-
-*/
-class pageBuilder
-{
-    private $tpl; // RainTPL template
-
-    function __construct()
-    {
-        $this->tpl = false;
-    }
-
-    /**
-     * Initialize all default tpl tags.
-     */
-    private function initialize()
-    {
-        $this->tpl = new RainTPL;
-
-        try {
-            $version = ApplicationUtils::checkUpdate(
-                shaarli_version,
-                $GLOBALS['config']['UPDATECHECK_FILENAME'],
-                $GLOBALS['config']['UPDATECHECK_INTERVAL'],
-                $GLOBALS['config']['ENABLE_UPDATECHECK'],
-                isLoggedIn(),
-                $GLOBALS['config']['UPDATECHECK_BRANCH']
-            );
-            $this->tpl->assign('newVersion', escape($version));
-            $this->tpl->assign('versionError', '');
-
-        } catch (Exception $exc) {
-            logm($exc->getMessage());
-            $this->tpl->assign('newVersion', '');
-            $this->tpl->assign('versionError', escape($exc->getMessage()));
-        }
-
-        $this->tpl->assign('feedurl', escape(index_url($_SERVER)));
-        $searchcrits = ''; // Search criteria
-        if (!empty($_GET['searchtags'])) {
-            $searchcrits .= '&searchtags=' . urlencode($_GET['searchtags']);
-        }
-        elseif (!empty($_GET['searchterm'])) {
-            $searchcrits .= '&searchterm=' . urlencode($_GET['searchterm']);
-        }
-        $this->tpl->assign('searchcrits', $searchcrits);
-        $this->tpl->assign('source', index_url($_SERVER));
-        $this->tpl->assign('version', shaarli_version);
-        $this->tpl->assign('scripturl', index_url($_SERVER));
-        $this->tpl->assign('pagetitle', 'Shaarli');
-        $this->tpl->assign('privateonly', !empty($_SESSION['privateonly'])); // Show only private links?
-        if (!empty($GLOBALS['title'])) {
-            $this->tpl->assign('pagetitle', $GLOBALS['title']);
-        }
-        if (!empty($GLOBALS['titleLink'])) {
-            $this->tpl->assign('titleLink', $GLOBALS['titleLink']);
-        }
-        if (!empty($GLOBALS['pagetitle'])) {
-            $this->tpl->assign('pagetitle', $GLOBALS['pagetitle']);
-        }
-        $this->tpl->assign('shaarlititle', empty($GLOBALS['title']) ? 'Shaarli': $GLOBALS['title']);
-        if (!empty($GLOBALS['plugin_errors'])) {
-            $this->tpl->assign('plugin_errors', $GLOBALS['plugin_errors']);
-        }
-    }
-
-    // The following assign() method is basically the same as RainTPL (except that it's lazy)
-    public function assign($what,$where)
-    {
-        if ($this->tpl===false) $this->initialize(); // Lazy initialization
-        $this->tpl->assign($what,$where);
-    }
-
-    // Render a specific page (using a template).
-    // e.g. pb.renderPage('picwall')
-    public function renderPage($page)
-    {
-        if ($this->tpl===false) $this->initialize(); // Lazy initialization
-        $this->tpl->draw($page);
-    }
-}
-
-// ------------------------------------------------------------------------------------------
 // Output the last N links in RSS 2.0 format.
 function showRSS()
 {
@@ -978,7 +894,7 @@ function showDailyRSS() {
         }
 
         // Then build the HTML for this day:
-        $tpl = new RainTPL;
+        $tpl = new RainTPL();
         $tpl->assign('title', $GLOBALS['title']);
         $tpl->assign('daydate', $daydate);
         $tpl->assign('absurl', $absurl);
@@ -1059,30 +975,34 @@ function showDaily()
         array_push($columns[$index],$link); // Put entry in this column.
         $fill[$index]+=$length;
     }
-    $PAGE = new pageBuilder;
-    $data = array(
+
+    $pageContext = new PageContext(
+        $GLOBALS,
+        $_GET,
+        $_SERVER,
+        $_SESSION,
+        shaarli_version
+    );
+    $pageContext->merge(array(
         'linksToDisplay' => $linksToDisplay,
         'linkcount' => count($LINKSDB),
         'cols' => $columns,
         'day' => linkdate2timestamp($day.'_000000'),
         'previousday' => $previousday,
         'nextday' => $nextday,
-    );
+    ));
+
     $pluginManager = PluginManager::getInstance();
-    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => isLoggedIn()));
+    $pluginManager->executeHooks('render_daily', $pageContext, array('loggedin' => isLoggedIn()));
 
-    foreach ($data as $key => $value) {
-        $PAGE->assign($key, $value);
-    }
-
-    $PAGE->renderPage('daily');
+    render_page($pageContext, 'daily');
     exit;
 }
 
 // Renders the linklist
-function showLinkList($PAGE, $LINKSDB) {
-    buildLinkList($PAGE,$LINKSDB); // Compute list of links to display
-    $PAGE->renderPage('linklist');
+function showLinkList($pageContext, $linkDb) {
+    $pageContext->merge(buildLinkList($linkDb));
+    render_page($pageContext, 'linklist');
 }
 
 
@@ -1097,7 +1017,14 @@ function renderPage()
         $GLOBALS['redirector']
     );
 
-    $PAGE = new pageBuilder;
+    $template = new RainTPL();
+    $pageContext = new PageContext(
+        $GLOBALS,
+        $_GET,
+        $_SERVER,
+        $_SESSION,
+        shaarli_version
+    );
 
     // Determine which page will be rendered.
     $query = (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : '';
@@ -1119,17 +1046,25 @@ function renderPage()
                 'loggedin' => isLoggedIn()
             )
         );
-        $PAGE->assign('plugins_' . $name, $plugin_data);
+        $pageContext->set('plugins_' . $name, $plugin_data);
     }
 
     // -------- Display login form.
     if ($targetPage == Router::$PAGE_LOGIN)
     {
         if ($GLOBALS['config']['OPEN_SHAARLI']) { header('Location: ?'); exit; }  // No need to login for open Shaarli
-        $token=''; if (ban_canLogin()) $token=getToken(); // Do not waste token generation if not useful.
-        $PAGE->assign('token',$token);
-        $PAGE->assign('returnurl',(isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']):''));
-        $PAGE->renderPage('loginform');
+        $token='';
+        if (ban_canLogin()) {
+            // Do not waste token generation if not useful
+            $token = getToken();
+        }
+        $pageContext->set('token', $token);
+        $pageContext->set(
+            'returnurl',
+            (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : '')
+        );
+
+        render_page($pageContext, 'loginform');
         exit;
     }
     // -------- User wants to logout.
@@ -1165,17 +1100,17 @@ function renderPage()
             }
         }
 
-        $data = array(
+        $pageContext->merge(array(
             'linkcount' => count($LINKSDB),
             'linksToDisplay' => $linksToDisplay,
+        ));
+        $pluginManager->executeHooks(
+            'render_picwall',
+            $pageContext,
+            array('loggedin' => isLoggedIn())
         );
-        $pluginManager->executeHooks('render_picwall', $data, array('loggedin' => isLoggedIn()));
 
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('picwall');
+        render_page($pageContext, 'picwall');
         exit;
     }
 
@@ -1195,25 +1130,26 @@ function renderPage()
             $tagList[$key] = array('count'=>$value,'size'=>log($value, 15) / log($maxcount, 30) * (22-6) + 6);
         }
 
-        $data = array(
+        $pageContext->merge(array(
             'linkcount' => count($LINKSDB),
             'tags' => $tagList,
+        ));
+        $pluginManager->executeHooks(
+            'render_tagcloud',
+            $pageContext,
+            array('loggedin' => isLoggedIn())
         );
-        $pluginManager->executeHooks('render_tagcloud', $data, array('loggedin' => isLoggedIn()));
 
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('tagcloud');
+        render_page($pageContext, 'tagcloud');
         exit;
     }
 
     // Display openseach plugin (XML)
     if ($targetPage == Router::$PAGE_OPENSEARCH) {
         header('Content-Type: application/xml; charset=utf-8');
-        $PAGE->assign('serverurl', index_url($_SERVER));
-        $PAGE->renderPage('opensearch');
+        // FIXME: see PageContext->setServerInfo
+        $pageContext->set('serverurl', index_url($_SERVER));
+        render_page($pageContext, 'opensearch');
         exit;
     }
 
@@ -1325,7 +1261,7 @@ function renderPage()
 			header('Location: ?do=login&post=');
 			exit;
 		}
-        showLinkList($PAGE, $LINKSDB);
+        showLinkList($pageContext, $LINKSDB);
         if (isset($_GET['edit_link'])) {
             header('Location: ?do=login&edit_link='. escape($_GET['edit_link']));
             exit;
@@ -1339,17 +1275,13 @@ function renderPage()
     // -------- Display the Tools menu if requested (import/export/bookmarklet...)
     if ($targetPage == Router::$PAGE_TOOLS)
     {
-        $data = array(
+        $pageContext->merge(array(
             'linkcount' => count($LINKSDB),
             'pageabsaddr' => index_url($_SERVER),
-        );
-        $pluginManager->executeHooks('render_tools', $data);
+        ));
+        $pluginManager->executeHooks('render_tools', $pageContext);
 
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('tools');
+        render_page($pageContext, 'tools');
         exit;
     }
 
@@ -1385,9 +1317,9 @@ function renderPage()
         }
         else // show the change password form.
         {
-            $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
-            $PAGE->renderPage('changepassword');
+            $pageContext->set('linkcount', count($LINKSDB));
+            $pageContext->set('token', getToken());
+            render_page($pageContext, 'changepassword');
             exit;
         }
     }
@@ -1429,14 +1361,17 @@ function renderPage()
         }
         else // Show the configuration form.
         {
-            $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
-            $PAGE->assign('title', empty($GLOBALS['title']) ? '' : $GLOBALS['title'] );
-            $PAGE->assign('redirector', empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'] );
             list($timezone_form, $timezone_js) = generateTimeZoneForm($GLOBALS['timezone']);
-            $PAGE->assign('timezone_form', $timezone_form);
-            $PAGE->assign('timezone_js',$timezone_js);
-            $PAGE->renderPage('configure');
+
+            $pageContext->merge(array(
+                'linkcount' => count($LINKSDB),
+                'token' => getToken(),
+                'title' => empty($GLOBALS['title']) ? '' : $GLOBALS['title'],
+                'redirector' => empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'],
+                'timezone_form' => $timezone_form,
+                'timezone_js' => $timezone_js
+            ));
+            render_page($pageContext, 'configure');
             exit;
         }
     }
@@ -1446,10 +1381,12 @@ function renderPage()
     {
         if (empty($_POST['fromtag']))
         {
-            $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->assign('token',getToken());
-            $PAGE->assign('tags', $LINKSDB->allTags());
-            $PAGE->renderPage('changetag');
+            $pageContext->merge(array(
+                'linkcount' => count($LINKSDB),
+                'token' => getToken(),
+                'tags', $LINKSDB->allTags()
+            ));
+            render_page($pageContext, 'changetag');
             exit;
         }
         if (!tokenOk($_POST['token'])) die('Wrong token.');
@@ -1492,8 +1429,8 @@ function renderPage()
     // -------- User wants to add a link without using the bookmarklet: Show form.
     if ($targetPage == Router::$PAGE_ADDLINK)
     {
-        $PAGE->assign('linkcount',count($LINKSDB));
-        $PAGE->renderPage('addlink');
+        $pageContext->set('linkcount', count($LINKSDB));
+        render_page($pageContext, 'addlink');
         exit;
     }
 
@@ -1594,21 +1531,16 @@ function renderPage()
     {
         $link = $LINKSDB[$_GET['edit_link']];  // Read database
         if (!$link) { header('Location: ?'); exit; } // Link not found in database.
-        $data = array(
+        $pageContext->merge(array(
             'linkcount' => count($LINKSDB),
             'link' => $link,
             'link_is_new' => false,
             'token' => getToken(),
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
             'tags' => $LINKSDB->allTags(),
-        );
-        $pluginManager->executeHooks('render_editlink', $data);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('editlink');
+        ));
+        $pluginManager->executeHooks('render_editlink', $pageContext);
+        render_page($pageContext, 'editlink');
         exit;
     }
 
@@ -1671,7 +1603,7 @@ function renderPage()
             );
         }
 
-        $data = array(
+        $pageContext->merge(array(
             'linkcount' => count($LINKSDB),
             'link' => $link,
             'link_is_new' => $link_is_new,
@@ -1679,24 +1611,18 @@ function renderPage()
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
             'source' => (isset($_GET['source']) ? $_GET['source'] : ''),
             'tags' => $LINKSDB->allTags(),
-        );
-        $pluginManager->executeHooks('render_editlink', $data);
+        ));
+        $pluginManager->executeHooks('render_editlink', $pageContext);
 
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('editlink');
+        render_page($pageContext, 'editlink');
         exit;
     }
 
     // -------- Export as Netscape Bookmarks HTML file.
-    if ($targetPage == Router::$PAGE_EXPORT)
-    {
-        if (empty($_GET['what']))
-        {
-            $PAGE->assign('linkcount',count($LINKSDB));
-            $PAGE->renderPage('export');
+    if ($targetPage == Router::$PAGE_EXPORT) {
+        if (empty($_GET['what'])) {
+            $pageContext->set('linkcount', count($LINKSDB));
+            render_page($pageContext, 'export');
             exit;
         }
         $exportWhat=$_GET['what'];
@@ -1746,17 +1672,16 @@ HTML;
     }
 
     // -------- Show upload/import dialog:
-    if ($targetPage == Router::$PAGE_IMPORT)
-    {
-        $PAGE->assign('linkcount',count($LINKSDB));
-        $PAGE->assign('token',getToken());
-        $PAGE->assign('maxfilesize',getMaxFileSize());
-        $PAGE->renderPage('import');
+    if ($targetPage == Router::$PAGE_IMPORT) {
+        $pageContext->set('linkcount', count($LINKSDB));
+        $pageContext->set('token', getToken());
+        $pageContext->set('maxfilesize', getMaxFileSize());
+        render_page($pageContext, 'import');
         exit;
     }
 
     // -------- Otherwise, simply display search form and links:
-    showLinkList($PAGE, $LINKSDB);
+    showLinkList($pageContext, $LINKSDB);
     exit;
 }
 
@@ -1853,7 +1778,7 @@ function importFile()
 // -----------------------------------------------------------------------------------------------
 // Template for the list of links (<div id="linklist">)
 // This function fills all the necessary fields in the $PAGE for the template 'linklist.html'
-function buildLinkList($PAGE,$LINKSDB)
+function buildLinkList($LINKSDB)
 {
     // ---- Filter link database according to parameters
     $linksToDisplay=array();
@@ -1966,11 +1891,7 @@ function buildLinkList($PAGE,$LINKSDB)
     $pluginManager = PluginManager::getInstance();
     $pluginManager->executeHooks('render_linklist', $data, array('loggedin' => isLoggedIn()));
 
-    foreach ($data as $key => $value) {
-        $PAGE->assign($key, $value);
-    }
-
-    return;
+    return $data;
 }
 
 // Compute the thumbnail for a link.
@@ -2220,10 +2141,18 @@ function install()
         $timezone_html = '<tr><td><b>Timezone:</b></td><td>'.$timezone_form.'</td></tr>';
     }
 
-    $PAGE = new pageBuilder;
-    $PAGE->assign('timezone_html',$timezone_html);
-    $PAGE->assign('timezone_js',$timezone_js);
-    $PAGE->renderPage('install');
+    $pageContext = new PageContext(
+        $GLOBALS,
+        $_GET,
+        $_SERVER,
+        $_SESSION,
+        shaarli_version
+    );
+    $pageContext->merge(array(
+        'timezone_html' => $timezone_html,
+        'timezone_js' => $timezone_js
+    ));
+    render_page($pageContext, 'install');
     exit;
 }
 
