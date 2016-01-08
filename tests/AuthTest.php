@@ -20,7 +20,7 @@ class AuthTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testLoginStateValid($globals)
+    public function testLoginStateValid()
     {
         //
     }
@@ -31,7 +31,7 @@ class AuthTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testLoginStateInvalid($globals)
+    public function testLoginStateInvalid()
     {
         //
     }
@@ -42,7 +42,7 @@ class AuthTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testCheckAuthValid($login, $password, $globals)
+    public function testCheckAuthValid()
     {
         //
     }
@@ -53,7 +53,7 @@ class AuthTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testCheckAuthInvalid($login, $password, $globals)
+    public function testCheckAuthInvalid()
     {
         //
     }
