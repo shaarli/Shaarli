@@ -136,16 +136,21 @@ class LinkFilter
      */
     private function filterFulltext($searchterms, $privateonly = false)
     {
-        // FIXME: explode(' ',$searchterms) and perform a AND search.
-        // FIXME: accept double-quotes to search for a string "as is"?
-        $filtered = array();
-        $search = mb_convert_case($searchterms, MB_CASE_LOWER, 'UTF-8');
+        $search = mb_convert_case(html_entity_decode($searchterms), MB_CASE_LOWER, 'UTF-8');
         $explodedSearch = explode(' ', trim($search));
         $keys = array('title', 'description', 'url', 'tags');
+        $found = true;
+        $searchExactPhrase = false;
 
+        // Check if we're using double-quotes to search for the exact string
+        if ($search[0] == '"' && $search[strlen($search) - 1] == '"') {
+            $searchExactPhrase = true;
+            
+            // Remove the double-quotes as they are not what we search for
+            $search = substr($search, 1, -1);
+        }
         // Iterate over every stored link.
         foreach ($this->links as $link) {
-            $found = false;
 
             // ignore non private links when 'privatonly' is on.
             if (! $link['private'] && $privateonly === true) {
@@ -154,19 +159,33 @@ class LinkFilter
 
             // Iterate over searchable link fields.
             foreach ($keys as $key) {
-                // Search full expression.
-                if (strpos(
-                    mb_convert_case($link[$key], MB_CASE_LOWER, 'UTF-8'),
-                    $search
-                ) !== false) {
-                    $found = true;
-                }
+                // Be optimistic
+                $found = true;
+                
+                // FIXME: Find a better word for where you're searching in 
+                $haystack = mb_convert_case($link[$key], MB_CASE_LOWER, 'UTF-8');
 
+                // When searching for the phrase, check if it's in the haystack...
+                if ( $searchExactPhrase && strpos($haystack, $search) !== false) {
+                    break;
+                }
+                else {
+                    // Iterate over keywords, if keyword is not found,
+                    // no need to check for the others. We want all or nothing.
+                    foreach($explodedSearch as $keyword) {
+                         if(strpos($haystack, $keyword) === false) {
+                           $found = false;
+                           break;
+                      }
+                    }
+                }
+                
+                // One of the fields of the link matches, no need to check the other.
                 if ($found) {
                     break;
                 }
             }
-
+            
             if ($found) {
                 $filtered[$link['linkdate']] = $link;
             }
