@@ -162,12 +162,18 @@ class LinkFilter
                 // Be optimistic
                 $found = true;
                 
-                // FIXME: Find a better word for where you're searching in 
                 $haystack = mb_convert_case($link[$key], MB_CASE_LOWER, 'UTF-8');
 
-                // When searching for the phrase, check if it's in the haystack...
-                if ( $searchExactPhrase && strpos($haystack, $search) !== false) {
-                    break;
+                // When searching for the exact phrase
+                if ( $searchExactPhrase) {
+                	// check if it's in the haystack
+                	if (strpos($haystack, $search) !== false) {
+                        // found it in this key, no need to look at other keys
+                        break;
+                	}
+                	else {
+                		$found = false;
+                	}
                 }
                 else {
                     // Iterate over keywords, if keyword is not found,
