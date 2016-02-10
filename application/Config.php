@@ -74,6 +74,41 @@ function writeConfig($config, $isLoggedIn)
 }
 
 /**
+ * Write plugin settings in its specific config.php file if it exists.
+ *
+ * @param string $plugin   Name of the plugin.
+ * @param array  $settings The settings to save:
+ *                              - key: setting name.
+ *                              - value: setting value.
+ *
+ * @return boolean true if the settings are saved, false otherwise.
+ *
+ * @throws Exception File write failed.
+ */
+function write_plugin_config($plugin, $settings)
+{
+    $settingsFile = PluginManager::$PLUGINS_PATH . '/' . $plugin . '/config.php';
+    if (! is_file($settingsFile) || ! is_writable($settingsFile)) {
+        return false;
+    }
+
+    $configStr = '<?php '. PHP_EOL;
+    foreach ($settings as $key => $value) {
+        $configStr .= '$GLOBALS[\'plugins\'][\''. $key .'\'] = '. var_export($value, true) .';'. PHP_EOL;
+    }
+
+    if (!file_put_contents($settingsFile, $configStr)
+        || strcmp(file_get_contents($settingsFile), $configStr) != 0
+    ) {
+        throw new Exception(
+            'Shaarli couldn\'t write the plugin settings.
+            Please make sure Shaarli has the right to write in the folder is it installed in.'
+        );
+    }
+    return true;
+}
+
+/**
  * Process plugin administration form data and save it in an array.
  *
  * @param array $formData Data sent by the plugin admin form.

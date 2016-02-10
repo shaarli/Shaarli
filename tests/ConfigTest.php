@@ -14,6 +14,18 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     private static $configFields;
 
     /**
+     * Path to tests plugin.
+     * @var string $pluginPath
+     */
+    private static $pluginPath = 'tests/plugins';
+
+    /**
+     * Test plugin.
+     * @var string $pluginName
+     */
+    private static $pluginName = 'test';
+
+    /**
      * Executed before each test.
      */
     public function setUp()
@@ -46,6 +58,9 @@ class ConfigTest extends PHPUnit_Framework_TestCase
     {
         if (is_file(self::$configFields['config']['CONFIG_FILE'])) {
             unlink(self::$configFields['config']['CONFIG_FILE']);
+        }
+        if (is_file(self::$pluginPath . '/' . self::$pluginName . '/config.php')) {
+            unlink(self::$pluginPath . '/' . self::$pluginName . '/config.php');
         }
     }
 
@@ -282,5 +297,26 @@ class ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('value1', $result['plugin_name']['parameters']['param1']);
         $this->assertEquals('value2', $result['plugin_name']['parameters']['param2']);
         $this->assertEquals('', $result['plugin_name']['parameters']['param3']);
+    }
+
+    /**
+     * Test write_plugin_config():
+     *   1. Without an existing file: don't write.
+     *   2. With an existing file: write.
+     */
+    public function testWritePluginConfig() {
+        $settings = array(
+            'SETTING_1' => 'value 1',
+            'SETTING_2' => 'value 2',
+        );
+        PluginManager::$PLUGINS_PATH = self::$pluginPath;
+
+        $this->assertFalse(write_plugin_config(self::$pluginName, $settings));
+        $settingsFile = PluginManager::$PLUGINS_PATH . '/' . self::$pluginName . '/config.php';
+        touch($settingsFile);
+        $this->assertTrue(write_plugin_config(self::$pluginName, $settings));
+        include $settingsFile;
+        $this->assertEquals($settings['SETTING_1'], $GLOBALS['plugins']['SETTING_1']);
+        $this->assertEquals($settings['SETTING_2'], $GLOBALS['plugins']['SETTING_2']);
     }
 }
