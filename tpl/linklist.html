@@ -32,7 +32,6 @@
         {/loop}
     </div>
 </div>
-
 <div id="linklist">
 
     {include="linklist.paging"}
@@ -58,6 +57,7 @@
             {/loop}</i></div>
         {/if}
     {/if}
+	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{if="isLoggedIn()  || isset($_GET['searchterm']) || isset($_GET['searchtags'])"}{/if}
     <ul>
         {loop="links"}
         <li{if="$value.class"} class="{$value.class}"{/if}>
@@ -106,17 +106,15 @@
         </li>
     {/loop}
     </ul>
-
+	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{/if}{/if}
     <div id="plugin_zone_end_linklist" class="plugin_zone">
         {loop="$plugin_end_zone"}
             {$value}
         {/loop}
     </div>
-
     {include="linklist.paging"}
 
 </div>
-
     {include="page.footer"}
 
 <script src="inc/awesomplete.min.js#"></script>
