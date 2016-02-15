@@ -30,15 +30,9 @@
     {if="$GLOBALS['config']['SHOW_ATOM']"}
     <li><a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a></li>
     {/if}
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{if="isLoggedIn()  || isset($_GET['searchterm']) || isset($_GET['searchtags'])"}{/if}
     <li><a href="?do=tagcloud">Tag cloud</a></li>
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{/if}{/if}
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{if="isLoggedIn()  || isset($_GET['searchterm']) || isset($_GET['searchtags'])"}{/if}
     <li><a href="?do=picwall{$searchcrits}">Picture wall</a></li>
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{/if}{/if}
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{if="isLoggedIn()  || isset($_GET['searchterm']) || isset($_GET['searchtags'])"}{/if}
     <li><a href="?do=daily">Daily</a></li>
-	{if="$GLOBALS['config']['SEMI_PRIVATE']"}{/if}{/if}
     {loop="$plugins_header.buttons_toolbar"}
         {$value}
     {/loop}
