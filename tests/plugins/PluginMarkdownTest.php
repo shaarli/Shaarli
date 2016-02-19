@@ -109,4 +109,22 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $reversedText = reset_quote_tags($processedText);
         $this->assertEquals($text, $reversedText);
     }
+
+    /**
+     * Test unescape_code_blocks function.
+     */
+    function testUnescapeCodeBlocks()
+    {
+        $text  = escape('echo "test <hi>" > test < &1');
+        $text .= '<code>' . escape('echo "test <hi>" > test < &1') . '</code>';
+        $text .= '<code data-lang="bash">' . escape('echo "test <hi>" > test < &1') . '</code>';
+        $textExpected = escape('echo "test <hi>" > test < &1');
+        $textExpected .= '<code>echo "test <hi>" > test < &1</code>';
+        $textExpected .= '<code data-lang="bash">echo "test <hi>" > test < &1</code>';
+        $textProcessed = unescape_code_blocks($text);
+        $this->assertEquals(
+            $textExpected,
+            $textProcessed
+        );
+    }
 }
