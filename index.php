@@ -152,6 +152,7 @@ if (is_file($GLOBALS['config']['CONFIG_FILE'])) {
 
 // Shaarli library
 require_once 'application/ApplicationUtils.php';
+require_once 'application/BookmarkUtils.php';
 require_once 'application/Cache.php';
 require_once 'application/CachedPage.php';
 require_once 'application/FeedBuilder.php';
@@ -1623,8 +1624,7 @@ HTML;
     }
 
     // -------- User is uploading a file for import
-    if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=upload'))
-    {
+    if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=upload')) {
         // If file is too big, some form field may be missing.
         if (!isset($_POST['token']) || (!isset($_FILES)) || (isset($_FILES['filetoupload']['size']) && $_FILES['filetoupload']['size']==0))
         {
@@ -1632,8 +1632,10 @@ HTML;
             echo '<script>alert("The file you are trying to upload is probably bigger than what this webserver can accept ('.getMaxFileSize().' bytes). Please upload in smaller chunks.");document.location=\''.escape($returnurl).'\';</script>';
             exit;
         }
-        if (!tokenOk($_POST['token'])) die('Wrong token.');
-        importFile();
+        if (!tokenOk($_POST['token'])) {
+            die('Wrong token.');
+        }
+        import_bookmark_file($GLOBALS, $_POST, $_FILES);
         exit;
     }
 
@@ -1700,95 +1702,6 @@ HTML;
     exit;
 }
 
-// -----------------------------------------------------------------------------------------------
-// Process the import file form.
-function importFile()
-{
-    if (!isLoggedIn()) { die('Not allowed.'); }
-    $LINKSDB = new LinkDB(
-        $GLOBALS['config']['DATASTORE'],
-        isLoggedIn(),
-        $GLOBALS['config']['HIDE_PUBLIC_LINKS'],
-        $GLOBALS['redirector']
-    );
-    $filename=$_FILES['filetoupload']['name'];
-    $filesize=$_FILES['filetoupload']['size'];
-    $data=file_get_contents($_FILES['filetoupload']['tmp_name']);
-    $private = (empty($_POST['private']) ? 0 : 1); // Should the links be imported as private?
-    $overwrite = !empty($_POST['overwrite']) ; // Should the imported links overwrite existing ones?
-    $import_count=0;
-
-    // Sniff file type:
-    $type='unknown';
-    if (startsWith($data,'<!DOCTYPE NETSCAPE-Bookmark-file-1>')) $type='netscape'; // Netscape bookmark file (aka Firefox).
-
-    // Then import the bookmarks.
-    if ($type=='netscape')
-    {
-        // This is a standard Netscape-style bookmark file.
-        // This format is supported by all browsers (except IE, of course), also Delicious, Diigo and others.
-        foreach(explode('<DT>',$data) as $html) // explode is very fast
-        {
-            $link = array('linkdate'=>'','title'=>'','url'=>'','description'=>'','tags'=>'','private'=>0);
-            $d = explode('<DD>',$html);
-            if (startswith($d[0],'<A '))
-            {
-                $link['description'] = (isset($d[1]) ? html_entity_decode(trim($d[1]),ENT_QUOTES,'UTF-8') : '');  // Get description (optional)
-                preg_match('!<A .*?>(.*?)</A>!i',$d[0],$matches); $link['title'] = (isset($matches[1]) ? trim($matches[1]) : '');  // Get title
-                $link['title'] = html_entity_decode($link['title'],ENT_QUOTES,'UTF-8');
-                preg_match_all('! ([A-Z_]+)=\"(.*?)"!i',$html,$matches,PREG_SET_ORDER);  // Get all other attributes
-                $raw_add_date=0;
-                foreach($matches as $m)
-                {
-                    $attr=$m[1]; $value=$m[2];
-                    if ($attr=='HREF') $link['url']=html_entity_decode($value,ENT_QUOTES,'UTF-8');
-                    elseif ($attr=='ADD_DATE')
-                    {
-                        $raw_add_date=intval($value);
-                        if ($raw_add_date>30000000000) $raw_add_date/=1000;	//If larger than year 2920, then was likely stored in milliseconds instead of seconds
-                    }
-                    elseif ($attr=='PRIVATE') $link['private']=($value=='0'?0:1);
-                    elseif ($attr=='TAGS') $link['tags']=html_entity_decode(str_replace(',',' ',$value),ENT_QUOTES,'UTF-8');
-                }
-                if ($link['url']!='')
-                {
-                    if ($private==1) $link['private']=1;
-                    $dblink = $LINKSDB->getLinkFromUrl($link['url']); // See if the link is already in database.
-                    if ($dblink==false)
-                    {  // Link not in database, let's import it...
-                       if (empty($raw_add_date)) $raw_add_date=time(); // In case of shitty bookmark file with no ADD_DATE
-
-                       // Make sure date/time is not already used by another link.
-                       // (Some bookmark files have several different links with the same ADD_DATE)
-                       // We increment date by 1 second until we find a date which is not used in DB.
-                       // (so that links that have the same date/time are more or less kept grouped by date, but do not conflict.)
-                       while (!empty($LINKSDB[date('Ymd_His',$raw_add_date)])) { $raw_add_date++; }// Yes, I know it's ugly.
-                       $link['linkdate']=date('Ymd_His',$raw_add_date);
-                       $LINKSDB[$link['linkdate']] = $link;
-                       $import_count++;
-                    }
-                    else // Link already present in database.
-                    {
-                        if ($overwrite)
-                        {   // If overwrite is required, we import link data, except date/time.
-                            $link['linkdate']=$dblink['linkdate'];
-                            $LINKSDB[$link['linkdate']] = $link;
-                            $import_count++;
-                        }
-                    }
-
-                }
-            }
-        }
-        $LINKSDB->savedb($GLOBALS['config']['PAGECACHE']);
-
-        echo '<script>alert("File '.json_encode($filename).' ('.$filesize.' bytes) was successfully processed: '.$import_count.' links imported.");document.location=\'?\';</script>';
-    }
-    else
-    {
-        echo '<script>alert("File '.json_encode($filename).' ('.$filesize.' bytes) has an unknown file format. Nothing was imported.");document.location=\'?\';</script>';
-    }
-}
 
 /**
  * Template for the list of links (<div id="linklist">)
