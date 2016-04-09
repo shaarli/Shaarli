@@ -36,13 +36,6 @@ TEST_DIR="$(pwd)"
 TEMPDIR="$(mktemp -u -t shaarli.api.XXXXXXXXXX)"
 WEBAPPROOT="${TEST_DIR}/../.."
 
-# http://stackoverflow.com/a/34676160
-function cleanup {
-  rm -rf "${TEMPDIR}"
-  echo "Deleted temp working directory ${TEMPDIR}"
-}
-trap cleanup EXIT
-
 # terminal colors (require bash)
 # http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x329.html
 # http://wiki.bash-hackers.org/scripting/terminalcodes
@@ -130,4 +123,5 @@ do
   test_counter=$((test_counter+1))
 done
 
+rm -rf "${TEMPDIR}"
 exit ${status_code}
