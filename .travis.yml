@@ -5,11 +5,16 @@ php:
   - 5.6
   - 5.5
   - 5.4
-  - 5.3
+#  - 5.3 doesn't provide a 'php' webserver as required in tests/api/run.sh
 install:
   - composer self-update
   - composer install
+addons:
+  apt:
+    packages:
+    - xsltproc
 script:
   - make clean
   - make check_permissions
   - make test
+  - sh tests/api/run.sh
