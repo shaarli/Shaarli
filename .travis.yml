@@ -17,4 +17,4 @@ script:
   - make clean
   - make check_permissions
   - make test
-  - /usr/bin/env bash tests/api/run.sh
+  - sh tests/api/run.sh
