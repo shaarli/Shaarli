@@ -1,4 +1,4 @@
-![Shaarli logo](doc/images/doc-logo.png)
+![Shaarli logo](https://cdn.rawgit.com/ArthurHoaro/Shaarli/master/doc/images/doc-logo.svg)
 
 The personal, minimalist, super-fast, no-database delicious clone.
 
