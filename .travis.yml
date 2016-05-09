@@ -5,7 +5,7 @@ php:
   - 5.6
   - 5.5
   - 5.4
-#  - 5.3 doesn't provide a 'php' webserver as required in tests/api/run.sh
+  - 5.3
 install:
   - composer self-update
   - composer install
@@ -17,4 +17,5 @@ script:
   - make clean
   - make check_permissions
   - make test
-  - sh tests/api/run.sh
+  # PHP 5.3 doesn't provide a 'php' webserver as required in tests/api/run.sh
+  - if [ "PHP 5.3." != "$(php --version | head -n 1 | cut -c 1-8)" ] ; then sh tests/api/run.sh ; fi
