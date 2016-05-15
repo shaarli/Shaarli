@@ -9,7 +9,13 @@ php:
 install:
   - composer self-update
   - composer install
+addons:
+  apt:
+    packages:
+    - xsltproc
 script:
   - make clean
   - make check_permissions
   - make test
+  # PHP 5.3 doesn't provide a 'php' webserver as required in tests/api/run.sh
+  - if [ "PHP 5.3." != "$(php --version | head -n 1 | cut -c 1-8)" ] ; then sh tests/api/run.sh ; fi
