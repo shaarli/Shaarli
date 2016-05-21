@@ -425,4 +425,30 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
     {
         self::$publicLinkDB->filterHash('');
     }
+
+    /**
+     * test whitespace handling in tags.
+     * split on whitespace runs and don't allow empty tags.
+     */
+    public function testReadTagsWithWhitespace()
+    {
+        // test load contains "tags": " tag1  tag2   tag3  tag4   "
+        $ds  = '<?php /* ';
+        $ds .= 'fY5BDoMwDAS/gvwB4hRKMY9BEaASNQKUuL1U/L22D721Odheez';
+        $ds .= 'baQEjvQtgSeIdX12I/onfyYAjU6e1GkOL2mAMvMPxAC8mWIydD';
+        $ds .= 'enHsU0jrXlj1heCZk5k7gpX5oLr+ErUdkGBeypTjwXHfdOUItD';
+        $ds .= 'XycbgXHb24KxFYafWVtYvVRoQiQhw5vixrJDdY/LyENP5PcJ4f */ ?>';
+        file_put_contents(self::$testDatastore, $ds);
+        self::$publicLinkDB = new LinkDB(self::$testDatastore, false, false);
+
+        $this->assertEquals(
+            array(
+                'tag1' => 1,
+                'tag2' => 1,
+                'tag3' => 1,
+                'tag4' => 1
+            ),
+            self::$publicLinkDB->allTags()
+        );
+    }
 }

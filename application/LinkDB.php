@@ -291,7 +291,7 @@ You use the community supported version of the original Shaarli project, by Seba
 
             // Remove private tags if the user is not logged in.
             if (! $this->_loggedIn) {
-                $link['tags'] = preg_replace('/(^| )\.[^($| )]+/', '', $link['tags']);
+                $link['tags'] = preg_replace('/(^|\s*)\.[^($| )]+\s*$/', '', $link['tags']);
             }
 
             // Do not use the redirector for internal links (Shaarli note URL starting with a '?').
@@ -441,7 +441,7 @@ You use the community supported version of the original Shaarli project, by Seba
     {
         $tags = array();
         foreach ($this->_links as $link) {
-            foreach (explode(' ', $link['tags']) as $tag) {
+            foreach (preg_split('/\s+/', $link['tags'], 0, PREG_SPLIT_NO_EMPTY) as $tag) {
                 if (!empty($tag)) {
                     $tags[$tag] = (empty($tags[$tag]) ? 1 : $tags[$tag] + 1);
                 }
