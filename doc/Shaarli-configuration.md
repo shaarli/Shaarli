@@ -1,14 +1,17 @@
-#Shaarli configuration
+# Shaarli configuration
+
 ## Foreword
 
 **Do not edit configuration options in index.php! Your changes would be lost.** 
 
-Once your Shaarli instance is installed, the file `data/config.php` is generated:
-* it contains all settings, and can be edited to customize values
+Once your Shaarli instance is installed, the file `data/config.json.php` is generated:
+* it contains all settings in JSON format, and can be edited to customize values
 * it defines which [plugins](Plugin-System) are enabled[](.html)
 * its values override those defined in `index.php`
+* it is wrap in a PHP comment to prevent anyone accessing it, regardless of server configuration
 
 ## File and directory permissions
+
 The server process running Shaarli must have:
 - `read` access to the following resources:
     - PHP scripts: `index.php`, `application/*.php`, `plugins/*.php`
@@ -31,121 +34,172 @@ On a Linux distribution:
     - put users in the same group as the web server, and set the appropriate access rights
 - if you have a domain / subdomain to serve Shaarli, [configure the server](Server-configuration) accordingly[](.html)
 
-## Example `data/config.php`
+## Configuration
+
+In `data/config.json.php`.
+
 See also [Plugin System](Plugin-System.html).
 
-```php
-<?php 
-// User login
-$GLOBALS['login'] = '<login>';[](.html)
+### Credentials
+ 
+> You shouldn't edit those.
 
-// User password hash
-$GLOBALS['hash'] = '200c452da46c2f889e5e48c49ef044bcacdcb095';[](.html)
+**login**: Login username.  
+**hash**: Generated password hash.  
+**salt**: Password salt.
 
-// Password salt
-$GLOBALS['salt'] = '13b654102321576033d8473b63a275a1bf94c0f0'; [](.html)
+### General
 
-// Local timezone
-$GLOBALS['timezone'] = 'Africa/Abidjan';[](.html)
-date_default_timezone_set('Africa/Abidjan');
+**title**: Shaarli's instance title.  
+**header_link**: Link to the homepage.  
+**links_per_page**: Number of shaares displayed per page.  
+**timezone**: See [the list of supported timezones](http://php.net/manual/en/timezones.php).  
+**enabled_plugins**: List of enabled plugins.
 
-// Shaarli title
-$GLOBALS['title'] = 'My Little Shaarly';[](.html)
+### Security
 
-// Link the Shaarli title points to
-$GLOBALS['titleLink'] = '?';[](.html)
+**session_protection_disabled**: Disable session cookie hijacking protection (not recommended). 
+It might be useful if your IP adress often changes.  
+**ban_after**: Failed login attempts before being IP banned.  
+**ban_duration**: IP ban duration in seconds.  
+**open_shaarli**: Anyone can add a new link while logged out if enabled.  
 
-// HTTP referer redirector
-$GLOBALS['redirector'] = '';[](.html)
+### Resources
 
-// Disable session hijacking
-$GLOBALS['disablesessionprotection'] = false; [](.html)
+**data_dir**: Data directory.  
+**datastore**: Shaarli's links database file path.  
+**updates**: File path for the ran updates file.  
+**log**: Log file path.  
+**update_check**: Last update check file path.  
+**raintpl_tpl**: Templates directory.  
+**raintpl_tmp**: Template engine cache directory.  
+**thumbnails_cache**: Thumbnails cache directory.  
+**page_cache**: Shaarli's internal cache directory.  
+**ban_file**: Banned IP file path.
 
-// Whether new links are private by default
-$GLOBALS['privateLinkByDefault'] = false;[](.html)
+### Updates
 
-// Enabled plugins
-// Note: each plugin may provide further settings through its own "config.php"
-$GLOBALS['config'['ENABLED_PLUGINS'] = array('addlink_toolbar', 'qrcode');]('ENABLED_PLUGINS']-=-array('addlink_toolbar',-'qrcode');.html)
+**check_updates**: Enable or disable update check to the git repository.  
+**check_updates_branch**: Git branch used to check updates (e.g. `stable` or `master`).  
+**check_updates_interval**: Look for new version every N seconds (default: every day).
 
-// Subdirectory where Shaarli stores its data files.
-// You can change it for better security.
-$GLOBALS['config'['DATADIR'] = 'data';]('DATADIR']-=-'data';.html)
+### Privacy
 
-// File used to store settings
-$GLOBALS['config'['CONFIG_FILE'] = 'data/config.php';]('CONFIG_FILE']-=-'data/config.php';.html)
+**default_private_links**: Check the private checkbox by default for every new link.  
+**hide_public_links**: All links are hidden while logged out.  
+**hide_timestamps**: Timestamps are hidden.
 
-// File containing the link database
-$GLOBALS['config'['DATASTORE'] = 'data/datastore.php';]('DATASTORE']-=-'data/datastore.php';.html)
+### Feed
 
-// Number of links displayed per page
-$GLOBALS['config'['LINKS_PER_PAGE'] = 20;]('LINKS_PER_PAGE']-=-20;.html)
+**rss_permalinks**: Enable this to redirect RSS links to Shaarli's permalinks instead of shaared URL.  
+**show_atom**: Display ATOM feed button.
 
-// File recording failed login attempts and IP bans
-$GLOBALS['config'['IPBANS_FILENAME'] = 'data/ipbans.php';]('IPBANS_FILENAME']-=-'data/ipbans.php';.html)
+### Thumbnail
 
-// Failed login attempts before being banned
-$GLOBALS['config'['BAN_AFTER'] = 4;]('BAN_AFTER']-=-4;.html)
+**enable_thumbnails**: Enable or disable thumbnail display.  
+**enable_localcache**: Enable or disable local cache.
 
-// Duration of an IP ban, in seconds (30 minutes)
-$GLOBALS['config'['BAN_DURATION'] = 1800;]('BAN_DURATION']-=-1800;.html)
+### Redirector
 
-// If set to true, everyone will be able to add, edit and remove links,
-// as well as change configuration
-$GLOBALS['config'['OPEN_SHAARLI'] = false;]('OPEN_SHAARLI']-=-false;.html)
+**url**: Redirector URL, such as `anonym.to`.  
+**encode_url**: Enable this if the redirector needs encoded URL to work properly.
 
-// Do not show link timestamps
-$GLOBALS['config'['HIDE_TIMESTAMPS'] = false;]('HIDE_TIMESTAMPS']-=-false;.html)
+## Configuration file example
 
-// Set to false to disable local thumbnail cache, e.g. due to limited disk quotas
-$GLOBALS['config'['ENABLE_THUMBNAILS'] = true;]('ENABLE_THUMBNAILS']-=-true;.html)
-
-// Thumbnail cache directory
-$GLOBALS['config'['CACHEDIR'] = 'cache';]('CACHEDIR']-=-'cache';.html)
-
-// Enable feed (rss, atom, dailyrss) cache
-$GLOBALS['config'['ENABLE_LOCALCACHE'] = true;]('ENABLE_LOCALCACHE']-=-true;.html)
-
-// Feed cache directory
-$GLOBALS['config'['PAGECACHE'] = 'pagecache';]('PAGECACHE']-=-'pagecache';.html)
-
-// RainTPL cache directory (keep the trailing slash!)
-$GLOBALS['config'['RAINTPL_TMP'] = 'tmp/';]('RAINTPL_TMP']-=-'tmp/';.html)
-
-// RainTPL template directory (keep the trailing slash!)
-$GLOBALS['config'['RAINTPL_TPL'] = 'tpl/';]('RAINTPL_TPL']-=-'tpl/';.html)
-
-// Whether Shaarli checks for new releases at https://github.com/shaarli/Shaarli
-$GLOBALS['config'['ENABLE_UPDATECHECK'] = true;]('ENABLE_UPDATECHECK']-=-true;.html)
-
-// File to store the latest Shaarli version
-$GLOBALS['config'['UPDATECHECK_FILENAME'] = 'data/lastupdatecheck.txt';]('UPDATECHECK_FILENAME']-=-'data/lastupdatecheck.txt';.html)
-
-// Delay between version checks (requires to be logged in) (24 hours)
-$GLOBALS['config'['UPDATECHECK_INTERVAL'] = 86400;]('UPDATECHECK_INTERVAL']-=-86400;.html)
-
-// For each link, display a link to an archived version on archive.org
-$GLOBALS['config'['ARCHIVE_ORG'] = false;]('ARCHIVE_ORG']-=-false;.html)
-
-// The RSS item links point:
-// true   =>  directly to the link
-// false  =>  to the entry on Shaarli (permalink)
-$GLOBALS['config'['ENABLE_RSS_PERMALINKS'] = true;]('ENABLE_RSS_PERMALINKS']-=-true;.html)
-
-// Hide all links to non-logged users
-$GLOBALS['config'['HIDE_PUBLIC_LINKS'] = false;]('HIDE_PUBLIC_LINKS']-=-false;.html)
-
-$GLOBALS['config'['PUBSUBHUB_URL'] = '';]('PUBSUBHUB_URL']-=-'';.html)
-
-// Show an ATOM Feed button next to the Subscribe (RSS) button.
-// ATOM feeds are available at the address ?do=atom regardless of this option.
-$GLOBALS['config'['SHOW_ATOM'] = false;]('SHOW_ATOM']-=-false;.html)
-
-// Set this to true if the redirector requires encoded URL, false otherwise.
-$GLOBALS['config'['REDIRECTOR_URLENCODE'] = true;]('REDIRECTOR_URLENCODE']-=-true;.html)
-?>
+```json
+<?php /*
+{
+    "credentials": {
+        "login": "<login>",
+        "hash": "<password hash>",
+        "salt": "<password salt>"
+    },
+    "security": {
+        "ban_after": 4,
+        "session_protection_disabled": false,
+        "ban_duration": 1800
+    },
+    "resources": {
+        "data_dir": "data",
+        "config": "data\/config.php",
+        "datastore": "data\/datastore.php",
+        "ban_file": "data\/ipbans.php",
+        "updates": "data\/updates.txt",
+        "log": "data\/log.txt",
+        "update_check": "data\/lastupdatecheck.txt",
+        "raintpl_tmp": "tmp\/",
+        "raintpl_tpl": "tpl\/",
+        "thumbnails_cache": "cache",
+        "page_cache": "pagecache"
+    },
+    "general": {
+        "check_updates": true,
+        "rss_permalinks": true,
+        "links_per_page": 20,
+        "default_private_links": true,
+        "enable_thumbnails": true,
+        "enable_localcache": true,
+        "check_updates_branch": "stable",
+        "check_updates_interval": 86400,
+        "enabled_plugins": [
+            "markdown",
+            "wallabag",
+            "archiveorg"
+        ],
+        "timezone": "Europe\/Paris",
+        "title": "My Shaarli",
+        "header_link": "?"
+    },
+    "extras": {
+        "show_atom": false,
+        "hide_public_links": false,
+        "hide_timestamps": false,
+        "open_shaarli": false,
+        "redirector": "http://anonym.to/?",
+        "redirector_encode_url": false
+    },
+    "general": {
+        "header_link": "?",
+        "links_per_page": 20,
+        "enabled_plugins": [
+            "markdown",
+            "wallabag"
+        ],
+        "timezone": "Europe\/Paris",
+        "title": "My Shaarli"
+    },
+    "updates": {
+        "check_updates": true,
+        "check_updates_branch": "stable",
+        "check_updates_interval": 86400
+    },
+    "feed": {
+        "rss_permalinks": true,
+        "show_atom": false
+    },
+    "privacy": {
+        "default_private_links": true,
+        "hide_public_links": false,
+        "hide_timestamps": false
+    },
+    "thumbnail": {
+        "enable_thumbnails": true,
+        "enable_localcache": true
+    },
+    "redirector": {
+        "url": "http://anonym.to/?",
+        "encode_url": false
+    },
+    "plugins": {
+        "WALLABAG_URL": "http://demo.wallabag.org",
+        "WALLABAG_VERSION": "1"
+    }
+}
 ```
 
 ## Additional configuration
 
-The playvideos plugin may require that you adapt your server's [Content Security Policy](https://github.com/shaarli/Shaarli/blob/master/plugins/playvideos/README.md#troubleshooting) configuration to work properly.[](.html)
+The playvideos plugin may require that you adapt your server's 
+[Content Security Policy](https://github.com/shaarli/Shaarli/blob/master/plugins/playvideos/README.md#troubleshooting) 
+configuration to work properly.[](.html)
+
