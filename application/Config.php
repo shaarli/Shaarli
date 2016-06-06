@@ -21,7 +21,7 @@ function writeConfig($config, $isLoggedIn)
     // These fields are required in configuration.
     $MANDATORY_FIELDS = array(
         'login', 'hash', 'salt', 'timezone', 'title', 'titleLink',
-        'redirector', 'disablesessionprotection', 'privateLinkByDefault'
+        'redirector', 'api_secret_key','disablesessionprotection', 'privateLinkByDefault'
     );
 
     if (!isset($config['config']['CONFIG_FILE'])) {
@@ -48,6 +48,7 @@ function writeConfig($config, $isLoggedIn)
     $configStr .= 'date_default_timezone_set('.var_export($config['timezone'], true).');'. PHP_EOL;
     $configStr .= '$GLOBALS[\'title\'] = '.var_export($config['title'], true).';'. PHP_EOL;
     $configStr .= '$GLOBALS[\'titleLink\'] = '.var_export($config['titleLink'], true).'; '. PHP_EOL;
+    $configStr .= '$GLOBALS[\'api_secret_key\'] = '.var_export($config['api_secret_key'], true).'; '. PHP_EOL;
     $configStr .= '$GLOBALS[\'redirector\'] = '.var_export($config['redirector'], true).'; '. PHP_EOL;
     $configStr .= '$GLOBALS[\'disablesessionprotection\'] = '.var_export($config['disablesessionprotection'], true).'; '. PHP_EOL;
     $configStr .= '$GLOBALS[\'privateLinkByDefault\'] = '.var_export($config['privateLinkByDefault'], true).'; '. PHP_EOL;

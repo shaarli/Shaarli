@@ -16,6 +16,8 @@
 
 	    <tr><td><b>Redirector</b></td><td><input type="text" name="redirector" id="redirector" size="50" value="{$redirector}"><br>(e.g. <i>http://anonym.to/?</i> will mask the HTTP_REFERER)</td></tr>
 
+	    <tr><td><b>Api Secret Key:</b></td><td><input type="text" name="api_secret_key" id="api_secret_key" size="50" value="{$api_secret_key}"></td></tr>
+
         <tr><td><b>Security:</b></td><td><input type="checkbox" name="disablesessionprotection" id="disablesessionprotection" {if="!empty($GLOBALS['disablesessionprotection'])"}checked{/if}><label for="disablesessionprotection">&nbsp;Disable session cookie hijacking protection (Check this if you get disconnected often or if your IP address changes often.)</label></td></tr>
 
         <tr><td valign="top"><b>New link:</b></td><td>
