@@ -1551,8 +1551,20 @@ function renderPage()
         try {
             if (isset($_POST['parameters_form'])) {
                 unset($_POST['parameters_form']);
+                $pluginSave = array();
                 foreach ($_POST as $param => $value) {
                     $GLOBALS['plugins'][$param] = escape($value);
+                    // Link parameters to their plugin.
+                    foreach ($pluginManager->getPluginsMeta() as $plugin => $meta) {
+                        if (in_array($param, array_keys($meta['parameters']))) {
+                            $pluginSave[$plugin][$param] = escape($value);
+                        }
+                    }
+                }
+
+                // Save parameters into specific plugin config.php files.
+                foreach ($pluginSave as $key => $value) {
+                    write_plugin_config($key, $value);
                 }
             }
             else {
