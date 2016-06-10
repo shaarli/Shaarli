@@ -936,7 +936,7 @@ function renderPage()
     
     // Api page.
     if ($targetPage == Router::$PAGE_API) {
-    	$api = new Api();
+    	$api = new Api($_SERVER,$_GET);
     	exit;
     }
 

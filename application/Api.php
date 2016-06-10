@@ -1,9 +1,16 @@
 <?php
 
+/**
+ * characteristics of the Shaarli Account
+ * @property String $name Name of the account
+ * @property int $num Total number of links
+ * @property String $foo Version of Shaarli
+ *
+ */
 class Account {
-    public $name = "";
-    public $num = 0;
-    public $version = 0;
+    public $name;
+    public $num;
+    public $version;
     
     public function __construct($name,$num,$version) {
         $this->name = $name;
@@ -51,32 +58,46 @@ class Api
     
     const VALUE_ALL = 'all';
     
-    private $loggedin; // Is the used logged in ? (used to filter private links)
-    private $allowed_methods = array('get', 'post', 'delete');
-    private $linkdb;
-    private $linkhistorydb;
+    const HTTP_OK = 200;
+    const HTTP_CREATED = 201;
+    const HTTP_BAD_REQUEST = 400;
+    const HTTP_FORBIDDEN = 403;
+    const HTTP_NOT_FOUND = 404;
+    const HTTP_METHOD_NOT_ALLOWED = 405;
+    const HTTP_INTERNAL_SERVER_ERROR = 500;
+    
+    private $loggedIn; // Is the used logged in ? (used to filter private links)
+    private $allowedMethods = array('get', 'post', 'delete');
+    private $linkDb;
+    private $linkHistoryDb;
+    
+    private $server;
+    private $get;
     
     /**
      * Creates a new Api
      *
      */
-    public function __construct()
+    public function __construct($server, $get)
     {
+        $this->server = $server;
+        $this->get = $get;
+        
         $this->getLoggedIn();
     
         $method = $this->getMethod();
         if ($method === null) {
             exit;
         }
-        $this->linkdb = new LinkDB(
+        $this->linkDb = new LinkDB(
             $GLOBALS['config']['DATASTORE'],
-            $this->loggedin,
+            $this->loggedIn,
             $GLOBALS['config']['HIDE_PUBLIC_LINKS'],
             $GLOBALS['redirector']
         );
-        $this->linkhistorydb = new LinkHistoryDB(
+        $this->linkHistoryDb = new LinkHistoryDB(
             $GLOBALS['config']['DATASTORE_HISTORY'],
-            $this->loggedin
+            $this->loggedIn
         );
         $this->$method();
     }
@@ -84,19 +105,19 @@ class Api
     /**
      * Identify request method
      *
-     * @return method allowed (get, post, delete) or 400 or 405
+     * @return method allowed (get, post, delete) or HTTP_BAD_REQUEST or HTTP_METHOD_NOT_ALLOWED
      */    
     private function getMethod()
     {
-        if (isset($_SERVER['REQUEST_METHOD']) === false) {
-            $this->send(400);
+        if (isset($this->server['REQUEST_METHOD']) === false) {
+            $this->send(Api::HTTP_BAD_REQUEST);
             return null;
         }
     
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        $method = strtolower($this->server['REQUEST_METHOD']);
     
-        if (in_array($method, $this->allowed_methods) === false) {
-            $this->send(405);
+        if (in_array($method, $this->allowedMethods) === false) {
+            $this->send(Api::HTTP_METHOD_NOT_ALLOWED);
             return null;
         }
     
@@ -114,14 +135,11 @@ class Api
     private function checkParam($name, $table = null)
     {
         if ($table === null) {
-            $table = $_GET;
+            $table = $this->get;
         }
-        return (isset($table[$name]) === true
+        return (!empty($table[$name]) === true
                 &&
-                is_string($table[$name]) === true
-                &&
-                empty($table[$name]) === false
-                );
+                is_string($table[$name]) === true);
     }
     
     /**
@@ -133,64 +151,68 @@ class Api
      */
     private function getLoggedIn()
     {
-        $this->loggedin = false;
+        $this->loggedIn = false;
     
-        $date_request = null;
-        $authorization_client = null;
-        $android_version = null;
+        $dateRequest = null;
+        $authorizationClient = null;
+        $clientVersion = null;
     
         $headers = apache_request_headers();
         foreach ($headers as $header => $value) {
-            if ($header==='Authorization') $authorization_client=$value;
-            if ($header==='Date') $date_request=strtotime($value);
-            if ($header==='X-SHAARLI-ANDROID-VERSION') $android_version=$value;
+            if ($header==='Authorization') $authorizationClient=$value;
+            if ($header==='Date') $dateRequest=strtotime($value);
+            if ($header==='X-SHAARLI-CLIENT-VERSION') $clientVersion=$value;
         }
     
-        if (empty($date_request) && empty($_SERVER['HTTP_DATE'])) {
-            $this->send(403, Api::LOGIN_ERROR_DATE_NOT_FOUND); 
+        if (empty($dateRequest) && empty($this->server['HTTP_DATE'])) {
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_DATE_NOT_FOUND); 
             exit;
-        } elseif (empty($date_request)) {
-            $date_request = strtotime($_SERVER['HTTP_DATE']);
+        } elseif (empty($dateRequest)) {
+            $dateRequest = strtotime($this->server['HTTP_DATE']);
         }
 
-        if (empty($authorization_client) && empty($_SERVER['REMOTE_USER'])) {
-            $this->send(403, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED); 
+        if (empty($authorizationClient) && empty($this->server['REMOTE_USER'])) {
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED); 
             exit;
-        } elseif (empty($authorization_client)) {
-            $authorization_client = $_SERVER['REMOTE_USER'];
+        } elseif (empty($authorizationClient)) {
+            $authorizationClient = $this->server['REMOTE_USER'];
         }
         
-        if (empty($android_version) && isset($_SERVER['X-SHAARLI-ANDROID-VERSION'])) {
-            $android_version = $_SERVER['X-SHAARLI-ANDROID-VERSION'];
+        if (empty($clientVersion) && isset($this->server['X-SHAARLI-ANDROID-VERSION'])) {
+            $clientVersion = $this->server['X-SHAARLI-ANDROID-VERSION'];
         } 
       
         $date_server = time();
-        $seconds = $date_server - $date_request;
+        $seconds = $date_server - $dateRequest;
     
         if ($seconds > Api::MAX_TIMESTAMP_CLIENT_SERVER_DIFF) {
-            $this->send(403, Api::LOGIN_ERROR_CLIENT_SERVER_TIME_SYNC);
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_CLIENT_SERVER_TIME_SYNC);
             exit;
         }
         
-        if (empty($authorization_client)) {
-            $this->send(403, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED);
+        if (empty($authorizationClient)) {
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED);
             exit;
         }
                 
-        $authorization_client_array = explode(":", $authorization_client);
-        $authorization_client_name = $authorization_client_array[0];
-        $authorization_client_hash = $authorization_client_array[1];
+        $authorizationClientArray = explode(":", $authorizationClient);
+        $authorizationClientName = "";
+        $authorizationClientHash = "";
+        if (!empty($authorizationClientArray) && sizeof($authorizationClientArray)==2) {
+            $authorizationClientName = $authorizationClientArray[0];
+            $authorizationClientHash = $authorizationClientArray[1];
+        }
     
-        $calculated_hash = $_SERVER['REQUEST_METHOD']."\n".$_SERVER['CONTENT_TYPE']
-            ."\n".$_SERVER['HTTP_DATE']."\n".$_SERVER['QUERY_STRING'];
+        $calculated_hash = $this->server['REQUEST_METHOD']."\n".$this->server['CONTENT_TYPE']
+            ."\n".$this->server['HTTP_DATE']."\n".$this->server['QUERY_STRING'];
     
         if (hash_hmac('sha256', $GLOBALS['api_secret_key'], $calculated_hash) 
-                !== $authorization_client_hash) {
-            $this->send(403, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED); 
+                !== $authorizationClientHash) {
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_TOKEN_VERIFICATION_FAILED); 
             exit;
         }
     
-        $this->loggedin = true;
+        $this->loggedIn = true;
     }
     
     /**
@@ -200,16 +222,16 @@ class Api
     private function get()
     {
         if ($this->checkParam(Api::PARAM_OBJECT) === true) {
-            switch ($_GET[Api::PARAM_OBJECT]) {
+            switch ($this->get[Api::PARAM_OBJECT]) {
                 case Api::O_ACCOUNT:
                     $this->checkaccount();
                     break;
                 case Api::O_LINKS:
                     if ($this->checkParam(Api::PARAM_METHOD) === true) {
-                        switch ($_GET[Api::PARAM_METHOD]) {
+                        switch ($this->get[Api::PARAM_METHOD]) {
                             case Api::M_SEARCH:
                                 if ($this->checkParam(LinkFilter::$FILTER_DAY) === true) {
-                                    $this->getLinksByDay($_GET[LinkFilter::$FILTER_DAY]);
+                                    $this->getLinksByDay($this->get[LinkFilter::$FILTER_DAY]);
                                 } else {
                                     $this->search();
                                 }
@@ -221,11 +243,11 @@ class Api
                                 $this->getLinksDeleted();
                                 break;
                             default:
-                                $this->send(400, 'Bad Request');
+                                $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                                 return;
                         }
                     } else {
-                        $this->send(400, 'Bad Request');
+                        $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                         return;
                     }
                     break;
@@ -234,42 +256,42 @@ class Api
                     break;
                 case Api::O_LINK:
                     if ($this->checkParam(Api::PARAM_METHOD) === true) {
-                        switch ($_GET[Api::PARAM_METHOD]) {
+                        switch ($this->get[Api::PARAM_METHOD]) {
                             case Api::M_SEARCH:
                                 if ($this->checkParam(Api::M_SEARCH_KEY) === true) {
-                                    $this->getLinkByKey($_GET[Api::M_SEARCH_KEY]);
+                                    $this->getLinkByKey($this->get[Api::M_SEARCH_KEY]);
                                 } else {
-                                    $this->send(400, 'Bad Request');
+                                    $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                                     return;
                                 }
                                 break;
                             case Api::M_DELETED:
                                 if ($this->checkParam(Api::M_SEARCH_KEY) === true) {
-                                    $this->getLinkDeletedByKey($_GET[Api::M_SEARCH_KEY]);
+                                    $this->getLinkDeletedByKey($this->get[Api::M_SEARCH_KEY]);
                                 } else {
-                                    $this->send(400, 'Bad Request');
+                                    $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                                     return;
                                 }
                                 break;
                         }
                     } else {
-                        $this->send(400, 'Bad Request');
+                        $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                         return;
                     }
                     break;
                 case Api::O_HISTORY:
                     $type='';
-                    if (!empty($_GET[Api::PARAM_TYPE])) {
-                        $type=$_GET[Api::PARAM_TYPE];
+                    if (!empty($this->get[Api::PARAM_TYPE])) {
+                        $type=$this->get[Api::PARAM_TYPE];
                     }
                     $this->getHistory($type);
                     break;
                 default:
-                    $this->send(400, 'Bad Request');
+                    $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
                     return;
             }
         } else {
-            $this->send(400, 'Bad Request');
+            $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
             return;
         }
         
@@ -286,8 +308,8 @@ class Api
      */
     private function checkAccount(){
         $account = new Account($GLOBALS['title'],
-                count($this->linkdb), shaarli_version);
-        $this->send(200, $account);
+                count($this->linkDb), shaarli_version);
+        $this->send(Api::HTTP_OK, $account);
     }
     
     /**
@@ -301,19 +323,17 @@ class Api
      */
     private function getTags()
     {
-        $tags= $this->linkdb->allTags();
-        $maxcount=0; foreach($tags as $key=>$value) $maxcount=max($maxcount,$value);
+        $tags= $this->linkDb->allTags();
         ksort($tags);
         $tagList=array();
         foreach($tags as $key=>$value)
         {
-            $tag = array(
+            $tagList[] = array(
                     'title' => $key,
                     'count' => $value
             );
-            $tagList[] = $tag;
         }
-        $this->send(200, $tagList);
+        $this->send(Api::HTTP_OK, $tagList);
         
     }
     
@@ -334,10 +354,10 @@ class Api
      */
     private function getHistory($type)
     {
-        $filtered = $this->linkhistorydb->filterSearch($type);
+        $filtered = $this->linkHistoryDb->filterSearch($type);
         $filtered = $this->filterByDate($filtered,'editdate');
         $filtered = $this->filterByPage($filtered);
-        $this->send(200, $filtered); 
+        $this->send(Api::HTTP_OK, $filtered); 
     }
     
     /**
@@ -355,7 +375,7 @@ class Api
      */
     private function getLinksUpdated()
     {
-        $filtered = $this->linkhistorydb->filterSearch('UPDATED');
+        $filtered = $this->linkHistoryDb->filterSearch('UPDATED');
         $filtered = $this->filterByDate($filtered,'editdate');
         $filtered = $this->filterByPage($filtered);
 
@@ -363,7 +383,7 @@ class Api
         $links = array();
         foreach ($filtered as $l) {
             $key = $l['linkdate'];
-            $link = isset($this->linkdb[$key]) === true ? $this->linkdb[$key] : false;
+            $link = isset($this->linkDb[$key]) === true ? $this->linkDb[$key] : false;
             if ($link !== false) {
                 if (empty($dateLastEdited)) $dateLastEdited=$l['editdate'];
                 $links[]=$link;
@@ -373,7 +393,7 @@ class Api
         $headers = array();
         $headers = $this->add_header($headers, 'X-DATE-LAST-EDITED', $dateLastEdited);
        
-        $this->send(200, $links, $headers);
+        $this->send(Api::HTTP_OK, $links, $headers);
     }
     
     
@@ -391,13 +411,13 @@ class Api
      * @return JSON Array List of deleted links (linkdate, editdate = edit date of the link)
      */
     private function getLinksDeleted(){
-        $filtered = $this->linkhistorydb->filterSearch('DELETED');
+        $filtered = $this->linkHistoryDb->filterSearch('DELETED');
         $filtered = $this->filterByDate($filtered,'editdate');
         $filtered = $this->filterByPage($filtered);
         foreach ($filtered as &$l) {
             unset($l['type']);
         }
-        $this->send(200, $filtered);
+        $this->send(Api::HTTP_OK, $filtered);
     }
     
 
@@ -410,17 +430,17 @@ class Api
      * @url param : key. Format : YYYYMMDD_HHMMSS.
      * 
      * @return JSON Object (linkdate, editdate = edit date of the link)
-     *  or a 404 error
+     *  or a HTTP_NOT_FOUND error
      */
     private function getLinkDeletedByKey($key)
     {
-        $link = isset($this->linkhistorydb[$key]) === true ? $this->linkhistorydb[$key] : false;
+        $link = isset($this->linkHistoryDb[$key]) === true ? $this->linkHistoryDb[$key] : false;
         if ($link === false) {
-            $this->send(404, 'Not Found');
+            $this->send(Api::HTTP_NOT_FOUND, 'Not Found');
             return;
         }
         unset($link['type']);
-        $this->send(200, $link);
+        $this->send(Api::HTTP_OK, $link);
     }
     
     
@@ -441,10 +461,10 @@ class Api
      */
     private function search()
     {
-        $filtered = $this->linkdb->filterSearch($_GET, false, false);
+        $filtered = $this->linkDb->filterSearch($this->get, false, false);
         $filtered = $this->filterByDate($filtered,'linkdate');
         $filtered = $this->filterByPage($filtered);
-        $this->send(200, $filtered);
+        $this->send(Api::HTTP_OK, $filtered);
     }
     
     /**
@@ -458,16 +478,16 @@ class Api
      * @url param : page. (optionnal, default = 1)
      *
      * @return JSON Array List of links (linkdate, url, title, description, private, tags)
-     *  or a 400 error
+     *  or a HTTP_BAD_REQUEST error
      */
     private function getLinksByDay($day)
     {
         try {
-            $links = $this->linkdb->filterDay($day);
+            $links = $this->linkDb->filterDay($day);
             $filtered = $this->filterByPage($links);
-            $this->send(200, $filtered);
+            $this->send(Api::HTTP_OK, $filtered);
         } catch (Exception $e) {
-            $this->send(400, 'Bad Request');
+            $this->send(Api::HTTP_BAD_REQUEST, 'Bad Request');
             return;
         }
     }
@@ -481,16 +501,16 @@ class Api
      * @url param : key. Format : YYYYMMDD_HHMMSS.
      * 
      * @return JSON Object (linkdate, url, title, description, private, tags)
-     *  or a 404 error
+     *  or a HTTP_NOT_FOUND error
      */
     private function getLinkByKey($key)
     {
-        $link = isset($this->linkdb[$key]) === true ? $this->linkdb[$key] : false;
+        $link = isset($this->linkDb[$key]) === true ? $this->linkDb[$key] : false;
         if ($link === false) {
-            $this->send(404, 'Not Found');
+            $this->send(Api::HTTP_NOT_FOUND, 'Not Found');
             return;
         }
-        $this->send(200, $link);
+        $this->send(Api::HTTP_OK, $link);
     }
     
     /**
@@ -506,39 +526,27 @@ class Api
      */
     private function filterByDate($linksToDisplay,$field)
     {
-        if (empty($_GET[Api::PARAM_START_DATE]) && empty($_GET[Api::PARAM_END_DATE])) {
+        if (empty($this->get[Api::PARAM_START_DATE]) && empty($this->get[Api::PARAM_END_DATE])) {
             return $linksToDisplay;
         }  
                 
         $start = null;
-        if (!empty($_GET[Api::PARAM_START_DATE])) 
-            $start = $_GET[Api::PARAM_START_DATE];
+        if (!empty($this->get[Api::PARAM_START_DATE])) {
+            $start = $this->get[Api::PARAM_START_DATE];
+        }
         $end = null;
-        if (!empty($_GET[Api::PARAM_END_DATE])) 
-            $end = $_GET[Api::PARAM_END_DATE];
-        
-        if (checkDateFormat('Ymd_His', $start)) {
-            $startDate = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $start);
-        } else if (checkDateFormat('Ymd', $start)) {
-            $startDate = DateTime::createFromFormat(Api::LINK_DATE_DAY, $start);
-            $startDate->setTime(23,59,59);
-        } else {
-            $startDate = null;
+        if (!empty($this->get[Api::PARAM_END_DATE])) {
+            $end = $this->get[Api::PARAM_END_DATE];
         }
         
-        if (checkDateFormat('Ymd_His', $end)) {
-            $endDate = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $end);
-        } else if (checkDateFormat('Ymd', $end)) {
-            $endDate = DateTime::createFromFormat(Api::LINK_DATE_DAY, $end);
-            $endDate->setTime(0,0,0);
-        } else {
-            $endDate = null;
-        }
-
+        $startDate = $this->get_date($start,23,59,59);
+        $endDate = $this->get_date($end);
+        
         if (empty($startDate) && empty($endDate)) {
             return $linksToDisplay;
         }
         
+        $links = array();
         foreach ($linksToDisplay as $l => $info) {
 			$dateLink = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $info[$field]);
         	$diffInSecondsStart = null;
@@ -552,21 +560,20 @@ class Api
 			}
 			
 			if (!empty($startDate) && !empty($endDate)) {
-			    if (!($diffInSecondsStart>0 && $diffInSecondsEnd<0)) {
-			        unset($linksToDisplay[$l]);
+			    if ($diffInSecondsStart>=0 && $diffInSecondsEnd<=0) {
+			        $links[]=$linksToDisplay[$l];
 			    }
 			} else if (!empty($startDate)) {
-			    if (!($diffInSecondsStart>0)) {
-			        unset($linksToDisplay[$l]);
+			    if ($diffInSecondsStart>=0) {
+			        $links[]=$linksToDisplay[$l];
 			    }
 			} else if (!empty($endDate)) {
-			    if (!($diffInSecondsEnd<0)) {
-			        unset($linksToDisplay[$l]);
-			    } 
+			    if ($diffInSecondsEnd<=0) {
+			        $links[]=$linksToDisplay[$l];
+			    }
 			}
-			
         }
-        return $linksToDisplay;
+        return $links;
     }
     
     /**
@@ -583,9 +590,9 @@ class Api
     {
         $nblinksToDisplay = 2;  // Number of links to display.
         // In URL, you can specificy the number of links. Example: nb=200 or nb=all for all links.
-        if (!empty($_GET[Api::PARAM_PER_PAGE])) {
-            $nblinksToDisplay = $_GET[Api::PARAM_PER_PAGE]==Api::VALUE_ALL ? 
-                count($linksToDisplay) : max(intval($_GET[Api::PARAM_PER_PAGE]), 1);
+        if (!empty($this->get[Api::PARAM_PER_PAGE])) {
+            $nblinksToDisplay = $this->get[Api::PARAM_PER_PAGE]==Api::VALUE_ALL ? 
+                count($linksToDisplay) : max(intval($this->get[Api::PARAM_PER_PAGE]), 1);
         }
         $i=0;
         //$linksToDisplay = $this->linkdb;
@@ -594,7 +601,7 @@ class Api
         $pagecount = ceil(count($keys) / $nblinksToDisplay);
         $pagecount = $pagecount == 0 ? 1 : $pagecount;
     
-        $page= empty($_GET['page']) ? 1 : intval($_GET['page']);
+        $page= empty($this->get['page']) ? 1 : intval($this->get['page']);
         $page = $page < 1 ? 1 : $page;
         $page = $page > $pagecount ? $pagecount : $page;
         // Start index.
@@ -618,19 +625,19 @@ class Api
      *  Add a link by providing an edit date.
      * @url param : key (optionnal). Format: YYYYMMDD_HHMMSS. Edit a link 
      * 
-     * Duplicate URL is not allowed at the moment... Send a 400 error.
+     * Duplicate URL is not allowed at the moment... Send a HTTP_BAD_REQUEST error.
      * 
      * @return JSON Object (linkdate, url, title, description, private, tags)
-     *  or a 400, 403, 404 error
+     *  or a HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND error
      */
     private function post()
     {
-        if ($this->loggedin === false) {
-            $this->send(403, Api::LOGIN_ERROR_UNKNOWN);
+        if ($this->loggedIn === false) {
+            $this->send(Api::HTTP_FORBIDDEN, Api::LOGIN_ERROR_UNKNOWN);
             return;
         }
         if ($this->checkParam('restore') === true) {
-            $key = $_GET['restore'];
+            $key = $this->get['restore'];
             $link = array(
                     'title' => null,
                     'url' => null,
@@ -641,12 +648,12 @@ class Api
             );
             $is_new = false;
         } else if ($this->checkParam('key') === true) {
-            $key = $_GET['key'];
-            if (isset($this->linkdb[$key]) === false) {
-                $this->send(404, Api::POST_EDIT_ERROR_LINK_NOT_FOUND);
+            $key = $this->get['key'];
+            if (isset($this->linkDb[$key]) === false) {
+                $this->send(Api::HTTP_NOT_FOUND, Api::POST_EDIT_ERROR_LINK_NOT_FOUND);
                 return;
             }
-            $link = $this->linkdb[$key];
+            $link = $this->linkDb[$key];
             $is_new = false;
         }  else {
             $key = date('Ymd_His');
@@ -682,12 +689,12 @@ class Api
         }
     
         if (empty($link['url']) === true) {
-            $this->send(400, Api::POST_EDIT_ERROR_URL_EMPTY);
+            $this->send(Api::HTTP_BAD_REQUEST, Api::POST_EDIT_ERROR_URL_EMPTY);
             return;
         }
         
-        if ($is_new && $this->linkdb->getLinkFromUrl($link['url'])) {
-            $this->send(400, Api::POST_EDIT_ERROR_DUPLICATE_URL);
+        if ($is_new && $this->linkDb->getLinkFromUrl($link['url'])) {
+            $this->send(Api::HTTP_BAD_REQUEST, Api::POST_EDIT_ERROR_DUPLICATE_URL);
             return;
         }
     
@@ -705,13 +712,13 @@ class Api
                     'editdate' => date('Ymd_His'),
                     'type' => 'UPDATED'
             );
-            $this->linkhistorydb[$link['linkdate']] = $linkHistory;
-            $this->linkhistorydb->savedb($GLOBALS['config']['PAGECACHE']);
+            $this->linkHistoryDb[$link['linkdate']] = $linkHistory;
+            $this->linkHistoryDb->savedb($GLOBALS['config']['PAGECACHE']);
         }
     
-        $this->linkdb[$key] = $link;
-        $this->linkdb->savedb($GLOBALS['config']['PAGECACHE']);
-        $this->send($is_new ? 201 : 200, $link);
+        $this->linkDb[$key] = $link;
+        $this->linkDb->savedb($GLOBALS['config']['PAGECACHE']);
+        $this->send($is_new ? Api::HTTP_CREATED : Api::HTTP_OK, $link);
     }
     
     /**
@@ -719,19 +726,19 @@ class Api
      *
      * @url param : key. Format: YYYYMMDD_HHMMSS. 
      * 
-     * @return 200 or a 400, 404 error
+     * @return HTTP_OK or a HTTP_BAD_REQUEST, HTTP_NOT_FOUND error
      */
     private function delete()
     {
-        if ($this->loggedin === false) {
-            $this->send(403);
+        if ($this->loggedIn === false) {
+            $this->send(Api::HTTP_FORBIDDEN);
             return;
         }
     
         if ($this->checkParam('key') === true) {
-            $key = $_GET['key'];
-            if (isset($this->linkdb[$key]) === false) {
-                $this->send(404);
+            $key = $this->get['key'];
+            if (isset($this->linkDb[$key]) === false) {
+                $this->send(Api::HTTP_NOT_FOUND);
                 return;
             }
     
@@ -740,14 +747,14 @@ class Api
                     'editdate' => date('Ymd_His'),
                     'type' => 'DELETED'
             );
-            $this->linkhistorydb[$key] = $linkHistory;
-            $this->linkhistorydb->savedb($GLOBALS['config']['PAGECACHE']);
+            $this->linkHistoryDb[$key] = $linkHistory;
+            $this->linkHistoryDb->savedb($GLOBALS['config']['PAGECACHE']);
                 
-            unset($this->linkdb[$key]);
-            $this->linkdb->savedb($GLOBALS['config']['PAGECACHE']);
-            $this->send(200);
+            unset($this->linkDb[$key]);
+            $this->linkDb->savedb($GLOBALS['config']['PAGECACHE']);
+            $this->send(Api::HTTP_OK);
         } else {
-            $this->send(400, 'key is required to delete an item');
+            $this->send(Api::HTTP_BAD_REQUEST, 'key is required to delete an item');
         }
     }
     
@@ -783,20 +790,19 @@ class Api
     private function sendHttpStatusCode($status)
     {
         $status_text = array(
-                200 => 'OK',
-                201 => 'Created',
-                204 => 'No Content',
-                400 => 'Bad Request',
-                403 => 'Forbidden',
-                404 => 'Not Found',
-                405 => 'Method Not Allowed',
-                500 => 'Internal Server Error',
+                Api::HTTP_OK => 'OK',
+                Api::HTTP_CREATED => 'Created',
+                Api::HTTP_BAD_REQUEST => 'Bad Request',
+                Api::HTTP_FORBIDDEN => 'Forbidden',
+                Api::HTTP_NOT_FOUND => 'Not Found',
+                Api::HTTP_METHOD_NOT_ALLOWED => 'Method Not Allowed',
+                Api::HTTP_INTERNAL_SERVER_ERROR => 'Internal Server Error',
         );
     
         if (isset($status_text[$status]) === true) {
             $header = 'HTTP/1.0 '.$status.' '.$status_text[$status];
         } else {
-            $header = 'HTTP/1.0 500 '.$status_text[500];
+            $header = 'HTTP/1.0 '.Api::HTTP_INTERNAL_SERVER_ERROR.' '.$status_text[500];
         }
     
         header($header);
@@ -815,6 +821,29 @@ class Api
     {
         $headers[] = array($key,$value);
         return $headers;
+    }
+    
+    /**
+     * Convert a string (Format: YYYYMMDD_HHMMSS or YYYYMMDD) to a date
+     * Additionaly add hour, minute, seconds if in format YYYYMMDD  
+     *
+     * @param : $date. String
+     * @param : $hour. Int
+     * @param : $minute. Int
+     * @param : $second. Int
+     *
+     * @return array of headers
+     */
+    function get_date($dateString, $hour = 0, $minute = 0, $second = 0)
+    {
+        $date = null;
+        if (checkDateFormat('Ymd_His', $dateString)) {
+            $date = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $dateString);
+        } else if (checkDateFormat('Ymd', $dateString)) {
+            $date = DateTime::createFromFormat(Api::LINK_DATE_DAY, $dateString);
+            $date->setTime($hour,$minute,$second);
+        }
+        return $date;
     }
     
 }
