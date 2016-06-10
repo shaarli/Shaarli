@@ -40,7 +40,7 @@ $GLOBALS['config']['CONFIG_FILE'] = $GLOBALS['config']['DATADIR'].'/config.php';
 
 // Link datastore
 $GLOBALS['config']['DATASTORE'] = $GLOBALS['config']['DATADIR'].'/datastore.php';
-$GLOBALS['config']['DATASTORE_DELETED'] = $GLOBALS['config']['DATADIR'].'/datastore_delete.php';
+$GLOBALS['config']['DATASTORE_HISTORY'] = $GLOBALS['config']['DATADIR'].'/datastore_history.php';
 
 // Banned IPs
 $GLOBALS['config']['IPBANS_FILENAME'] = $GLOBALS['config']['DATADIR'].'/ipbans.php';
@@ -171,7 +171,7 @@ require_once 'application/Config.php';
 require_once 'application/PluginManager.php';
 require_once 'application/Router.php';
 require_once 'application/Updater.php';
-require_once 'application/LinkDeletedDB.php';
+require_once 'application/LinkHistoryDB.php';
 require_once 'application/Api.php';
 
 // Ensure the PHP version is supported
@@ -775,10 +775,10 @@ function renderPage()
         $GLOBALS['config']['REDIRECTOR_URLENCODE']
     );
 
-    $LINKSDELETEDDB = new LinkDeletedDB(
-    	$GLOBALS['config']['DATASTORE_DELETED'],
-    	isLoggedIn()
-    );
+    $LINKSHISTORYDB = new LinkHistoryDB(
+        $GLOBALS['config']['DATASTORE_HISTORY'],
+        isLoggedIn()
+    );    
     
     $updater = new Updater(
         read_updates_file($GLOBALS['config']['UPDATES_FILE']),
@@ -1298,8 +1298,7 @@ function renderPage()
             'description' => $_POST['lf_description'],
             'private' => (isset($_POST['lf_private']) ? 1 : 0),
             'linkdate' => $linkdate,
-            'tags' => str_replace(',', ' ', $tags),
-            'editdate' => date('Ymd_His')        		
+            'tags' => str_replace(',', ' ', $tags)
         );
         // If title is empty, use the URL as title.
         if ($link['title'] == '') {
@@ -1308,6 +1307,16 @@ function renderPage()
 
         $pluginManager->executeHooks('save_link', $link);
 
+        if ($LINKSDB->getLinkFromUrl($url)){
+            $linkHistory = array(
+                    'linkdate' => $linkdate,
+                    'editdate' => date('Ymd_His'),
+                    'type' => 'UPDATED'
+            );
+            $LINKSHISTORYDB[$linkdate] = $linkHistory;
+            $LINKSHISTORYDB->savedb($GLOBALS['config']['PAGECACHE']);
+        }
+        
         $LINKSDB[$linkdate] = $link;
         $LINKSDB->savedb($GLOBALS['config']['PAGECACHE']);
         pubsubhub();
@@ -1349,13 +1358,14 @@ function renderPage()
         $linkdate=$_POST['lf_linkdate'];
 
         $pluginManager->executeHooks('delete_link', $LINKSDB[$linkdate]);
-
-        $linkDeleted = array(
-        		'linkdate' => $linkdate,
-        		'deletedate' => date('Ymd_His')
+        
+        $linkHistory = array(
+                'linkdate' => $linkdate,
+                'editdate' => date('Ymd_His'),
+                'type' => 'DELETED'
         );
-        $LINKSDELETEDDB[$linkdate] = $linkDeleted;
-        $LINKSDELETEDDB->savedb($GLOBALS['config']['PAGECACHE']);
+        $LINKSHISTORYDB[$linkdate] = $linkHistory;
+        $LINKSHISTORYDB->savedb($GLOBALS['config']['PAGECACHE']);
         
         unset($LINKSDB[$linkdate]);
         $LINKSDB->savedb($GLOBALS['config']['PAGECACHE']); // save to disk
@@ -1403,8 +1413,7 @@ function renderPage()
             'link_is_new' => false,
             'token' => getToken(),
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
-            'tags' => $LINKSDB->allTags(),
-       	    'editdate' => date('Ymd_His'),
+            'tags' => $LINKSDB->allTags()
         );
         $pluginManager->executeHooks('render_editlink', $data);
 

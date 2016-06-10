@@ -1,11 +1,28 @@
 <?php
 /**
- * Data storage for links deleted.
+ * Data storage for links history.
  *
  * This object behaves like an associative array.
  *
+ * Example:
+ *    $myLinks = new LinkHistoryDB();
+ *    echo $myLinks['20110826_161819']['action'];
+ *    foreach ($myLinks as $link)
+ *       echo $link['linkdate'].' edit at date '.$link['editdate'].'; action:'.$link['action'];
+ *
+ * Available keys:
+ *  - linkdate: date of the creation of this entry, in the form YYYYMMDD_HHMMSS
+ *              (e.g.'20110914_192317')
+ *  - date:  date of the edition of this entry, in the form YYYYMMDD_HHMMSS
+ *              (e.g.'20110914_192317')
+ *  - action:  nature of edition (e.g. UPDATED, DELETED)  
+ *
+ * Implements 3 interfaces:
+ *  - ArrayAccess: behaves like an associative array;
+ *  - Countable:   there is a count() method;
+ *  - Iterator:    usable in foreach () loops.
  */
-class LinkDeletedDB implements Iterator, Countable, ArrayAccess
+class LinkHistoryDB implements Iterator, Countable, ArrayAccess
 {
     // Links are stored as a PHP serialized string
     private $_datastore;
@@ -30,14 +47,14 @@ class LinkDeletedDB implements Iterator, Countable, ArrayAccess
     // Position in the $this->_keys array (for the Iterator interface)
     private $_position;
 
-    // Is the user logged in? (used to filter private links)
+    // Is the user logged in?
     private $_loggedIn;
 
 
     /**
-     * Creates a new LinkDB
+     * Creates a new LinkHistoryDB
      *
-     * Checks if the datastore exists; else, attempts to create a dummy one.
+     * Checks if the datastore exists
      *
      * @param string  $datastore       datastore file path.
      * @param boolean $isLoggedIn      is the user logged in?
@@ -65,16 +82,18 @@ class LinkDeletedDB implements Iterator, Countable, ArrayAccess
     {
         // TODO: use exceptions instead of "die"
         if (!$this->_loggedIn) {
-            die('You are not authorized to add a link.');
+            die('You are not logged in.');
         }
         if (empty($value['linkdate'])) {
-            die('Internal Error: A link should always have a linkdate.');
+            die('Internal Error: A link history should always have a linkdate.');
+        }
+        if (empty($value['editdate'])) {
+            die('Internal Error: A link history should always have a date.');
         }
         if (empty($offset)) {
             die('You must specify a key.');
         }
         $this->_links[$offset] = $value;
-        $this->_urls[$value['url']]=$offset;
     }
 
     /**
@@ -184,13 +203,6 @@ class LinkDeletedDB implements Iterator, Countable, ArrayAccess
                        strlen(self::$phpPrefix), -strlen(self::$phpSuffix)))));
         }
 
-        /**
-        $this->_urls = array();
-        foreach ($this->_links as &$link) {
-            // Keep the list of the mapping URLs-->linkdate up-to-date.
-            $this->_urls[$link['url']] = $link['linkdate'];
-       	}
-       	*/
     }
 
     /**
@@ -231,5 +243,34 @@ class LinkDeletedDB implements Iterator, Countable, ArrayAccess
 
         invalidateCaches($pageCacheDir);
     }
+    
+    /**
+     * Filter links according to search parameters.
+     *
+     * @param array  $request type of history (e.g. UPDATED, DELETED)
+     *
+     * @return array filtered links, all links if no suitable filter was provided.
+     */
+    public function filterSearch($request)
+    {
+        if (empty($request)) {
+            $out = array();
+            foreach ($this->_links as $value) {
+                $out[$value['editdate']] = $value;
+            }
+            krsort($out);
+            return $out;
+        } else {
+            $out = array();
+            foreach ($this->_links as $value) {
+                if ($value['type']===$request) {
+                    $out[$value['editdate']] = $value;
+                }
+            }
+            krsort($out);
+            return $out;
+        }
+    }
+    
 
 }
