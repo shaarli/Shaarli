@@ -40,6 +40,7 @@ $GLOBALS['config']['CONFIG_FILE'] = $GLOBALS['config']['DATADIR'].'/config.php';
 
 // Link datastore
 $GLOBALS['config']['DATASTORE'] = $GLOBALS['config']['DATADIR'].'/datastore.php';
+$GLOBALS['config']['DATASTORE_HISTORY'] = $GLOBALS['config']['DATADIR'].'/datastore_history.php';
 
 // Banned IPs
 $GLOBALS['config']['IPBANS_FILENAME'] = $GLOBALS['config']['DATADIR'].'/ipbans.php';
@@ -170,6 +171,8 @@ require_once 'application/Config.php';
 require_once 'application/PluginManager.php';
 require_once 'application/Router.php';
 require_once 'application/Updater.php';
+require_once 'application/LinkHistoryDB.php';
+require_once 'application/Api.php';
 
 // Ensure the PHP version is supported
 try {
@@ -239,6 +242,7 @@ header("Pragma: no-cache");
 if (empty($GLOBALS['title'])) $GLOBALS['title']='Shared links on '.escape(index_url($_SERVER));
 if (empty($GLOBALS['timezone'])) $GLOBALS['timezone']=date_default_timezone_get();
 if (empty($GLOBALS['redirector'])) $GLOBALS['redirector']='';
+if (empty($GLOBALS['api_secret_key'])) $GLOBALS['api_secret_key']='you_should_define_a_secret_key';
 if (empty($GLOBALS['disablesessionprotection'])) $GLOBALS['disablesessionprotection']=false;
 if (empty($GLOBALS['privateLinkByDefault'])) $GLOBALS['privateLinkByDefault']=false;
 if (empty($GLOBALS['titleLink'])) $GLOBALS['titleLink']='?';
@@ -771,6 +775,11 @@ function renderPage()
         $GLOBALS['config']['REDIRECTOR_URLENCODE']
     );
 
+    $LINKSHISTORYDB = new LinkHistoryDB(
+        $GLOBALS['config']['DATASTORE_HISTORY'],
+        isLoggedIn()
+    );    
+    
     $updater = new Updater(
         read_updates_file($GLOBALS['config']['UPDATES_FILE']),
         $GLOBALS,
@@ -923,6 +932,12 @@ function renderPage()
     // Daily page.
     if ($targetPage == Router::$PAGE_DAILY) {
         showDaily($PAGE, $LINKSDB);
+    }
+    
+    // Api page.
+    if ($targetPage == Router::$PAGE_API) {
+    	$api = new Api($_SERVER,$_GET);
+    	exit;
     }
 
     // ATOM and RSS feed.
@@ -1163,6 +1178,7 @@ function renderPage()
             $GLOBALS['title']=$_POST['title'];
             $GLOBALS['titleLink']=$_POST['titleLink'];
             $GLOBALS['redirector']=$_POST['redirector'];
+            $GLOBALS['api_secret_key']=$_POST['api_secret_key'];
             $GLOBALS['disablesessionprotection']=!empty($_POST['disablesessionprotection']);
             $GLOBALS['privateLinkByDefault']=!empty($_POST['privateLinkByDefault']);
             $GLOBALS['config']['ENABLE_RSS_PERMALINKS']= !empty($_POST['enableRssPermalinks']);
@@ -1189,6 +1205,7 @@ function renderPage()
             $PAGE->assign('token',getToken());
             $PAGE->assign('title', empty($GLOBALS['title']) ? '' : $GLOBALS['title'] );
             $PAGE->assign('redirector', empty($GLOBALS['redirector']) ? '' : $GLOBALS['redirector'] );
+            $PAGE->assign('api_secret_key', empty($GLOBALS['api_secret_key']) ? '' : $GLOBALS['api_secret_key'] );
             list($timezone_form, $timezone_js) = generateTimeZoneForm($GLOBALS['timezone']);
             $PAGE->assign('timezone_form', $timezone_form);
             $PAGE->assign('timezone_js',$timezone_js);
@@ -1290,6 +1307,16 @@ function renderPage()
 
         $pluginManager->executeHooks('save_link', $link);
 
+        if ($LINKSDB->getLinkFromUrl($url)){
+            $linkHistory = array(
+                    'linkdate' => $linkdate,
+                    'editdate' => date('Ymd_His'),
+                    'type' => 'UPDATED'
+            );
+            $LINKSHISTORYDB[$linkdate] = $linkHistory;
+            $LINKSHISTORYDB->savedb($GLOBALS['config']['PAGECACHE']);
+        }
+        
         $LINKSDB[$linkdate] = $link;
         $LINKSDB->savedb($GLOBALS['config']['PAGECACHE']);
         pubsubhub();
@@ -1331,7 +1358,15 @@ function renderPage()
         $linkdate=$_POST['lf_linkdate'];
 
         $pluginManager->executeHooks('delete_link', $LINKSDB[$linkdate]);
-
+        
+        $linkHistory = array(
+                'linkdate' => $linkdate,
+                'editdate' => date('Ymd_His'),
+                'type' => 'DELETED'
+        );
+        $LINKSHISTORYDB[$linkdate] = $linkHistory;
+        $LINKSHISTORYDB->savedb($GLOBALS['config']['PAGECACHE']);
+        
         unset($LINKSDB[$linkdate]);
         $LINKSDB->savedb($GLOBALS['config']['PAGECACHE']); // save to disk
 
@@ -1378,7 +1413,7 @@ function renderPage()
             'link_is_new' => false,
             'token' => getToken(),
             'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
-            'tags' => $LINKSDB->allTags(),
+            'tags' => $LINKSDB->allTags()
         );
         $pluginManager->executeHooks('render_editlink', $data);
 
