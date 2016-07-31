@@ -221,3 +221,29 @@ function autoLocale($headerLocale)
     }
     setlocale(LC_ALL, $attempts);
 }
+
+/**
+ * Generates a default API secret.
+ *
+ * Note that the random-ish methods used in this function are predictable,
+ * which makes them NOT suitable for crypto.
+ * BUT the random string is salted with the salt and hashed with the username.
+ * It makes the generated API secret secured enough for Shaarli.
+ *
+ * PHP 7 provides random_int(), designed for cryptography.
+ * More info: http://stackoverflow.com/questions/4356289/php-random-string-generator
+
+ * @param string $username Shaarli login username
+ * @param string $salt     Shaarli password hash salt
+ *
+ * @return string|bool Generated API secret, 12 char length.
+ *                     Or false if invalid parameters are provided (which will make the API unusable).
+ */
+function generate_api_secret($username, $salt)
+{
+    if (empty($username) || empty($salt)) {
+        return false;
+    }
+
+    return str_shuffle(substr(hash_hmac('sha512', uniqid($salt), $username), 10, 12));
+}

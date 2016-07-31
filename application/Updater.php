@@ -215,6 +215,29 @@ class Updater
         }
         return true;
     }
+
+    /**
+     * Initialize API settings:
+     *   - api.enabled: true
+     *   - api.secret: generated secret
+     */
+    public function updateMethodApiSettings()
+    {
+        if ($this->conf->exists('api.secret')) {
+            return true;
+        }
+
+        $this->conf->set('api.enabled', true);
+        $this->conf->set(
+            'api.secret',
+            generate_api_secret(
+                $this->conf->get('credentials.login'),
+                $this->conf->get('credentials.salt')
+            )
+        );
+        $this->conf->write($this->isLoggedIn);
+        return true;
+    }
 }
 
 /**

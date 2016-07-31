@@ -1134,6 +1134,8 @@ function renderPage($conf, $pluginManager)
             $conf->set('feed.rss_permalinks', !empty($_POST['enableRssPermalinks']));
             $conf->set('updates.check_updates', !empty($_POST['updateCheck']));
             $conf->set('privacy.hide_public_links', !empty($_POST['hidePublicLinks']));
+            $conf->set('api.enabled', !empty($_POST['apiEnabled']));
+            $conf->set('api.secret', escape($_POST['apiSecret']));
             try {
                 $conf->write(isLoggedIn());
             }
@@ -1163,6 +1165,8 @@ function renderPage($conf, $pluginManager)
             $PAGE->assign('enable_rss_permalinks', $conf->get('feed.rss_permalinks', false));
             $PAGE->assign('enable_update_check', $conf->get('updates.check_updates', true));
             $PAGE->assign('hide_public_links', $conf->get('privacy.hide_public_links', false));
+            $PAGE->assign('api_enabled', $conf->get('api.enabled', true));
+            $PAGE->assign('api_secret', $conf->get('api.secret'));
             $PAGE->renderPage('configure');
             exit;
         }
@@ -1996,6 +2000,14 @@ function install($conf)
             $conf->set('general.title', 'Shared links on '.escape(index_url($_SERVER)));
         }
         $conf->set('updates.check_updates', !empty($_POST['updateCheck']));
+        $conf->set('api.enabled', !empty($_POST['enableApi']));
+        $conf->set(
+            'api.secret',
+            generate_api_secret(
+                $this->conf->get('credentials.login'),
+                $this->conf->get('credentials.salt')
+            )
+        );
         try {
             // Everything is ok, let's create config file.
             $conf->write(isLoggedIn());

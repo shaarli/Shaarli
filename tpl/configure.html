@@ -80,6 +80,20 @@
           <label for="updateCheck">&nbsp;Notify me when a new release is ready</label>
         </td>
       </tr>
+      <tr>
+        <td valign="top"><b>Enable API</b></td>
+        <td>
+          <input type="checkbox" name="apiEnabled" id="apiEnabled"
+                 {if="$api_enabled"}checked{/if}/>
+          <label for="apiEnabled">&nbsp;Allow third party software to use Shaarli such as mobile application.</label>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top"><b>API secret</b></td>
+        <td>
+          <input type="text" name="apiSecret" id="apiSecret" size="50" value="{$api_secret}" />
+        </td>
+      </tr>
 
       <tr>
         <td></td>
