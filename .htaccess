@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^(.*/?)api/v(\d+)(/.*)$ $1index.php?do=api&version=$2&q=$3&%{QUERY_STRING} [L]

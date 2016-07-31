@@ -43,6 +43,8 @@ class Router
 
     public static $PAGE_SAVE_PLUGINSADMIN = 'save_pluginadmin';
 
+    public static $API = 'api';
+
     /**
      * Reproducing renderPage() if hell, to avoid regression.
      *
@@ -89,6 +91,10 @@ class Router
 
         if (startsWith($query, 'do='. self::$PAGE_FEED_RSS)) {
             return self::$PAGE_FEED_RSS;
+        }
+
+        if (startsWith($query, 'do='. self::$API)) {
+            return self::$API;
         }
 
         // At this point, only loggedin pages.

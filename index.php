@@ -930,11 +930,29 @@ function renderPage($conf, $pluginManager)
         exit;
     }
 
-    // Display openseach plugin (XML)
+    // Display opensearch plugin (XML)
     if ($targetPage == Router::$PAGE_OPENSEARCH) {
         header('Content-Type: application/xml; charset=utf-8');
         $PAGE->assign('serverurl', index_url($_SERVER));
         $PAGE->renderPage('opensearch');
+        exit;
+    }
+
+    // API Call
+    if ($targetPage == Router::$API) {
+        require_once 'application/api/Api.php';
+        require_once 'application/api/ApiUtils.php';
+        require_once 'application/api/ApiResponse.php';
+
+        if (empty($_GET['version']) || $_GET['version'] != '1') {
+            $error = new ApiResponse(400, array(), ApiUtils::formatError(400, 'Unsupported version'));
+            ApiUtils::render($error);
+            exit;
+        }
+
+        $api = new Api($conf, $LINKSDB, $pluginManager);
+        $body = file_get_contents('php://input');
+        ApiUtils::render($api->call($_SERVER, getallheaders(), $_GET, $body));
         exit;
     }
 
