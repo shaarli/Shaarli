@@ -11,7 +11,9 @@ require_once 'Parsedown.php';
 /*
  * If this tag is used on a shaare, the description won't be processed by Parsedown.
  */
-define('NO_MD_TAG', 'nomarkdown');
+if (! defined('NO_MD_TAG')) {
+    define('NO_MD_TAG', 'nomarkdown');
+}
 
 /**
  * Parse linklist descriptions.

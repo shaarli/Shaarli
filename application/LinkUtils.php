@@ -81,7 +81,7 @@ function html_extract_charset($html)
 /**
  * Count private links in given linklist.
  *
- * @param array $links Linklist.
+ * @param array|Countable $links Linklist.
  *
  * @return int Number of private links.
  */
