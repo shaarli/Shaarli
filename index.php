@@ -780,6 +780,15 @@ function renderPage($conf, $pluginManager)
         $PAGE->assign('plugins_' . $name, $plugin_data);
     }
 
+    $viewClass = ucfirst($targetPage) . 'Controller';
+    /** @var Controller $view */
+    $view = new $viewClass($PAGE, $conf, $pluginManager, $LINKSDB, $_SERVER, $_GET, $_POST);
+    if ($view->redirect()) {
+        exit;
+    }
+    $view->render();
+    exit;
+
     // -------- Display login form.
     if ($targetPage == Router::$PAGE_LOGIN)
     {
