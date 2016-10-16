@@ -124,7 +124,7 @@ class FeedBuilder
         $data['last_update'] = $this->getLatestDateFormatted();
         $data['show_dates'] = !$this->hideDates || $this->isLoggedIn;
         // Remove leading slash from REQUEST_URI.
-        $data['self_link'] = $pageaddr . escape(ltrim($this->serverInfo['REQUEST_URI'], '/'));
+        $data['self_link'] = merge_overlap($pageaddr, escape(ltrim($this->serverInfo['REQUEST_URI'], '/')));
         $data['index_url'] = $pageaddr;
         $data['usepermalinks'] = $this->usePermalinks === true;
         $data['links'] = $linkDisplayed;

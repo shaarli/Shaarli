@@ -221,3 +221,22 @@ function autoLocale($headerLocale)
     }
     setlocale(LC_ALL, $attempts);
 }
+
+/**
+ * Merge two overlapping strings
+ * http://stackoverflow.com/a/2267245
+ *
+ * @param string $left
+ * @param string $right
+ */
+function merge_overlap($left, $right)
+{
+    $l = strlen($right);
+
+    // keep checking smaller portions of right
+    while ($l > 0 && substr($left, $l * -1) != substr($right, 0, $l)) {
+        $l--;
+    }
+
+    return $left . substr($right, $l);
+}
