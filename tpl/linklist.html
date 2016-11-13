@@ -84,7 +84,7 @@
                     </div>
                 {/if}
                 <span class="linktitle">
-                    <a href="{$value.real_url}">{$value.title}</a>
+                    <a href="{$value.real_url}" rel="noreferrer">{$value.title}</a>
                 </span>
                 <br>
                 {if="$value.description"}<div class="linkdescription">{$value.description}</div>{/if}
@@ -107,7 +107,7 @@
                     <span>{$value}</span> -
                 {/loop}
 
-                <a href="{$value.real_url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
+                <a href="{$value.real_url}" rel="noreferrer"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
                     {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
