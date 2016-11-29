@@ -253,4 +253,21 @@ class UtilsTest extends PHPUnit_Framework_TestCase
             is_session_id_valid('c0ZqcWF3VFE2NmJBdm1HMVQ0ZHJ3UmZPbTFsNGhkNHI=')
         );
     }
+
+    /**
+     * Test generateSecretApi.
+     */
+    public function testGenerateSecretApi()
+    {
+        $this->assertEquals(12, strlen(generate_api_secret('foo', 'bar')));
+    }
+
+    /**
+     * Test generateSecretApi with invalid parameters.
+     */
+    public function testGenerateSecretApiInvalid()
+    {
+        $this->assertFalse(generate_api_secret('', ''));
+        $this->assertFalse(generate_api_secret(false, false));
+    }
 }

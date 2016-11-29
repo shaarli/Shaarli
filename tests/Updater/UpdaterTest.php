@@ -270,7 +270,7 @@ $GLOBALS[\'privateLinkByDefault\'] = true;';
     public function testEscapeConfig()
     {
         $sandbox = 'sandbox/config';
-        copy(self::$configFile .'.json.php', $sandbox .'.json.php');
+        copy(self::$configFile . '.json.php', $sandbox . '.json.php');
         $this->conf = new ConfigManager($sandbox);
         $title = '<script>alert("title");</script>';
         $headerLink = '<script>alert("header_link");</script>';
@@ -285,6 +285,42 @@ $GLOBALS[\'privateLinkByDefault\'] = true;';
         $this->assertEquals(escape($title), $this->conf->get('general.title'));
         $this->assertEquals(escape($headerLink), $this->conf->get('general.header_link'));
         $this->assertEquals(escape($redirectorUrl), $this->conf->get('redirector.url'));
-        unlink($sandbox .'.json.php');
+        unlink($sandbox . '.json.php');
+    }
+
+    /**
+     * Test updateMethodApiSettings(): create default settings for the API (enabled + secret).
+     */
+    public function testUpdateApiSettings()
+    {
+        $confFile = 'sandbox/config';
+        copy(self::$configFile .'.json.php', $confFile .'.json.php');
+        $conf = new ConfigManager($confFile);
+        $updater = new Updater(array(), array(), $conf, true);
+
+        $this->assertFalse($conf->exists('api.enabled'));
+        $this->assertFalse($conf->exists('api.secret'));
+        $updater->updateMethodApiSettings();
+        $conf->reload();
+        $this->assertTrue($conf->get('api.enabled'));
+        $this->assertTrue($conf->exists('api.secret'));
+        unlink($confFile .'.json.php');
+    }
+
+    /**
+     * Test updateMethodApiSettings(): already set, do nothing.
+     */
+    public function testUpdateApiSettingsNothingToDo()
+    {
+        $confFile = 'sandbox/config';
+        copy(self::$configFile .'.json.php', $confFile .'.json.php');
+        $conf = new ConfigManager($confFile);
+        $conf->set('api.enabled', false);
+        $conf->set('api.secret', '');
+        $updater = new Updater(array(), array(), $conf, true);
+        $updater->updateMethodApiSettings();
+        $this->assertFalse($conf->get('api.enabled'));
+        $this->assertEmpty($conf->get('api.secret'));
+        unlink($confFile .'.json.php');
     }
 }

@@ -475,4 +475,22 @@ You use the community supported version of the original Shaarli project, by Seba
 
         return $linkDays;
     }
+
+    /**
+     * Reload all links from the datastore.
+     */
+    public function refresh()
+    {
+        $this->_readDB();
+    }
+
+    /**
+     * Force the user login state.
+     *
+     * @param boolean $loggedIn true logged in user (can load private links).
+     */
+    public function setLoggedIn($loggedIn)
+    {
+        $this->_loggedIn = $loggedIn;
+    }
 }

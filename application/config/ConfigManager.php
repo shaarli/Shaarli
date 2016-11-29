@@ -20,6 +20,8 @@ class ConfigManager
      */
     protected static $NOT_FOUND = 'NOT_FOUND';
 
+    public static $DEFAULT_PLUGINS = array('qrcode');
+
     /**
      * @var string Config folder.
      */
@@ -308,7 +310,7 @@ class ConfigManager
 
         $this->setEmpty('general.header_link', '?');
         $this->setEmpty('general.links_per_page', 20);
-        $this->setEmpty('general.enabled_plugins', array('qrcode'));
+        $this->setEmpty('general.enabled_plugins', self::$DEFAULT_PLUGINS);
 
         $this->setEmpty('updates.check_updates', false);
         $this->setEmpty('updates.check_updates_branch', 'stable');

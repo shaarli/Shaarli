@@ -950,11 +950,29 @@ function renderPage($conf, $pluginManager)
         exit;
     }
 
-    // Display openseach plugin (XML)
+    // Display opensearch plugin (XML)
     if ($targetPage == Router::$PAGE_OPENSEARCH) {
         header('Content-Type: application/xml; charset=utf-8');
         $PAGE->assign('serverurl', index_url($_SERVER));
         $PAGE->renderPage('opensearch');
+        exit;
+    }
+
+    // API Call
+    if ($targetPage == Router::$API) {
+        require_once 'application/api/Api.php';
+        require_once 'application/api/ApiUtils.php';
+        require_once 'application/api/ApiResponse.php';
+
+        if (empty($_GET['version']) || $_GET['version'] != '1') {
+            $error = new ApiResponse(400, array(), ApiUtils::formatError(400, 'Unsupported version'));
+            ApiUtils::render($error);
+            exit;
+        }
+
+        $api = new Api($conf, $LINKSDB, $pluginManager);
+        $body = file_get_contents('php://input');
+        ApiUtils::render($api->call($_SERVER, getallheaders(), $_GET, $body));
         exit;
     }
 
@@ -1153,6 +1171,8 @@ function renderPage($conf, $pluginManager)
             $conf->set('feed.rss_permalinks', !empty($_POST['enableRssPermalinks']));
             $conf->set('updates.check_updates', !empty($_POST['updateCheck']));
             $conf->set('privacy.hide_public_links', !empty($_POST['hidePublicLinks']));
+            $conf->set('api.enabled', !empty($_POST['apiEnabled']));
+            $conf->set('api.secret', escape($_POST['apiSecret']));
             try {
                 $conf->write(isLoggedIn());
             }
@@ -1181,6 +1201,8 @@ function renderPage($conf, $pluginManager)
             $PAGE->assign('enable_rss_permalinks', $conf->get('feed.rss_permalinks', false));
             $PAGE->assign('enable_update_check', $conf->get('updates.check_updates', true));
             $PAGE->assign('hide_public_links', $conf->get('privacy.hide_public_links', false));
+            $PAGE->assign('api_enabled', $conf->get('api.enabled', true));
+            $PAGE->assign('api_secret', $conf->get('api.secret'));
             $PAGE->renderPage('configure');
             exit;
         }
@@ -1939,6 +1961,14 @@ function install($conf)
             $conf->set('general.title', 'Shared links on '.escape(index_url($_SERVER)));
         }
         $conf->set('updates.check_updates', !empty($_POST['updateCheck']));
+        $conf->set('api.enabled', !empty($_POST['enableApi']));
+        $conf->set(
+            'api.secret',
+            generate_api_secret(
+                $this->conf->get('credentials.login'),
+                $this->conf->get('credentials.salt')
+            )
+        );
         try {
             // Everything is ok, let's create config file.
             $conf->write(isLoggedIn());
