@@ -227,3 +227,13 @@ function autoLocale($headerLocale)
     }
     setlocale(LC_ALL, $attempts);
 }
+
+function getAllTheme()
+{
+    $allTheme = glob('tpl/*', GLOB_ONLYDIR);
+    foreach ($allTheme as $value) {
+        $themes[] = str_replace('tpl/', '', $value);
+    }
+
+    return $themes;
+}

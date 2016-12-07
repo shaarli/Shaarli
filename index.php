@@ -122,12 +122,12 @@ if (isset($_COOKIE['shaarli']) && !is_session_id_valid($_COOKIE['shaarli'])) {
 $conf = new ConfigManager();
 $conf->setEmpty('general.timezone', date_default_timezone_get());
 $conf->setEmpty('general.title', 'Shared links on '. escape(index_url($_SERVER)));
-RainTPL::$tpl_dir = $conf->get('resource.raintpl_tpl'); // template directory
+$conf->setEmpty('resource.theme', 'Default');
+RainTPL::$tpl_dir = 'tpl/'.$conf->get('resource.theme').'/'; // template directory
 RainTPL::$cache_dir = $conf->get('resource.raintpl_tmp'); // cache directory
 
 $pluginManager = new PluginManager($conf);
 $pluginManager->load($conf->get('general.enabled_plugins'));
-
 date_default_timezone_set($conf->get('general.timezone', 'UTC'));
 
 ob_start();  // Output buffering for the page cache.
@@ -1148,6 +1148,7 @@ function renderPage($conf, $pluginManager)
             $conf->set('general.timezone', $tz);
             $conf->set('general.title', escape($_POST['title']));
             $conf->set('general.header_link', escape($_POST['titleLink']));
+            $conf->set('resource.theme', escape($_POST['theme']));
             $conf->set('redirector.url', escape($_POST['redirector']));
             $conf->set('security.session_protection_disabled', !empty($_POST['disablesessionprotection']));
             $conf->set('privacy.default_private_links', !empty($_POST['privateLinkByDefault']));
@@ -1173,6 +1174,8 @@ function renderPage($conf, $pluginManager)
         else // Show the configuration form.
         {
             $PAGE->assign('title', $conf->get('general.title'));
+            $PAGE->assign('theme', $conf->get('resource.theme'));
+            $PAGE->assign('theme_avaible', getAllTheme());
             $PAGE->assign('redirector', $conf->get('redirector.url'));
             list($timezone_form, $timezone_js) = generateTimeZoneForm($conf->get('general.timezone'));
             $PAGE->assign('timezone_form', $timezone_form);

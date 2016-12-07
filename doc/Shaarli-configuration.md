@@ -73,7 +73,7 @@ It might be useful if your IP adress often changes.
 **updates**: File path for the ran updates file.  
 **log**: Log file path.  
 **update_check**: Last update check file path.  
-**raintpl_tpl**: Templates directory.  
+**theme**: Templates directory.  
 **raintpl_tmp**: Template engine cache directory.  
 **thumbnails_cache**: Thumbnails cache directory.  
 **page_cache**: Shaarli's internal cache directory.  
@@ -134,7 +134,7 @@ It might be useful if your IP adress often changes.
         "log": "data\/log.txt",
         "update_check": "data\/lastupdatecheck.txt",
         "raintpl_tmp": "tmp\/",
-        "raintpl_tpl": "tpl\/",
+        "theme": "tpl\/",
         "thumbnails_cache": "cache",
         "page_cache": "pagecache"
     },

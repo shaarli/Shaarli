@@ -18,7 +18,7 @@ _WARNING - This feature is currently being worked on and will be improved in the
     - There should now be a `my-template/` directory under the `tpl/` dir, containing directly all the template files.
 - Edit `data/config.php` to have Shaarli use this template, e.g.
 ```php
-$GLOBALS['config'['RAINTPL_TPL'] = 'tpl/my-template/';]('RAINTPL_TPL']-=-'tpl/my-template/';.html)
+$GLOBALS['config'['theme'] = 'tpl/my-template/';]('theme']-=-'tpl/my-template/';.html)
 ```
 
 ## Community themes & templates

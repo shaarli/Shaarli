@@ -40,7 +40,7 @@ class ConfigPhp implements ConfigIO
         'resource.updates' => 'config.UPDATES_FILE',
         'resource.log' => 'config.LOG_FILE',
         'resource.update_check' => 'config.UPDATECHECK_FILENAME',
-        'resource.raintpl_tpl' => 'config.RAINTPL_TPL',
+        'resource.theme' => 'config.theme',
         'resource.raintpl_tmp' => 'config.RAINTPL_TMP',
         'resource.thumbnails_cache' => 'config.CACHEDIR',
         'resource.page_cache' => 'config.PAGECACHE',

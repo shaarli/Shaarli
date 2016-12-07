@@ -288,7 +288,7 @@ class ApplicationUtilsTest extends PHPUnit_Framework_TestCase
         $conf->set('resource.log', 'data/log.txt');
         $conf->set('resource.page_cache', 'pagecache');
         $conf->set('resource.raintpl_tmp', 'tmp');
-        $conf->set('resource.raintpl_tpl', 'tpl');
+        $conf->set('resource.theme', 'tpl');
         $conf->set('resource.update_check', 'data/lastupdatecheck.txt');
 
         $this->assertEquals(
@@ -311,7 +311,7 @@ class ApplicationUtilsTest extends PHPUnit_Framework_TestCase
         $conf->set('resource.log', 'null/data/log.txt');
         $conf->set('resource.page_cache', 'null/pagecache');
         $conf->set('resource.raintpl_tmp', 'null/tmp');
-        $conf->set('resource.raintpl_tpl', 'null/tpl');
+        $conf->set('resource.theme', 'null/tpl');
         $conf->set('resource.update_check', 'null/data/lastupdatecheck.txt');
         $this->assertEquals(
             array(
