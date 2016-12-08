@@ -149,7 +149,8 @@ class ApplicationUtils
             'application',
             'inc',
             'plugins',
-            'tpl/'.$conf->get('resource.theme'),
+            $conf->get('resource.raintpl_tpl'),
+            $conf->get('resource.raintpl_tpl').'/'.$conf->get('resource.theme'),
         ) as $path) {
             if (! is_readable(realpath($path))) {
                 $errors[] = '"'.$path.'" directory is not readable';
