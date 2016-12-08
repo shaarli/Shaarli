@@ -1158,6 +1158,7 @@ function renderPage($conf, $pluginManager)
             $conf->set('privacy.hide_public_links', !empty($_POST['hidePublicLinks']));
             try {
                 $conf->write(isLoggedIn());
+                invalidateCaches($conf->get('resource.page_cache'));
             }
             catch(Exception $e) {
                 error_log(
@@ -1176,7 +1177,7 @@ function renderPage($conf, $pluginManager)
         {
             $PAGE->assign('title', $conf->get('general.title'));
             $PAGE->assign('theme', $conf->get('resource.theme'));
-            $PAGE->assign('theme_avaible', getAllTheme());
+            $PAGE->assign('theme_available', getAllTheme($conf->get('resource.raintpl_tpl')));
             $PAGE->assign('redirector', $conf->get('redirector.url'));
             list($timezone_form, $timezone_js) = generateTimeZoneForm($conf->get('general.timezone'));
             $PAGE->assign('timezone_form', $timezone_form);

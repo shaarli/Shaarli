@@ -228,11 +228,11 @@ function autoLocale($headerLocale)
     setlocale(LC_ALL, $attempts);
 }
 
-function getAllTheme()
+function getAllTheme($raintpl_tpl)
 {
-    $allTheme = glob('tpl/*', GLOB_ONLYDIR);
+    $allTheme = glob($raintpl_tpl.'/*', GLOB_ONLYDIR);
     foreach ($allTheme as $value) {
-        $themes[] = str_replace('tpl/', '', $value);
+        $themes[] = str_replace($raintpl_tpl.'/', '', $value);
     }
 
     return $themes;

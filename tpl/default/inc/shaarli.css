@@ -103,7 +103,7 @@ strong {
 }
 
 #pageheader #logo {
-    background-image: url('../../images/logo.png');
+    background-image: url('../../../images/logo.png');
     background-repeat: no-repeat;
     float: left;
     margin: 0 10px 0 10px;
@@ -423,7 +423,7 @@ strong {
 }
 
 #linklist li.private {
-    background: url('../../../images/private.png') no-repeat 4px center;
+    background: url('../images/private.png') no-repeat 4px center;
     padding-left: 30px;
 }
 
@@ -455,7 +455,7 @@ strong {
 }
 
 .linkdate a {
-    background-image: url('../../images/calendar.png');
+    background-image: url('../images/calendar.png');
     padding: 2px 0 3px 20px;
     background-repeat: no-repeat;
     text-decoration: none;
@@ -506,7 +506,7 @@ strong {
     height: 20px;
     border-radius: 3px;
     cursor: pointer;
-    background-image: url('../../images/tag_blue.png');
+    background-image: url('../images/tag_blue.png');
     background-repeat: no-repeat;
     background-position: 3px center;
     background-color: #ffffff;
@@ -752,7 +752,7 @@ div.daily {
     /* Background paper texture by BashCorpo:
        http://www.bashcorpo.dk/textures.php
        http://bashcorpo.deviantart.com/art/Grungy-paper-texture-v-5-22966998  */
-    background-image: url("../../images/Paper_texture_v5_by_bashcorpo_w1000.jpg");
+    background-image: url("../images/Paper_texture_v5_by_bashcorpo_w1000.jpg");
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -846,7 +846,7 @@ div.dailyEntryThumbnail {
     width: 100%;
     text-align: center;
     background-color: rgb(128, 128, 128);
-    background: url(../../images/50pc_transparent.png);
+    background: url(../images/50pc_transparent.png);
     padding: 4px 0px 2px 0px;
 }
 
