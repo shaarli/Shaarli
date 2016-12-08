@@ -3,7 +3,7 @@
 
 ## Foreword
 
-**Do not edit configuration options in index.php! Your changes would be lost.** 
+**Do not edit configuration options in index.php! Your changes would be lost.**
 
 Once your Shaarli instance is installed, the file `data/config.json.php` is generated:
 * it contains all settings in JSON format, and can be edited to customize values
@@ -42,7 +42,7 @@ In `data/config.json.php`.
 See also [Plugin System](Plugin-System.html).[](.html)
 
 ### Credentials
- 
+
 > You shouldn't edit those.
 
 **login**: Login username.  
@@ -59,12 +59,12 @@ See also [Plugin System](Plugin-System.html).[](.html)
 
 ### Security
 
-**session_protection_disabled**: Disable session cookie hijacking protection (not recommended). 
+**session_protection_disabled**: Disable session cookie hijacking protection (not recommended).
 It might be useful if your IP adress often changes.  
 **ban_after**: Failed login attempts before being IP banned.  
 **ban_duration**: IP ban duration in seconds.  
 **open_shaarli**: Anyone can add a new link while logged out if enabled.  
-**trusted_proxies**: List of trusted IP which won't be banned after failed login attemps. Useful if Shaarli is behind a reverse proxy. 
+**trusted_proxies**: List of trusted IP which won't be banned after failed login attemps. Useful if Shaarli is behind a reverse proxy.
 
 ### Resources
 
@@ -205,7 +205,6 @@ It might be useful if your IP adress often changes.
 
 ## Additional configuration
 
-The playvideos plugin may require that you adapt your server's 
+The playvideos plugin may require that you adapt your server's
 [Content Security Policy](https://github.com/shaarli/Shaarli/blob/master/plugins/playvideos/README.md#troubleshooting) [](.html)
 configuration to work properly.[(.html)]((.html).html)
-

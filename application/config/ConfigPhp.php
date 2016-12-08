@@ -41,6 +41,7 @@ class ConfigPhp implements ConfigIO
         'resource.log' => 'config.LOG_FILE',
         'resource.update_check' => 'config.UPDATECHECK_FILENAME',
         'resource.raintpl_tpl' => 'config.RAINTPL_TPL',
+        'resource.theme' => 'config.theme',
         'resource.raintpl_tmp' => 'config.RAINTPL_TMP',
         'resource.thumbnails_cache' => 'config.CACHEDIR',
         'resource.page_cache' => 'config.PAGECACHE',
@@ -99,7 +100,7 @@ class ConfigPhp implements ConfigIO
                 $configStr .= '$GLOBALS[\'' . $key . '\'] = ' . var_export($conf[$key], true) . ';' . PHP_EOL;
             }
         }
-        
+
         // Store all $conf['config']
         foreach ($conf['config'] as $key => $value) {
             $configStr .= '$GLOBALS[\'config\'][\''. $key .'\'] = '.var_export($conf['config'][$key], true).';'. PHP_EOL;

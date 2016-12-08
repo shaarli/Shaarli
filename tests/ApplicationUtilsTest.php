@@ -289,6 +289,7 @@ class ApplicationUtilsTest extends PHPUnit_Framework_TestCase
         $conf->set('resource.page_cache', 'pagecache');
         $conf->set('resource.raintpl_tmp', 'tmp');
         $conf->set('resource.raintpl_tpl', 'tpl');
+        $conf->set('resource.theme', 'default');
         $conf->set('resource.update_check', 'data/lastupdatecheck.txt');
 
         $this->assertEquals(
@@ -312,10 +313,12 @@ class ApplicationUtilsTest extends PHPUnit_Framework_TestCase
         $conf->set('resource.page_cache', 'null/pagecache');
         $conf->set('resource.raintpl_tmp', 'null/tmp');
         $conf->set('resource.raintpl_tpl', 'null/tpl');
+        $conf->set('resource.raintpl_theme', 'null/tpl/default');
         $conf->set('resource.update_check', 'null/data/lastupdatecheck.txt');
         $this->assertEquals(
             array(
                 '"null/tpl" directory is not readable',
+                '"null/tpl/default" directory is not readable',
                 '"null/cache" directory is not readable',
                 '"null/cache" directory is not writable',
                 '"null/data" directory is not readable',

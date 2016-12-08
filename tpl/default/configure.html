@@ -19,6 +19,23 @@
         <td><input type="text" name="titleLink" id="titleLink" size="50" value="{$titleLink}"><br/><label
             for="titleLink">(default value is: ?)</label></td>
       </tr>
+
+      <tr>
+        <td><b>Theme:</b></td>
+        <td>
+          <select name="theme" id="theme">
+            {loop="$theme_available"}
+              {if="$value===$theme"}
+                <option selected value="{$value}">{$value|ucfirst}</option>
+              {else}
+                <option value="{$value}">{$value|ucfirst}</option>
+              {/if}
+            {/loop}
+          </select>
+          <label for="theme">(default value is: Default)</label>
+        </td>
+      </tr>
+
       <tr>
         <td><b>Timezone:</b></td>
         <td>{$timezone_form}</td>

@@ -6,9 +6,9 @@
 <link rel="alternate" type="application/rss+xml" href="{$feedurl}?do=rss{$searchcrits}#" title="RSS Feed" />
 <link rel="alternate" type="application/atom+xml" href="{$feedurl}?do=atom{$searchcrits}#" title="ATOM Feed" />
 <link href="images/favicon.ico#" rel="shortcut icon" type="image/x-icon" />
-<link type="text/css" rel="stylesheet" href="../inc/reset.css" />
-<link type="text/css" rel="stylesheet" href="../inc/shaarli.css" />
-{if="is_file('inc/user.css')"}<link type="text/css" rel="stylesheet" href="../inc/user.css" />{/if}
+<link type="text/css" rel="stylesheet" href="inc/reset.css" />
+<link type="text/css" rel="stylesheet" href="inc/shaarli.css" />
+{if="is_file('inc/user.css')"}<link type="text/css" rel="stylesheet" href="inc/user.css#" />{/if}
 {loop="$plugins_includes.css_files"}
 <link type="text/css" rel="stylesheet" href="{$value}#"/>
 {/loop}
