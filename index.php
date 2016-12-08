@@ -123,11 +123,12 @@ $conf = new ConfigManager();
 $conf->setEmpty('general.timezone', date_default_timezone_get());
 $conf->setEmpty('general.title', 'Shared links on '. escape(index_url($_SERVER)));
 $conf->setEmpty('resource.theme', 'default');
-RainTPL::$tpl_dir = 'tpl/'.$conf->get('resource.theme').'/'; // template directory
+RainTPL::$tpl_dir = $conf->get('resource.raintpl_tpl').'/'.$conf->get('resource.theme').'/'; // template directory
 RainTPL::$cache_dir = $conf->get('resource.raintpl_tmp'); // cache directory
 
 $pluginManager = new PluginManager($conf);
 $pluginManager->load($conf->get('general.enabled_plugins'));
+
 date_default_timezone_set($conf->get('general.timezone', 'UTC'));
 
 ob_start();  // Output buffering for the page cache.

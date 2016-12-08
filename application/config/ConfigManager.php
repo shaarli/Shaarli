@@ -189,7 +189,7 @@ class ConfigManager
             'general.title',
             'general.header_link',
             'privacy.default_private_links',
-            'redirector.url'
+            'redirector.url',
         );
 
         // Only logged in user can alter config.
@@ -296,6 +296,7 @@ class ConfigManager
         $this->setEmpty('resource.updates', 'data/updates.txt');
         $this->setEmpty('resource.log', 'data/log.txt');
         $this->setEmpty('resource.update_check', 'data/lastupdatecheck.txt');
+        $this->setEmpty('resource.raintpl_tpl', 'tpl/');
         $this->setEmpty('resource.theme', 'default');
         $this->setEmpty('resource.raintpl_tmp', 'tmp/');
         $this->setEmpty('resource.thumbnails_cache', 'cache');
