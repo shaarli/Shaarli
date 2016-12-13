@@ -333,7 +333,7 @@ strong {
 .paging_current {
     display: inline;
     color: #fff;
-    padding: 0 20 0 20;
+    padding: 0 20px 0 20px;
 }
 
 .paging_older {
@@ -569,7 +569,7 @@ strong {
     position: absolute;
     top: 0;
     right: 0;
-    padding: 2 7 2 7;
+    padding: 2px 7px 2px 7px;
     font-size: 9pt;
 }
 
@@ -737,7 +737,7 @@ strong {
     background-color: transparent;
     background-color: rgba(0, 0, 0, 0.4);
     /* FF3+, Saf3+, Opera 10.10+, Chrome, IE9 */
-    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr=#66000000, endColorstr=#66000000);
+    /* filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#66000000, endColorstr=#66000000); */
     /* IE6IE9 */
     text-shadow: 2px 2px 1px #000000;
 }
@@ -924,13 +924,13 @@ div.dailyNoEntry {
     }
 
     #linklist li {
-	padding: 2 0 10 0;
+	padding: 2px 0 10px 0;
 	border-top: 2px solid #000;
 	clear: both;
     }
 
     #linklist li.private {
-	background-color: none;
+	background-color: transparent;
 	border-left: 0;
     }
 
