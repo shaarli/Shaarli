@@ -5,6 +5,7 @@ body {
     font-size: 10pt;
     background-color: #ffffff;
     word-wrap: break-word;
+    margin: 0;
 }
 
 input, textarea {
@@ -405,6 +406,8 @@ strong {
     background: -ms-linear-gradient(#F2F2F2, #ffffff);
     background: -o-linear-gradient(#F2F2F2, #ffffff);
     background: linear-gradient(#F2F2F2, #ffffff);
+    list-style: none;
+    margin-left: -40px;
 }
 
 /*
