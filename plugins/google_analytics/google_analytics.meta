@@ -1,0 +1,3 @@
+description="A plugin that adds Google Analytics tracking code to Shaarli pages."
+parameters="GA_TRACKINGID"
+parameter.GA_TRACKINGID="Google Analytics Tracking ID"
