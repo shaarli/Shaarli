@@ -16,7 +16,7 @@
         <div id="picwall_container">
             {loop="$linksToDisplay"}
             <div class="picwall_pictureframe">
-        	    {$value.thumbnail}<a href="{$value.real_url}"><span class="info">{$value.title}</span></a>
+        	    {$value.thumbnail}<a href="{$value.real_url}" rel="noreferrer"><span class="info">{$value.title}</span></a>
                 {loop="$value.picwall_plugin"}
                     {$value}
                 {/loop}
