@@ -7,9 +7,6 @@ class CachedPage
     // Directory containing page caches
     private $cacheDir;
 
-    // Full URL of the page to cache -typically the value returned by pageUrl()
-    private $url;
-
     // Should this URL be cached (boolean)?
     private $shouldBeCached;
 
@@ -27,7 +24,6 @@ class CachedPage
     {
         // TODO: check write access to the cache directory
         $this->cacheDir = $cacheDir;
-        $this->url = $url;
         $this->filename = $this->cacheDir.'/'.sha1($url).'.cache';
         $this->shouldBeCached = $shouldBeCached;
     }

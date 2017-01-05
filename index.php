@@ -617,7 +617,7 @@ function showDailyRSS($conf) {
         $tpl->assign('links', $links);
         $tpl->assign('rssdate', escape($dayDate->format(DateTime::RSS)));
         $tpl->assign('hide_timestamps', $conf->get('privacy.hide_timestamps', false));
-        $html = $tpl->draw('dailyrss', $return_string=true);
+        $html = $tpl->draw('dailyrss', true);
 
         echo $html . PHP_EOL;
     }
