@@ -10,7 +10,7 @@ class ConfigJson implements ConfigIO
     /**
      * @inheritdoc
      */
-    function read($filepath)
+    public function read($filepath)
     {
         if (! is_readable($filepath)) {
             return array();
@@ -29,7 +29,7 @@ class ConfigJson implements ConfigIO
     /**
      * @inheritdoc
      */
-    function write($filepath, $conf)
+    public function write($filepath, $conf)
     {
         // JSON_PRETTY_PRINT is available from PHP 5.4.
         $print = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
@@ -46,7 +46,7 @@ class ConfigJson implements ConfigIO
     /**
      * @inheritdoc
      */
-    function getExtension()
+    public function getExtension()
     {
         return '.json.php';
     }

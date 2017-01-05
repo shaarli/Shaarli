@@ -157,7 +157,7 @@ class UrlTest extends PHPUnit_Framework_TestCase
     /**
      * Test add trailing slash.
      */
-    function testAddTrailingSlash()
+    public function testAddTrailingSlash()
     {
         $strOn = 'http://randomstr.com/test/';
         $strOff = 'http://randomstr.com/test';
@@ -168,7 +168,7 @@ class UrlTest extends PHPUnit_Framework_TestCase
     /**
      * Test valid HTTP url.
      */
-    function testUrlIsHttp()
+    public function testUrlIsHttp()
     {
         $url = new Url(self::$baseUrl);
         $this->assertTrue($url->isHttp());
@@ -177,7 +177,7 @@ class UrlTest extends PHPUnit_Framework_TestCase
     /**
      * Test non HTTP url.
      */
-    function testUrlIsNotHttp()
+    public function testUrlIsNotHttp()
     {
         $url = new Url('ftp://save.tld/mysave');
         $this->assertFalse($url->isHttp());
@@ -186,7 +186,7 @@ class UrlTest extends PHPUnit_Framework_TestCase
     /**
      * Test International Domain Name to ASCII conversion
      */
-    function testIdnToAscii()
+    public function testIdnToAscii()
     {
         $ind = 'http://www.académie-française.fr/';
         $expected = 'http://www.xn--acadmie-franaise-npb1a.fr/';

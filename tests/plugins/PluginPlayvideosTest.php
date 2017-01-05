@@ -16,7 +16,7 @@ class PluginPlayvideosTest extends PHPUnit_Framework_TestCase
     /**
      * Reset plugin path
      */
-    function setUp()
+    public function setUp()
     {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
@@ -24,7 +24,7 @@ class PluginPlayvideosTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_linklist hook.
      */
-    function testPlayvideosHeader()
+    public function testPlayvideosHeader()
     {
         $str = 'stuff';
         $data = array($str => $str);
@@ -43,7 +43,7 @@ class PluginPlayvideosTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_footer hook.
      */
-    function testPlayvideosFooter()
+    public function testPlayvideosFooter()
     {
         $str = 'stuff';
         $data = array($str => $str);

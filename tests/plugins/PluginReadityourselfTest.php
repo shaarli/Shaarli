@@ -15,7 +15,7 @@ class PluginReadityourselfTest extends PHPUnit_Framework_TestCase
     /**
      * Reset plugin path
      */
-    function setUp()
+    public function setUp()
     {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
@@ -23,7 +23,7 @@ class PluginReadityourselfTest extends PHPUnit_Framework_TestCase
     /**
      * Test Readityourself init without errors.
      */
-    function testReadityourselfInitNoError()
+    public function testReadityourselfInitNoError()
     {
         $conf = new ConfigManager('');
         $conf->set('plugins.READITYOUSELF_URL', 'value');
@@ -34,7 +34,7 @@ class PluginReadityourselfTest extends PHPUnit_Framework_TestCase
     /**
      * Test Readityourself init with errors.
      */
-    function testReadityourselfInitError()
+    public function testReadityourselfInitError()
     {
         $conf = new ConfigManager('');
         $errors = readityourself_init($conf);
@@ -44,7 +44,7 @@ class PluginReadityourselfTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_linklist hook.
      */
-    function testReadityourselfLinklist()
+    public function testReadityourselfLinklist()
     {
         $conf = new ConfigManager('');
         $conf->set('plugins.READITYOUSELF_URL', 'value');
@@ -72,7 +72,7 @@ class PluginReadityourselfTest extends PHPUnit_Framework_TestCase
     /**
      * Test without config: nothing should happened.
      */
-    function testReadityourselfLinklistWithoutConfig()
+    public function testReadityourselfLinklistWithoutConfig()
     {
         $conf = new ConfigManager('');
         $conf->set('plugins.READITYOUSELF_URL', null);

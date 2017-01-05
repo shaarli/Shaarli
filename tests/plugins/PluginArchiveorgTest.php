@@ -15,7 +15,7 @@ class PluginArchiveorgTest extends PHPUnit_Framework_TestCase
     /**
      * Reset plugin path
      */
-    function setUp()
+    public function setUp()
     {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
@@ -23,7 +23,7 @@ class PluginArchiveorgTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_linklist hook on external links.
      */
-    function testArchiveorgLinklistOnExternalLinks()
+    public function testArchiveorgLinklistOnExternalLinks()
     {
         $str = 'http://randomstr.com/test';
 
@@ -48,13 +48,12 @@ class PluginArchiveorgTest extends PHPUnit_Framework_TestCase
         // plugin data
         $this->assertEquals(1, count($link['link_plugin']));
         $this->assertNotFalse(strpos($link['link_plugin'][0], $str));
-
     }
 
     /**
      * Test render_linklist hook on internal links.
      */
-    function testArchiveorgLinklistOnInternalLinks()
+    public function testArchiveorgLinklistOnInternalLinks()
     {
         $internalLink1 = 'http://shaarli.shaarli/?qvMAqg';
         $internalLinkRealURL1 = '?qvMAqg';
@@ -101,7 +100,6 @@ class PluginArchiveorgTest extends PHPUnit_Framework_TestCase
             )
         );
 
-
         $data = hook_archiveorg_render_linklist($data);
 
         // Case n°1: first link type, public
@@ -136,7 +134,5 @@ class PluginArchiveorgTest extends PHPUnit_Framework_TestCase
         $link = $data['links'][5];
 
         $this->assertArrayNotHasKey('link_plugin', $link);
-
     }
-    
 }

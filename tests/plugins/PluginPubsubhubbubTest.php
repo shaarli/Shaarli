@@ -17,7 +17,7 @@ class PluginPubsubhubbubTest extends PHPUnit_Framework_TestCase
     /**
      * Reset plugin path
      */
-    function setUp()
+    public function setUp()
     {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
@@ -25,7 +25,7 @@ class PluginPubsubhubbubTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_feed hook with an RSS feed.
      */
-    function testPubSubRssRenderFeed()
+    public function testPubSubRssRenderFeed()
     {
         $hub = 'http://domain.hub';
         $conf = new ConfigManager(self::$configFile);
@@ -40,7 +40,7 @@ class PluginPubsubhubbubTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_feed hook with an ATOM feed.
      */
-    function testPubSubAtomRenderFeed()
+    public function testPubSubAtomRenderFeed()
     {
         $hub = 'http://domain.hub';
         $conf = new ConfigManager(self::$configFile);

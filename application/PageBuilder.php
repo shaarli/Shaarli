@@ -25,7 +25,7 @@ class PageBuilder
      *
      * @param ConfigManager $conf Configuration Manager instance (reference).
      */
-    function __construct(&$conf)
+    public function __construct(&$conf)
     {
         $this->tpl = false;
         $this->conf = $conf;

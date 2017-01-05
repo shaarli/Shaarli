@@ -1,29 +1,29 @@
 <?php
 
 /**
- * PlugQrcodeTest.php
+ * PluginQrcodeTest.php
  */
 
 require_once 'plugins/qrcode/qrcode.php';
 require_once 'application/Router.php';
 
 /**
- * Class PlugQrcodeTest
+ * Class PluginQrcodeTest
  * Unit test for the QR-Code plugin
  */
-class PlugQrcodeTest extends PHPUnit_Framework_TestCase
+class PluginQrcodeTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Reset plugin path
      */
-    function setUp() {
+    public function setUp() {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
 
     /**
      * Test render_linklist hook.
      */
-    function testQrcodeLinklist()
+    public function testQrcodeLinklist()
     {
         $str = 'http://randomstr.com/test';
         $data = array(
@@ -49,7 +49,7 @@ class PlugQrcodeTest extends PHPUnit_Framework_TestCase
     /**
      * Test render_footer hook.
      */
-    function testQrcodeFooter()
+    public function testQrcodeFooter()
     {
         $str = 'stuff';
         $data = array($str => $str);

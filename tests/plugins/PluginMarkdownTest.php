@@ -16,7 +16,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Reset plugin path
      */
-    function setUp()
+    public function setUp()
     {
         PluginManager::$PLUGINS_PATH = 'plugins';
     }
@@ -25,7 +25,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
      * Test render_linklist hook.
      * Only check that there is basic markdown rendering.
      */
-    function testMarkdownLinklist()
+    public function testMarkdownLinklist()
     {
         $markdown = '# My title' . PHP_EOL . 'Very interesting content.';
         $data = array(
@@ -45,7 +45,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
      * Test render_daily hook.
      * Only check that there is basic markdown rendering.
      */
-    function testMarkdownDaily()
+    public function testMarkdownDaily()
     {
         $markdown = '# My title' . PHP_EOL . 'Very interesting content.';
         $data = array(
@@ -69,7 +69,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test reverse_text2clickable().
      */
-    function testReverseText2clickable()
+    public function testReverseText2clickable()
     {
         $text = 'stuff http://hello.there/is=someone#here otherstuff';
         $clickableText = text2clickable($text, '');
@@ -80,7 +80,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test reverse_nl2br().
      */
-    function testReverseNl2br()
+    public function testReverseNl2br()
     {
         $text = 'stuff' . PHP_EOL . 'otherstuff';
         $processedText = nl2br($text);
@@ -91,7 +91,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test reverse_space2nbsp().
      */
-    function testReverseSpace2nbsp()
+    public function testReverseSpace2nbsp()
     {
         $text = ' stuff' . PHP_EOL . '  otherstuff  and another';
         $processedText = space2nbsp($text);
@@ -102,7 +102,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test sanitize_html().
      */
-    function testSanitizeHtml()
+    public function testSanitizeHtml()
     {
         $input = '< script src="js.js"/>';
         $input .= '< script attr>alert(\'xss\');</script>';
@@ -119,7 +119,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test the no markdown tag.
      */
-    function testNoMarkdownTag()
+    public function testNoMarkdownTag()
     {
         $str = 'All _work_ and `no play` makes Jack a *dull* boy.';
         $data = array(
@@ -158,7 +158,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test that a close value to nomarkdown is not understand as nomarkdown (previous value `.nomarkdown`).
      */
-    function testNoMarkdownNotExcactlyMatching()
+    public function testNoMarkdownNotExcactlyMatching()
     {
         $str = 'All _work_ and `no play` makes Jack a *dull* boy.';
         $data = array(
@@ -176,7 +176,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     /**
      * Test hashtag links processed with markdown.
      */
-    function testMarkdownHashtagLinks()
+    public function testMarkdownHashtagLinks()
     {
         $md = file_get_contents('tests/plugins/resources/markdown.md');
         $md = format_description($md);
