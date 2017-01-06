@@ -19,6 +19,7 @@ Dockerfile      text
 
 # Exclude from Git archives
 .gitattributes  export-ignore
+.github         export-ignore
 .gitignore      export-ignore
 .travis.yml     export-ignore
 doc/**/*.json   export-ignore

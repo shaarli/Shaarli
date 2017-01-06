@@ -169,6 +169,12 @@ clean:
 	@git clean -df
 	@rm -rf sandbox
 
+### generate the AUTHORS file from Git commit information
+authors:
+	@cp .github/mailmap .mailmap
+	@git shortlog -sne > AUTHORS
+	@rm .mailmap
+
 ### generate Doxygen documentation
 doxygen: clean
 	@rm -rf doxygen
@@ -214,4 +220,4 @@ htmlpages:
 			-o doc/$$base.html $$file; \
 	done;
 
-htmldoc: doc htmlsidebar htmlpages
+htmldoc: authors doc htmlsidebar htmlpages
