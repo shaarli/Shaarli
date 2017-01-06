@@ -204,7 +204,7 @@ function setup_login_state($conf)
 	}
 	// If session does not exist on server side, or IP address has changed, or session has expired, logout.
 	if (empty($_SESSION['uid'])
-        || ($conf->get('security.session_protection_disabled') == false && $_SESSION['ip'] != allIPs())
+        || ($conf->get('security.session_protection_disabled') === false && $_SESSION['ip'] != allIPs())
         || time() >= $_SESSION['expires_on'])
 	{
 	    logout();

@@ -122,7 +122,7 @@ function get_http_response($url, $timeout = 30, $maxBytes = 4194304)
     $content = substr($response, $headSize);
     $headers = array();
     foreach (preg_split('~[\r\n]+~', $rawHeadersLastRedir) as $line) {
-        if (empty($line) or ctype_space($line)) {
+        if (empty($line) || ctype_space($line)) {
             continue;
         }
         $splitLine = explode(': ', $line, 2);

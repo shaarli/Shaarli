@@ -69,7 +69,7 @@ class Updater
             return $updatesRan;
         }
 
-        if ($this->methods == null) {
+        if ($this->methods === null) {
             throw new UpdaterException('Couldn\'t retrieve Updater class methods.');
         }
 
