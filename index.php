@@ -55,7 +55,6 @@ if (! file_exists(__DIR__ . '/vendor/autoload.php')) {
         ."- https://github.com/shaarli/Shaarli/wiki/Download-and-Installation";
     exit;
 }
-require_once 'inc/rain.tpl.class.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
 // Shaarli library
@@ -123,8 +122,18 @@ if (isset($_COOKIE['shaarli']) && !is_session_id_valid($_COOKIE['shaarli'])) {
 $conf = new ConfigManager();
 $conf->setEmpty('general.timezone', date_default_timezone_get());
 $conf->setEmpty('general.title', 'Shared links on '. escape(index_url($_SERVER)));
-RainTPL::$tpl_dir = $conf->get('resource.raintpl_tpl').'/'.$conf->get('resource.theme').'/'; // template directory
-RainTPL::$cache_dir = $conf->get('resource.raintpl_tmp'); // cache directory
+
+use Rain\Tpl;
+use Rain\Tpl\Plugin\PathReplace;
+Tpl::configure(
+    array(
+        'auto_escape' => false,
+        'cache_dir' => $conf->get('resource.raintpl_tmp'),
+        'tpl_dir' => $conf->get('resource.raintpl_tpl').'/'.$conf->get('resource.theme').'/',
+        'sandbox' => false
+    )
+);
+Tpl::registerPlugin(new PathReplace());
 
 $pluginManager = new PluginManager($conf);
 $pluginManager->load($conf->get('general.enabled_plugins'));
@@ -611,7 +620,7 @@ function showDailyRSS($conf) {
         }
 
         // Then build the HTML for this day:
-        $tpl = new RainTPL;
+        $tpl = new Tpl;
         $tpl->assign('title', $conf->get('general.title'));
         $tpl->assign('daydate', $dayDate->getTimestamp());
         $tpl->assign('absurl', $absurl);
@@ -1651,7 +1660,9 @@ function buildLinkList($PAGE,$LINKSDB, $conf, $pluginManager)
         $link['timestamp'] = $link['created']->getTimestamp();
         if (! empty($link['updated'])) {
             $link['updated_timestamp'] = $link['updated']->getTimestamp();
+            $link['updated_meta'] = 'Edited: '. strftime('%c', $link['updated']->getTimestamp());
         } else {
+            $link['updated_meta'] = 'Permalink';
             $link['updated_timestamp'] = '';
         }
         $taglist = preg_split('/\s+/', $link['tags'], -1, PREG_SPLIT_NO_EMPTY);

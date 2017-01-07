@@ -2,7 +2,6 @@
 
 require_once 'application/config/ConfigManager.php';
 require_once 'tests/Updater/DummyUpdater.php';
-require_once 'inc/rain.tpl.class.php';
 
 /**
  * Class UpdaterTest.

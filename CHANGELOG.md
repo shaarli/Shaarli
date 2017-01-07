@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - REST API: see [Shaarli API documentation](http://shaarli.github.io/api-documentation/)
 - The theme can now be selected in the administration page.
+- Upgrade [RainTPL](https://github.com/feulf/raintpl3) to 3.1, install via Composer
+- Update HTML templates to work with RainTPL 3.1
+
+### Removed
+- Remove `inc/rain.tpl.class.php`
 
 ### Changed
 

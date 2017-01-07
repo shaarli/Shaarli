@@ -1,4 +1,6 @@
 <?php
+use Rain\Tpl;
+
 
 /**
  * Class Updater.
@@ -303,8 +305,8 @@ class Updater
         $this->conf->set('resource.theme', trim(str_replace($parent, '', $tplDir), '/'));
         $this->conf->write($this->isLoggedIn);
 
-        // Dependency injection gore
-        RainTPL::$tpl_dir = $tplDir;
+        // Live RainTPL configuration
+        Tpl::configure(array('tpl_dir' => $tplDir));
 
         return true;
     }

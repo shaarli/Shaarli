@@ -1,4 +1,6 @@
 <?php
+use Rain\Tpl;
+
 
 /**
  * This class is in charge of building the final page.
@@ -36,7 +38,7 @@ class PageBuilder
      */
     private function initialize()
     {
-        $this->tpl = new RainTPL();
+        $this->tpl = new Tpl();
 
         try {
             $version = ApplicationUtils::checkUpdate(

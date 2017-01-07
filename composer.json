@@ -13,6 +13,7 @@
         "php": ">=5.5",
         "shaarli/netscape-bookmark-parser": "1.*",
         "erusev/parsedown": "1.6",
+        "rain/raintpl": "3.1.0",
         "slim/slim": "^3.0",
         "pubsubhubbub/publisher": "dev-master"
     },
