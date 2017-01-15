@@ -13,7 +13,7 @@
  *
  * Licence: http://www.opensource.org/licenses/zlib-license.php
  *
- * Requires: PHP 5.3.x
+ * Requires: PHP 5.5.x
  */
 
 // Set 'UTC' as the default timezone if it is not defined in php.ini
@@ -83,7 +83,7 @@ use \Shaarli\ThemeUtils;
 
 // Ensure the PHP version is supported
 try {
-    ApplicationUtils::checkPHPVersion('5.3', PHP_VERSION);
+    ApplicationUtils::checkPHPVersion('5.5', PHP_VERSION);
 } catch(Exception $exc) {
     header('Content-Type: text/plain; charset=utf-8');
     echo $exc->getMessage();
