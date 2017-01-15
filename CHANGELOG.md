@@ -7,18 +7,50 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.9.0](https://github.com/shaarli/Shaarli/releases/tag/v0.9.0) - UNPUBLISHED
 
+This release introduces the REST API, and requires updating HTTP server
+configuration to enable URL rewriting, see:
+- https://shaarli.github.io/api-documentation/
+- https://github.com/shaarli/Shaarli/wiki/Server-configuration
+
 **WARNING**: Shaarli now requires PHP 5.5+.
 
 ### Added
-
-- REST API: see [Shaarli API documentation](http://shaarli.github.io/api-documentation/)
-- The theme can now be selected in the administration page.
+- REST API v1
+    - [Slim](https://www.slimframework.com/) framework
+    - [JSON Web Token](https://jwt.io/introduction/) (JWT) authentication
+    - versioned API endpoints:
+        - `/api/v1/info`: get general information on the Shaarli instance
+        - `/api/v1/links`: get a list of shaared links
+- Allow selecting themes/templates from the configuration page
+- Add plugin placeholders to Atom/RSS feed templates
+- Add OpenSearch to feed templates
+- Add `campaign_` to the URL cleanup pattern list
+- Add an AUTHORS file and Makefile target to list authors from Git commit data
 
 ### Changed
+- Docker: enable nginx URL rewriting for the REST API
+- Move `user.css` to the `data` folder
+- Move default template files to a subfolder (`default`)
+- Move PubSubHub to a dedicated plugin
+- Coding style:
+    - explicit method visibility
+    - safe boolean comparisons
+    - remove unused variables
+- The updater now keeps custom theme preferences
+- Simplify the COPYING information
 
-- Default template files are moved to a subfolder (`default`).
+
+### Removed
+- PHP < 5.5 compatibility
 
 ### Fixed
+- Ignore generated release tarballs
+- Hide default port when behind a reverse proxy
+- Fix a typo in the Markdown plugin description
+- Fix the presence of empty tags for private tags and in search results
+- Fix a fatal error during the install
+- Fix permalink image alignment in daily page
+- Fix the delete button in `editlink`
 
 
 ## [v0.8.1](https://github.com/shaarli/Shaarli/releases/tag/v0.8.1) - 2016-12-12
