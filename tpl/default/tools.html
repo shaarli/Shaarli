@@ -86,8 +86,18 @@
     <div class="tools-item">
       <a title="{'Drag this link to your bookmarks toolbar or right-click it and Bookmark This Link'|t},
                 {'Then click ✚Add Note button anytime to start composing a private Note (text post) to your Shaarli'|t}"
-         href="?private=1&amp;post="
-         class="bookmarklet-link">
+         class="bookmarklet-link"
+         href="javascript:(
+          function(){
+            var%20url%20=%20location.href;
+            var%20title%20=%20document.title%20||%20url;
+            window.open(
+              '{$pageabsaddr}?private=1&amp;post='+
+              '&amp;description='%20+%20encodeURIComponent(document.getSelection())+
+              '&amp;source=bookmarklet','_blank','menubar=no,height=800,width=600,toolbar=no,scrollbars=yes,status=no,dialog=1'
+            );
+          }
+        )();">
         <span class="pure-button pure-u-lg-2-3 pure-u-3-4">✚ {'Add Note'|t}</span>
       </a>
     </div>
@@ -146,4 +156,3 @@
        value="{'Drag this link to your bookmarks toolbar, or right-click it and choose Bookmark This Link'|t}">
 </body>
 </html>
-
