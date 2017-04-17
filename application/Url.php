@@ -130,6 +130,19 @@ class Url
         }
     }
 
+
+    private function removeFirefoxAboutReader($input){
+      $output_array = [];
+      preg_match("%^about://reader\?url=(.*)%", $input, $output_array);
+      if(!empty($output_array)){
+        $extractedUrl = preg_replace("%^about://reader\?url=(.*)%", "$1", $input);
+        $url = urldecode($extractedUrl);
+      }else{
+        $url = $input;
+      }
+      return $url;
+    }
+    
     /**
      * Clean up URL before it's parsed.
      * ie. handle urlencode, url prefixes, etc.
@@ -221,7 +234,8 @@ class Url
     {
         $this->cleanupQuery();
         $this->cleanupFragment();
-        return $this->toString();
+        $url = $this->toString();
+        return $this->removeFirefoxAboutReader($url);
     }
 
     /**
