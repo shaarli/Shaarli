@@ -17,7 +17,7 @@ class NetscapeBookmarkUtils
      *
      * Added fields:
      * - timestamp  link addition date, using the Unix epoch format
-     * - taglist    comma-separated tag list
+     * - taglist    tag list stored in an array
      *
      * @param LinkDB $linkDb         Link datastore
      * @param string $selection      Which links to export: (all|private|public)
@@ -46,7 +46,7 @@ class NetscapeBookmarkUtils
             }
             $date = $link['created'];
             $link['timestamp'] = $date->getTimestamp();
-            $link['taglist'] = str_replace(' ', ',', $link['tags']);
+            $link['taglist'] = implode(',', $link['tags']);
 
             if (startsWith($link['url'], '?') && $prependNoteUrl) {
                 $link['url'] = $indexUrl . $link['url'];
@@ -91,14 +91,16 @@ class NetscapeBookmarkUtils
     /**
      * Imports Web bookmarks from an uploaded Netscape bookmark dump
      *
-     * @param array         $post      Server $_POST parameters
-     * @param array         $files     Server $_FILES parameters
-     * @param LinkDB        $linkDb    Loaded LinkDB instance
+     * @param array  $post              Server $_POST parameters
+     * @param array  $files             Server $_FILES parameters
+     * @param LinkDB $linkDb            Loaded LinkDB instance
+     * @param string $pagecache         Page cache
      * @param ConfigManager $conf      instance
+     * @param string $tagUtil           Instance of TagUtil for tag list parsing
      *
      * @return string Summary of the bookmark import status
      */
-    public static function import($post, $files, $linkDb, $conf)
+    public static function import($post, $files, $linkDb, $conf, $tagUtil)
     {
         $filename = $files['filetoupload']['name'];
         $filesize = $files['filetoupload']['size'];
@@ -115,10 +117,7 @@ class NetscapeBookmarkUtils
         if (empty($post['default_tags'])) {
             $defaultTags = array();
         } else {
-            $defaultTags = preg_split(
-                '/[\s,]+/',
-                escape($post['default_tags'])
-            );
+            $defaultTags = $tagUtil->parseTags($post['default_tags']);
         }
 
         // links are imported as public by default

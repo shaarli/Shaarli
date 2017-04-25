@@ -19,8 +19,8 @@
         </form>
         <form method="GET" class="tagfilter" name="tagfilter">
             <input type="text" tabindex="2" name="searchtags" id="tagfilter_value" placeholder="Filter by tag"
-                {if="!empty($search_tags)"}
-                    value="{$search_tags}"
+                {if="!empty($search_tags_list)"}
+                    value="{$search_tags_list}"
                 {/if}
                 autocomplete="off" class="awesomplete" data-multiple data-minChars="1"
                 data-list="{loop="$tags"}{$key}, {/loop}"
@@ -62,9 +62,8 @@
                 for <em>{$search_term}</em>
             {/if}
             {if="!empty($search_tags)"}
-                {$exploded_tags=explode(' ', $search_tags)}
                 tagged
-                {loop="$exploded_tags"}
+                {loop="$search_tags"}
                     <span class="linktag" title="Remove tag">
                         <a href="?removetag={function="urlencode($value)"}">{$value} <span class="remove">x</span></a>
                     </span>
@@ -120,7 +119,7 @@
                 <a href="{$value.real_url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
-                    {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
+                    {loop="$value.tags"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
                     </div>
                 {/if}
 
@@ -142,6 +141,9 @@
 
     {include="page.footer"}
 
+<script>
+	 var separators = "{$separators}";
+</script>
 <script src="inc/awesomplete.min.js#"></script>
 <script src="inc/awesomplete-multiple-tags.js#"></script>
 <script>

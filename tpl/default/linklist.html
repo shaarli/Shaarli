@@ -31,8 +31,8 @@
     <div class="pure-u-1 pure-u-lg-1-2">
       <form method="GET" class="tagfilter" name="tagfilter">
         <input type="text" tabindex="2" name="searchtags" placeholder="{'Filter by tag'|t}"
-               {if="!empty($search_tags)"}
-               value="{$search_tags}"
+               {if="!empty($search_tags_list)"}
+               value="{$search_tags_list}"
                {/if}
         autocomplete="off" data-multiple data-autofirst data-minChars="1"
         data-list="{loop="$tags"}{$key}, {/loop}"
@@ -98,9 +98,8 @@
           {'for'|t} <em><strong>{$search_term}</strong></em>
         {/if}
         {if="!empty($search_tags)"}
-          {$exploded_tags=explode(' ', $search_tags)}
           {'tagged'|t}
-          {loop="$exploded_tags"}
+          {loop="$search_tags"}
               <span class="label label-tag" title="{'Remove tag'|t}">
                 <a href="?removetag={function="urlencode($value)"}">{$value}<span class="remove"><i class="fa fa-times"></i></span></a>
               </span>
@@ -163,8 +162,8 @@
             {if="$value.tags"}
               <div class="linklist-item-tags">
                 <i class="fa fa-tags"></i>
-                {$tag_counter=count($value.taglist)}
-                {loop="value.taglist"}
+                {$tag_counter=count($value.tags)}
+                {loop="value.tags"}
                   <span class="label label-tag" title="Add tag">
                     <a href="?addtag={$value|urlencode}">{$value}</a>
                   </span>
@@ -248,6 +247,10 @@
   </div>
 </div>
 
+<script>
+    var separators = "{$separators}";
+</script>
 {include="page.footer"}
+
 </body>
 </html>

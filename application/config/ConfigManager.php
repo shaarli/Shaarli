@@ -193,6 +193,7 @@ class ConfigManager
             'general.timezone',
             'general.title',
             'general.header_link',
+            'general.separators',
             'privacy.default_private_links',
             'redirector.url',
         );
@@ -315,6 +316,7 @@ class ConfigManager
         $this->setEmpty('general.header_link', '?');
         $this->setEmpty('general.links_per_page', 20);
         $this->setEmpty('general.enabled_plugins', self::$DEFAULT_PLUGINS);
+        $this->setEmpty('general.separators', ', ');
 
         $this->setEmpty('updates.check_updates', false);
         $this->setEmpty('updates.check_updates_branch', 'stable');

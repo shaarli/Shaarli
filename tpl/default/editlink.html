@@ -35,7 +35,8 @@
         <label for="lf_tags">{'Tags'|t}</label>
       </div>
       <div>
-        <input type="text" name="lf_tags" id="lf_tags" value="{$link.tags}" class="lf_input autofocus"
+        <input type="text" name="lf_tags" id="lf_tags" class="lf_input autofocus"
+          value="{loop="$link.tags"}{$value}{$default_separator} {/loop}"
           data-list="{loop="$tags"}{$key}, {/loop}" data-multiple data-autofirst autocomplete="off" >
       </div>
 

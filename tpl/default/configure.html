@@ -102,6 +102,21 @@
       </div>
       <div class="clear"></div>
       <div class="pure-g">
+        <div class="pure-u-lg-{$ratioLabel} pure-u-1 ">
+          <div class="form-label">
+            <label for="separators">
+              <span class="label-name">{'Tag separators'|t}</span><br>
+              <span class="label-desc">{'You can add multiple separators, e.g.'|t} "<em>,;</em>"</span>
+            </label>
+          </div>
+        </div>
+        <div class="pure-u-lg-{$ratioInput} pure-u-1 ">
+          <div class="form-input">
+            <input type="text" name="separators" id="separators" size="50" value="{$separators}">
+          </div>
+        </div>
+      </div>
+      <div class="pure-g">
         <div class="pure-u-lg-{$ratioLabel} pure-u-{$ratioLabelMobile} ">
           <div class="form-label">
             <label for="disablesessionprotection">

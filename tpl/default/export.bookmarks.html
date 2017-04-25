@@ -6,5 +6,5 @@
 <TITLE>{$pagetitle}</TITLE>
 <H1>Shaarli export of {$selection} bookmarks on {$date}</H1>
 <DL><p>{loop="links"}
-<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.taglist}">{$value.title}</A>{if="$value.description"}{$eol}<DD>{$value.description}{/if}{/loop}
+<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.tags}">{$value.title}</A>{if="$value.description"}{$eol}<DD>{$value.description}{/if}{/loop}
 </DL><p>

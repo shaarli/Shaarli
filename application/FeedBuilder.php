@@ -169,9 +169,9 @@ class FeedBuilder
             $this->latestDate = $upDate;
         }
 
-        $taglist = array_filter(explode(' ', $link['tags']), 'strlen');
-        uasort($taglist, 'strcasecmp');
-        $link['taglist'] = $taglist;
+        $tags = array_filter($link['tags'], 'strlen');
+        uasort($tags, 'strcasecmp');
+        $link['tags'] = $tags;
 
         return $link;
     }

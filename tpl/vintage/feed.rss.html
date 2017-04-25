@@ -27,7 +27,7 @@
           <atom:modified>{$value.up_iso_date}</atom:modified>
         {/if}
         <description><![CDATA[{$value.description}]]></description>
-        {loop="$value.taglist"}
+        {loop="$value.tags"}
           <category domain="{$index_url}?searchtags=">{$value}</category>
         {/loop}
         {loop="$value.feed_plugins"}

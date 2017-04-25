@@ -31,7 +31,7 @@
         <updated>{$value.up_iso_date}</updated>
       {/if}
       <content type="html" xml:lang="{$language}"><![CDATA[{$value.description}]]></content>
-      {loop="$value.taglist"}
+      {loop="$value.tags"}
         <category scheme="{$index_url}?searchtags=" term="{$value|strtolower}" label="{$value}" />
       {/loop}
       {loop="$value.feed_plugins"}

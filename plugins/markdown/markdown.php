@@ -82,13 +82,13 @@ function hook_markdown_render_daily($data, $conf)
 /**
  * Check if noMarkdown is set in tags.
  *
- * @param string $tags tag list
+ * @param array $tags tag list
  *
  * @return bool true if markdown should be disabled on this link.
  */
 function noMarkdownTag($tags)
 {
-    return preg_match('/(^|\s)'. NO_MD_TAG .'(\s|$)/', $tags);
+    return in_array(NO_MD_TAG, $tags);
 }
 
 /**
@@ -108,7 +108,10 @@ function stripNoMarkdownTag($link)
     }
 
     if (!empty($link['tags'])) {
-        str_replace(NO_MD_TAG, '', $link['tags']);
+        $offset = array_search(NO_MD_TAG, $link['tags']);
+        if ($offset !== false) {
+            unset($link['tags'][$offset]);
+        }
     }
 
     return $link;

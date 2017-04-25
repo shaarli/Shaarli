@@ -253,7 +253,7 @@ class Updater
         $linklist = $this->linkDB->filterSearch();
         foreach ($linklist as $key => $link) {
             $link['tags'] = preg_replace('/(^| )\-/', '$1', $link['tags']);
-            $link['tags'] = implode(' ', array_unique(LinkFilter::tagsStrToArray($link['tags'], true)));
+            $link['tags'] = array_unique(LinkFilter::lowerCase($link['tags']));
             $this->linkDB[$key] = $link;
         }
         $this->linkDB->save($this->conf->get('resource.page_cache'));
