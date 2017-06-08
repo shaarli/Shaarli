@@ -247,7 +247,7 @@ class LinkDB implements Iterator, Countable, ArrayAccess
         // Create a dummy database for example
         $this->links = array();
         $link = array(
-            'id' => 1,
+            'id' => 2,
             'title'=>' Shaarli: the personal, minimalist, super-fast, no-database delicious clone',
             'url'=>'https://github.com/shaarli/Shaarli/wiki',
             'description'=>'Welcome to Shaarli! This is your first public bookmark. To edit or delete me, you must first login.
@@ -260,10 +260,10 @@ You use the community supported version of the original Shaarli project, by Seba
             'tags'=>'opensource software'
         );
         $link['shorturl'] = link_small_hash($link['created'], $link['id']);
-        $this->links[1] = $link;
+        $this->links[2] = $link;
 
         $link = array(
-            'id' => 0,
+            'id' => 1,
             'title'=>'My secret stuff... - Pastebin.com',
             'url'=>'http://sebsauvage.net/paste/?8434b27936c09649#bR7XsXhoTiLcqCpQbmOpBi3rq2zzQUC5hBI7ZT1O3x8=',
             'description'=>'Shhhh! I\'m a private link only YOU can see. You can delete me too.',
@@ -272,7 +272,7 @@ You use the community supported version of the original Shaarli project, by Seba
             'tags'=>'secretstuff',
         );
         $link['shorturl'] = link_small_hash($link['created'], $link['id']);
-        $this->links[0] = $link;
+        $this->links[1] = $link;
 
         // Write database to disk
         $this->write();
