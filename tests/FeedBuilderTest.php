@@ -110,6 +110,37 @@ class FeedBuilderTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test HTML escaping in RSS feed.
+     * @group WIP
+     */
+    public function testRSSHTMLEscaping()
+    {
+        $link = array(
+            'id' => 0,
+            'title' => 'A & B',
+            'url' => 'http://dummy',
+            'description' => 'a &amp; b<br>',
+            'private' => 0,
+            'created' => new DateTime(),
+            'updated' => null,
+            'tags' => 'éêè',
+            'shorturl' => 'http://dummy',
+        );
+        file_put_contents(self::$testDatastore,
+            '<?php /* '.base64_encode(gzdeflate(serialize(array($link)))).' */ ?>');
+        self::$linkDB = new LinkDB(self::$testDatastore, true, false);
+
+        $feedBuilder = new FeedBuilder(self::$linkDB, FeedBuilder::$FEED_RSS, self::$serverInfo, null, false);
+        $feedBuilder->setLocale(self::$LOCALE);
+        $data = $feedBuilder->buildData();
+        $link = $data['links'][0];
+
+        $this->assertEquals('A &amp; B', $link['title']);
+        $this->assertEquals('a &amp; b&lt;br&gt;', explode(PHP_EOL, $link['description'])[0]);
+        $this->assertEquals('éêè', $link['taglist'][0]);
+    }
+
+    /**
      * Test buildData with ATOM feed (test only specific to ATOM).
      */
     public function testAtomBuildData()
