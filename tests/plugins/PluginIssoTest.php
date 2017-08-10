@@ -55,6 +55,8 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
                 array(
                     'id' => 12,
                     'url' => $str,
+                    'title' => 'Bookmarked web page title',
+                    'shorturl' => 'abc123',
                     'created' => DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $date),
                 )
             )
@@ -70,11 +72,11 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($data['plugin_end_zone']));
         $this->assertNotFalse(strpos(
             $data['plugin_end_zone'][0],
-            'data-isso-id="'. $data['links'][0]['id'] .'"'
+            'data-isso-id="'. $data['links'][0]['shorturl'] .'"'
         ));
         $this->assertNotFalse(strpos(
             $data['plugin_end_zone'][0],
-            'data-title="'. $data['links'][0]['id'] .'"'
+            'data-title="'. $data['links'][0]['title'] .'"'
         ));
         $this->assertNotFalse(strpos($data['plugin_end_zone'][0], 'embed.min.js'));
     }
