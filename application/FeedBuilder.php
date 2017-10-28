@@ -153,6 +153,7 @@ class FeedBuilder
             $permalink = '<a href="'. $link['guid'] .'" title="'. t('Permalink') .'">'. t('Permalink') .'</a>';
         }
         $link['description']  = format_description($link['description'], '', $pageaddr);
+        $link['description'] = $this->htmlEscape($link['description']);
         $link['description'] .= PHP_EOL .'<br>&#8212; '. $permalink;
 
         $pubDate = $link['created'];
@@ -177,6 +178,11 @@ class FeedBuilder
         $taglist = array_filter(explode(' ', $link['tags']), 'strlen');
         uasort($taglist, 'strcasecmp');
         $link['taglist'] = $taglist;
+
+        if ($this->feedType == self::$FEED_RSS) {
+            $link['title'] = $this->htmlEscape($link['title']);
+            $link['taglist'] = array_map('FeedBuilder::htmlEscape', $link['taglist']);
+        }
 
         return $link;
     }
@@ -244,6 +250,18 @@ class FeedBuilder
 
         $type = ($this->feedType == self::$FEED_RSS) ? DateTime::RSS : DateTime::ATOM;
         return $this->latestDate->format($type);
+    }
+
+    /**
+     * Perform HTML-escaping, ensuring entities are not escaped twice.
+     *
+     * @param string $text Plain text or already HTML-escaped text
+     *
+     * @return string HTML-escaped string
+     */
+    protected function htmlEscape($text) {
+        // We avoid double-encoding
+        return htmlspecialchars($text, ENT_COMPAT|ENT_HTML401, ini_get("default_charset"), false);
     }
 
     /**

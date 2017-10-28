@@ -22,9 +22,9 @@
         {/if}
         {if="$show_dates"}
           <pubDate>{$value.pub_iso_date}</pubDate>
-          <atom:modified>{$value.up_iso_date}</atom:modified>
+          <atom:updated>{$value.up_iso_date}</atom:updated>
         {/if}
-        <description><![CDATA[{$value.description}]]></description>
+        <description>{$value.description}></description>
         {loop="$value.taglist"}
           <category domain="{$index_url}?searchtags=">{$value}</category>
         {/loop}
