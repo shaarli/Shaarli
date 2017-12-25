@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM lsiobase/alpine.armhf:3.6
 MAINTAINER Shaarli Community
 
 RUN apk --update --no-cache add \
