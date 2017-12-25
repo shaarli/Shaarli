@@ -24,6 +24,9 @@ RUN apk --update --no-cache add \
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY php-fpm.conf /etc/php7/php-fpm.conf
 COPY services.d /etc/services.d
+RUN chmod +x /etc/services.d/nginx/run \
+    chmod +x /etc/services.d/php-fpm/run
+
 
 RUN curl -sS https://getcomposer.org/installer | php7 -- --install-dir=/usr/local/bin --filename=composer \
     && rm -rf /etc/php7/php-fpm.d/www.conf \
