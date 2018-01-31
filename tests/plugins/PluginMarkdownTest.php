@@ -57,7 +57,8 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     {
         $markdown = '# My title' . PHP_EOL . 'Very interesting content.';
         $data = array(
-            'linksToDisplay' => arrat(
+            // Raw data
+            'linksToDisplay' => array(
                 // nth link
                 0 => array(
                     'formatedDescription' => $markdown,
@@ -155,6 +156,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($str, $processed['links'][0]['description']);
 
         $data = array(
+            // Raw data
             'linksToDisplay' => array(
                 // nth link
                 0 => array(
