@@ -70,6 +70,19 @@ function hook_markdown_render_feed($data, $conf)
  */
 function hook_markdown_render_daily($data, $conf)
 {
+    // Manipulate raw data
+    foreach ($data['linksToDisplay'] as &$value) {
+        if (!empty($value['tags']) && noMarkdownTag($value['tags'])) {
+            $value = stripNoMarkdownTag($value);
+            continue;
+        }
+        $value['formatedDescription'] = process_markdown(
+            $value['formatedDescription'],
+            $conf->get('security.markdown_escape', true),
+            $conf->get('security.allowed_protocols')
+        );
+    }
+    
     // Manipulate columns data
     foreach ($data['cols'] as &$value) {
         foreach ($value as &$value2) {
