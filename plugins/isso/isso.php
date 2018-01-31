@@ -44,7 +44,7 @@ function hook_isso_render_linklist($data, $conf)
         $link = reset($data['links']);
         $issoHtml = file_get_contents(PluginManager::$PLUGINS_PATH . '/isso/isso.html');
 
-        $isso = sprintf($issoHtml, $issoUrl, $issoUrl, $link['id'], $link['id']);
+        $isso = sprintf($issoHtml, $issoUrl, $issoUrl, $link['shorturl'], $link['title']);
         $data['plugin_end_zone'][] = $isso;
 
         // Hackish way to include this CSS file only when necessary.
