@@ -57,6 +57,12 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
     {
         $markdown = '# My title' . PHP_EOL . 'Very interesting content.';
         $data = array(
+            'linksToDisplay' => arrat(
+                // nth link
+                0 => array(
+                    'formatedDescription' => $markdown,
+                ),
+            ),
             // Columns data
             'cols' => array(
                 // First, second, third.
@@ -70,6 +76,8 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         );
 
         $data = hook_markdown_render_daily($data, $this->conf);
+        $this->assertNotFalse(strpos($data['linksToDisplay'][0]['formatedDescription'], '<h1>'));
+        $this->assertNotFalse(strpos($data['linksToDisplay'][0]['formatedDescription'], '<p>'));
         $this->assertNotFalse(strpos($data['cols'][0][0]['formatedDescription'], '<h1>'));
         $this->assertNotFalse(strpos($data['cols'][0][0]['formatedDescription'], '<p>'));
     }
@@ -147,6 +155,14 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($str, $processed['links'][0]['description']);
 
         $data = array(
+            'linksToDisplay' => array(
+                // nth link
+                0 => array(
+                    'formatedDescription' => $str,
+                    'tags' => NO_MD_TAG,
+                    'taglist' => array(),
+                ),
+            ),
             // Columns data
             'cols' => array(
                 // First, second, third.
@@ -163,6 +179,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
 
         $data = hook_markdown_render_daily($data, $this->conf);
         $this->assertEquals($str, $data['cols'][0][0]['formatedDescription']);
+        $this->assertEquals($str, $data['linksToDisplay'][0]['formatedDescription']);
     }
 
     /**
