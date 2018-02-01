@@ -70,19 +70,18 @@ function hook_markdown_render_feed($data, $conf)
  */
 function hook_markdown_render_daily($data, $conf)
 {
+    //var_dump($data);die;
     // Manipulate columns data
-    foreach ($data['cols'] as &$value) {
-        foreach ($value as &$value2) {
-            if (!empty($value2['tags']) && noMarkdownTag($value2['tags'])) {
-                $value2 = stripNoMarkdownTag($value2);
-                continue;
-            }
-            $value2['formatedDescription'] = process_markdown(
-                $value2['formatedDescription'],
-                $conf->get('security.markdown_escape', true),
-                $conf->get('security.allowed_protocols')
-            );
+    foreach ($data['linksToDisplay'] as &$value) {
+        if (!empty($value['tags']) && noMarkdownTag($value['tags'])) {
+            $value = stripNoMarkdownTag($value);
+            continue;
         }
+        $value['formatedDescription'] = process_markdown(
+            $value['formatedDescription'],
+            $conf->get('security.markdown_escape', true),
+            $conf->get('security.allowed_protocols')
+        );
     }
 
     return $data;
@@ -136,7 +135,7 @@ function hook_markdown_render_includes($data)
         || $data['_PAGE_'] == Router::$PAGE_DAILY
         || $data['_PAGE_'] == Router::$PAGE_EDITLINK
     ) {
-        
+
         $data['css_files'][] = PluginManager::$PLUGINS_PATH . '/markdown/markdown.css';
     }
 

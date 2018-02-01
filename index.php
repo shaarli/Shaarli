@@ -611,6 +611,20 @@ function showDaily($pageBuilder, $LINKSDB, $conf, $pluginManager)
         $linksToDisplay[$key]['timestamp'] =  $link['created']->getTimestamp();
     }
 
+    $dayDate = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $day.'_000000');
+    $data = array(
+        'pagetitle' => $conf->get('general.title') .' - '. format_date($dayDate, false),
+        'linksToDisplay' => $linksToDisplay,
+        'day' => $dayDate->getTimestamp(),
+        'dayDate' => $dayDate,
+        'previousday' => $previousday,
+        'nextday' => $nextday,
+    );
+
+    /* Hook is called before column construction so that plugins don't have
+       to deal with columns. */
+    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => isLoggedIn()));
+
     /* We need to spread the articles on 3 columns.
        I did not want to use a JavaScript lib like http://masonry.desandro.com/
        so I manually spread entries with a simple method: I roughly evaluate the
@@ -618,7 +632,7 @@ function showDaily($pageBuilder, $LINKSDB, $conf, $pluginManager)
     */
     $columns = array(array(), array(), array()); // Entries to display, for each column.
     $fill = array(0, 0, 0);  // Rough estimate of columns fill.
-    foreach($linksToDisplay as $key => $link) {
+    foreach($data['linksToDisplay'] as $key => $link) {
         // Roughly estimate length of entry (by counting characters)
         // Title: 30 chars = 1 line. 1 line is 30 pixels height.
         // Description: 836 characters gives roughly 342 pixel height.
@@ -634,18 +648,7 @@ function showDaily($pageBuilder, $LINKSDB, $conf, $pluginManager)
         $fill[$index] += $length;
     }
 
-    $dayDate = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $day.'_000000');
-    $data = array(
-        'pagetitle' => $conf->get('general.title') .' - '. format_date($dayDate, false),
-        'linksToDisplay' => $linksToDisplay,
-        'cols' => $columns,
-        'day' => $dayDate->getTimestamp(),
-        'dayDate' => $dayDate,
-        'previousday' => $previousday,
-        'nextday' => $nextday,
-    );
-
-    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => isLoggedIn()));
+    $data['cols'] = $columns;
 
     foreach ($data as $key => $value) {
         $pageBuilder->assign($key, $value);

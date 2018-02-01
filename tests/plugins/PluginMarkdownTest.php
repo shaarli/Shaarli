@@ -58,20 +58,17 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $markdown = '# My title' . PHP_EOL . 'Very interesting content.';
         $data = array(
             // Columns data
-            'cols' => array(
-                // First, second, third.
+            'linksToDisplay' => array(
+                // nth link
                 0 => array(
-                    // nth link
-                    0 => array(
-                        'formatedDescription' => $markdown,
-                    ),
+                    'formatedDescription' => $markdown,
                 ),
             ),
         );
 
         $data = hook_markdown_render_daily($data, $this->conf);
-        $this->assertNotFalse(strpos($data['cols'][0][0]['formatedDescription'], '<h1>'));
-        $this->assertNotFalse(strpos($data['cols'][0][0]['formatedDescription'], '<p>'));
+        $this->assertNotFalse(strpos($data['linksToDisplay'][0]['formatedDescription'], '<h1>'));
+        $this->assertNotFalse(strpos($data['linksToDisplay'][0]['formatedDescription'], '<p>'));
     }
 
     /**
@@ -148,21 +145,18 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
 
         $data = array(
             // Columns data
-            'cols' => array(
-                // First, second, third.
+            'linksToDisplay' => array(
+                // nth link
                 0 => array(
-                    // nth link
-                    0 => array(
-                        'formatedDescription' => $str,
-                        'tags' => NO_MD_TAG,
-                        'taglist' => array(),
-                    ),
+                    'formatedDescription' => $str,
+                    'tags' => NO_MD_TAG,
+                    'taglist' => array(),
                 ),
             ),
         );
 
         $data = hook_markdown_render_daily($data, $this->conf);
-        $this->assertEquals($str, $data['cols'][0][0]['formatedDescription']);
+        $this->assertEquals($str, $data['linksToDisplay'][0]['formatedDescription']);
     }
 
     /**
