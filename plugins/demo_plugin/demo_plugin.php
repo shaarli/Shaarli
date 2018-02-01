@@ -378,17 +378,13 @@ function hook_demo_plugin_render_daily($data)
 
 
     // Manipulate columns data
-    foreach ($data['cols'] as &$value) {
-        foreach ($value as &$value2) {
-            $value2['formatedDescription'] .= ' ಠ_ಠ';
-        }
+    foreach ($data['linksToDisplay'] as &$value) {
+        $value['formatedDescription'] .= ' ಠ_ಠ';
     }
 
     // Add plugin content at the end of each link
-    foreach ($data['cols'] as &$value) {
-        foreach ($value as &$value2) {
-            $value2['link_plugin'][] = 'DEMO';
-        }
+    foreach ($data['linksToDisplay'] as &$value) {
+        $value['link_plugin'][] = 'DEMO';
     }
 
     return $data;
