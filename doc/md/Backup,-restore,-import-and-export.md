@@ -38,6 +38,12 @@ See [this issue](https://github.com/sebsauvage/Shaarli/issues/146) for import tw
 
 To correctly import the tags from a [SemanticScuttle](http://semanticscuttle.sourceforge.net/) HTML export, edit the HTML file before importing and replace all occurences of `tags=` (lowercase) to `TAGS=` (uppercase).
 
+Also, be sure to have the correct capitalization for the DOCTYPE string:
+
+```
+<!DOCTYPE NETSCAPE-Bookmark-file-1>
+```
+
 ### Scuttle
 
 Shaarli cannot import data directly from [Scuttle](https://github.com/scronide/scuttle).
