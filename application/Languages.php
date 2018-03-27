@@ -177,6 +177,7 @@ class Languages
             'auto' => t('Automatic'),
             'en' => t('English'),
             'fr' => t('French'),
+            'de' => t('German'),
         ];
     }
 }
