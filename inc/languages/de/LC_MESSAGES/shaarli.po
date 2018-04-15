@@ -358,8 +358,8 @@ msgstr[1] "Der Tag wurde aus den Links %d entfernt."
 #, php-format
 msgid "The tag was renamed in %d link."
 msgid_plural "The tag was renamed in %d links."
-msgstr[0] "Der Tage wurde im Link %d umbenannt."
-msgstr[1] "Der Tage wurde in den  Links %d umbenannt."
+msgstr[0] "Der Tag wurde im Link %d umbenannt."
+msgstr[1] "Der Tag wurde in den Links %d umbenannt."
 
 #: index.php:1181 tmp/addlink.b91ef64efc3688266305ea9b42e5017e.rtpl.php:13
 msgid "Shaare a new link"
