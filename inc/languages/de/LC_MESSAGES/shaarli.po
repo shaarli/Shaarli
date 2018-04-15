@@ -1309,7 +1309,7 @@ msgid ""
 "Drag this link to your bookmarks toolbar, or right-click it and choose "
 "Bookmark This Link"
 msgstr ""
-"Ziehe diese Link in deine Lesezeichen-Symbolleiste oder klicke mit der "
+"Ziehe diesen Link in deine Lesezeichen-Symbolleiste oder klicke mit der "
 "rechten Maustaste darauf und wähle \"Speichere diesen Link als Lesezeichen\""
 
 #, fuzzy
