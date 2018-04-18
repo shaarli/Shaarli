@@ -1,8 +1,8 @@
 To install Shaarli, simply place the files in a directory under your webserver's
 Document Root (or directly at the document root).
 
-Also, please make sure your server meets the [requirements](Server-requirements)
-and is properly [configured](Server-configuration).
+Also, please make sure your server meets the [requirements](Server-requirements.md)
+and is properly [configured](Server-configuration.md).
 
 Multiple releases branches are available:
 
@@ -122,4 +122,4 @@ Setup your Shaarli installation, and it's ready to use!
 
 ## Updating Shaarli
 
-See [Upgrade and Migration](Upgrade-and-migration)
+See [Upgrade and Migration](Upgrade-and-migration.md)
