@@ -22,6 +22,11 @@ use Slim\Http\Response;
 class ApiMiddleware
 {
     /**
+     * @var int Maximum duration for the POST/PUT/DELETE requests lock
+     */
+    const LOCK_DURATION = 20;
+
+    /**
      * @var int JWT token validity in seconds (9 min).
      */
     public static $TOKEN_DURATION = 540;
@@ -37,6 +42,11 @@ class ApiMiddleware
     protected $conf;
 
     /**
+     * @var string Datastore lock file path
+     */
+    protected $lockFilePath;
+
+    /**
      * ApiMiddleware constructor.
      *
      * @param Container $container instance.
@@ -45,6 +55,7 @@ class ApiMiddleware
     {
         $this->container = $container;
         $this->conf = $this->container->get('conf');
+        $this->lockFilePath = $this->conf->get('resources/datastore') .'.lock';
         $this->setLinkDb($this->conf);
     }
 
@@ -64,7 +75,9 @@ class ApiMiddleware
     {
         try {
             $this->checkRequest($request);
+            $this->preventConcurrentRequest($request);
             $response = $next($request, $response);
+            $this->unlockDatastore($request);
         } catch(ApiException $e) {
             $e->setResponse($response);
             $e->setDebug($this->conf->get('dev.debug', false));
@@ -134,5 +147,51 @@ class ApiMiddleware
             $conf->get('redirector.encode_url')
         );
         $this->container['db'] = $linkDb;
+    }
+
+    /**
+     * Prevent concurrent request which modify the datastore.
+     * So we wait for the `.lock` file to disappear, or its timeout to be reached,
+     * then only we recreate the lock file, reload the datastore and process the request.
+     *
+     * It ignores GET requests.
+     *
+     * @see https://github.com/shaarli/Shaarli/issues/1132
+     *
+     * @param Request $request
+     */
+    protected function preventConcurrentRequest($request)
+    {
+        if (! in_array($request->getMethod(), ['POST', 'PUT', 'DELETE'])) {
+            return;
+        }
+
+        while (is_readable($this->lockFilePath)) {
+            $lockTs = (new \DateTime(file_get_contents($this->lockFilePath)))->getTimestamp();
+            $currentTs = (new \DateTime())->getTimestamp();
+            if (($currentTs - $lockTs) > self::LOCK_DURATION) {
+                break;
+            }
+            usleep(250000); // 250ms
+        }
+
+        file_put_contents($this->lockFilePath, new \DateTime());
+        $this->setLinkDb($this->conf);
+    }
+
+    /**
+     * Remove the `.lock` file when the request is handled.
+     *
+     * @param Request $request
+     */
+    protected function unlockDatastore($request)
+    {
+        if (! in_array($request->getMethod(), ['POST', 'PUT', 'DELETE'])) {
+            return;
+        }
+
+        if (is_readable($this->lockFilePath)) {
+            unlink($this->lockFilePath);
+        }
     }
 }
