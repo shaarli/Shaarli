@@ -25,6 +25,10 @@ _It is designed to be personal (single-user), fast and handy._
 - [Change log](CHANGELOG.md)
 - [Bugs/Feature requests/Discussion](https://github.com/shaarli/Shaarli/issues/)
 
+#### Install with Yunohost
+Shaarli is available as a [Yunohost](https://yunohost.org) app: [Shaarli_ynh](https://github.com/YunoHost-Apps/shaarli_ynh).
+[![Install Shaarli with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=shaarli)
+
 ### Demo
 
 You can use this [public demo instance of Shaarli](https://demo.shaarli.org).
