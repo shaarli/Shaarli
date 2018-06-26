@@ -35,6 +35,7 @@ doc/**/*.json     export-ignore
 doc/**/*.md       export-ignore
 .docker/          export-ignore
 .dockerignore     export-ignore
+docker-compose.*  export-ignore
 Dockerfile*       export-ignore
 Doxyfile          export-ignore
 Makefile          export-ignore

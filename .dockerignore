@@ -4,6 +4,10 @@
 .github
 tests
 
+# Docker Compose resources
+docker-compose.env
+docker-compose.yml
+
 # Shaarli runtime resources
 cache/*
 data/*

@@ -1,0 +1,50 @@
+---
+version: '3'
+
+networks:
+  http-proxy:
+
+volumes:
+  traefik-acme:
+  shaarli-data:
+
+services:
+  shaarli:
+    image: shaarli/shaarli:master
+    build: ./
+    networks:
+      - http-proxy
+    volumes:
+      - shaarli-data:/var/www/shaarli/data
+    labels:
+      traefik.domain: "${SHAARLI_VIRTUAL_HOST}"
+      traefik.backend: shaarli
+      traefik.frontend.rule: "Host:${SHAARLI_VIRTUAL_HOST}"
+
+  traefik:
+    image: traefik
+    command:
+      - "--defaultentrypoints=http,https"
+      - "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
+      - "--entrypoints=Name:https Address::443 TLS"
+      - "--retry"
+      - "--docker"
+      - "--docker.domain=docker.localhost"
+      - "--docker.exposedbydefault=true"
+      - "--docker.watch=true"
+      - "--acme"
+      - "--acme.domains=${SHAARLI_VIRTUAL_HOST}"
+      - "--acme.email=${SHAARLI_LETSENCRYPT_EMAIL}"
+      - "--acme.entrypoint=https"
+      - "--acme.onhostrule=true"
+      - "--acme.storage=/acme/acme.json"
+      - "--acme.httpchallenge"
+      - "--acme.httpchallenge.entrypoint=http"
+    networks:
+      - http-proxy
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/acme
