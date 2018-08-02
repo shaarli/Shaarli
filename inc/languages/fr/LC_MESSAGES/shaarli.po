@@ -48,7 +48,7 @@ msgstr "le fichier n'est pas accessible en écriture"
 #: application/Cache.php:16
 #, php-format
 msgid "Cannot purge %s: no directory"
-msgstr "Impossible de purger %s: le répertoire n'existe pas"
+msgstr "Impossible de purger %s : le répertoire n'existe pas"
 
 #: application/FeedBuilder.php:151
 msgid "Direct link"
@@ -98,7 +98,7 @@ msgstr "Vous devez utiliser un entier comme clé."
 
 #: application/LinkDB.php:145
 msgid "Array offset and link ID must be equal."
-msgstr "La clé du tableau et l'ID du lien doivent être égaux."
+msgstr "La clé du tableau et l'ID du lien doivent être identiques."
 
 #: application/LinkDB.php:251
 #: tmp/page.footer.b91ef64efc3688266305ea9b42e5017e.rtpl.php:14
@@ -108,7 +108,7 @@ msgstr "La clé du tableau et l'ID du lien doivent être égaux."
 msgid ""
 "The personal, minimalist, super-fast, database free, bookmarking service"
 msgstr ""
-"Le gestionnaire de marque-page personnel, minimaliste, et sans base de "
+"Le gestionnaire de marque-pages personnel, minimaliste, et sans base de "
 "données"
 
 #: application/LinkDB.php:253
@@ -125,11 +125,11 @@ msgstr ""
 "Bienvenue sur Shaarli ! Ceci est votre premier marque-page public. Pour me "
 "modifier ou me supprimer, vous devez d'abord vous connecter.\n"
 "\n"
-"Pour apprendre comment utiliser Shaarli, consultez le lien « Documentation » "
+"Pour apprendre à utiliser Shaarli, consultez le lien « Documentation » "
 "en bas de page.\n"
 "\n"
 "Vous utilisez la version supportée par la communauté du projet original "
-"Shaarli, de Sébastien Sauvage."
+"Shaarli de Sébastien Sauvage."
 
 #: application/LinkDB.php:267
 msgid "My secret stuff... - Pastebin.com"
@@ -185,8 +185,8 @@ msgid ""
 "php-gd extension must be loaded to use thumbnails. Thumbnails are now "
 "disabled. Please reload the page."
 msgstr ""
-"php-gd extension must be loaded to use thumbnails. Thumbnails are now "
-"disabled. Please reload the page."
+"l'extension php-gd doit être chargée pour utiliser les miniatures. Les miniatures sont désormais "
+"désactivées. Rechargez la page."
 
 #: application/Updater.php:86
 msgid "Couldn't retrieve Updater class methods."
@@ -286,7 +286,7 @@ msgstr "NON. Vous êtes banni pour le moment. Revenez plus tard."
 
 #: index.php:273
 msgid "Wrong login/password."
-msgstr "Nom d'utilisateur ou mot de passe incorrects."
+msgstr "Nom d'utilisateur ou mot de passe incorrect(s)."
 
 #: index.php:483 tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:46
 #: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:46
@@ -343,11 +343,11 @@ msgstr "Votre mot de passe a été modifié"
 #: tmp/changepassword.b91ef64efc3688266305ea9b42e5017e.rtpl.php:13
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:29
 msgid "Change password"
-msgstr "Modification du mot de passe"
+msgstr "Modifier le mot de passe"
 
 #: index.php:1043
 msgid "Configuration was saved."
-msgstr "La configuration a été sauvegardé."
+msgstr "La configuration a été sauvegardée."
 
 #: index.php:1068 tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:24
 msgid "Configure"
@@ -411,7 +411,7 @@ msgstr ""
 #: index.php:1471 tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:26
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:22
 msgid "Plugin administration"
-msgstr "Administration des extensions"
+msgstr "Administration des plugins"
 
 #: index.php:1523 tmp/thumbnails.b91ef64efc3688266305ea9b42e5017e.rtpl.php:14
 msgid "Thumbnails update"
@@ -431,9 +431,9 @@ msgid ""
 "custom hostname without a dot causes cookie storage to fail. We recommend "
 "accessing your server via it's IP address or Fully Qualified Domain Name.<br>"
 msgstr ""
-"<pre>Les sesssions ne semble pas fonctionner sur ce serveur.<br>Assurez vous "
+"<pre>Les sesssions ne semblent pas fonctionner sur ce serveur.<br>Assurez vous "
 "que la variable « session.save_path » est correctement définie dans votre "
-"fichier de configuration PHP, et que vous y avez les droits d'écriture."
+"fichier de configuration PHP, et que vous avez les droits d'écriture dessus."
 "<br>Ce paramètre pointe actuellement sur %s.<br>Sur certains navigateurs, "
 "accéder à votre serveur depuis un nom d'hôte comme « localhost » ou autre "
 "nom personnalisé sans point '.' entraine l'échec de la sauvegarde des "
@@ -455,7 +455,7 @@ msgstr "Shaare"
 
 #: plugins/addlink_toolbar/addlink_toolbar.php:50
 msgid "Adds the addlink input on the linklist page."
-msgstr "Ajout le formulaire d'ajout de liens sur la page principale."
+msgstr "Ajoute le formulaire d'ajout de liens sur la page principale."
 
 #: plugins/archiveorg/archiveorg.php:23
 msgid "View on archive.org"
@@ -471,7 +471,7 @@ msgid ""
 "developers."
 msgstr ""
 "Une extension de démonstration couvrant tous les cas d'utilisation pour les "
-"designers et les développeurs."
+"designers de thèmes et les développeurs d'extensions."
 
 #: plugins/isso/isso.php:20
 msgid ""
@@ -484,7 +484,7 @@ msgstr ""
 #: plugins/isso/isso.php:63
 msgid "Let visitor comment your shaares on permalinks with Isso."
 msgstr ""
-"Permet aux visiteurs de commenter vos shaares sur les permaliens avec Isso."
+"Permettre aux visiteurs de commenter vos shaares sur les permaliens avec Isso."
 
 #: plugins/isso/isso.php:64
 msgid "Isso server URL (without 'http://')"
@@ -578,7 +578,7 @@ msgstr "Active la publication de flux vers PubSubHubbub."
 
 #: plugins/qrcode/qrcode.php:69 plugins/wallabag/wallabag.php:68
 msgid "For each link, add a QRCode icon."
-msgstr "Pour chaque liens, ajouter une icône de QRCode."
+msgstr "Pour chaque lien, ajouter une icône de QRCode."
 
 #: plugins/wallabag/wallabag.php:21
 msgid ""
@@ -752,7 +752,7 @@ msgstr "Activer l'API REST"
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:170
 msgid "Allow third party software to use Shaarli such as mobile application"
 msgstr ""
-"Permets aux applications tierces d'utiliser Shaarli, par exemple les "
+"Permet aux applications tierces d'utiliser Shaarli, par exemple les "
 "applications mobiles"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:263
@@ -854,7 +854,7 @@ msgstr "Privé"
 
 #: tmp/editlink.b91ef64efc3688266305ea9b42e5017e.rtpl.php:72
 msgid "Apply Changes"
-msgstr "Appliquer"
+msgstr "Appliquer les changements"
 
 #: tmp/export.b91ef64efc3688266305ea9b42e5017e.rtpl.php:16
 msgid "Export Database"
@@ -870,7 +870,7 @@ msgstr "Publics"
 
 #: tmp/export.b91ef64efc3688266305ea9b42e5017e.rtpl.php:52
 msgid "Prepend note permalinks with this Shaarli instance's URL"
-msgstr "Préfixer les liens de notes avec l'URL de l'instance de Shaarli"
+msgstr "Préfixer les liens de note avec l'URL de l'instance de Shaarli"
 
 #: tmp/export.b91ef64efc3688266305ea9b42e5017e.rtpl.php:53
 msgid "Useful to import bookmarks in a web browser"
@@ -1066,7 +1066,7 @@ msgstr "Liens par page"
 msgid ""
 "You have been banned after too many failed login attempts. Try again later."
 msgstr ""
-"Vous avez été banni après trop d'échec d'authentification. Merci de "
+"Vous avez été banni après trop d'échecs d'authentification. Merci de "
 "réessayer plus tard."
 
 #: tmp/loginform.b91ef64efc3688266305ea9b42e5017e.rtpl.php:41
@@ -1251,7 +1251,7 @@ msgstr "Changer les paramètres de Shaarli : titre, fuseau horaire, etc."
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:17
 msgid "Configure your Shaarli"
-msgstr "Conguration de Shaarli"
+msgstr "Configurer Shaarli"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:21
 msgid "Enable, disable and configure plugins"
@@ -1259,19 +1259,19 @@ msgstr "Activer, désactiver et configurer les extensions"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:28
 msgid "Change your password"
-msgstr "Modification du mot de passe"
+msgstr "Modifier le mot de passe"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:35
 msgid "Rename or delete a tag in all links"
-msgstr "Rename or delete a tag in all links"
+msgstr "Renommer ou supprimer un tag dans tous les liens"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:41
 msgid ""
 "Import Netscape HTML bookmarks (as exported from Firefox, Chrome, Opera, "
-"delicious...)"
+"delicious…)"
 msgstr ""
 "Importer des marques pages au format Netscape HTML (comme exportés depuis "
-"Firefox, Chrome, Opera, delicious...)"
+"Firefox, Chrome, Opera, delicious…)"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:42
 msgid "Import links"
@@ -1280,10 +1280,10 @@ msgstr "Importer des liens"
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:47
 msgid ""
 "Export Netscape HTML bookmarks (which can be imported in Firefox, Chrome, "
-"Opera, delicious...)"
+"Opera, delicious…)"
 msgstr ""
 "Exporter les marques pages au format Netscape HTML (comme exportés depuis "
-"Firefox, Chrome, Opera, delicious...)"
+"Firefox, Chrome, Opera, delicious…)"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:48
 msgid "Export database"
@@ -1298,13 +1298,13 @@ msgid ""
 "Drag one of these button to your bookmarks toolbar or right-click it and "
 "\"Bookmark This Link\""
 msgstr ""
-"Glisser un de ces bouttons dans votre barre de favoris ou cliquer droit "
+"Glisser un de ces boutons dans votre barre de favoris ou cliquer droit "
 "dessus et « Ajouter aux favoris »"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:82
 msgid "then click on the bookmarklet in any page you want to share."
 msgstr ""
-"puis cliquer sur le marque page depuis un site que vous souhaitez partager."
+"puis cliquer sur le marque-page depuis un site que vous souhaitez partager."
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:86
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:110
@@ -1450,7 +1450,7 @@ msgstr ""
 #~ "\n"
 
 #~ msgid "Sessions do not seem to work correctly on your server."
-#~ msgstr "Les sessions ne semblent "
+#~ msgstr "Les sessions ne semblent pas fonctionner correctement sur votre serveur."
 
 #~ msgid "Tag was renamed in "
 #~ msgstr "Le tag a été renommé dans "
