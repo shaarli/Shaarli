@@ -15,6 +15,7 @@ Using one of the following methods:
 - by downloading Github archives
 - by cloning the Git repository
 - using Docker: [see the documentation](docker/shaarli-images.md)
+- using the Shaarli app on Cloudron: [see the instructions](https://cloudron.io/store/com.github.shaarli.html)
 
 --------------------------------------------------------------------------------
 
