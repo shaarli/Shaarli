@@ -47,6 +47,8 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $data = hook_markdown_render_linklist($data, $this->conf);
         $this->assertNotFalse(strpos($data['links'][0]['description'], '<h1>'));
         $this->assertNotFalse(strpos($data['links'][0]['description'], '<p>'));
+
+        $this->assertEquals($markdown, $data['links'][0]['description_src']);
     }
 
     /**
@@ -104,6 +106,18 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
         $clickableText = text2clickable($text, '');
         $reversedText = reverse_text2clickable($clickableText);
         $this->assertEquals($text, $reversedText);
+    }
+
+    /**
+     * Test reverse_text2clickable().
+     */
+    public function testReverseText2clickableHashtags()
+    {
+        $text = file_get_contents('tests/plugins/resources/hashtags.raw');
+        $md = file_get_contents('tests/plugins/resources/hashtags.md');
+        $clickableText = hashtag_autolink($text);
+        $reversedText = reverse_text2clickable($clickableText);
+        $this->assertEquals($md, $reversedText);
     }
 
     /**
@@ -246,7 +260,7 @@ class PluginMarkdownTest extends PHPUnit_Framework_TestCase
             $this->conf->get('security.markdown_escape', true),
             $this->conf->get('security.allowed_protocols')
         );
-        $this->assertEquals($html, $data);
+        $this->assertEquals($html, $data . PHP_EOL);
     }
 
     /**

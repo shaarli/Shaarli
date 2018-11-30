@@ -381,8 +381,6 @@ body,
   box-shadow: 0 1px 0 $light-shadow, 0 1px 4px $dark-shadow inset;
   background: $almost-white;
   padding: 5px 5px 3px 15px;
-  width: 20%;
-  height: 20px;
   color: $dark-grey;
 }
 
@@ -742,7 +740,7 @@ body,
     font-size: 1em;
   }
 
-  .delete-checkbox {
+  .link-checkbox {
     display: none;
   }
 }
@@ -755,6 +753,14 @@ body,
 .delete-link {
   color: $red !important;
   font-size: 1.3em;
+}
+
+.pin-link {
+  font-size: 1.3em;
+}
+
+.pinned-link {
+  color: $blue !important;
 }
 
 .linklist-item-description {
@@ -848,6 +854,10 @@ body,
 
 .ctrl-edit {
   margin: 0 7px;
+}
+
+.ctrl-delete {
+  margin: 0 7px 0 0;
 }
 
 // 64em -> lg

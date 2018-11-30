@@ -125,6 +125,8 @@
       {$strPermalink=t('Permalink')}
       {$strPermalinkLc=t('permalink')}
       {$strAddTag=t('Add tag')}
+      {$strToggleSticky=t('Toggle sticky')}
+      {$strSticky=t('Sticky')}
       {ignore}End of translations{/ignore}
       {loop="links"}
         <div class="anchor" id="{$value.shorturl}"></div>
@@ -137,7 +139,7 @@
                   <a href="{$value.real_url}">
                   {ignore}RainTPL hack: put the 2 src on two different line to avoid path replace bug{/ignore}
                   <img data-src="{$value.thumbnail}#" class="b-lazy"
-                    src="#"
+                    src=""
                     alt="thumbnail" width="{$thumbnails_width}" height="{$thumbnails_height}" />
                   </a>
                 </div>
@@ -190,7 +192,7 @@
                 {if="$is_logged_in"}
                   <div class="linklist-item-infos-controls-group pure-u-0 pure-u-lg-visible">
                     <span class="linklist-item-infos-controls-item ctrl-checkbox">
-                      <input type="checkbox" class="delete-checkbox" value="{$value.id}">
+                      <input type="checkbox" class="link-checkbox" value="{$value.id}">
                     </span>
                     <span class="linklist-item-infos-controls-item ctrl-edit">
                       <a href="?edit_link={$value.id}" title="{$strEdit}"><i class="fa fa-pencil-square-o edit-link"></i></a>
@@ -201,7 +203,23 @@
                         <i class="fa fa-trash"></i>
                       </a>
                     </span>
+                    <span class="linklist-item-infos-controls-item ctrl-pin">
+                      <a href="?do=pin&amp;id={$value.id}&amp;token={$token}"
+                         title="{$strToggleSticky}" class="pin-link {if="$value.sticky"}pinned-link{/if} pure-u-0 pure-u-lg-visible">
+                        <i class="fa fa-thumb-tack"></i>
+                      </a>
+                    </span>
                   </div>
+                {else}
+                  {if="$value.sticky"}
+                    <div class="linklist-item-infos-controls-group pure-u-0 pure-u-lg-visible">
+                      <span class="linklist-item-infos-controls-item ctrl-pin">
+                        <span title="{$strSticky}" class="pin-link pinned-link pure-u-0 pure-u-lg-visible">
+                          <i class="fa fa-thumb-tack"></i>
+                        </span>
+                      </span>
+                    </div>
+                  {/if}
                 {/if}
                 <a href="?{$value.shorturl}" title="{$strPermalink}">
                   {if="!$hide_timestamps || $is_logged_in"}

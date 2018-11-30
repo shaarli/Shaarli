@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{#
+The entry point for the ReadTheDocs Theme.
+ 
+Any theme customisations should override this file to redefine blocks defined in
+the various templates. The custom theme should only need to define a main.html
+which `{% extends "base.html" %}` and defines various blocks which will replace
+the blocks defined in base.html and its included child templates.
+#}
+
+{%- block site_meta %}
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+{%- if 'media.readthedocs.org' not in config.extra_css[0] %}
+<meta name="robots" content="noindex, nofollow">
+{%- endif %}
+
+{% if page and page.is_homepage %}<meta name="description" content="{{ config.site_description }}">{% endif %}
+{% if config.site_author %}<meta name="author" content="{{ config.site_author }}">{% endif %}
+{%- endblock %}

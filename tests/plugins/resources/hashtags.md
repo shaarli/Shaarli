@@ -1,0 +1,10 @@
+[#lol](?addtag=lol)
+
+    #test
+
+`#test2`
+
+```
+bla #bli blo
+#bla
+```

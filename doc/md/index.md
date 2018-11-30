@@ -1,25 +1,19 @@
-# [Shaarli](https://github.com/shaarli/Shaarli/) documentation
+# <img src="../../assets/default/img/favicon.png" width="20px" height="20px"> Shaarli
 
 The personal, minimalist, super-fast, database free, bookmarking service.
 
 Do you want to share the links you discover?
-Shaarli is a minimalist link sharing service that you can install on your own server.
+Shaarli is a minimalist bookmark manager and link sharing service that you can install on your own server.
 It is designed to be personal (single-user), fast and handy.
 
 <!-- TODO screenshots -->
 
-Here you can find some info on how to use, configure, tweak and solve problems with your Shaarli.
-For general information, read the [README](https://github.com/shaarli/Shaarli/blob/master/README.md).
+Visit the pages in the sidebar to find information on how to setup, use, configure, tweak and troubleshoot Shaarli.
 
-If you have any questions or ideas, please join the [chat](https://gitter.im/shaarli/Shaarli) (also reachable via [IRC](https://irc.gitter.im/)), post them in our [general discussion](https://github.com/shaarli/Shaarli/issues/308) or read the current [issues](https://github.com/shaarli/Shaarli/issues).
-
-If you've found a bug, please create a [new issue](https://github.com/shaarli/Shaarli/issues/new).
-
-If you would like a feature added to Shaarli, check the issues labeled [`feature`](https://github.com/shaarli/Shaarli/labels/feature), [`enhancement`](https://github.com/shaarli/Shaarli/labels/enhancement), and [`plugin`](https://github.com/shaarli/Shaarli/labels/plugin).
 
 * [GitHub project page](https://github.com/shaarli/Shaarli)
-* [Online documentation](https://shaarli.readthedocs.io/) (this page)
-* [Latest Shaarli releases](https://github.com/shaarli/Shaarli/releases)
+* [Online documentation](https://shaarli.readthedocs.io/)
+* [Latest releases](https://github.com/shaarli/Shaarli/releases)
 * [Changelog](https://github.com/shaarli/Shaarli/blob/master/CHANGELOG.md)
 
 
@@ -30,87 +24,70 @@ It runs the latest development version of Shaarli and is updated/reset daily.
 
 Login: `demo`; Password: `demo`
 
-<!-- TODO review everything below this point -->
-
-
 ## Features
 
 Shaarli can be used:
 
-- to share, comment and save interesting links and news.
-- to bookmark useful/frequent personal links (as private links) and share them between computers.
-- as a minimal blog/microblog/writing platform (no character limit).
-- as a read-it-later list (for example items tagged `readlater`).
-- to draft and save articles/posts/ideas.
-- to keep code snippets.
-- to keep notes and documentation.
-- as a shared clipboard/notepad/pastebin between machines.
-- as a todo list.
-- to store playlists (e.g. with the `music` or `video` tags).
+- to share, comment and save interesting links and news
+- to bookmark useful/frequent links and share them between computers
+- as a minimal blog/microblog/writing platform
+- as a read-it-later list
+- to draft and save articles/posts/ideas
+- to keep notes, documentation and code snippets
+- as a shared clipboard/notepad/pastebin between machines
+- as a todo list
+- to store media playlists
 - to keep extracts/comments from webpages that may disappear.
-- to keep track of ongoing discussions (for example items tagged `discussion`).
-- [to feed RSS aggregators](http://shaarli.chassegnouf.net/?9Efeiw) (planets) with specific tags.
-- to feed other social networks, blogs... using RSS feeds and external services (dlvr.it, ifttt.com ...).
+- to keep track of ongoing discussions
+- to feed other blogs, aggregators, social networks... using RSS feeds
 
-### Interface
+### Edit, view and search your links
 
-- minimalist design (simple is beautiful)
+- Minimalist design
 - FAST
-- ATOM and RSS feeds
-- views:
-    - paginated link list (with image and video thumbnails)
-    - tag cloud
-    - picture wall: image and video thumbnails (with lazy loading)
-    - daily: newspaper-like daily digest
-    - daily RSS feed
-- permalinks for easy reference
-- links can be public or private
-- thumbnail generation for images and video services
+- Customizable link titles and descriptions
+- Tags to organize your links (features tag autocompletion, renaming, merging and deletion)
+- Search by tag or using the full-text search
+- Public and private links (visible only to logged-in users)
+- Unique permalinks for easy reference
+- Paginated link list (with image and video thumbnails)
+- Tag cloud and list views
+- Picture wall: image and video thumbnails view (with lazy loading)
+- ATOM and RSS feeds (can also be filtered using tags or text search)
+- Daily: newspaper-like daily digest (and daily RSS feed)
 - URL cleanup: automatic removal of `?utm_source=...`, `fb=...`
-- extensible through [plugins](https://shaarli.readthedocs.io/en/master/Plugins/#plugin-usage)
-
-### Tag, view and search your links
-
-- add a custom title and description to archived links
-- add tags to classify and search links
-  - features tag autocompletion, renaming, merging and deletion
-- full-text and tag search
+- Extensible through [plugins](https://shaarli.readthedocs.io/en/master/Plugins/#plugin-usage)
 
 ### Easy setup
 
-- dead-simple installation: drop the files, open the page
-- links are stored in a file
-    - compact storage
-    - no database required
-    - easy backup: simply copy the datastore file
-- import and export links as Netscape bookmarks
+- Dead-simple installation: drop the files, open the page
+- Links are stored in a file (no database required, easy backup: simply copy the datastore file)
+- Import and export links as Netscape bookmarks compatible with most Web browsers
 
 ### Accessibility
 
-- bookmarlet to share links in one click
-- support for mobile browsers
-- degrades gracefully with Javascript disabled
-- easy page customization through HTML/CSS/RainTPL
+- Bookmarklet and other tools to share links in one click
+- Support for mobile browsers
+- Degrades gracefully with Javascript disabled
+- Easy page customization through HTML/CSS/RainTPL
 
 ### Security
 
-- discreet pop-up notification when a new release is available
-- bruteforce protection on the login form
-- protected against [XSRF](http://en.wikipedia.org/wiki/Cross-site_request_forgery) and session cookie hijacking
+- Discreet pop-up notification when a new release is available
+- Bruteforce protection on the login form
+- Protected against [XSRF](http://en.wikipedia.org/wiki/Cross-site_request_forgery) and session cookie hijacking
 
 <!-- TODO Limitations -->
 
 ### REST API
 
-Easily extensible by any client using the REST API exposed by Shaarli.
-
-See the [API documentation](http://shaarli.github.io/api-documentation/).
+- Easily extensible by any client using the REST API exposed by Shaarli ([API documentation](http://shaarli.github.io/api-documentation/)).
 
 ## About
 
 ### Shaarli community fork
 
-This friendly fork is maintained by the Shaarli community at https://github.com/shaarli/Shaarli
+This friendly fork is maintained by the Shaarli community at <https://github.com/shaarli/Shaarli>
 
 This is a community fork of the original [Shaarli](https://github.com/sebsauvage/Shaarli/) project by [Sébastien Sauvage](http://sebsauvage.net/).
 
@@ -123,16 +100,15 @@ in this repository, and will keep maintaining the project for the foreseeable
 future, while keeping Shaarli simple and efficient.
 
 
-### Contributing
+### Contributing and getting help
 
-If you'd like to help, please:
+Feedback is very appreciated!
 
-- have a look at the open [issues](https://github.com/shaarli/Shaarli/issues)
-and [pull requests](https://github.com/shaarli/Shaarli/pulls)
-- feel free to report bugs (feedback is much appreciated)
-- suggest new features and improvements to both code and [documentation](https://github.com/shaarli/Shaarli/tree/master/doc/md/)
-- propose solutions to existing problems
-- submit pull requests :-)
+- If you have any questions or ideas, please join the [chat](https://gitter.im/shaarli/Shaarli) (also reachable via [IRC](https://irc.gitter.im/)), post them in our [general discussion](https://github.com/shaarli/Shaarli/issues/308) or read the current [issues](https://github.com/shaarli/Shaarli/issues).
+- Have a look at the open [issues](https://github.com/shaarli/Shaarli/issues) and [pull requests](https://github.com/shaarli/Shaarli/pulls)
+- If you would like a feature added to Shaarli, check the issues labeled [`feature`](https://github.com/shaarli/Shaarli/labels/feature), [`enhancement`](https://github.com/shaarli/Shaarli/labels/enhancement), and [`plugin`](https://github.com/shaarli/Shaarli/labels/plugin).
+- If you've found a bug, please create a [new issue](https://github.com/shaarli/Shaarli/issues/new).
+- Feel free to propose solutions to existing problems, help us improve the documentation and translations, and submit pull requests :-)
 
 
 ### License

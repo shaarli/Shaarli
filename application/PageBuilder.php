@@ -101,7 +101,7 @@ class PageBuilder
             'version_hash',
             ApplicationUtils::getVersionHash(SHAARLI_VERSION, $this->conf->get('credentials.salt'))
         );
-        $this->tpl->assign('scripturl', index_url($_SERVER));
+        $this->tpl->assign('index_url', index_url($_SERVER));
         $visibility = ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '';
         $this->tpl->assign('visibility', $visibility);
         $this->tpl->assign('untaggedonly', !empty($_SESSION['untaggedonly']));

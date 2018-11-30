@@ -110,7 +110,7 @@ class BookmarkExportTest extends PHPUnit_Framework_TestCase
         $links = NetscapeBookmarkUtils::filterAndFormat(self::$linkDb, 'public', false, '');
         $this->assertEquals(
             '?WDWyig',
-            $links[0]['url']
+            $links[2]['url']
         );
     }
 
@@ -128,7 +128,7 @@ class BookmarkExportTest extends PHPUnit_Framework_TestCase
         );
         $this->assertEquals(
             $indexUrl . '?WDWyig',
-            $links[0]['url']
+            $links[2]['url']
         );
     }
 }

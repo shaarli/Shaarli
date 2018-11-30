@@ -46,9 +46,36 @@ function hook_isso_render_linklist($data, $conf)
 
         $isso = sprintf($issoHtml, $issoUrl, $issoUrl, $link['id'], $link['id']);
         $data['plugin_end_zone'][] = $isso;
+    } else {
+        $button = '<span><a href="?%s#isso-thread">';
+        // For the default theme we use a FontAwesome icon which is better than an image
+        if ($conf->get('resource.theme') === 'default') {
+            $button .= '<i class="linklist-plugin-icon fa fa-comment"></i>';
+        } else {
+            $button .= '<img class="linklist-plugin-icon" src="plugins/isso/comment.png" ';
+            $button .= 'title="Comment on this shaare" alt="Comments" />';
+        }
+        $button .= '</a></span>';
+        foreach ($data['links'] as &$value) {
+            $commentLink = sprintf($button, $value['shorturl']);
+            $value['link_plugin'][] = $commentLink;
+        }
+    }
 
-        // Hackish way to include this CSS file only when necessary.
-        $data['plugins_includes']['css_files'][] = PluginManager::$PLUGINS_PATH . '/isso/isso.css';
+    return $data;
+}
+
+/**
+ * When linklist is displayed, include isso CSS file.
+ *
+ * @param array $data - header data.
+ *
+ * @return mixed - header data with isso CSS file added.
+ */
+function hook_isso_render_includes($data)
+{
+    if ($data['_PAGE_'] == Router::$PAGE_LINKLIST) {
+        $data['css_files'][] = PluginManager::$PLUGINS_PATH . '/isso/isso.css';
     }
 
     return $data;

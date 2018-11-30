@@ -37,6 +37,8 @@ class Router
 
     public static $PAGE_DELETELINK = 'delete_link';
 
+    public static $PAGE_PINLINK = 'pin';
+
     public static $PAGE_EXPORT = 'export';
 
     public static $PAGE_IMPORT = 'import';
@@ -144,6 +146,10 @@ class Router
 
         if (isset($get['delete_link'])) {
             return self::$PAGE_DELETELINK;
+        }
+
+        if (startsWith($query, 'do='. self::$PAGE_PINLINK)) {
+            return self::$PAGE_PINLINK;
         }
 
         if (startsWith($query, 'do='. self::$PAGE_EXPORT)) {

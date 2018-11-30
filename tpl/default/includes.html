@@ -15,3 +15,23 @@
   <link type="text/css" rel="stylesheet" href="data/user.css#" />
 {/if}
 <link rel="search" type="application/opensearchdescription+xml" href="?do=opensearch#" title="Shaarli search - {$shaarlititle}"/>
+{if="! empty($links) && count($links) === 1"}
+  {$link=reset($links)}
+  <meta property="og:title" content="{$link.title}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="{$index_url}?{$link.shorturl}" />
+  {$ogDescription=isset($link.description_src) ? $link.description_src : $link.description}
+  <meta property="og:description" content="{function="substr($ogDescription, 0, 300)"}" />
+  {if="$link.thumbnail"}
+    <meta property="og:image" content="{$index_url}{$link.thumbnail}" />
+  {/if}
+  {if="!$hide_timestamps || $is_logged_in"}
+    <meta property="article:published_time" content="{$link.created->format(DateTime::ATOM)}" />
+    {if="$link.updated"}
+      <meta property="article:modified_time" content="{$link.updated->format(DateTime::ATOM)}" />
+    {/if}
+  {/if}
+  {loop="link.taglist"}
+    <meta property="article:tag" content="{$value}" />
+  {/loop}
+{/if}

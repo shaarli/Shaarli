@@ -239,12 +239,12 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
     public function testDays()
     {
         $this->assertEquals(
-            array('20100310', '20121206', '20130614', '20150310'),
+            array('20100309', '20100310', '20121206', '20121207', '20130614', '20150310'),
             self::$publicLinkDB->days()
         );
 
         $this->assertEquals(
-            array('20100310', '20121206', '20130614', '20141125', '20150310'),
+            array('20100309', '20100310', '20121206', '20121207', '20130614', '20141125', '20150310'),
             self::$privateLinkDB->days()
         );
     }
@@ -475,13 +475,15 @@ class LinkDBTest extends PHPUnit_Framework_TestCase
     public function testReorderLinksDesc()
     {
         self::$privateLinkDB->reorder('ASC');
-        $linkIds = array(42, 4, 9, 1, 0, 7, 6, 8, 41);
+        $stickyIds = [11, 10];
+        $standardIds = [42, 4, 9, 1, 0, 7, 6, 8, 41];
+        $linkIds = array_merge($stickyIds, $standardIds);
         $cpt = 0;
         foreach (self::$privateLinkDB as $key => $value) {
             $this->assertEquals($linkIds[$cpt++], $key);
         }
         self::$privateLinkDB->reorder('DESC');
-        $linkIds = array_reverse($linkIds);
+        $linkIds = array_merge(array_reverse($stickyIds), array_reverse($standardIds));
         $cpt = 0;
         foreach (self::$privateLinkDB as $key => $value) {
             $this->assertEquals($linkIds[$cpt++], $key);

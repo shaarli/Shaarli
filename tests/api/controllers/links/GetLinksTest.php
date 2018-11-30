@@ -95,7 +95,7 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->refDB->countLinks(), count($data));
 
         // Check order
-        $order = [41, 8, 6, 7, 0, 1, 9, 4, 42];
+        $order = [10, 11, 41, 8, 6, 7, 0, 1, 9, 4, 42];
         $cpt = 0;
         foreach ($data as $link) {
             $this->assertEquals(self::NB_FIELDS_LINK, count($link));
@@ -103,7 +103,7 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         }
 
         // Check first element fields
-        $first = $data[0];
+        $first = $data[2];
         $this->assertEquals('http://domain.tld/?WDWyig', $first['url']);
         $this->assertEquals('WDWyig', $first['shorturl']);
         $this->assertEquals('Link title: @website', $first['title']);
@@ -120,7 +120,7 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($first['updated']);
 
         // Multi tags
-        $link = $data[1];
+        $link = $data[3];
         $this->assertEquals(7, count($link['tags']));
 
         // Update date
@@ -138,7 +138,7 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
     {
         $env = Environment::mock([
             'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=1&limit=1'
+            'QUERY_STRING' => 'offset=3&limit=1'
         ]);
         $request = Request::createFromEnvironment($env);
         $response = $this->controller->getLinks($request, new Response());
@@ -164,7 +164,7 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
         // Check order
-        $order = [41, 8, 6, 7, 0, 1, 9, 4, 42];
+        $order = [10, 11, 41, 8, 6, 7, 0, 1, 9, 4, 42];
         $cpt = 0;
         foreach ($data as $link) {
             $this->assertEquals(self::NB_FIELDS_LINK, count($link));
@@ -205,7 +205,8 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
-        $this->assertEquals(41, $data[0]['id']);
+        $this->assertEquals(10, $data[0]['id']);
+        $this->assertEquals(41, $data[2]['id']);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
     }
 
@@ -243,7 +244,8 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countPublicLinks(), count($data));
-        $this->assertEquals(41, $data[0]['id']);
+        $this->assertEquals(10, $data[0]['id']);
+        $this->assertEquals(41, $data[2]['id']);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
     }
 
@@ -413,8 +415,9 @@ class GetLinksTest extends \PHPUnit_Framework_TestCase
         $response = $this->controller->getLinks($request, new Response());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
-        $this->assertEquals(9, count($data));
-        $this->assertEquals(41, $data[0]['id']);
+        $this->assertEquals(\ReferenceLinkDB::$NB_LINKS_TOTAL, count($data));
+        $this->assertEquals(10, $data[0]['id']);
+        $this->assertEquals(41, $data[2]['id']);
 
         // wildcard: optional ('*' does not need to expand)
         $env = Environment::mock([

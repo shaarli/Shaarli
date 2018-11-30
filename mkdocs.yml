@@ -2,7 +2,9 @@ site_name: Shaarli Documentation
 repo_url: https://github.com/shaarli/Shaarli
 edit_uri: edit/master/doc/md
 site_description: The personal, minimalist, super-fast, database free, bookmarking service
-theme: readthedocs
+theme:
+  name: readthedocs
+  custom_dir: doc/custom_theme/
 docs_dir: doc/md
 site_dir: doc/html
 # Disable strict mode until ReadTheDocs provides up-to-date MkDocs settings:

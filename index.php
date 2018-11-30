@@ -111,7 +111,7 @@ ini_set('session.use_trans_sid', false);
 
 session_name('shaarli');
 // Start session if needed (Some server auto-start sessions).
-if (session_id() == '') {
+if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
@@ -1084,7 +1084,8 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
             die(t('Wrong token.'));
         }
 
-        $alteredLinks = $LINKSDB->renameTag(escape($_POST['fromtag']), escape($_POST['totag']));
+        $toTag = isset($_POST['totag']) ? escape($_POST['totag']) : null;
+        $alteredLinks = $LINKSDB->renameTag(escape($_POST['fromtag']), $toTag);
         $LINKSDB->save($conf->get('resource.page_cache'));
         foreach ($alteredLinks as $link) {
             $history->updateLink($link);
@@ -1236,10 +1237,10 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
             $id = (int) escape($id);
             $link = $LINKSDB[$id];
             $pluginManager->executeHooks('delete_link', $link);
+            $history->deleteLink($link);
             unset($LINKSDB[$id]);
         }
         $LINKSDB->save($conf->get('resource.page_cache')); // save to disk
-        $history->deleteLink($link);
 
         // If we are called from the bookmarklet, we must close the popup:
         if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) { echo '<script>self.close();</script>'; exit; }
@@ -1349,6 +1350,25 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
 
         $PAGE->assign('pagetitle', t('Shaare') .' - '. $conf->get('general.title', 'Shaarli'));
         $PAGE->renderPage('editlink');
+        exit;
+    }
+
+    if ($targetPage == Router::$PAGE_PINLINK) {
+        if (! isset($_GET['id']) || empty($LINKSDB[$_GET['id']])) {
+            // FIXME! Use a proper error system.
+            $msg = t('Invalid link ID provided');
+            echo '<script>alert("'. $msg .'");document.location=\''. index_url($_SERVER) .'\';</script>';
+            exit;
+        }
+        if (! $sessionManager->checkToken($_GET['token'])) {
+            die('Wrong token.');
+        }
+
+        $link = $LINKSDB[$_GET['id']];
+        $link['sticky'] = ! $link['sticky'];
+        $LINKSDB[(int) $_GET['id']] = $link;
+        $LINKSDB->save($conf->get('resource.page_cache'));
+        header('Location: '.index_url($_SERVER));
         exit;
     }
 
@@ -1635,9 +1655,9 @@ function buildLinkList($PAGE, $LINKSDB, $conf, $pluginManager, $loginManager)
         uasort($taglist, 'strcasecmp');
         $link['taglist'] = $taglist;
 
-        // Thumbnails enabled, not a note,
+        // Logged in, thumbnails enabled, not a note,
         // and (never retrieved yet or no valid cache file)
-        if ($thumbnailsEnabled && $link['url'][0] != '?'
+        if ($loginManager->isLoggedIn() && $thumbnailsEnabled && $link['url'][0] != '?'
             && (! isset($link['thumbnail']) || ($link['thumbnail'] !== false && ! is_file($link['thumbnail'])))
         ) {
             $elem = $LINKSDB[$keys[$i]];
@@ -1858,6 +1878,7 @@ $app->group('/api/v1', function() {
 })->add('\Shaarli\Api\ApiMiddleware');
 
 $response = $app->run(true);
+
 // Hack to make Slim and Shaarli router work together:
 // If a Slim route isn't found and NOT API call, we call renderPage().
 if ($response->getStatusCode() == 404 && strpos($_SERVER['REQUEST_URI'], '/api/v1') === false) {
@@ -1865,5 +1886,12 @@ if ($response->getStatusCode() == 404 && strpos($_SERVER['REQUEST_URI'], '/api/v
     header('Content-Type: text/html; charset=utf-8');
     renderPage($conf, $pluginManager, $linkDb, $history, $sessionManager, $loginManager);
 } else {
+    $response = $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader(
+            'Access-Control-Allow-Headers',
+            'X-Requested-With, Content-Type, Accept, Origin, Authorization'
+        )
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     $app->respond($response);
 }

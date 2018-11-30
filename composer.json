@@ -16,7 +16,7 @@
     },
     "require": {
         "php": ">=5.6",
-        "shaarli/netscape-bookmark-parser": "^2.0",
+        "shaarli/netscape-bookmark-parser": "^2.1",
         "erusev/parsedown": "^1.6",
         "slim/slim": "^3.0",
         "arthurhoaro/web-thumbnailer": "^1.1",

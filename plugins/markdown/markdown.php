@@ -28,6 +28,7 @@ function hook_markdown_render_linklist($data, $conf)
             $value = stripNoMarkdownTag($value);
             continue;
         }
+        $value['description_src'] = $value['description'];
         $value['description'] = process_markdown(
             $value['description'],
             $conf->get('security.markdown_escape', true),
@@ -214,6 +215,15 @@ function reverse_text2clickable($description)
             '$1',
             $descriptionLine
         );
+
+        // Make hashtag links markdown ready, otherwise the links will be ignored with escape set to true
+        if (!$codeBlockOn && !$codeLineOn) {
+            $descriptionLine = preg_replace(
+                '#<a href="([^ ]*)"'. $hashtagTitle .'>([^<]+)</a>#m',
+                '[$2]($1)',
+                $descriptionLine
+            );
+        }
 
         $descriptionOut .= $descriptionLine;
         if ($lineCount++ < count($descriptionLines) - 1) {

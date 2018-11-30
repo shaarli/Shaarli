@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.10.2](https://github.com/shaarli/Shaarli/releases/tag/v0.10.2) - 2018-08-11
+
+### Fixed
+
+- Docker build
+
+## [v0.10.1](https://github.com/shaarli/Shaarli/releases/tag/v0.10.1) - 2018-08-11
+
+### Changed 
+
+- Accessibility:
+    - Remove alt text on the logo
+    - Remove redundant title in tools page
+
+### Fixed
+
+- Fixed an error on the daily page and daily RSS
+- Fixed an issue causing 'You are not authorized to add a link' error while logged out
+- Fixed thumbnail path when Shaarli's path uses symbolic links
+- Add a `mod_version` check in Shaarli's root `.htaccess` file for Apache 2.2 syntax
+- Include assets in the release Makefile target
+
+### Removed
+
+- Firefox Social API shaare has been removed
+
 ## [v0.10.0](https://github.com/shaarli/Shaarli/releases/tag/v0.10.0) - 2018-07-28
 **PHP 5.5 compatibility has been dropped.** Shaarli now requires at least PHP 5.6.
 

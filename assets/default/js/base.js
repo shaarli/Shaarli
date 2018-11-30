@@ -422,12 +422,12 @@ function init(description) {
   /**
    * Bulk actions
    */
-  const linkCheckboxes = document.querySelectorAll('.delete-checkbox');
+  const linkCheckboxes = document.querySelectorAll('.link-checkbox');
   const bar = document.getElementById('actions');
   [...linkCheckboxes].forEach((checkbox) => {
     checkbox.style.display = 'inline-block';
-    checkbox.addEventListener('click', () => {
-      const linkCheckedCheckboxes = document.querySelectorAll('.delete-checkbox:checked');
+    checkbox.addEventListener('change', () => {
+      const linkCheckedCheckboxes = document.querySelectorAll('.link-checkbox:checked');
       const count = [...linkCheckedCheckboxes].length;
       if (count === 0 && bar.classList.contains('open')) {
         bar.classList.toggle('open');
@@ -444,7 +444,7 @@ function init(description) {
       event.preventDefault();
 
       const links = [];
-      const linkCheckedCheckboxes = document.querySelectorAll('.delete-checkbox:checked');
+      const linkCheckedCheckboxes = document.querySelectorAll('.link-checkbox:checked');
       [...linkCheckedCheckboxes].forEach((checkbox) => {
         links.push({
           id: checkbox.value,
@@ -465,6 +465,25 @@ function init(description) {
       }
     });
   }
+
+  /**
+   * Select all button
+   */
+  const selectAllButtons = document.querySelectorAll('.select-all-button');
+  [...selectAllButtons].forEach((selectAllButton) => {
+    selectAllButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      const checked = selectAllButton.classList.contains('filter-off');
+      [...selectAllButtons].forEach((selectAllButton2) => {
+        selectAllButton2.classList.toggle('filter-off');
+        selectAllButton2.classList.toggle('filter-on');
+      });
+      [...linkCheckboxes].forEach((linkCheckbox) => {
+        linkCheckbox.checked = checked;
+        linkCheckbox.dispatchEvent(new Event('change'));
+      });
+    });
+  });
 
   /**
    * Tag list operations
@@ -548,7 +567,7 @@ function init(description) {
       event.preventDefault();
       const block = findParent(event.target, 'div', { class: 'tag-list-item' });
       const tag = block.getAttribute('data-tag');
-      const refreshedToken = document.getElementById('token');
+      const refreshedToken = document.getElementById('token').value;
 
       if (confirm(`Are you sure you want to delete the tag "${tag}"?`)) {
         const xhr = new XMLHttpRequest();

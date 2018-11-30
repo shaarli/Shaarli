@@ -15,7 +15,6 @@ While logged in to your Shaarli, you can add new Shaares in several ways:
 
  * [+Shaare button](#shaare-button)
  * [Bookmarklet](#bookmarklet)
- * [Firefox Share](#firefox-share)
  * Third-party [apps and browser addons](Community-&-Related-software.md#mobile-apps)
  * [REST API](https://shaarli.github.io/api-documentation/)
 
@@ -51,22 +50,6 @@ bookmarklet in your browser! The same `New Shaare` dialog as above is displayed.
 
 ![](images/bookmarklet.png)
 
-
-### Firefox Share
-
-Before using Firefox Share, you must first add Shaarli as a sharing provider:
-
-- Click the `Tools` button in the top bar
-- Click the `✚Add to Firefox social` button and accept the activation.
-
-Once this is done, you can share any URL you are visiting by clicking the Firefox
-_Share_ button ![images/firefoxshare.png](images/firefoxshare.png)
-
-| Note | Firefox Share is no longer available for Firefox 57 and later versions. |
-|---------|---------|
-
-| Note | Your Shaarli instance must be hosted on an HTTPS (SSL/TLS secure connection) enabled server for Firefox Share to work. Firefox Share will not work over plaintext HTTP connections. |
-|---------|---------|
 
 --------------------------------------------------------------------------------
 

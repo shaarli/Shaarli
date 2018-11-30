@@ -9,7 +9,7 @@ _It is designed to be personal (single-user), fast and handy._
 [![](https://img.shields.io/badge/stable-v0.9.7-blue.svg)](https://github.com/shaarli/Shaarli/releases/tag/v0.9.7)
 [![](https://img.shields.io/travis/shaarli/Shaarli/stable.svg?label=stable)](https://travis-ci.org/shaarli/Shaarli)
 &bull;
-[![](https://img.shields.io/badge/latest-v0.10.0-blue.svg)](https://github.com/shaarli/Shaarli/releases/tag/v0.10.0)
+[![](https://img.shields.io/badge/latest-v0.10.2-blue.svg)](https://github.com/shaarli/Shaarli/releases/tag/v0.10.2)
 [![](https://img.shields.io/travis/shaarli/Shaarli/latest.svg?label=latest)](https://travis-ci.org/shaarli/Shaarli)
 &bull;
 [![](https://img.shields.io/badge/master-v0.10.x-blue.svg)](https://github.com/shaarli/Shaarli)

@@ -21,7 +21,7 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
     /**
      * Test Isso init without errors.
      */
-    public function testWallabagInitNoError()
+    public function testIssoInitNoError()
     {
         $conf = new ConfigManager('');
         $conf->set('plugins.ISSO_SERVER', 'value');
@@ -32,7 +32,7 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
     /**
      * Test Isso init with errors.
      */
-    public function testWallabagInitError()
+    public function testIssoInitError()
     {
         $conf = new ConfigManager('');
         $errors = isso_init($conf);
@@ -96,19 +96,22 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
                 array(
                     'id' => 12,
                     'url' => $str,
+                    'shorturl' => $short1 = 'abcd',
                     'created' => DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $date1),
                 ),
                 array(
                     'id' => 13,
                     'url' => $str . '2',
+                    'shorturl' => $short2 = 'efgh',
                     'created' => DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $date2),
                 ),
             )
         );
 
         $processed = hook_isso_render_linklist($data, $conf);
-        // data shouldn't be altered
-        $this->assertEquals($data, $processed);
+        // link_plugin should be added for the icon
+        $this->assertContains('<a href="?'. $short1 .'#isso-thread">', $processed['links'][0]['link_plugin'][0]);
+        $this->assertContains('<a href="?'. $short2 .'#isso-thread">', $processed['links'][1]['link_plugin'][0]);
     }
 
     /**
@@ -127,6 +130,7 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
                 array(
                     'id' => 12,
                     'url' => $str,
+                    'shorturl' => $short1 = 'abcd',
                     'created' => DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $date),
                 )
             ),
@@ -135,8 +139,8 @@ class PluginIssoTest extends PHPUnit_Framework_TestCase
 
         $processed = hook_isso_render_linklist($data, $conf);
 
-        // data shouldn't be altered
-        $this->assertEquals($data, $processed);
+        // link_plugin should be added for the icon
+        $this->assertContains('<a href="?'. $short1 .'#isso-thread">', $processed['links'][0]['link_plugin'][0]);
     }
 
     /**
