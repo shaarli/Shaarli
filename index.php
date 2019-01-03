@@ -1134,12 +1134,22 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
         if (isset($LINKSDB[$id])) {
             // Edit
             $created = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $linkdate);
+            $errors = DateTime::getLastErrors();
+            // if invalid date, resort to now as DateTime Obj.
+            if (!empty($errors['warning_count'])) {
+                $created = new DateTime();
+            }
             $updated = new DateTime();
             $shortUrl = $LINKSDB[$id]['shorturl'];
             $new = false;
         } else {
             // New link
             $created = DateTime::createFromFormat(LinkDB::LINK_DATE_FORMAT, $linkdate);
+            $errors = DateTime::getLastErrors();
+            // if invalid date, resort to now as DateTime Obj.
+            if (!empty($errors['warning_count'])) {
+                $created = new DateTime();
+            }
             $updated = null;
             $shortUrl = link_small_hash($created, $id);
             $new = true;
