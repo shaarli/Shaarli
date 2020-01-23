@@ -102,7 +102,5 @@ class BookmarkIO
             $this->datastore,
             self::$phpPrefix.base64_encode(gzdeflate(serialize($links))).self::$phpSuffix
         );
-
-        invalidateCaches($this->conf->get('resource.page_cache'));
     }
 }

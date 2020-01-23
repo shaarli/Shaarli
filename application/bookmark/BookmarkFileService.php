@@ -12,6 +12,7 @@ use Shaarli\Formatter\BookmarkMarkdownFormatter;
 use Shaarli\History;
 use Shaarli\Legacy\LegacyLinkDB;
 use Shaarli\Legacy\LegacyUpdater;
+use Shaarli\Render\PageCacheManager;
 use Shaarli\Updater\UpdaterUtils;
 
 /**
@@ -39,6 +40,9 @@ class BookmarkFileService implements BookmarkServiceInterface
     /** @var History instance */
     protected $history;
 
+    /** @var PageCacheManager instance */
+    protected $pageCacheManager;
+
     /** @var bool true for logged in users. Default value to retrieve private bookmarks. */
     protected $isLoggedIn;
 
@@ -49,6 +53,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     {
         $this->conf = $conf;
         $this->history = $history;
+        $this->pageCacheManager = new PageCacheManager($this->conf->get('resource.page_cache'));
         $this->bookmarksIO = new BookmarkIO($this->conf);
         $this->isLoggedIn = $isLoggedIn;
 
@@ -275,7 +280,7 @@ class BookmarkFileService implements BookmarkServiceInterface
         }
         $this->bookmarks->reorder();
         $this->bookmarksIO->write($this->bookmarks);
-        invalidateCaches($this->conf->get('resource.page_cache'));
+        $this->pageCacheManager->invalidateCaches();
     }
 
     /**
