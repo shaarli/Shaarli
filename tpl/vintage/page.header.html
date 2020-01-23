@@ -18,12 +18,12 @@
 {else}
 <li><a href="{$titleLink}" class="nomobile">Home</a></li>
     {if="$is_logged_in"}
-    <li><a href="?do=logout">Logout</a></li>
-    <li><a href="?do=tools">Tools</a></li>
-    <li><a href="?do=addlink">Add link</a></li>
+    <li><a href="./?do=logout">Logout</a></li>
+    <li><a href="./?do=tools">Tools</a></li>
+    <li><a href="./?do=addlink">Add link</a></li>
     {elseif="$openshaarli"}
-    <li><a href="?do=tools">Tools</a></li>
-    <li><a href="?do=addlink">Add link</a></li>
+    <li><a href="./?do=tools">Tools</a></li>
+    <li><a href="./?do=addlink">Add link</a></li>
     {else}
     <li><a href="/login">Login</a></li>
     {/if}
@@ -31,9 +31,9 @@
     {if="$showatom"}
     <li><a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a></li>
     {/if}
-    <li><a href="?do=tagcloud">Tag cloud</a></li>
-    <li><a href="?do=picwall{$searchcrits}">Picture wall</a></li>
-    <li><a href="?do=daily">Daily</a></li>
+    <li><a href="./?do=tagcloud">Tag cloud</a></li>
+    <li><a href="./?do=picwall{$searchcrits}">Picture wall</a></li>
+    <li><a href="./?do=daily">Daily</a></li>
     {loop="$plugins_header.buttons_toolbar"}
         <li><a
             {loop="$value.attr"}

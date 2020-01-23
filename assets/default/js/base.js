@@ -27,7 +27,7 @@ function findParent(element, tagName, attributes) {
  */
 function refreshToken() {
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', '?do=token');
+  xhr.open('GET', './?do=token');
   xhr.onload = () => {
     const token = document.getElementById('token');
     token.setAttribute('value', xhr.responseText);
@@ -546,7 +546,7 @@ function init(description) {
       const refreshedToken = document.getElementById('token').value;
       const fromtag = block.getAttribute('data-tag');
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', '?do=changetag');
+      xhr.open('POST', './?do=changetag');
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.onload = () => {
         if (xhr.status !== 200) {
@@ -558,8 +558,8 @@ function init(description) {
           input.setAttribute('value', totag);
           findParent(input, 'div', { class: 'rename-tag-form' }).style.display = 'none';
           block.querySelector('a.tag-link').innerHTML = htmlEntities(totag);
-          block.querySelector('a.tag-link').setAttribute('href', `?searchtags=${encodeURIComponent(totag)}`);
-          block.querySelector('a.rename-tag').setAttribute('href', `?do=changetag&fromtag=${encodeURIComponent(totag)}`);
+          block.querySelector('a.tag-link').setAttribute('href', `./?searchtags=${encodeURIComponent(totag)}`);
+          block.querySelector('a.rename-tag').setAttribute('href', `./?do=changetag&fromtag=${encodeURIComponent(totag)}`);
 
           // Refresh awesomplete values
           existingTags = existingTags.map(tag => (tag === fromtag ? totag : tag));
@@ -593,7 +593,7 @@ function init(description) {
 
       if (confirm(`Are you sure you want to delete the tag "${tag}"?`)) {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '?do=changetag');
+        xhr.open('POST', './?do=changetag');
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = () => {
           block.remove();

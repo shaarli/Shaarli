@@ -10,9 +10,9 @@ use ReflectionMethod;
 use Shaarli\ApplicationUtils;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkArray;
-use Shaarli\Bookmark\LinkDB;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Bookmark\BookmarkIO;
+use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigJson;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Config\ConfigPhp;
@@ -534,7 +534,7 @@ class LegacyUpdater
 
         if ($thumbnailsEnabled) {
             $this->session['warnings'][] = t(
-                'You have enabled or changed thumbnails mode. <a href="?do=thumbs_update">Please synchronize them</a>.'
+                'You have enabled or changed thumbnails mode. <a href="./?do=thumbs_update">Please synchronize them</a>.'
             );
         }
 

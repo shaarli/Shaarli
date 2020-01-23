@@ -979,7 +979,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             if ($oldhash != $conf->get('credentials.hash')) {
                 echo '<script>alert("'
                     . t('The old password is not correct.')
-                    .'");document.location=\'?do=changepasswd\';</script>';
+                    .'");document.location=\'./?do=changepasswd\';</script>';
                 exit;
             }
             // Save new password
@@ -1002,10 +1002,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 );
 
                 // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'?do=tools\';</script>';
+                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=tools\';</script>';
                 exit;
             }
-            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'?do=tools\';</script>';
+            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'./?do=tools\';</script>';
             exit;
         } else {
             // show the change password form.
@@ -1051,7 +1051,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             ) {
                 $_SESSION['warnings'][] = t(
                     'You have enabled or changed thumbnails mode. '
-                    .'<a href="?do=thumbs_update">Please synchronize them</a>.'
+                    .'<a href="./?do=thumbs_update">Please synchronize them</a>.'
                 );
             }
             $conf->set('thumbnails.mode', $thumbnailsMode);
@@ -1067,10 +1067,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 );
 
                 // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'?do=configure\';</script>';
+                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=configure\';</script>';
                 exit;
             }
-            echo '<script>alert("'. t('Configuration was saved.') .'");document.location=\'?do=configure\';</script>';
+            echo '<script>alert("'. t('Configuration was saved.') .'");document.location=\'./?do=configure\';</script>';
             exit;
         } else {
             // Show the configuration form.
@@ -1130,7 +1130,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         }
         $bookmarkService->save();
         $delete = empty($_POST['totag']);
-        $redirect = $delete ? 'do=changetag' : 'searchtags='. urlencode(escape($_POST['totag']));
+        $redirect = $delete ? './do=changetag' : 'searchtags='. urlencode(escape($_POST['totag']));
         $alert = $delete
             ? sprintf(t('The tag was removed from %d link.', 'The tag was removed from %d bookmarks.', $count), $count)
             : sprintf(t('The tag was renamed in %d link.', 'The tag was renamed in %d bookmarks.', $count), $count);
@@ -1519,7 +1519,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 ),
                 get_max_upload_size(ini_get('post_max_size'), ini_get('upload_max_filesize'))
             );
-            echo '<script>alert("'. $msg .'");document.location=\'?do='.Router::$PAGE_IMPORT .'\';</script>';
+            echo '<script>alert("'. $msg .'");document.location=\'./?do='.Router::$PAGE_IMPORT .'\';</script>';
             exit;
         }
         if (! $sessionManager->checkToken($_POST['token'])) {
@@ -1532,7 +1532,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             $conf,
             $history
         );
-        echo '<script>alert("'.$status.'");document.location=\'?do='
+        echo '<script>alert("'.$status.'");document.location=\'./?do='
              .Router::$PAGE_IMPORT .'\';</script>';
         exit;
     }
@@ -1587,12 +1587,12 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             // TODO: do not handle exceptions/errors in JS.
             echo '<script>alert("'
                 . $e->getMessage()
-                .'");document.location=\'?do='
+                .'");document.location=\'./?do='
                 . Router::$PAGE_PLUGINSADMIN
                 .'\';</script>';
             exit;
         }
-        header('Location: ?do='. Router::$PAGE_PLUGINSADMIN);
+        header('Location: ./?do='. Router::$PAGE_PLUGINSADMIN);
         exit;
     }
 
