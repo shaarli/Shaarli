@@ -10,6 +10,7 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Render\PageBuilder;
+use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 
@@ -35,7 +36,12 @@ class ContainerBuilderTest extends TestCase
         $this->loginManager = $this->createMock(LoginManager::class);
         $this->loginManager->method('isLoggedIn')->willReturn(true);
 
-        $this->containerBuilder = new ContainerBuilder($this->conf, $this->sessionManager, $this->loginManager);
+        $this->containerBuilder = new ContainerBuilder(
+            $this->conf,
+            $this->sessionManager,
+            $this->loginManager,
+            'UT web path'
+        );
     }
 
     public function testBuildContainer(): void
@@ -45,9 +51,11 @@ class ContainerBuilderTest extends TestCase
         static::assertInstanceOf(ConfigManager::class, $container->conf);
         static::assertInstanceOf(SessionManager::class, $container->sessionManager);
         static::assertInstanceOf(LoginManager::class, $container->loginManager);
+        static::assertSame('UT web path', $container->webPath);
         static::assertInstanceOf(History::class, $container->history);
         static::assertInstanceOf(BookmarkServiceInterface::class, $container->bookmarkService);
         static::assertInstanceOf(PageBuilder::class, $container->pageBuilder);
         static::assertInstanceOf(FormatterFactory::class, $container->formatterFactory);
+        static::assertInstanceOf(PageCacheManager::class, $container->pageCacheManager);
     }
 }
