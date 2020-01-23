@@ -56,7 +56,7 @@
         </li>
         {if="$is_logged_in"}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-logout">
-            <a href="./?do=logout" class="pure-menu-link">{'Logout'|t}</a>
+            <a href="/logout" class="pure-menu-link">{'Logout'|t}</a>
           </li>
         {else}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-login">
@@ -88,7 +88,7 @@
             </li>
           {else}
             <li class="pure-menu-item" id="shaarli-menu-desktop-logout">
-              <a href="./?do=logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
+              <a href="/logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
                 <i class="fa fa-sign-out" aria-hidden="true"></i>
               </a>
             </li>

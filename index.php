@@ -604,10 +604,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     }
     // -------- User wants to logout.
     if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=logout')) {
-        invalidateCaches($conf->get('resource.page_cache'));
-        $sessionManager->logout();
-        setcookie(LoginManager::$STAY_SIGNED_IN_COOKIE, 'false', 0, WEB_PATH);
-        header('Location: ?');
+        header('Location: ./logout');
         exit;
     }
 
@@ -1894,7 +1891,7 @@ if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=
     exit;
 }
 
-$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager);
+$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager, WEB_PATH);
 $container = $containerBuilder->build();
 $app = new App($container);
 

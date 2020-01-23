@@ -11,6 +11,7 @@ use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
+use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 
@@ -34,19 +35,30 @@ class ContainerBuilder
     /** @var LoginManager */
     protected $login;
 
-    public function __construct(ConfigManager $conf, SessionManager $session, LoginManager $login)
-    {
+    /** @var string */
+    protected $webPath;
+
+    public function __construct(
+        ConfigManager $conf,
+        SessionManager $session,
+        LoginManager $login,
+        string $webPath
+    ) {
         $this->conf = $conf;
         $this->session = $session;
         $this->login = $login;
+        $this->webPath = $webPath;
     }
 
     public function build(): ShaarliContainer
     {
         $container = new ShaarliContainer();
+
         $container['conf'] = $this->conf;
         $container['sessionManager'] = $this->session;
         $container['loginManager'] = $this->login;
+        $container['webPath'] = $this->webPath;
+
         $container['plugins'] = function (ShaarliContainer $container): PluginManager {
             return new PluginManager($container->conf);
         };
@@ -79,6 +91,10 @@ class ContainerBuilder
 
         $container['formatterFactory'] = function (ShaarliContainer $container): FormatterFactory {
             return new FormatterFactory($container->conf, $container->loginManager->isLoggedIn());
+        };
+
+        $container['pageCacheManager'] = function (ShaarliContainer $container): PageCacheManager {
+            return new PageCacheManager($container->conf->get('resource.page_cache'));
         };
 
         return $container;
