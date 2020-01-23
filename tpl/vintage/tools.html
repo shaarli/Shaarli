@@ -5,17 +5,17 @@
 <div id="pageheader">
 	{include="page.header"}
 	<div id="toolsdiv">
-		<a href="?do=configure"><b>Configure your Shaarli</b><span>: Change Title, timezone...</span></a>
+		<a href="./?do=configure"><b>Configure your Shaarli</b><span>: Change Title, timezone...</span></a>
 		<br><br>
-		<a href="?do=pluginadmin"><b>Plugin administration</b><span>: Enable, disable and configure plugins.</span></a>
+		<a href="./?do=pluginadmin"><b>Plugin administration</b><span>: Enable, disable and configure plugins.</span></a>
     <br><br>
 		{if="!$openshaarli"}<a href="?do=changepasswd"><b>Change password</b><span>: Change your password.</span></a>
     <br><br>{/if}
-		<a href="?do=changetag"><b>Rename/delete tags</b><span>: Rename or delete a tag in all links</span></a>
+		<a href="./?do=changetag"><b>Rename/delete tags</b><span>: Rename or delete a tag in all links</span></a>
     <br><br>
-		<a href="?do=import"><b>Import</b><span>: Import Netscape html bookmarks (as exported from Firefox, Chrome, Opera, delicious...)</span></a>
+		<a href="./?do=import"><b>Import</b><span>: Import Netscape html bookmarks (as exported from Firefox, Chrome, Opera, delicious...)</span></a>
     <br><br>
-		<a href="?do=export"><b>Export</b><span>: Export Netscape html bookmarks (which can be imported in Firefox, Chrome, Opera, delicious...)</span></a>
+		<a href="./?do=export"><b>Export</b><span>: Export Netscape html bookmarks (which can be imported in Firefox, Chrome, Opera, delicious...)</span></a>
     <br><br>
 		<a class="smallbutton"
 		   onclick="return alertBookmarklet();"
