@@ -11,7 +11,6 @@ use ReflectionClass;
 use Shaarli;
 use Shaarli\Bookmark\Bookmark;
 
-require_once 'application/feed/Cache.php';
 require_once 'application/Utils.php';
 require_once 'tests/utils/ReferenceLinkDB.php';
 
