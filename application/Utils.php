@@ -87,7 +87,7 @@ function endsWith($haystack, $needle, $case = true)
  *
  * @param mixed $input Data to escape: a single string or an array of strings.
  *
- * @return string escaped.
+ * @return string|array escaped.
  */
 function escape($input)
 {

@@ -15,7 +15,7 @@
     <h2 class="window-title">{'Tag cloud'|t} - {$countTags} {'tags'|t}</h2>
     {if="!empty($search_tags)"}
     <p class="center">
-      <a href="?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
+      <a href="./?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
         {'List all links with those tags'|t}
       </a>
     </p>
