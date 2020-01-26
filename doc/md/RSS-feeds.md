@@ -21,8 +21,8 @@ For example, if you want to subscribe only to links tagged `photography`:
 - Click on the `RSS Feed` button.
 - You are presented with an RSS feed showing only these links. Subscribe to it to receive only updates with this tag.
 - The same method **also works for a full-text search** (_Search_ box) **and for the Picture Wall** (want to only see pictures about `nature`?)
-- You can also build the URLs manually: 
+- You can also build the URLs manually:
     - `https://my.shaarli.domain/?do=rss&searchtags=nature`
-    - `https://my.shaarli.domain/links/?do=picwall&searchterm=poney`
+    - `https://my.shaarli.domain/links/picture-wall?searchterm=poney`
 
 ![](images/rss-filter-1.png) ![](images/rss-filter-2.png)

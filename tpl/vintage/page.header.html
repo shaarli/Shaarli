@@ -32,7 +32,7 @@
     <li><a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a></li>
     {/if}
     <li><a href="./?do=tagcloud">Tag cloud</a></li>
-    <li><a href="./?do=picwall{$searchcrits}">Picture wall</a></li>
+    <li><a href="./picture-wall{function="ltrim($searchcrits, '&')"}">Picture wall</a></li>
     <li><a href="./?do=daily">Daily</a></li>
     {loop="$plugins_header.buttons_toolbar"}
         <li><a

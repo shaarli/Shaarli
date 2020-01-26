@@ -34,7 +34,7 @@
         </li>
         {if="$thumbnails_enabled"}
           <li class="pure-menu-item" id="shaarli-menu-picwall">
-            <a href="./?do=picwall{$searchcrits}" class="pure-menu-link">{'Picture wall'|t}</a>
+            <a href="./picture-wall?{function="ltrim($searchcrits, '&')"}" class="pure-menu-link">{'Picture wall'|t}</a>
           </li>
         {/if}
         <li class="pure-menu-item" id="shaarli-menu-daily">
