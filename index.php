@@ -610,37 +610,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Picture wall
     if ($targetPage == Router::$PAGE_PICWALL) {
-        $PAGE->assign('pagetitle', t('Picture wall') .' - '. $conf->get('general.title', 'Shaarli'));
-        if (! $conf->get('thumbnails.mode', Thumbnailer::MODE_NONE) === Thumbnailer::MODE_NONE) {
-            $PAGE->assign('linksToDisplay', []);
-            $PAGE->renderPage('picwall');
-            exit;
-        }
-
-        // Optionally filter the results:
-        $links = $bookmarkService->search($_GET);
-        $linksToDisplay = [];
-
-        // Get only bookmarks which have a thumbnail.
-        // Note: we do not retrieve thumbnails here, the request is too heavy.
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        $formatter = $factory->getFormatter();
-        foreach ($links as $key => $link) {
-            if ($link->getThumbnail() !== false) {
-                $linksToDisplay[] = $formatter->format($link);
-            }
-        }
-
-        $data = [
-            'linksToDisplay' => $linksToDisplay,
-        ];
-        $pluginManager->executeHooks('render_picwall', $data, ['loggedin' => $loginManager->isLoggedIn()]);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('picwall');
+        header('Location: ./picture-wall');
         exit;
     }
 
@@ -1944,6 +1914,7 @@ $app->group('/api/v1', function () {
 
 $app->group('', function () {
     $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
+    $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
 $response = $app->run(true);

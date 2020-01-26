@@ -7,6 +7,7 @@ namespace Shaarli\Container;
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Security\LoginManager;
@@ -30,7 +31,9 @@ class ContainerBuilderTest extends TestCase
     {
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->sessionManager = $this->createMock(SessionManager::class);
+
         $this->loginManager = $this->createMock(LoginManager::class);
+        $this->loginManager->method('isLoggedIn')->willReturn(true);
 
         $this->containerBuilder = new ContainerBuilder($this->conf, $this->sessionManager, $this->loginManager);
     }
@@ -45,5 +48,6 @@ class ContainerBuilderTest extends TestCase
         static::assertInstanceOf(History::class, $container->history);
         static::assertInstanceOf(BookmarkServiceInterface::class, $container->bookmarkService);
         static::assertInstanceOf(PageBuilder::class, $container->pageBuilder);
+        static::assertInstanceOf(FormatterFactory::class, $container->formatterFactory);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Shaarli\Updater;
 
-use Shaarli\Config\ConfigManager;
 use Shaarli\Bookmark\BookmarkServiceInterface;
+use Shaarli\Config\ConfigManager;
 use Shaarli\Updater\Exception\UpdaterException;
 
 /**
@@ -110,5 +110,21 @@ class Updater
     public function getDoneUpdates()
     {
         return $this->doneUpdates;
+    }
+
+    /**
+     * With the Slim routing system, default header link should be `./` instead of `?`.
+     * Otherwise you can not go back to the home page. Example: `/picture-wall` -> `/picture-wall?` instead of `/`.
+     */
+    public function updateMethodRelativeHomeLink(): bool
+    {
+        $link = trim($this->conf->get('general.header_link'));
+        if ($link[0] === '?') {
+            $link = './'. ltrim($link, '?');
+
+            $this->conf->set('general.header_link', $link, true, true);
+        }
+
+        return true;
     }
 }

@@ -7,6 +7,7 @@ namespace Shaarli\Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
@@ -74,6 +75,10 @@ class ContainerBuilder
 
         $container['pluginManager'] = function (ShaarliContainer $container): PluginManager {
             return new PluginManager($container->conf);
+        };
+
+        $container['formatterFactory'] = function (ShaarliContainer $container): FormatterFactory {
+            return new FormatterFactory($container->conf, $container->loginManager->isLoggedIn());
         };
 
         return $container;
