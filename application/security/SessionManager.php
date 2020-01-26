@@ -202,4 +202,14 @@ class SessionManager
     {
         return $this->session;
     }
+
+    /**
+     * @param mixed $default value which will be returned if the $key is undefined
+     *
+     * @return mixed Content stored in session
+     */
+    public function getSessionParameter(string $key, $default = null)
+    {
+        return $this->session[$key] ?? $default;
+    }
 }
