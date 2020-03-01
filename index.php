@@ -903,6 +903,19 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
         exit;
     }
 
+    // -------- User wants to see data sorted alphabetically (toggle)
+    if (isset($_GET['alphasorted'])) {
+        $_SESSION['alphasorted'] = empty($_SESSION['alphasorted']);
+
+        if (! empty($_SERVER['HTTP_REFERER'])) {
+            $location = generateLocation($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'], array('alphasorted'));
+        } else {
+            $location = '?';
+        }
+        header('Location: '. $location);
+        exit;
+    }
+
     // -------- Handle other actions allowed for non-logged in users:
     if (!$loginManager->isLoggedIn()) {
         // User tries to post new link but is not logged in:
@@ -1652,6 +1665,11 @@ function renderPage($conf, $pluginManager, $LINKSDB, $history, $sessionManager, 
  */
 function buildLinkList($PAGE, $LINKSDB, $conf, $pluginManager, $loginManager)
 {
+    // reorder
+    if (!empty($_SESSION['alphasorted'])) {
+        $LINKSDB->reorder('ASC', 'alphabetical');
+    }
+  
     // Used in templates
     if (isset($_GET['searchtags'])) {
         if (! empty($_GET['searchtags'])) {
@@ -1769,6 +1787,7 @@ function buildLinkList($PAGE, $LINKSDB, $conf, $pluginManager, $loginManager)
         'search_tags' => $searchtags,
         'visibility' => ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '',
         'links' => $linkDisp,
+        'alphasorted' => !empty($_SESSION['alphasorted'])
     );
 
     // If there is only a single link, we change on-the-fly the title of the page.

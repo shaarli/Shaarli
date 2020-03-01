@@ -525,15 +525,19 @@ You use the community supported version of the original Shaarli project, by Seba
      *
      * @param string $order ASC|DESC
      */
-    public function reorder($order = 'DESC')
+    public function reorder($order = 'DESC', $mode = '')
     {
         $order = $order === 'ASC' ? -1 : 1;
         // Reorder array by dates.
-        usort($this->links, function ($a, $b) use ($order) {
+        usort($this->links, function ($a, $b) use ($order, $mode) {
             if (isset($a['sticky']) && isset($b['sticky']) && $a['sticky'] !== $b['sticky']) {
                 return $a['sticky'] ? -1 : 1;
             }
-            return $a['created'] < $b['created'] ? 1 * $order : -1 * $order;
+            if ($mode == 'alphabetical') {
+                return strnatcmp ($b['title'], $a['title']) * $order;
+            } else {
+                return $a['created'] < $b['created'] ? 1 * $order : -1 * $order;
+            }
         });
 
         $this->urls = [];

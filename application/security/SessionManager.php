@@ -157,6 +157,7 @@ class SessionManager
             unset($this->session['username']);
             unset($this->session['visibility']);
             unset($this->session['untaggedonly']);
+            unset($this->session['alphasorted']);
         }
     }
 

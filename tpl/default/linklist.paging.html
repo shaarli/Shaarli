@@ -22,6 +22,9 @@
         <a href="#" class="filter-off fold-all pure-u-lg-0" aria-label="{'Fold all'|t}" title="{'Fold all'|t}">
           <i class="fa fa-chevron-up" aria-hidden="true"></i>
         </a>
+        <a href="?alphasorted" aria-label="{'Sort alphabetically links'|t}" title="{'Sort alphabetically links'|t}"
+           class={if="$alphasorted"}"filter-on"{else}"filter-off"{/if}
+        ><i class="fa fa-sort-alpha-asc" aria-hidden="true"></i></a>
         {loop="$action_plugin"}
           {$value.attr.class=isset($value.attr.class) ? $value.attr.class : ''}
           {$value.attr.class=!empty($value.on) ? $value.attr.class .' filter-on' : $value.attr.class .' filter-off'}

@@ -1126,6 +1126,10 @@ msgstr "Afficher uniquement les liens publics"
 msgid "Filter untagged links"
 msgstr "Filtrer par liens privés"
 
+#: tmp/linklist.paging.8d0e8d56fa46e03bb53d6865bbbc4c82.rtpl.php:31
+msgid "Sort alphabetically links"
+msgstr "Classer les liens par ordre alphabétique"
+
 #: tmp/linklist.paging.b91ef64efc3688266305ea9b42e5017e.rtpl.php:24
 #: tmp/linklist.paging.cedf684561d925457130839629000a81.rtpl.php:24
 msgid "Select all"
