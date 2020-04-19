@@ -1553,6 +1553,20 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 return $a['order'] - $b['order'];
             }
         );
+		foreach ($enabledPlugins as $plugin => $enabledPlugin) {
+            foreach ($enabledPlugin['parameters'] as $name => $value) {
+                switch ($value['value']) {
+                    case preg_match('/^#[0-9a-fA-F]{6}$/', $value['value']) ? $value['value'] : !$value['value']:
+                        $enabledPlugins[$plugin]['parameters'][$name]['type'] = "color";
+                        break;
+                    case preg_match('/^[0-9]+$/', $value['value']) ? $value['value'] : !$value['value']:
+                        $enabledPlugins[$plugin]['parameters'][$name]['type'] = "number";
+                        break;
+                    default:
+                        $enabledPlugins[$plugin]['parameters'][$name]['type'] = "text";
+                }
+            }
+        }
         $disabledPlugins = array_filter($pluginMeta, function ($v) {
             return $v['order'] === false;
         });
