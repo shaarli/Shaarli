@@ -181,7 +181,7 @@
                 {$tag_counter=count($value.taglist)}
                 {loop="value.taglist"}
                   <span class="label label-tag" title="{$strAddTag}">
-                    <a href="?addtag={$value|urlencode}">{$value}</a>
+                    <a href="./add-tag/{$value|urlencode}">{$value}</a>
                   </span>
                   {if="$tag_counter - 1 != $counter"}&middot;{/if}
                 {/loop}

@@ -3,8 +3,6 @@
 namespace Shaarli\Bookmark;
 
 use PHPUnit\Framework\TestCase;
-use ReferenceLinkDB;
-use Shaarli\Config\ConfigManager;
 
 require_once 'tests/utils/CurlUtils.php';
 
@@ -491,7 +489,7 @@ class LinkUtilsTest extends TestCase
      */
     private function getHashtagLink($hashtag, $index = '')
     {
-        $hashtagLink = '<a href="' . $index . '?addtag=$1" title="Hashtag $1">#$1</a>';
+        $hashtagLink = '<a href="' . $index . './add-tag/$1" title="Hashtag $1">#$1</a>';
         return str_replace('$1', $hashtag, $hashtagLink);
     }
 }
