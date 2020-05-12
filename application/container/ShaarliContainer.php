@@ -18,6 +18,7 @@ use Slim\Container;
 /**
  * Extension of Slim container to document the injected objects.
  *
+ * @property mixed[]                  $environment     $_SERVER automatically injected by Slim
  * @property ConfigManager            $conf
  * @property SessionManager           $sessionManager
  * @property LoginManager             $loginManager

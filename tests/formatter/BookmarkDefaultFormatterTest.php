@@ -123,7 +123,7 @@ class BookmarkDefaultFormatterTest extends TestCase
         $description[0] = 'This a &lt;strong&gt;description&lt;/strong&gt;<br />';
         $url = 'https://sub.domain.tld?query=here&amp;for=real#hash';
         $description[1] = 'text <a href="'. $url .'">'. $url .'</a> more text<br />';
-        $description[2] = 'Also, there is an <a href="?addtag=hashtag" '.
+        $description[2] = 'Also, there is an <a href="./add-tag/hashtag" '.
             'title="Hashtag hashtag">#hashtag</a> added<br />';
         $description[3] = '&nbsp; &nbsp; A &nbsp;N &nbsp;D KEEP &nbsp; &nbsp; '.
             'SPACES &nbsp; &nbsp;! &nbsp; <br />';
@@ -148,7 +148,7 @@ class BookmarkDefaultFormatterTest extends TestCase
         $this->assertEquals($root . $short, $link['url']);
         $this->assertEquals($root . $short, $link['real_url']);
         $this->assertEquals(
-            'Text <a href="'. $root .'?addtag=hashtag" title="Hashtag hashtag">'.
+            'Text <a href="'. $root .'./add-tag/hashtag" title="Hashtag hashtag">'.
             '#hashtag</a> more text',
             $link['description']
         );

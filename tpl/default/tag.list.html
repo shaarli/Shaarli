@@ -56,7 +56,7 @@
               </a>
             {/if}
 
-            <a href="?addtag={$key|urlencode}" title="{'Filter by tag'|t}" class="count">{$value}</a>
+            <a href="./add-tag/{$key|urlencode}" title="{'Filter by tag'|t}" class="count">{$value}</a>
             <a href="?searchtags={$key|urlencode} {$search_tags|urlencode}" class="tag-link">{$key}</a>
 
             {loop="$value.tag_plugin"}

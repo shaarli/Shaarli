@@ -220,7 +220,7 @@ function hashtag_autolink($description, $indexUrl = '')
      * \p{Mn} - any non marking space (accents, umlauts, etc)
      */
     $regex = '/(^|\s)#([\p{Pc}\p{N}\p{L}\p{Mn}]+)/mui';
-    $replacement = '$1<a href="'. $indexUrl .'?addtag=$2" title="Hashtag $2">#$2</a>';
+    $replacement = '$1<a href="'. $indexUrl .'./add-tag/$2" title="Hashtag $2">#$2</a>';
     return preg_replace($regex, $replacement, $description);
 }
 
