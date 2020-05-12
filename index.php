@@ -610,37 +610,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Picture wall
     if ($targetPage == Router::$PAGE_PICWALL) {
-        $PAGE->assign('pagetitle', t('Picture wall') .' - '. $conf->get('general.title', 'Shaarli'));
-        if (! $conf->get('thumbnails.mode', Thumbnailer::MODE_NONE) === Thumbnailer::MODE_NONE) {
-            $PAGE->assign('linksToDisplay', []);
-            $PAGE->renderPage('picwall');
-            exit;
-        }
-
-        // Optionally filter the results:
-        $links = $bookmarkService->search($_GET);
-        $linksToDisplay = [];
-
-        // Get only bookmarks which have a thumbnail.
-        // Note: we do not retrieve thumbnails here, the request is too heavy.
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        $formatter = $factory->getFormatter();
-        foreach ($links as $key => $link) {
-            if ($link->getThumbnail() !== false) {
-                $linksToDisplay[] = $formatter->format($link);
-            }
-        }
-
-        $data = [
-            'linksToDisplay' => $linksToDisplay,
-        ];
-        $pluginManager->executeHooks('render_picwall', $data, ['loggedin' => $loginManager->isLoggedIn()]);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->renderPage('picwall');
+        header('Location: ./picture-wall');
         exit;
     }
 
@@ -979,7 +949,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             if ($oldhash != $conf->get('credentials.hash')) {
                 echo '<script>alert("'
                     . t('The old password is not correct.')
-                    .'");document.location=\'?do=changepasswd\';</script>';
+                    .'");document.location=\'./?do=changepasswd\';</script>';
                 exit;
             }
             // Save new password
@@ -1002,10 +972,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 );
 
                 // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'?do=tools\';</script>';
+                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=tools\';</script>';
                 exit;
             }
-            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'?do=tools\';</script>';
+            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'./?do=tools\';</script>';
             exit;
         } else {
             // show the change password form.
@@ -1051,7 +1021,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             ) {
                 $_SESSION['warnings'][] = t(
                     'You have enabled or changed thumbnails mode. '
-                    .'<a href="?do=thumbs_update">Please synchronize them</a>.'
+                    .'<a href="./?do=thumbs_update">Please synchronize them</a>.'
                 );
             }
             $conf->set('thumbnails.mode', $thumbnailsMode);
@@ -1067,10 +1037,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 );
 
                 // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'?do=configure\';</script>';
+                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=configure\';</script>';
                 exit;
             }
-            echo '<script>alert("'. t('Configuration was saved.') .'");document.location=\'?do=configure\';</script>';
+            echo '<script>alert("'. t('Configuration was saved.') .'");document.location=\'./?do=configure\';</script>';
             exit;
         } else {
             // Show the configuration form.
@@ -1130,7 +1100,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         }
         $bookmarkService->save();
         $delete = empty($_POST['totag']);
-        $redirect = $delete ? 'do=changetag' : 'searchtags='. urlencode(escape($_POST['totag']));
+        $redirect = $delete ? './do=changetag' : 'searchtags='. urlencode(escape($_POST['totag']));
         $alert = $delete
             ? sprintf(t('The tag was removed from %d link.', 'The tag was removed from %d bookmarks.', $count), $count)
             : sprintf(t('The tag was renamed in %d link.', 'The tag was renamed in %d bookmarks.', $count), $count);
@@ -1519,7 +1489,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 ),
                 get_max_upload_size(ini_get('post_max_size'), ini_get('upload_max_filesize'))
             );
-            echo '<script>alert("'. $msg .'");document.location=\'?do='.Router::$PAGE_IMPORT .'\';</script>';
+            echo '<script>alert("'. $msg .'");document.location=\'./?do='.Router::$PAGE_IMPORT .'\';</script>';
             exit;
         }
         if (! $sessionManager->checkToken($_POST['token'])) {
@@ -1532,7 +1502,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             $conf,
             $history
         );
-        echo '<script>alert("'.$status.'");document.location=\'?do='
+        echo '<script>alert("'.$status.'");document.location=\'./?do='
              .Router::$PAGE_IMPORT .'\';</script>';
         exit;
     }
@@ -1587,12 +1557,12 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             // TODO: do not handle exceptions/errors in JS.
             echo '<script>alert("'
                 . $e->getMessage()
-                .'");document.location=\'?do='
+                .'");document.location=\'./?do='
                 . Router::$PAGE_PLUGINSADMIN
                 .'\';</script>';
             exit;
         }
-        header('Location: ?do='. Router::$PAGE_PLUGINSADMIN);
+        header('Location: ./?do='. Router::$PAGE_PLUGINSADMIN);
         exit;
     }
 
@@ -1944,6 +1914,7 @@ $app->group('/api/v1', function () {
 
 $app->group('', function () {
     $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
+    $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
 $response = $app->run(true);

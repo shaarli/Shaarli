@@ -14,9 +14,9 @@
 
     <div class="dailyAbout">
         All links of one day<br>in a single page.<br>
-        {if="$previousday"} <a href="?do=daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
+        {if="$previousday"} <a href="./?do=daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
         -
-        {if="$nextday"}<a href="?do=daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
+        {if="$nextday"}<a href="./?do=daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
         <br>
 
         {loop="$daily_about_plugin"}
@@ -24,7 +24,7 @@
         {/loop}
 
         <br>
-        <a href="?do=dailyrss" title="1 RSS entry per day"><img src="img/feed-icon-14x14.png" alt="rss_feed">Daily RSS Feed</a>
+        <a href="./?do=dailyrss" title="1 RSS entry per day"><img src="img/feed-icon-14x14.png" alt="rss_feed">Daily RSS Feed</a>
     </div>
 
     <div class="dailyTitle">

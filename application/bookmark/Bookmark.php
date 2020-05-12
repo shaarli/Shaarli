@@ -346,7 +346,7 @@ class Bookmark
     /**
      * Get the Thumbnail.
      *
-     * @return string|bool
+     * @return string|bool|null
      */
     public function getThumbnail()
     {

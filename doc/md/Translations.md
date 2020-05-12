@@ -42,7 +42,7 @@ http://<replace_domain>/?post
 http://<replace_domain>/?do=export
 http://<replace_domain>/?do=import
 http://<replace_domain>/login
-http://<replace_domain>/?do=picwall
+http://<replace_domain>/picture-wall
 http://<replace_domain>/?do=pluginadmin
 http://<replace_domain>/?do=tagcloud
 http://<replace_domain>/?do=taglist

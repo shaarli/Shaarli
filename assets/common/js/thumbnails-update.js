@@ -16,7 +16,7 @@
  */
 function updateThumb(ids, i, elements) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', '?do=ajax_thumb_update');
+  xhr.open('POST', './?do=ajax_thumb_update');
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.responseType = 'json';
   xhr.onload = () => {
