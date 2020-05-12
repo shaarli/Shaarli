@@ -133,7 +133,7 @@
                 <a href="{$value.real_url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
-                    {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="?addtag={$value|urlencode}">{$value}</a></span> {/loop}
+                    {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="./add-tag/{$value|urlencode}">{$value}</a></span> {/loop}
                     </div>
                 {/if}
 

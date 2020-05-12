@@ -125,7 +125,7 @@ class BookmarkMarkdownFormatterTest extends TestCase
         $description .= 'This a &lt;strong&gt;description&lt;/strong&gt;<br />'. PHP_EOL;
         $url = 'https://sub.domain.tld?query=here&amp;for=real#hash';
         $description .= 'text <a href="'. $url .'">'. $url .'</a> more text<br />'. PHP_EOL;
-        $description .= 'Also, there is an <a href="?addtag=hashtag">#hashtag</a> added<br />'. PHP_EOL;
+        $description .= 'Also, there is an <a href="./add-tag/hashtag">#hashtag</a> added<br />'. PHP_EOL;
         $description .= 'A  N  D KEEP     SPACES    !   ';
         $description .= '</p></div>';
 
@@ -146,7 +146,7 @@ class BookmarkMarkdownFormatterTest extends TestCase
         $this->formatter->addContextData('index_url', $root = 'https://domain.tld/hithere/');
 
         $description = '<div class="markdown"><p>';
-        $description .= 'Text <a href="'. $root .'?addtag=hashtag">#hashtag</a> more text';
+        $description .= 'Text <a href="'. $root .'./add-tag/hashtag">#hashtag</a> more text';
         $description .= '</p></div>';
 
         $link = $this->formatter->format($bookmark);

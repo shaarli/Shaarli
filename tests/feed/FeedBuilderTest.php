@@ -306,6 +306,6 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $link = $data['links'][array_keys($data['links'])[2]];
         $this->assertEquals('http://host.tld:8080/~user/shaarli/?WDWyig', $link['guid']);
         $this->assertEquals('http://host.tld:8080/~user/shaarli/?WDWyig', $link['url']);
-        $this->assertContains('http://host.tld:8080/~user/shaarli/?addtag=hashtag', $link['description']);
+        $this->assertContains('http://host.tld:8080/~user/shaarli/./add-tag/hashtag', $link['description']);
     }
 }
