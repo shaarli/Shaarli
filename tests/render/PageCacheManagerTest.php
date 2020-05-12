@@ -2,17 +2,18 @@
 /**
  * Cache tests
  */
-namespace Shaarli\Feed;
+namespace Shaarli\Render;
+
+use PHPUnit\Framework\TestCase;
+use Shaarli\Security\SessionManager;
 
 // required to access $_SESSION array
 session_start();
 
-require_once 'application/feed/Cache.php';
-
 /**
  * Unitary tests for cached pages
  */
-class CacheTest extends \PHPUnit\Framework\TestCase
+class PageCacheManagerTest extends TestCase
 {
     // test cache directory
     protected static $testCacheDir = 'sandbox/dummycache';
@@ -20,12 +21,19 @@ class CacheTest extends \PHPUnit\Framework\TestCase
     // dummy cached file names / content
     protected static $pages = array('a', 'toto', 'd7b59c');
 
+    /** @var PageCacheManager */
+    protected $cacheManager;
+
+    /** @var SessionManager */
+    protected $sessionManager;
 
     /**
      * Populate the cache with dummy files
      */
     public function setUp()
     {
+        $this->cacheManager = new PageCacheManager(static::$testCacheDir);
+
         if (!is_dir(self::$testCacheDir)) {
             mkdir(self::$testCacheDir);
         } else {
@@ -52,7 +60,7 @@ class CacheTest extends \PHPUnit\Framework\TestCase
      */
     public function testPurgeCachedPages()
     {
-        purgeCachedPages(self::$testCacheDir);
+        $this->cacheManager->purgeCachedPages();
         foreach (self::$pages as $page) {
             $this->assertFileNotExists(self::$testCacheDir . '/' . $page . '.cache');
         }
@@ -65,28 +73,14 @@ class CacheTest extends \PHPUnit\Framework\TestCase
      */
     public function testPurgeCachedPagesMissingDir()
     {
+        $this->cacheManager = new PageCacheManager(self::$testCacheDir . '_missing');
+
         $oldlog = ini_get('error_log');
         ini_set('error_log', '/dev/null');
         $this->assertEquals(
             'Cannot purge sandbox/dummycache_missing: no directory',
-            purgeCachedPages(self::$testCacheDir . '_missing')
+            $this->cacheManager->purgeCachedPages()
         );
         ini_set('error_log', $oldlog);
-    }
-
-    /**
-     * Purge cached pages and session cache
-     */
-    public function testInvalidateCaches()
-    {
-        $this->assertArrayNotHasKey('tags', $_SESSION);
-        $_SESSION['tags'] = array('goodbye', 'cruel', 'world');
-
-        invalidateCaches(self::$testCacheDir);
-        foreach (self::$pages as $page) {
-            $this->assertFileNotExists(self::$testCacheDir . '/' . $page . '.cache');
-        }
-
-        $this->assertArrayNotHasKey('tags', $_SESSION);
     }
 }

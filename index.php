@@ -53,7 +53,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 // Shaarli library
 require_once 'application/bookmark/LinkUtils.php';
 require_once 'application/config/ConfigPlugin.php';
-require_once 'application/feed/Cache.php';
 require_once 'application/http/HttpUtils.php';
 require_once 'application/http/UrlUtils.php';
 require_once 'application/updater/UpdaterUtils.php';
@@ -78,6 +77,7 @@ use Shaarli\Languages;
 use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
+use Shaarli\Render\PageCacheManager;
 use Shaarli\Render\ThemeUtils;
 use Shaarli\Router;
 use Shaarli\Security\LoginManager;
@@ -530,6 +530,7 @@ function showLinkList($PAGE, $linkDb, $conf, $pluginManager, $loginManager)
  */
 function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionManager, $loginManager)
 {
+    $pageCacheManager = new PageCacheManager($conf->get('resource.page_cache'));
     $updater = new Updater(
         UpdaterUtils::read_updates_file($conf->get('resource.updates')),
         $bookmarkService,
@@ -543,6 +544,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 $conf->get('resource.updates'),
                 $updater->getDoneUpdates()
             );
+
+            $pageCacheManager->invalidateCaches();
         }
     } catch (Exception $e) {
         die($e->getMessage());
@@ -601,10 +604,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     }
     // -------- User wants to logout.
     if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=logout')) {
-        invalidateCaches($conf->get('resource.page_cache'));
-        $sessionManager->logout();
-        setcookie(LoginManager::$STAY_SIGNED_IN_COOKIE, 'false', 0, WEB_PATH);
-        header('Location: ?');
+        header('Location: ./logout');
         exit;
     }
 
@@ -1029,7 +1029,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
             try {
                 $conf->write($loginManager->isLoggedIn());
                 $history->updateSettings();
-                invalidateCaches($conf->get('resource.page_cache'));
+                $pageCacheManager->invalidateCaches();
             } catch (Exception $e) {
                 error_log(
                     'ERROR while writing config file after configuration update.' . PHP_EOL .
@@ -1891,7 +1891,7 @@ if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=
     exit;
 }
 
-$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager);
+$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager, WEB_PATH);
 $container = $containerBuilder->build();
 $app = new App($container);
 
@@ -1914,6 +1914,7 @@ $app->group('/api/v1', function () {
 
 $app->group('', function () {
     $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
+    $this->get('/logout', '\Shaarli\Front\Controller\LogoutController:index')->setName('logout');
     $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
