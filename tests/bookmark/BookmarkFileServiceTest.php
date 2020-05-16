@@ -816,7 +816,6 @@ class BookmarkFileServiceTest extends TestCase
         );
         $this->assertEquals(
             [
-                'web' => 4,
                 'cartoon' => 2,
                 'gnu' => 1,
                 'dev' => 1,
@@ -833,7 +832,6 @@ class BookmarkFileServiceTest extends TestCase
         );
         $this->assertEquals(
             [
-                'web' => 1,
                 'html' => 1,
                 'w3c' => 1,
                 'css' => 1,
@@ -968,7 +966,6 @@ class BookmarkFileServiceTest extends TestCase
     public function testCountLinkPerTagAllWithFilter()
     {
         $expected = [
-            'gnu' => 2,
             'hashtag' => 2,
             '-exclude' => 1,
             '.hidden' => 1,
@@ -991,7 +988,6 @@ class BookmarkFileServiceTest extends TestCase
     public function testCountLinkPerTagPublicWithFilter()
     {
         $expected = [
-            'gnu' => 2,
             'hashtag' => 2,
             '-exclude' => 1,
             '.hidden' => 1,
@@ -1015,7 +1011,6 @@ class BookmarkFileServiceTest extends TestCase
     {
         $expected = [
             'cartoon' => 1,
-            'dev' => 1,
             'tag1' => 1,
             'tag2' => 1,
             'tag3' => 1,

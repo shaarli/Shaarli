@@ -625,11 +625,6 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         $visibility = ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '';
         $filteringTags = isset($_GET['searchtags']) ? explode(' ', $_GET['searchtags']) : [];
         $tags = $bookmarkService->bookmarksCountPerTag($filteringTags, $visibility);
-        foreach ($filteringTags as $tag) {
-            if (array_key_exists($tag, $tags)) {
-                unset($tags[$tag]);
-            }
-        }
 
         if (! empty($_GET['sort']) && $_GET['sort'] === 'alpha') {
             alphabetical_sort($tags, false, true);

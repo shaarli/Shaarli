@@ -127,8 +127,8 @@ class TagCloudControllerTest extends TestCase
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with(['ghi', 'def'], BookmarkFilter::$PRIVATE)
-            ->willReturnCallback(function () use ($allTags): array {
-                return $allTags;
+            ->willReturnCallback(function (): array {
+                return ['abc' => 3];
             })
         ;
 
