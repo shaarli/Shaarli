@@ -39,9 +39,6 @@ class TagCloudController extends ShaarliController
         $logMaxCount = $maxCount > 1 ? log($maxCount, 30) : 1;
         $tagList = [];
         foreach ($tags as $key => $value) {
-            if (in_array($key, $filteringTags)) {
-                continue;
-            }
             // Tag font size scaling:
             //   default 15 and 30 logarithm bases affect scaling,
             //   2.2 and 0.8 are arbitrary font sizes in em.
