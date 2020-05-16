@@ -15,7 +15,7 @@
     <h2 class="window-title">{'Tag list'|t} - {$countTags} {'tags'|t}</h2>
     {if="!empty($search_tags)"}
       <p class="center">
-        <a href="?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
+        <a href="./?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
           {'List all links with those tags'|t}
         </a>
       </p>
@@ -57,7 +57,7 @@
             {/if}
 
             <a href="./add-tag/{$key|urlencode}" title="{'Filter by tag'|t}" class="count">{$value}</a>
-            <a href="?searchtags={$key|urlencode} {$search_tags|urlencode}" class="tag-link">{$key}</a>
+            <a href="./?searchtags={$key|urlencode} {$search_tags|urlencode}" class="tag-link">{$key}</a>
 
             {loop="$value.tag_plugin"}
               {$value}

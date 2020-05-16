@@ -10,12 +10,15 @@ use Slim\Http\Response;
 /**
  * Class TagCloud
  *
- * Slim controller used to render the tag cloud page.
+ * Slim controller used to render the tag cloud and tag list pages.
  *
  * @package Front\Controller
  */
 class TagCloudController extends ShaarliController
 {
+    protected const TYPE_CLOUD = 'cloud';
+    protected const TYPE_LIST = 'list';
+
     /**
      * Display the tag cloud through the template engine.
      * This controller a few filters:
@@ -24,26 +27,53 @@ class TagCloudController extends ShaarliController
      */
     public function cloud(Request $request, Response $response): Response
     {
+        return $this->processRequest(static::TYPE_CLOUD, $request, $response);
+    }
+
+    /**
+     * Display the tag list through the template engine.
+     * This controller a few filters:
+     *   - Visibility stored in the session for logged in users
+     *   - `searchtags` query parameter: will return tags associated with filter in at least one bookmark
+     *   - `sort` query parameters:
+     *       + `usage` (default): most used tags first
+     *       + `alpha`: alphabetical order
+     */
+    public function list(Request $request, Response $response): Response
+    {
+        return $this->processRequest(static::TYPE_LIST, $request, $response);
+    }
+
+    /**
+     * Process the request for both tag cloud and tag list endpoints.
+     */
+    protected function processRequest(string $type, Request $request, Response $response): Response
+    {
         if ($this->container->loginManager->isLoggedIn() === true) {
             $visibility = $this->container->sessionManager->getSessionParameter('visibility');
         }
 
+        $sort = $request->getQueryParam('sort');
         $searchTags = $request->getQueryParam('searchtags');
         $filteringTags = $searchTags !== null ? explode(' ', $searchTags) : [];
 
         $tags = $this->container->bookmarkService->bookmarksCountPerTag($filteringTags, $visibility ?? null);
 
-        // TODO: the sorting should be handled by bookmarkService instead of the controller
-        alphabetical_sort($tags, false, true);
+        if (static::TYPE_CLOUD === $type || 'alpha' === $sort) {
+            // TODO: the sorting should be handled by bookmarkService instead of the controller
+            alphabetical_sort($tags, false, true);
+        }
 
-        $tagList = $this->formatTagsForCloud($tags);
+        if (static::TYPE_CLOUD === $type) {
+            $tags = $this->formatTagsForCloud($tags);
+        }
 
         $searchTags = implode(' ', escape($filteringTags));
         $data = [
             'search_tags' => $searchTags,
-            'tags' => $tagList,
+            'tags' => $tags,
         ];
-        $data = $this->executeHooks($data);
+        $data = $this->executeHooks('tag' . $type, $data);
         foreach ($data as $key => $value) {
             $this->assignView($key, $value);
         }
@@ -51,12 +81,19 @@ class TagCloudController extends ShaarliController
         $searchTags = !empty($searchTags) ? $searchTags .' - ' : '';
         $this->assignView(
             'pagetitle',
-            $searchTags . t('Tag cloud') .' - '. $this->container->conf->get('general.title', 'Shaarli')
+            $searchTags . t('Tag '. $type) .' - '. $this->container->conf->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render('tag.cloud'));
+        return $response->write($this->render('tag.'. $type));
     }
 
+    /**
+     * Format the tags array for the tag cloud template.
+     *
+     * @param array<string, int> $tags List of tags as key with count as value
+     *
+     * @return mixed[] List of tags as key, with count and expected font size in a subarray
+     */
     protected function formatTagsForCloud(array $tags): array
     {
         // We sort tags alphabetically, then choose a font size according to count.
@@ -81,12 +118,12 @@ class TagCloudController extends ShaarliController
     /**
      * @param mixed[] $data Template data
      *
-     * @return mixed[] Template data after active plugins render_picwall hook execution.
+     * @return mixed[] Template data after active plugins hook execution.
      */
-    protected function executeHooks(array $data): array
+    protected function executeHooks(string $template, array $data): array
     {
         $this->container->pluginManager->executeHooks(
-            'render_tagcloud',
+            'render_'. $template,
             $data,
             ['loggedin' => $this->container->loginManager->isLoggedIn()]
         );
