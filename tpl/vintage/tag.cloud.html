@@ -13,7 +13,7 @@
     <div id="cloudtag">
         {loop="$tags"}
             <a href="./add-tag/{$key|urlencode}" class="count">{$value.count}</a><a
-                href="?searchtags={$key|urlencode}" style="font-size:{$value.size}em;">{$key}</a>
+                href="./?searchtags={$key|urlencode}" style="font-size:{$value.size}em;">{$key}</a>
             {loop="$value.tag_plugin"}
                 {$value}
             {/loop}

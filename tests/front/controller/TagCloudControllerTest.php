@@ -73,7 +73,7 @@ class TagCloudControllerTest extends TestCase
             })
         ;
 
-        $result = $this->controller->index($request, $response);
+        $result = $this->controller->cloud($request, $response);
 
         static::assertSame(200, $result->getStatusCode());
         static::assertSame('tag.cloud', (string) $result->getBody());
@@ -147,7 +147,7 @@ class TagCloudControllerTest extends TestCase
             })
         ;
 
-        $result = $this->controller->index($request, $response);
+        $result = $this->controller->cloud($request, $response);
 
         static::assertSame(200, $result->getStatusCode());
         static::assertSame('tag.cloud', (string) $result->getBody());
@@ -198,7 +198,7 @@ class TagCloudControllerTest extends TestCase
             })
         ;
 
-        $result = $this->controller->index($request, $response);
+        $result = $this->controller->cloud($request, $response);
 
         static::assertSame(200, $result->getStatusCode());
         static::assertSame('tag.cloud', (string) $result->getBody());
