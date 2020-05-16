@@ -296,6 +296,7 @@ class BookmarkFileService implements BookmarkServiceInterface
                 if (empty($tag)
                     || (! $this->isLoggedIn && startsWith($tag, '.'))
                     || $tag === BookmarkMarkdownFormatter::NO_MD_TAG
+                    || in_array($tag, $filteringTags, true)
                 ) {
                     continue;
                 }

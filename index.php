@@ -616,49 +616,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Tag cloud
     if ($targetPage == Router::$PAGE_TAGCLOUD) {
-        $visibility = ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '';
-        $filteringTags = isset($_GET['searchtags']) ? explode(' ', $_GET['searchtags']) : [];
-        $tags = $bookmarkService->bookmarksCountPerTag($filteringTags, $visibility);
-
-        // We sort tags alphabetically, then choose a font size according to count.
-        // First, find max value.
-        $maxcount = 0;
-        foreach ($tags as $value) {
-            $maxcount = max($maxcount, $value);
-        }
-
-        alphabetical_sort($tags, false, true);
-
-        $logMaxCount = $maxcount > 1 ? log($maxcount, 30) : 1;
-        $tagList = array();
-        foreach ($tags as $key => $value) {
-            if (in_array($key, $filteringTags)) {
-                continue;
-            }
-            // Tag font size scaling:
-            //   default 15 and 30 logarithm bases affect scaling,
-            //   2.2 and 0.8 are arbitrary font sizes in em.
-            $size = log($value, 15) / $logMaxCount * 2.2 + 0.8;
-            $tagList[$key] = array(
-                'count' => $value,
-                'size' => number_format($size, 2, '.', ''),
-            );
-        }
-
-        $searchTags = implode(' ', escape($filteringTags));
-        $data = array(
-            'search_tags' => $searchTags,
-            'tags' => $tagList,
-        );
-        $pluginManager->executeHooks('render_tagcloud', $data, array('loggedin' => $loginManager->isLoggedIn()));
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $searchTags = ! empty($searchTags) ? $searchTags .' - ' : '';
-        $PAGE->assign('pagetitle', $searchTags. t('Tag cloud') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('tag.cloud');
+        header('Location: ./tag-cloud');
         exit;
     }
 
@@ -667,11 +625,6 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         $visibility = ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '';
         $filteringTags = isset($_GET['searchtags']) ? explode(' ', $_GET['searchtags']) : [];
         $tags = $bookmarkService->bookmarksCountPerTag($filteringTags, $visibility);
-        foreach ($filteringTags as $tag) {
-            if (array_key_exists($tag, $tags)) {
-                unset($tags[$tag]);
-            }
-        }
 
         if (! empty($_GET['sort']) && $_GET['sort'] === 'alpha') {
             alphabetical_sort($tags, false, true);
@@ -894,7 +847,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         // Show login screen, then redirect to ?post=...
         if (isset($_GET['post'])) {
             header( // Redirect to login page, then back to post link.
-                'Location: /login?post='.urlencode($_GET['post']).
+                'Location: ./login?post='.urlencode($_GET['post']).
                 (!empty($_GET['title'])?'&title='.urlencode($_GET['title']):'').
                 (!empty($_GET['description'])?'&description='.urlencode($_GET['description']):'').
                 (!empty($_GET['tags'])?'&tags='.urlencode($_GET['tags']):'').
@@ -905,7 +858,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
         showLinkList($PAGE, $bookmarkService, $conf, $pluginManager, $loginManager);
         if (isset($_GET['edit_link'])) {
-            header('Location: /login?edit_link='. escape($_GET['edit_link']));
+            header('Location: ./login?edit_link='. escape($_GET['edit_link']));
             exit;
         }
 
@@ -1916,6 +1869,7 @@ $app->group('', function () {
     $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
     $this->get('/logout', '\Shaarli\Front\Controller\LogoutController:index')->setName('logout');
     $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
+    $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
