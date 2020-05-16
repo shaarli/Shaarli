@@ -18,14 +18,14 @@
 {else}
 <li><a href="{$titleLink}" class="nomobile">Home</a></li>
     {if="$is_logged_in"}
-    <li><a href="/logout">Logout</a></li>
+    <li><a href="./logout">Logout</a></li>
     <li><a href="?do=tools">Tools</a></li>
     <li><a href="?do=addlink">Add link</a></li>
     {elseif="$openshaarli"}
     <li><a href="./?do=tools">Tools</a></li>
     <li><a href="./?do=addlink">Add link</a></li>
     {else}
-    <li><a href="/login">Login</a></li>
+    <li><a href="./login">Login</a></li>
     {/if}
     <li><a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile">RSS Feed</a></li>
     {if="$showatom"}

@@ -852,7 +852,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         // Show login screen, then redirect to ?post=...
         if (isset($_GET['post'])) {
             header( // Redirect to login page, then back to post link.
-                'Location: /login?post='.urlencode($_GET['post']).
+                'Location: ./login?post='.urlencode($_GET['post']).
                 (!empty($_GET['title'])?'&title='.urlencode($_GET['title']):'').
                 (!empty($_GET['description'])?'&description='.urlencode($_GET['description']):'').
                 (!empty($_GET['tags'])?'&tags='.urlencode($_GET['tags']):'').
@@ -863,7 +863,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
         showLinkList($PAGE, $bookmarkService, $conf, $pluginManager, $loginManager);
         if (isset($_GET['edit_link'])) {
-            header('Location: /login?edit_link='. escape($_GET['edit_link']));
+            header('Location: ./login?edit_link='. escape($_GET['edit_link']));
             exit;
         }
 
