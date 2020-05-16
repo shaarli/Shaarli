@@ -30,6 +30,9 @@ class TagCloudControllerTest extends TestCase
         $this->controller = new TagCloudController($this->container);
     }
 
+    /**
+     * Tag Cloud - default parameters
+     */
     public function testValidCloudControllerInvokeDefault(): void
     {
         $this->createValidContainerMockSet();
@@ -42,7 +45,6 @@ class TagCloudControllerTest extends TestCase
         $expectedOrder = ['abc', 'def', 'ghi'];
 
         $request = $this->createMock(Request::class);
-        $request->expects(static::once())->method('getQueryParam')->with('searchtags')->willReturn(null);
         $response = new Response();
 
         // Save RainTPL assigned variables
@@ -92,7 +94,7 @@ class TagCloudControllerTest extends TestCase
     }
 
     /**
-     * Additional parameters:
+     * Tag Cloud - Additional parameters:
      *   - logged in
      *   - visibility private
      *   - search tags: `ghi` and `def` (note that filtered tags are not displayed anymore)
@@ -101,18 +103,17 @@ class TagCloudControllerTest extends TestCase
     {
         $this->createValidContainerMockSet();
 
-        $allTags = [
-            'ghi' => 1,
-            'abc' => 3,
-            'def' => 12,
-        ];
-
         $request = $this->createMock(Request::class);
         $request
-            ->expects(static::once())
             ->method('getQueryParam')
-            ->with('searchtags')
-            ->willReturn('ghi def')
+            ->with()
+            ->willReturnCallback(function (string $key): ?string {
+                if ('searchtags' === $key) {
+                    return 'ghi def';
+                }
+
+                return null;
+            })
         ;
         $response = new Response();
 
@@ -162,12 +163,14 @@ class TagCloudControllerTest extends TestCase
         static::assertLessThan(5, $assignedVariables['tags']['abc']['size']);
     }
 
+    /**
+     * Tag Cloud - empty
+     */
     public function testEmptyCloud(): void
     {
         $this->createValidContainerMockSet();
 
         $request = $this->createMock(Request::class);
-        $request->expects(static::once())->method('getQueryParam')->with('searchtags')->willReturn(null);
         $response = new Response();
 
         // Save RainTPL assigned variables
@@ -207,6 +210,182 @@ class TagCloudControllerTest extends TestCase
         static::assertSame('', $assignedVariables['search_tags']);
         static::assertCount(0, $assignedVariables['tags']);
     }
+
+    /**
+     * Tag List - Default sort is by usage DESC
+     */
+    public function testValidListControllerInvokeDefault(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $allTags = [
+            'def' => 12,
+            'abc' => 3,
+            'ghi' => 1,
+        ];
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        // Save RainTPL assigned variables
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $this->container->bookmarkService
+            ->expects(static::once())
+            ->method('bookmarksCountPerTag')
+            ->with([], null)
+            ->willReturnCallback(function () use ($allTags): array {
+                return $allTags;
+            })
+        ;
+
+        // Make sure that PluginManager hook is triggered
+        $this->container->pluginManager
+            ->expects(static::at(0))
+            ->method('executeHooks')
+            ->willReturnCallback(function (string $hook, array $data, array $param): array {
+                static::assertSame('render_taglist', $hook);
+                static::assertSame('', $data['search_tags']);
+                static::assertCount(3, $data['tags']);
+
+                static::assertArrayHasKey('loggedin', $param);
+
+                return $data;
+            })
+        ;
+
+        $result = $this->controller->list($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertSame('tag.list', (string) $result->getBody());
+        static::assertSame('Tag list - Shaarli', $assignedVariables['pagetitle']);
+
+        static::assertSame('', $assignedVariables['search_tags']);
+        static::assertCount(3, $assignedVariables['tags']);
+
+        foreach ($allTags as $tag => $count) {
+            static::assertSame($count, $assignedVariables['tags'][$tag]);
+        }
+    }
+
+    /**
+     * Tag List - Additional parameters:
+     *   - logged in
+     *   - visibility private
+     *   - search tags: `ghi` and `def` (note that filtered tags are not displayed anymore)
+     *   - sort alphabetically
+     */
+    public function testValidListControllerInvokeWithParameters(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $request
+            ->method('getQueryParam')
+            ->with()
+            ->willReturnCallback(function (string $key): ?string {
+                if ('searchtags' === $key) {
+                    return 'ghi def';
+                } elseif ('sort' === $key) {
+                    return 'alpha';
+                }
+
+                return null;
+            })
+        ;
+        $response = new Response();
+
+        // Save RainTPL assigned variables
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $this->container->loginManager->method('isLoggedin')->willReturn(true);
+        $this->container->sessionManager->expects(static::once())->method('getSessionParameter')->willReturn('private');
+
+        $this->container->bookmarkService
+            ->expects(static::once())
+            ->method('bookmarksCountPerTag')
+            ->with(['ghi', 'def'], BookmarkFilter::$PRIVATE)
+            ->willReturnCallback(function (): array {
+                return ['abc' => 3];
+            })
+        ;
+
+        // Make sure that PluginManager hook is triggered
+        $this->container->pluginManager
+            ->expects(static::at(0))
+            ->method('executeHooks')
+            ->willReturnCallback(function (string $hook, array $data, array $param): array {
+                static::assertSame('render_taglist', $hook);
+                static::assertSame('ghi def', $data['search_tags']);
+                static::assertCount(1, $data['tags']);
+
+                static::assertArrayHasKey('loggedin', $param);
+
+                return $data;
+            })
+        ;
+
+        $result = $this->controller->list($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertSame('tag.list', (string) $result->getBody());
+        static::assertSame('ghi def - Tag list - Shaarli', $assignedVariables['pagetitle']);
+
+        static::assertSame('ghi def', $assignedVariables['search_tags']);
+        static::assertCount(1, $assignedVariables['tags']);
+        static::assertSame(3, $assignedVariables['tags']['abc']);
+    }
+
+    /**
+     * Tag List - empty
+     */
+    public function testEmptyList(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        // Save RainTPL assigned variables
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $this->container->bookmarkService
+            ->expects(static::once())
+            ->method('bookmarksCountPerTag')
+            ->with([], null)
+            ->willReturnCallback(function (array $parameters, ?string $visibility): array {
+                return [];
+            })
+        ;
+
+        // Make sure that PluginManager hook is triggered
+        $this->container->pluginManager
+            ->expects(static::at(0))
+            ->method('executeHooks')
+            ->willReturnCallback(function (string $hook, array $data, array $param): array {
+                static::assertSame('render_taglist', $hook);
+                static::assertSame('', $data['search_tags']);
+                static::assertCount(0, $data['tags']);
+
+                static::assertArrayHasKey('loggedin', $param);
+
+                return $data;
+            })
+        ;
+
+        $result = $this->controller->list($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertSame('tag.list', (string) $result->getBody());
+        static::assertSame('Tag list - Shaarli', $assignedVariables['pagetitle']);
+
+        static::assertSame('', $assignedVariables['search_tags']);
+        static::assertCount(0, $assignedVariables['tags']);
+    }
+
 
     protected function createValidContainerMockSet(): void
     {

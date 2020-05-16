@@ -45,7 +45,7 @@ http://<replace_domain>/login
 http://<replace_domain>/picture-wall
 http://<replace_domain>/?do=pluginadmin
 http://<replace_domain>/tag-cloud
-http://<replace_domain>/?do=taglist
+http://<replace_domain>/tag-list
 ```
 
 #### Improve existing translation

@@ -622,28 +622,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Tag list
     if ($targetPage == Router::$PAGE_TAGLIST) {
-        $visibility = ! empty($_SESSION['visibility']) ? $_SESSION['visibility'] : '';
-        $filteringTags = isset($_GET['searchtags']) ? explode(' ', $_GET['searchtags']) : [];
-        $tags = $bookmarkService->bookmarksCountPerTag($filteringTags, $visibility);
-
-        if (! empty($_GET['sort']) && $_GET['sort'] === 'alpha') {
-            alphabetical_sort($tags, false, true);
-        }
-
-        $searchTags = implode(' ', escape($filteringTags));
-        $data = [
-            'search_tags' => $searchTags,
-            'tags' => $tags,
-        ];
-        $pluginManager->executeHooks('render_taglist', $data, ['loggedin' => $loginManager->isLoggedIn()]);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $searchTags = ! empty($searchTags) ? $searchTags .' - ' : '';
-        $PAGE->assign('pagetitle', $searchTags . t('Tag list') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('tag.list');
+        header('Location: ./tag-list');
         exit;
     }
 
@@ -1870,6 +1849,7 @@ $app->group('', function () {
     $this->get('/logout', '\Shaarli\Front\Controller\LogoutController:index')->setName('logout');
     $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
     $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
+    $this->get('/tag-list', '\Shaarli\Front\Controller\TagCloudController:list')->setName('taglist');
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
