@@ -56,11 +56,11 @@
         </li>
         {if="$is_logged_in"}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-logout">
-            <a href="/logout" class="pure-menu-link">{'Logout'|t}</a>
+            <a href="./logout" class="pure-menu-link">{'Logout'|t}</a>
           </li>
         {else}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-login">
-            <a href="/login" class="pure-menu-link">{'Login'|t}</a>
+            <a href="./login" class="pure-menu-link">{'Login'|t}</a>
           </li>
         {/if}
       </ul>
@@ -80,7 +80,7 @@
           </li>
           {if="!$is_logged_in"}
             <li class="pure-menu-item" id="shaarli-menu-desktop-login">
-              <a href="/login" class="pure-menu-link"
+              <a href="./login" class="pure-menu-link"
                  data-open-id="header-login-form"
                  id="login-button" aria-label="{'Login'|t}" title="{'Login'|t}">
                 <i class="fa fa-user" aria-hidden="true"></i>
@@ -88,7 +88,7 @@
             </li>
           {else}
             <li class="pure-menu-item" id="shaarli-menu-desktop-logout">
-              <a href="/logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
+              <a href="./logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
                 <i class="fa fa-sign-out" aria-hidden="true"></i>
               </a>
             </li>
