@@ -1869,7 +1869,7 @@ $app->group('', function () {
     $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
     $this->get('/logout', '\Shaarli\Front\Controller\LogoutController:index')->setName('logout');
     $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
-    $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:index')->setName('tagcloud');
+    $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
