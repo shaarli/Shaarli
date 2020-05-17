@@ -30,25 +30,19 @@ class DailyController extends ShaarliController
         $nbAvailableDates = count($availableDates);
         $index = array_search($day, $availableDates);
 
-        if ($index === false && $nbAvailableDates > 0) {
+        if ($index === false) {
             // no bookmarks for day, but at least one day with bookmarks
-            $index = $nbAvailableDates - 1;
-            $day = $availableDates[$index];
+            $day = $availableDates[$nbAvailableDates - 1] ?? $day;
+            $previousDay = $availableDates[$nbAvailableDates - 2] ?? '';
+        } else {
+            $previousDay = $availableDates[$index - 1] ?? '';
+            $nextDay = $availableDates[$index + 1] ?? '';
         }
 
         if ($day === date('Ymd')) {
             $this->assignView('dayDesc', t('Today'));
         } elseif ($day === date('Ymd', strtotime('-1 days'))) {
             $this->assignView('dayDesc', t('Yesterday'));
-        }
-
-        if ($index !== false) {
-            if ($index >= 1) {
-                $previousDay = $availableDates[$index - 1];
-            }
-            if ($index < $nbAvailableDates - 1) {
-                $nextDay = $availableDates[$index + 1];
-            }
         }
 
         try {

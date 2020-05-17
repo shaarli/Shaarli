@@ -112,6 +112,8 @@ class DailyControllerTest extends TestCase
             'Daily - '. format_date($currentDay, false, true) .' - Shaarli',
             $assignedVariables['pagetitle']
         );
+        static::assertEquals($currentDay, $assignedVariables['dayDate']);
+        static::assertEquals($currentDay->getTimestamp(), $assignedVariables['day']);
         static::assertCount(3, $assignedVariables['linksToDisplay']);
 
         $link = $assignedVariables['linksToDisplay'][0];
@@ -358,6 +360,8 @@ class DailyControllerTest extends TestCase
         static::assertSame('daily', (string) $result->getBody());
         static::assertCount(0, $assignedVariables['linksToDisplay']);
         static::assertSame('Today', $assignedVariables['dayDesc']);
+        static::assertEquals((new \DateTime())->setTime(0, 0)->getTimestamp(), $assignedVariables['day']);
+        static::assertEquals((new \DateTime())->setTime(0, 0), $assignedVariables['dayDate']);
     }
 
     protected function createValidContainerMockSet(): void
