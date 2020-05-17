@@ -399,112 +399,6 @@ function showDailyRSS($bookmarkService, $conf, $loginManager)
 }
 
 /**
- * Show the 'Daily' page.
- *
- * @param PageBuilder              $pageBuilder     Template engine wrapper.
- * @param BookmarkServiceInterface $bookmarkService instance.
- * @param ConfigManager            $conf            Configuration Manager instance.
- * @param PluginManager            $pluginManager   Plugin Manager instance.
- * @param LoginManager             $loginManager    Login Manager instance
- */
-function showDaily($pageBuilder, $bookmarkService, $conf, $pluginManager, $loginManager)
-{
-    if (isset($_GET['day'])) {
-        $day = $_GET['day'];
-        if ($day === date('Ymd', strtotime('now'))) {
-            $pageBuilder->assign('dayDesc', t('Today'));
-        } elseif ($day === date('Ymd', strtotime('-1 days'))) {
-            $pageBuilder->assign('dayDesc', t('Yesterday'));
-        }
-    } else {
-        $day = date('Ymd', strtotime('now')); // Today, in format YYYYMMDD.
-        $pageBuilder->assign('dayDesc', t('Today'));
-    }
-
-    $days = $bookmarkService->days();
-    $i = array_search($day, $days);
-    if ($i === false && count($days)) {
-        // no bookmarks for day, but at least one day with bookmarks
-        $i = count($days) - 1;
-        $day = $days[$i];
-    }
-    $previousday = '';
-    $nextday = '';
-
-    if ($i !== false) {
-        if ($i >= 1) {
-             $previousday = $days[$i - 1];
-        }
-        if ($i < count($days) - 1) {
-            $nextday = $days[$i + 1];
-        }
-    }
-    try {
-        $linksToDisplay = $bookmarkService->filterDay($day);
-    } catch (Exception $exc) {
-        error_log($exc);
-        $linksToDisplay = [];
-    }
-
-    $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-    $formatter = $factory->getFormatter();
-    // We pre-format some fields for proper output.
-    foreach ($linksToDisplay as $key => $bookmark) {
-        $linksToDisplay[$key] = $formatter->format($bookmark);
-        // This page is a bit specific, we need raw description to calculate the length
-        $linksToDisplay[$key]['formatedDescription'] = $linksToDisplay[$key]['description'];
-        $linksToDisplay[$key]['description'] = $bookmark->getDescription();
-    }
-
-    $dayDate = DateTime::createFromFormat(Bookmark::LINK_DATE_FORMAT, $day.'_000000');
-    $data = array(
-        'pagetitle' => $conf->get('general.title') .' - '. format_date($dayDate, false),
-        'linksToDisplay' => $linksToDisplay,
-        'day' => $dayDate->getTimestamp(),
-        'dayDate' => $dayDate,
-        'previousday' => $previousday,
-        'nextday' => $nextday,
-    );
-
-    /* Hook is called before column construction so that plugins don't have
-       to deal with columns. */
-    $pluginManager->executeHooks('render_daily', $data, array('loggedin' => $loginManager->isLoggedIn()));
-
-    /* We need to spread the articles on 3 columns.
-       I did not want to use a JavaScript lib like http://masonry.desandro.com/
-       so I manually spread entries with a simple method: I roughly evaluate the
-       height of a div according to title and description length.
-    */
-    $columns = array(array(), array(), array()); // Entries to display, for each column.
-    $fill = array(0, 0, 0);  // Rough estimate of columns fill.
-    foreach ($data['linksToDisplay'] as $key => $bookmark) {
-        // Roughly estimate length of entry (by counting characters)
-        // Title: 30 chars = 1 line. 1 line is 30 pixels height.
-        // Description: 836 characters gives roughly 342 pixel height.
-        // This is not perfect, but it's usually OK.
-        $length = strlen($bookmark['title']) + (342 * strlen($bookmark['description'])) / 836;
-        if (! empty($bookmark['thumbnail'])) {
-            $length += 100; // 1 thumbnails roughly takes 100 pixels height.
-        }
-        // Then put in column which is the less filled:
-        $smallest = min($fill); // find smallest value in array.
-        $index = array_search($smallest, $fill); // find index of this smallest value.
-        array_push($columns[$index], $bookmark); // Put entry in this column.
-        $fill[$index] += $length;
-    }
-
-    $data['cols'] = $columns;
-
-    foreach ($data as $key => $value) {
-        $pageBuilder->assign($key, $value);
-    }
-
-    $pageBuilder->assign('pagetitle', t('Daily') .' - '. $conf->get('general.title', 'Shaarli'));
-    $pageBuilder->renderPage('daily');
-    exit;
-}
-
-/**
  * Renders the linklist
  *
  * @param pageBuilder              $PAGE          pageBuilder instance.
@@ -628,7 +522,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // Daily page.
     if ($targetPage == Router::$PAGE_DAILY) {
-        showDaily($PAGE, $bookmarkService, $conf, $pluginManager, $loginManager);
+        header('Location: ./daily');
+        exit;
     }
 
     // ATOM and RSS feed.
@@ -1850,6 +1745,8 @@ $app->group('', function () {
     $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
     $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
     $this->get('/tag-list', '\Shaarli\Front\Controller\TagCloudController:list')->setName('taglist');
+    $this->get('/daily', '\Shaarli\Front\Controller\DailyController:index')->setName('daily');
+
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
