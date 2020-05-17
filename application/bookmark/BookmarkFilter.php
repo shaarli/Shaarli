@@ -436,7 +436,7 @@ class BookmarkFilter
             throw new Exception('Invalid date format');
         }
 
-        $filtered = array();
+        $filtered = [];
         foreach ($this->bookmarks as $key => $l) {
             if ($l->getCreated()->format('Ymd') == $day) {
                 $filtered[$key] = $l;

@@ -294,15 +294,15 @@ function normalize_spaces($string)
  * Requires php-intl to display international datetimes,
  * otherwise default format '%c' will be returned.
  *
- * @param DateTime $date to format.
- * @param bool     $time Displays time if true.
- * @param bool     $intl Use international format if true.
+ * @param DateTimeInterface $date to format.
+ * @param bool              $time Displays time if true.
+ * @param bool              $intl Use international format if true.
  *
  * @return bool|string Formatted date, or false if the input is invalid.
  */
 function format_date($date, $time = true, $intl = true)
 {
-    if (! $date instanceof DateTime) {
+    if (! $date instanceof DateTimeInterface) {
         return false;
     }
 
