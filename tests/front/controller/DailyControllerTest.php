@@ -9,11 +9,13 @@ use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Container\ShaarliContainer;
+use Shaarli\Feed\CachedPage;
 use Shaarli\Formatter\BookmarkFormatter;
 use Shaarli\Formatter\BookmarkRawFormatter;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
+use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -30,9 +32,10 @@ class DailyControllerTest extends TestCase
     {
         $this->container = $this->createMock(ShaarliContainer::class);
         $this->controller = new DailyController($this->container);
+        DailyController::$DAILY_RSS_NB_DAYS = 2;
     }
 
-    public function testValidControllerInvokeDefault(): void
+    public function testValidIndexControllerInvokeDefault(): void
     {
         $this->createValidContainerMockSet();
 
@@ -173,7 +176,7 @@ class DailyControllerTest extends TestCase
     /**
      * Daily page - test that everything goes fine with no future or past bookmarks
      */
-    public function testValidControllerInvokeNoFutureOrPast(): void
+    public function testValidIndexControllerInvokeNoFutureOrPast(): void
     {
         $this->createValidContainerMockSet();
 
@@ -247,7 +250,7 @@ class DailyControllerTest extends TestCase
     /**
      * Daily page - test that height adjustment in columns is working
      */
-    public function testValidControllerInvokeHeightAdjustment(): void
+    public function testValidIndexControllerInvokeHeightAdjustment(): void
     {
         $this->createValidContainerMockSet();
 
@@ -318,7 +321,7 @@ class DailyControllerTest extends TestCase
     /**
      * Daily page - no bookmark
      */
-    public function testValidControllerInvokeNoBookmark(): void
+    public function testValidIndexControllerInvokeNoBookmark(): void
     {
         $this->createValidContainerMockSet();
 
@@ -364,6 +367,136 @@ class DailyControllerTest extends TestCase
         static::assertEquals((new \DateTime())->setTime(0, 0), $assignedVariables['dayDate']);
     }
 
+    /**
+     * Daily RSS - default behaviour
+     */
+    public function testValidRssControllerInvokeDefault(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $dates = [
+            new \DateTimeImmutable('2020-05-17'),
+            new \DateTimeImmutable('2020-05-15'),
+            new \DateTimeImmutable('2020-05-13'),
+        ];
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $this->container->bookmarkService->expects(static::once())->method('search')->willReturn([
+            (new Bookmark())->setId(1)->setCreated($dates[0])->setUrl('http://domain.tld/1'),
+            (new Bookmark())->setId(2)->setCreated($dates[1])->setUrl('http://domain.tld/2'),
+            (new Bookmark())->setId(3)->setCreated($dates[1])->setUrl('http://domain.tld/3'),
+            (new Bookmark())->setId(4)->setCreated($dates[2])->setUrl('http://domain.tld/4'),
+        ]);
+
+        $this->container->pageCacheManager
+            ->expects(static::once())
+            ->method('getCachePage')
+            ->willReturnCallback(function (): CachedPage {
+                $cachedPage = $this->createMock(CachedPage::class);
+                $cachedPage->expects(static::once())->method('cache')->with('dailyrss');
+
+                return $cachedPage;
+            }
+        );
+
+        // Save RainTPL assigned variables
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $result = $this->controller->rss($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertStringContainsString('application/rss', $result->getHeader('Content-Type')[0]);
+        static::assertSame('dailyrss', (string) $result->getBody());
+        static::assertSame('Shaarli', $assignedVariables['title']);
+        static::assertSame('http://shaarli', $assignedVariables['index_url']);
+        static::assertSame('http://shaarli/daily-rss', $assignedVariables['page_url']);
+        static::assertFalse($assignedVariables['hide_timestamps']);
+        static::assertCount(2, $assignedVariables['days']);
+
+        $day = $assignedVariables['days'][$dates[0]->format('Ymd')];
+
+        static::assertEquals($dates[0], $day['date']);
+        static::assertSame($dates[0]->format(\DateTimeInterface::RSS), $day['date_rss']);
+        static::assertSame(format_date($dates[0], false), $day['date_human']);
+        static::assertSame('http://shaarli/daily?day='. $dates[0]->format('Ymd'), $day['absolute_url']);
+        static::assertCount(1, $day['links']);
+        static::assertSame(1, $day['links'][0]['id']);
+        static::assertSame('http://domain.tld/1', $day['links'][0]['url']);
+        static::assertEquals($dates[0], $day['links'][0]['created']);
+
+        $day = $assignedVariables['days'][$dates[1]->format('Ymd')];
+
+        static::assertEquals($dates[1], $day['date']);
+        static::assertSame($dates[1]->format(\DateTimeInterface::RSS), $day['date_rss']);
+        static::assertSame(format_date($dates[1], false), $day['date_human']);
+        static::assertSame('http://shaarli/daily?day='. $dates[1]->format('Ymd'), $day['absolute_url']);
+        static::assertCount(2, $day['links']);
+
+        static::assertSame(2, $day['links'][0]['id']);
+        static::assertSame('http://domain.tld/2', $day['links'][0]['url']);
+        static::assertEquals($dates[1], $day['links'][0]['created']);
+        static::assertSame(3, $day['links'][1]['id']);
+        static::assertSame('http://domain.tld/3', $day['links'][1]['url']);
+        static::assertEquals($dates[1], $day['links'][1]['created']);
+    }
+
+    /**
+     * Daily RSS - trigger cache rendering
+     */
+    public function testValidRssControllerInvokeTriggerCache(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $this->container->pageCacheManager->method('getCachePage')->willReturnCallback(function (): CachedPage {
+            $cachedPage = $this->createMock(CachedPage::class);
+            $cachedPage->method('cachedVersion')->willReturn('this is cache!');
+
+            return $cachedPage;
+        });
+
+        $this->container->bookmarkService->expects(static::never())->method('search');
+
+        $result = $this->controller->rss($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertStringContainsString('application/rss', $result->getHeader('Content-Type')[0]);
+        static::assertSame('this is cache!', (string) $result->getBody());
+    }
+
+    /**
+     * Daily RSS - No bookmark
+     */
+    public function testValidRssControllerInvokeNoBookmark(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $this->container->bookmarkService->expects(static::once())->method('search')->willReturn([]);
+
+        // Save RainTPL assigned variables
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $result = $this->controller->rss($request, $response);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertStringContainsString('application/rss', $result->getHeader('Content-Type')[0]);
+        static::assertSame('dailyrss', (string) $result->getBody());
+        static::assertSame('Shaarli', $assignedVariables['title']);
+        static::assertSame('http://shaarli', $assignedVariables['index_url']);
+        static::assertSame('http://shaarli/daily-rss', $assignedVariables['page_url']);
+        static::assertFalse($assignedVariables['hide_timestamps']);
+        static::assertCount(0, $assignedVariables['days']);
+    }
+
     protected function createValidContainerMockSet(): void
     {
         $loginManager = $this->createMock(LoginManager::class);
@@ -403,6 +536,17 @@ class DailyControllerTest extends TestCase
             })
         ;
         $this->container->formatterFactory = $formatterFactory;
+
+        // CacheManager
+        $pageCacheManager = $this->createMock(PageCacheManager::class);
+        $this->container->pageCacheManager = $pageCacheManager;
+
+        // $_SERVER
+        $this->container->environment = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => '80',
+            'REQUEST_URI' => '/daily-rss',
+        ];
     }
 
     protected function assignTemplateVars(array &$variables): void

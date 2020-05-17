@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller;
 
 use DateTime;
+use DateTimeImmutable;
 use Shaarli\Bookmark\Bookmark;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -18,6 +19,8 @@ use Slim\Http\Response;
  */
 class DailyController extends ShaarliController
 {
+    public static $DAILY_RSS_NB_DAYS = 8;
+
     /**
      * Controller displaying all bookmarks published in a single day.
      * It take a `day` date query parameter (format YYYYMMDD).
@@ -85,6 +88,77 @@ class DailyController extends ShaarliController
         );
 
         return $response->write($this->render('daily'));
+    }
+
+    /**
+     * Daily RSS feed: 1 RSS entry per day giving all the bookmarks on that day.
+     * Gives the last 7 days (which have bookmarks).
+     * This RSS feed cannot be filtered and does not trigger plugins yet.
+     */
+    public function rss(Request $request, Response $response): Response
+    {
+        $response = $response->withHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+
+        $pageUrl = page_url($this->container->environment);
+        $cache = $this->container->pageCacheManager->getCachePage($pageUrl);
+
+        $cached = $cache->cachedVersion();
+        if (!empty($cached)) {
+            return $response->write($cached);
+        }
+
+        $days = [];
+        foreach ($this->container->bookmarkService->search() as $bookmark) {
+            $day = $bookmark->getCreated()->format('Ymd');
+
+            // Stop iterating after DAILY_RSS_NB_DAYS entries
+            if (count($days) === static::$DAILY_RSS_NB_DAYS && !isset($days[$day])) {
+                break;
+            }
+
+            $days[$day][] = $bookmark;
+        }
+
+        // Build the RSS feed.
+        $indexUrl = escape(index_url($this->container->environment));
+
+        $formatter = $this->container->formatterFactory->getFormatter();
+        $formatter->addContextData('index_url', $indexUrl);
+
+        $dataPerDay = [];
+
+        /** @var Bookmark[] $bookmarks */
+        foreach ($days as $day => $bookmarks) {
+            $dayDatetime = DateTimeImmutable::createFromFormat(Bookmark::LINK_DATE_FORMAT, $day.'_000000');
+            $dataPerDay[$day] = [
+                'date' => $dayDatetime,
+                'date_rss' => $dayDatetime->format(DateTime::RSS),
+                'date_human' => format_date($dayDatetime, false, true),
+                'absolute_url' => $indexUrl . '/daily?day=' . $day,
+                'links' => [],
+            ];
+
+            foreach ($bookmarks as $key => $bookmark) {
+                $dataPerDay[$day]['links'][$key] = $formatter->format($bookmark);
+
+                // Make permalink URL absolute
+                if ($bookmark->isNote()) {
+                    $dataPerDay[$day]['links'][$key]['url'] = $indexUrl . $bookmark->getUrl();
+                }
+            }
+        }
+
+        $this->assignView('title', $this->container->conf->get('general.title', 'Shaarli'));
+        $this->assignView('index_url', $indexUrl);
+        $this->assignView('page_url', $pageUrl);
+        $this->assignView('hide_timestamps', $this->container->conf->get('privacy.hide_timestamps', false));
+        $this->assignView('days', $dataPerDay);
+
+        $rssContent = $this->render('dailyrss');
+
+        $cache->cache($rssContent);
+
+        return $response->write($rssContent);
     }
 
     /**

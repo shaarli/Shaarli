@@ -301,104 +301,6 @@ if (!isset($_SESSION['tokens'])) {
 }
 
 /**
- * Daily RSS feed: 1 RSS entry per day giving all the bookmarks on that day.
- * Gives the last 7 days (which have bookmarks).
- * This RSS feed cannot be filtered.
- *
- * @param BookmarkServiceInterface $bookmarkService
- * @param ConfigManager            $conf            Configuration Manager instance
- * @param LoginManager             $loginManager    LoginManager instance
- */
-function showDailyRSS($bookmarkService, $conf, $loginManager)
-{
-    // Cache system
-    $query = $_SERVER['QUERY_STRING'];
-    $cache = new CachedPage(
-        $conf->get('config.PAGE_CACHE'),
-        page_url($_SERVER),
-        startsWith($query, 'do=dailyrss') && !$loginManager->isLoggedIn()
-    );
-    $cached = $cache->cachedVersion();
-    if (!empty($cached)) {
-        echo $cached;
-        exit;
-    }
-
-    /* Some Shaarlies may have very few bookmarks, so we need to look
-       back in time until we have enough days ($nb_of_days).
-    */
-    $nb_of_days = 7; // We take 7 days.
-    $today = date('Ymd');
-    $days = array();
-
-    foreach ($bookmarkService->search() as $bookmark) {
-        $day = $bookmark->getCreated()->format('Ymd'); // Extract day (without time)
-        if (strcmp($day, $today) < 0) {
-            if (empty($days[$day])) {
-                $days[$day] = array();
-            }
-            $days[$day][] = $bookmark;
-        }
-
-        if (count($days) > $nb_of_days) {
-            break; // Have we collected enough days?
-        }
-    }
-
-    // Build the RSS feed.
-    header('Content-Type: application/rss+xml; charset=utf-8');
-    $pageaddr = escape(index_url($_SERVER));
-    echo '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0">';
-    echo '<channel>';
-    echo '<title>Daily - '. $conf->get('general.title') . '</title>';
-    echo '<link>'. $pageaddr .'</link>';
-    echo '<description>Daily shared bookmarks</description>';
-    echo '<language>en-en</language>';
-    echo '<copyright>'. $pageaddr .'</copyright>'. PHP_EOL;
-
-    $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-    $formatter = $factory->getFormatter();
-    $formatter->addContextData('index_url', index_url($_SERVER));
-    // For each day.
-    /** @var Bookmark[] $bookmarks */
-    foreach ($days as $day => $bookmarks) {
-        $formattedBookmarks = [];
-        $dayDate = DateTime::createFromFormat(Bookmark::LINK_DATE_FORMAT, $day.'_000000');
-        $absurl = escape(index_url($_SERVER).'?do=daily&day='.$day);  // Absolute URL of the corresponding "Daily" page.
-
-        // We pre-format some fields for proper output.
-        foreach ($bookmarks as $key => $bookmark) {
-            $formattedBookmarks[$key] = $formatter->format($bookmark);
-            // This page is a bit specific, we need raw description to calculate the length
-            $formattedBookmarks[$key]['formatedDescription'] = $formattedBookmarks[$key]['description'];
-            $formattedBookmarks[$key]['description'] = $bookmark->getDescription();
-
-            if ($bookmark->isNote()) {
-                $link['url'] = index_url($_SERVER) . $bookmark->getUrl();  // make permalink URL absolute
-            }
-        }
-
-        // Then build the HTML for this day:
-        $tpl = new RainTPL();
-        $tpl->assign('title', $conf->get('general.title'));
-        $tpl->assign('daydate', $dayDate->getTimestamp());
-        $tpl->assign('absurl', $absurl);
-        $tpl->assign('links', $formattedBookmarks);
-        $tpl->assign('rssdate', escape($dayDate->format(DateTime::RSS)));
-        $tpl->assign('hide_timestamps', $conf->get('privacy.hide_timestamps', false));
-        $tpl->assign('index_url', $pageaddr);
-        $html = $tpl->draw('dailyrss', true);
-
-        echo $html . PHP_EOL;
-    }
-    echo '</channel></rss><!-- Cached version of '. escape(page_url($_SERVER)) .' -->';
-
-    $cache->cache(ob_get_contents());
-    ob_end_flush();
-    exit;
-}
-
-/**
  * Renders the linklist
  *
  * @param pageBuilder              $PAGE          pageBuilder instance.
@@ -424,7 +326,7 @@ function showLinkList($PAGE, $linkDb, $conf, $pluginManager, $loginManager)
  */
 function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionManager, $loginManager)
 {
-    $pageCacheManager = new PageCacheManager($conf->get('resource.page_cache'));
+    $pageCacheManager = new PageCacheManager($conf->get('resource.page_cache'), $loginManager->isLoggedIn());
     $updater = new Updater(
         UpdaterUtils::read_updates_file($conf->get('resource.updates')),
         $bookmarkService,
@@ -1715,7 +1617,7 @@ try {
 $linkDb = new BookmarkFileService($conf, $history, $loginManager->isLoggedIn());
 
 if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=dailyrss')) {
-    showDailyRSS($linkDb, $conf, $loginManager);
+    header('Location: ./daily-rss');
     exit;
 }
 
@@ -1747,6 +1649,7 @@ $app->group('', function () {
     $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
     $this->get('/tag-list', '\Shaarli\Front\Controller\TagCloudController:list')->setName('taglist');
     $this->get('/daily', '\Shaarli\Front\Controller\DailyController:index')->setName('daily');
+    $this->get('/daily-rss', '\Shaarli\Front\Controller\DailyController:rss')->setName('dailyrss');
 
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');

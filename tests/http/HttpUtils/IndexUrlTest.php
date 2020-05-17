@@ -71,4 +71,36 @@ class IndexUrlTest extends \PHPUnit\Framework\TestCase
             )
         );
     }
+
+    /**
+     * The route is stored in REQUEST_URI
+     */
+    public function testPageUrlWithRoute()
+    {
+        $this->assertEquals(
+            'http://host.tld/picture-wall',
+            page_url(
+                array(
+                    'HTTPS' => 'Off',
+                    'SERVER_NAME' => 'host.tld',
+                    'SERVER_PORT' => '80',
+                    'SCRIPT_NAME' => '/index.php',
+                    'REQUEST_URI' => '/picture-wall',
+                )
+            )
+        );
+
+        $this->assertEquals(
+            'http://host.tld/admin/picture-wall',
+            page_url(
+                array(
+                    'HTTPS' => 'Off',
+                    'SERVER_NAME' => 'host.tld',
+                    'SERVER_PORT' => '80',
+                    'SCRIPT_NAME' => '/admin/index.php',
+                    'REQUEST_URI' => '/admin/picture-wall',
+                )
+            )
+        );
+    }
 }
