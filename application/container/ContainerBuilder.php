@@ -94,7 +94,10 @@ class ContainerBuilder
         };
 
         $container['pageCacheManager'] = function (ShaarliContainer $container): PageCacheManager {
-            return new PageCacheManager($container->conf->get('resource.page_cache'));
+            return new PageCacheManager(
+                $container->conf->get('resource.page_cache'),
+                $container->loginManager->isLoggedIn()
+            );
         };
 
         return $container;

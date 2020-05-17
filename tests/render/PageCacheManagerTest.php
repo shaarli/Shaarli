@@ -32,7 +32,7 @@ class PageCacheManagerTest extends TestCase
      */
     public function setUp()
     {
-        $this->cacheManager = new PageCacheManager(static::$testCacheDir);
+        $this->cacheManager = new PageCacheManager(static::$testCacheDir, true);
 
         if (!is_dir(self::$testCacheDir)) {
             mkdir(self::$testCacheDir);
@@ -73,7 +73,7 @@ class PageCacheManagerTest extends TestCase
      */
     public function testPurgeCachedPagesMissingDir()
     {
-        $this->cacheManager = new PageCacheManager(self::$testCacheDir . '_missing');
+        $this->cacheManager = new PageCacheManager(self::$testCacheDir . '_missing', true);
 
         $oldlog = ini_get('error_log');
         ini_set('error_log', '/dev/null');

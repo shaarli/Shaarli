@@ -369,7 +369,7 @@ function server_url($server)
  */
 function index_url($server)
 {
-    $scriptname = $server['SCRIPT_NAME'];
+    $scriptname = $server['SCRIPT_NAME'] ?? '';
     if (endsWith($scriptname, 'index.php')) {
         $scriptname = substr($scriptname, 0, -9);
     }
@@ -377,7 +377,7 @@ function index_url($server)
 }
 
 /**
- * Returns the absolute URL of the current script, with the query
+ * Returns the absolute URL of the current script, with current route and query
  *
  * If the resource is "index.php", then it is removed (for better-looking URLs)
  *
@@ -387,10 +387,17 @@ function index_url($server)
  */
 function page_url($server)
 {
-    if (! empty($server['QUERY_STRING'])) {
-        return index_url($server).'?'.$server['QUERY_STRING'];
+    $scriptname = $server['SCRIPT_NAME'] ?? '';
+    if (endsWith($scriptname, 'index.php')) {
+        $scriptname = substr($scriptname, 0, -9);
     }
-    return index_url($server);
+
+    $route = ltrim($server['REQUEST_URI'] ?? '', $scriptname);
+    if (! empty($server['QUERY_STRING'])) {
+        return index_url($server) . $route . '?' . $server['QUERY_STRING'];
+    }
+
+    return index_url($server) . $route;
 }
 
 /**

@@ -1,16 +1,32 @@
-<item>
-    <title>{$title} - {function="strftime('%A %e %B %Y', $daydate)"}</title>
-    <guid>{$absurl}</guid>
-    <link>{$absurl}</link>
-    <pubDate>{$rssdate}</pubDate>
-    <description><![CDATA[
-        {loop="links"}
-        	<h3><a href="{$value.url}">{$value.title}</a></h3>
-        	<small>{if="!$hide_timestamps"}{function="strftime('%c', $value.timestamp)"} - {/if}{if="$value.tags"}{$value.tags}{/if}<br>
-        	{$value.url}</small><br>
-        	{if="$value.thumbnail"}<img src="{$index_url}{$value.thumbnail}#" alt="thumbnail" />{/if}<br>
-        	{if="$value.description"}{$value.formatedDescription}{/if}
-        	<br><br><hr>
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Daily - {$title}</title>
+    <link>{$index_url}</link>
+    <description>Daily shaared bookmarks</description>
+    <language>{$language}</language>
+    <copyright>{$index_url}</copyright>
+    <generator>Shaarli</generator>
+
+    {loop="$days"}
+    <item>
+      <title>{$value.date_human} - {$title}</title>
+      <guid>{$value.absolute_url}</guid>
+      <link>{$value.absolute_url}</link>
+      <pubDate>{$value.date_rss}</pubDate>
+      <description><![CDATA[
+        {loop="$value.links"}
+        <h3><a href="{$value.url}">{$value.title}</a></h3>
+        <small>
+          {if="!$hide_timestamps"}{$value.created|format_date} - {/if}{if="$value.tags"}{$value.tags}{/if}<br>
+          {$value.url}
+        </small><br>
+        {if="$value.thumbnail"}<img src="{$index_url}{$value.thumbnail}#" alt="thumbnail" />{/if}<br>
+        {if="$value.description"}{$value.description}{/if}
+        <br><br><hr>
         {/loop}
-    ]]></description>
-</item>
+        ]]></description>
+    </item>
+    {/loop}
+  </channel>
+</rss><!-- Cached version of {$page_url} -->
