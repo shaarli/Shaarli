@@ -419,7 +419,7 @@ class DailyControllerTest extends TestCase
         $day = $assignedVariables['days'][$dates[0]->format('Ymd')];
 
         static::assertEquals($dates[0], $day['date']);
-        static::assertSame($dates[0]->format(\DateTimeInterface::RSS), $day['date_rss']);
+        static::assertSame($dates[0]->format(\DateTime::RSS), $day['date_rss']);
         static::assertSame(format_date($dates[0], false), $day['date_human']);
         static::assertSame('http://shaarli/daily?day='. $dates[0]->format('Ymd'), $day['absolute_url']);
         static::assertCount(1, $day['links']);
@@ -430,7 +430,7 @@ class DailyControllerTest extends TestCase
         $day = $assignedVariables['days'][$dates[1]->format('Ymd')];
 
         static::assertEquals($dates[1], $day['date']);
-        static::assertSame($dates[1]->format(\DateTimeInterface::RSS), $day['date_rss']);
+        static::assertSame($dates[1]->format(\DateTime::RSS), $day['date_rss']);
         static::assertSame(format_date($dates[1], false), $day['date_human']);
         static::assertSame('http://shaarli/daily?day='. $dates[1]->format('Ymd'), $day['absolute_url']);
         static::assertCount(2, $day['links']);
