@@ -522,7 +522,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // Daily page.
     if ($targetPage == Router::$PAGE_DAILY) {
-        header('Location: ./daily');
+        $dayParam = !empty($_GET['day']) ? '?day=' . escape($_GET['day']) : '';
+        header('Location: ./daily'. $dayParam);
         exit;
     }
 
