@@ -2,6 +2,8 @@
 
 namespace Shaarli\Render;
 
+use Shaarli\Feed\CachedPage;
+
 /**
  * Cache utilities
  */
@@ -10,9 +12,13 @@ class PageCacheManager
     /** @var string Cache directory */
     protected $pageCacheDir;
 
-    public function __construct(string $pageCacheDir)
+    /** @var bool */
+    protected $isLoggedIn;
+
+    public function __construct(string $pageCacheDir, bool $isLoggedIn)
     {
         $this->pageCacheDir = $pageCacheDir;
+        $this->isLoggedIn = $isLoggedIn;
     }
 
     /**
@@ -41,5 +47,14 @@ class PageCacheManager
     {
         // Purge page cache shared by sessions.
         $this->purgeCachedPages();
+    }
+
+    public function getCachePage(string $pageUrl): CachedPage
+    {
+        return new CachedPage(
+            $this->pageCacheDir,
+            $pageUrl,
+            false === $this->isLoggedIn
+        );
     }
 }

@@ -3,6 +3,7 @@
 namespace Shaarli\Bookmark;
 
 use DateTime;
+use DateTimeInterface;
 use Shaarli\Bookmark\Exception\InvalidBookmarkException;
 
 /**
@@ -42,10 +43,10 @@ class Bookmark
     /** @var bool Set to true if the bookmark is set as sticky */
     protected $sticky;
 
-    /** @var DateTime Creation datetime */
+    /** @var DateTimeInterface Creation datetime */
     protected $created;
 
-    /** @var DateTime Update datetime */
+    /** @var DateTimeInterface datetime */
     protected $updated;
 
     /** @var bool True if the bookmark can only be seen while logged in */
@@ -100,7 +101,7 @@ class Bookmark
             || ! is_int($this->id)
             || empty($this->shortUrl)
             || empty($this->created)
-            || ! $this->created instanceof DateTime
+            || ! $this->created instanceof DateTimeInterface
         ) {
             throw new InvalidBookmarkException($this);
         }
@@ -188,7 +189,7 @@ class Bookmark
     /**
      * Get the Created.
      *
-     * @return DateTime
+     * @return DateTimeInterface
      */
     public function getCreated()
     {
@@ -198,7 +199,7 @@ class Bookmark
     /**
      * Get the Updated.
      *
-     * @return DateTime
+     * @return DateTimeInterface
      */
     public function getUpdated()
     {
@@ -270,7 +271,7 @@ class Bookmark
      * Set the Created.
      * Note: you shouldn't set this manually except for special cases (like bookmark import)
      *
-     * @param DateTime $created
+     * @param DateTimeInterface $created
      *
      * @return Bookmark
      */
@@ -284,7 +285,7 @@ class Bookmark
     /**
      * Set the Updated.
      *
-     * @param DateTime $updated
+     * @param DateTimeInterface $updated
      *
      * @return Bookmark
      */

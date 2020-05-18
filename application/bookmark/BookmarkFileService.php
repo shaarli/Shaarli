@@ -53,7 +53,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     {
         $this->conf = $conf;
         $this->history = $history;
-        $this->pageCacheManager = new PageCacheManager($this->conf->get('resource.page_cache'));
+        $this->pageCacheManager = new PageCacheManager($this->conf->get('resource.page_cache'), $isLoggedIn);
         $this->bookmarksIO = new BookmarkIO($this->conf);
         $this->isLoggedIn = $isLoggedIn;
 
