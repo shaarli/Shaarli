@@ -30,6 +30,20 @@ abstract class ShaarliController
         return $this;
     }
 
+    /**
+     * Assign variables to RainTPL template through the PageBuilder.
+     *
+     * @param mixed $data Values to assign to the template and their keys
+     */
+    protected function assignAllView(array $data): self
+    {
+        foreach ($data as $key => $value) {
+            $this->assignView($key, $value);
+        }
+
+        return $this;
+    }
+
     protected function render(string $template): string
     {
         $this->assignView('linkcount', $this->container->bookmarkService->count(BookmarkFilter::$ALL));

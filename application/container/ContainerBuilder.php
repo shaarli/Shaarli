@@ -7,6 +7,7 @@ namespace Shaarli\Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
@@ -96,6 +97,15 @@ class ContainerBuilder
         $container['pageCacheManager'] = function (ShaarliContainer $container): PageCacheManager {
             return new PageCacheManager(
                 $container->conf->get('resource.page_cache'),
+                $container->loginManager->isLoggedIn()
+            );
+        };
+
+        $container['feedBuilder'] = function (ShaarliContainer $container): FeedBuilder {
+            return new FeedBuilder(
+                $container->bookmarkService,
+                $container->formatterFactory->getFormatter(),
+                $container->environment,
                 $container->loginManager->isLoggedIn()
             );
         };

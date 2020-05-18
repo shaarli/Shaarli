@@ -65,23 +65,6 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test GetTypeLanguage().
-     */
-    public function testGetTypeLanguage()
-    {
-        $feedBuilder = new FeedBuilder(null, self::$formatter, FeedBuilder::$FEED_ATOM, null, null, false);
-        $feedBuilder->setLocale(self::$LOCALE);
-        $this->assertEquals(self::$ATOM_LANGUAGUE, $feedBuilder->getTypeLanguage());
-        $feedBuilder = new FeedBuilder(null, self::$formatter, FeedBuilder::$FEED_RSS, null, null, false);
-        $feedBuilder->setLocale(self::$LOCALE);
-        $this->assertEquals(self::$RSS_LANGUAGE, $feedBuilder->getTypeLanguage());
-        $feedBuilder = new FeedBuilder(null, self::$formatter, FeedBuilder::$FEED_ATOM, null, null, false);
-        $this->assertEquals('en', $feedBuilder->getTypeLanguage());
-        $feedBuilder = new FeedBuilder(null, self::$formatter, FeedBuilder::$FEED_RSS, null, null, false);
-        $this->assertEquals('en-en', $feedBuilder->getTypeLanguage());
-    }
-
-    /**
      * Test buildData with RSS feed.
      */
     public function testRSSBuildData()
@@ -89,13 +72,11 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_RSS,
-            self::$serverInfo,
-            null,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_RSS, null);
         // Test headers (RSS)
         $this->assertEquals(self::$RSS_LANGUAGE, $data['language']);
         $this->assertRegExp('/Wed, 03 Aug 2016 09:30:33 \+\d{4}/', $data['last_update']);
@@ -140,13 +121,11 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            null,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertRegExp('/2016-08-03T09:30:33\+\d{2}:\d{2}/', $data['last_update']);
         $link = $data['links'][array_keys($data['links'])[2]];
@@ -166,13 +145,11 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            $criteria,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria);
         $this->assertEquals(1, count($data['links']));
         $link = array_shift($data['links']);
         $this->assertEquals(41, $link['id']);
@@ -190,13 +167,11 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            $criteria,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria);
         $this->assertEquals(3, count($data['links']));
         $link = $data['links'][array_keys($data['links'])[2]];
         $this->assertEquals(41, $link['id']);
@@ -211,14 +186,12 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            null,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setUsePermalinks(true);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertTrue($data['usepermalinks']);
         // First link is a permalink
@@ -247,14 +220,12 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            null,
+            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setHideDates(true);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertFalse($data['show_dates']);
 
@@ -262,14 +233,12 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
-            self::$serverInfo,
-            null,
+            static::$serverInfo,
             true
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setHideDates(true);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertTrue($data['show_dates']);
     }
@@ -289,13 +258,11 @@ class FeedBuilderTest extends \PHPUnit\Framework\TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            FeedBuilder::$FEED_ATOM,
             $serverInfo,
-            null,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData();
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
 
         $this->assertEquals(
             'http://host.tld:8080/~user/shaarli/index.php?do=feed',
