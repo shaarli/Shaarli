@@ -52,7 +52,7 @@
           </li>
         {/loop}
         <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-rss">
-            <a href="./?do={$feed_type}{$searchcrits}" class="pure-menu-link">{'RSS Feed'|t}</a>
+            <a href="./feed-{$feed_type}?{$searchcrits}" class="pure-menu-link">{'RSS Feed'|t}</a>
         </li>
         {if="$is_logged_in"}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-logout">
@@ -74,7 +74,7 @@
             </a>
           </li>
           <li class="pure-menu-item" id="shaarli-menu-desktop-rss">
-            <a href="./?do={$feed_type}{$searchcrits}" class="pure-menu-link" title="{'RSS Feed'|t}" aria-label="{'RSS Feed'|t}">
+            <a href="./feed-{$feed_type}?{$searchcrits}" class="pure-menu-link" title="{'RSS Feed'|t}" aria-label="{'RSS Feed'|t}">
               <i class="fa fa-rss" aria-hidden="true"></i>
             </a>
           </li>

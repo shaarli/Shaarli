@@ -432,45 +432,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     // ATOM and RSS feed.
     if ($targetPage == Router::$PAGE_FEED_ATOM || $targetPage == Router::$PAGE_FEED_RSS) {
         $feedType = $targetPage == Router::$PAGE_FEED_RSS ? FeedBuilder::$FEED_RSS : FeedBuilder::$FEED_ATOM;
-        header('Content-Type: application/'. $feedType .'+xml; charset=utf-8');
 
-        // Cache system
-        $query = $_SERVER['QUERY_STRING'];
-        $cache = new CachedPage(
-            $conf->get('resource.page_cache'),
-            page_url($_SERVER),
-            startsWith($query, 'do='. $targetPage) && !$loginManager->isLoggedIn()
-        );
-        $cached = $cache->cachedVersion();
-        if (!empty($cached)) {
-            echo $cached;
-            exit;
-        }
-
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        // Generate data.
-        $feedGenerator = new FeedBuilder(
-            $bookmarkService,
-            $factory->getFormatter(),
-            $_SERVER,
-            $loginManager->isLoggedIn()
-        );
-        $feedGenerator->setLocale(strtolower(setlocale(LC_COLLATE, 0)));
-        $feedGenerator->setHideDates($conf->get('privacy.hide_timestamps') && !$loginManager->isLoggedIn());
-        $feedGenerator->setUsePermalinks(isset($_GET['permalinks']) || !$conf->get('feed.rss_permalinks'));
-        $data = $feedGenerator->buildData($feedType, $_GET);
-
-        // Process plugin hook.
-        $pluginManager->executeHooks('render_feed', $data, array(
-            'loggedin' => $loginManager->isLoggedIn(),
-            'target' => $targetPage,
-        ));
-
-        // Render the template.
-        $PAGE->assignAll($data);
-        $PAGE->renderPage('feed.'. $feedType);
-        $cache->cache(ob_get_contents());
-        ob_end_flush();
+        header('Location: ./feed-'. $feedType .'?'. http_build_query($_GET));
         exit;
     }
 
@@ -1610,6 +1573,8 @@ $app->group('', function () {
     $this->get('/tag-list', '\Shaarli\Front\Controller\TagCloudController:list')->setName('taglist');
     $this->get('/daily', '\Shaarli\Front\Controller\DailyController:index')->setName('daily');
     $this->get('/daily-rss', '\Shaarli\Front\Controller\DailyController:rss')->setName('dailyrss');
+    $this->get('/feed-atom', '\Shaarli\Front\Controller\FeedController:atom')->setName('feedatom');
+    $this->get('/feed-rss', '\Shaarli\Front\Controller\FeedController:rss')->setName('feedrss');
 
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');

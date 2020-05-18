@@ -6,6 +6,7 @@ namespace Shaarli\Container;
 
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
@@ -29,6 +30,7 @@ use Slim\Container;
  * @property PluginManager            $pluginManager
  * @property FormatterFactory         $formatterFactory
  * @property PageCacheManager         $pageCacheManager
+ * @property FeedBuilder              $feedBuilder
  */
 class ShaarliContainer extends Container
 {

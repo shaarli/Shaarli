@@ -78,7 +78,7 @@ class FeedBuilder
      * @param array                    $serverInfo $_SERVER.
      * @param boolean                  $isLoggedIn True if the user is currently logged in, false otherwise.
      */
-    public function __construct($linkDB, $formatter, array $serverInfo, $isLoggedIn)
+    public function __construct($linkDB, $formatter, $serverInfo, $isLoggedIn)
     {
         $this->linkDB = $linkDB;
         $this->formatter = $formatter;

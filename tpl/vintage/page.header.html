@@ -27,9 +27,9 @@
     {else}
     <li><a href="./login">Login</a></li>
     {/if}
-    <li><a href="{$feedurl}?do=rss{$searchcrits}" class="nomobile">RSS Feed</a></li>
+    <li><a href="{$feedurl}/feed-rss?{$searchcrits}" class="nomobile">RSS Feed</a></li>
     {if="$showatom"}
-    <li><a href="{$feedurl}?do=atom{$searchcrits}" class="nomobile">ATOM Feed</a></li>
+    <li><a href="{$feedurl}/feed-atom?{$searchcrits}" class="nomobile">ATOM Feed</a></li>
     {/if}
     <li><a href="./tag-cloud">Tag cloud</a></li>
     <li><a href="./picture-wall{function="ltrim($searchcrits, '&')"}">Picture wall</a></li>
