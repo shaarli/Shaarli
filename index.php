@@ -486,45 +486,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User clicks on a tag in a link: The tag is added to the list of searched tags (searchtags=...)
     if (isset($_GET['addtag'])) {
-        // Get previous URL (http_referer) and add the tag to the searchtags parameters in query.
-        if (empty($_SERVER['HTTP_REFERER'])) {
-            // In case browser does not send HTTP_REFERER
-            header('Location: ?searchtags='.urlencode($_GET['addtag']));
-            exit;
-        }
-        parse_str(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY), $params);
-
-        // Prevent redirection loop
-        if (isset($params['addtag'])) {
-            unset($params['addtag']);
-        }
-
-        // Check if this tag is already in the search query and ignore it if it is.
-        // Each tag is always separated by a space
-        if (isset($params['searchtags'])) {
-            $current_tags = explode(' ', $params['searchtags']);
-        } else {
-            $current_tags = array();
-        }
-        $addtag = true;
-        foreach ($current_tags as $value) {
-            if ($value === $_GET['addtag']) {
-                $addtag = false;
-                break;
-            }
-        }
-        // Append the tag if necessary
-        if (empty($params['searchtags'])) {
-            $params['searchtags'] = trim($_GET['addtag']);
-        } elseif ($addtag) {
-            $params['searchtags'] = trim($params['searchtags']).' '.trim($_GET['addtag']);
-        }
-
-        // We also remove page (keeping the same page has no sense, since the
-        // results are different)
-        unset($params['page']);
-
-        header('Location: ?'.http_build_query($params));
+        header('Location: ./add-tag/'. $_GET['addtag']);
         exit;
     }
 
