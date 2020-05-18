@@ -43,20 +43,8 @@ class FeedBuilder
      */
     protected $formatter;
 
-    /**
-     * @var string RSS or ATOM feed.
-     */
-    protected $feedType;
-
-    /**
-     * @var array $_SERVER
-     */
+    /** @var mixed[] $_SERVER */
     protected $serverInfo;
-
-    /**
-     * @var array $_GET
-     */
-    protected $userInput;
 
     /**
      * @var boolean True if the user is currently logged in, false otherwise.
@@ -77,7 +65,6 @@ class FeedBuilder
      * @var string server locale.
      */
     protected $locale;
-
     /**
      * @var DateTime Latest item date.
      */
@@ -88,37 +75,36 @@ class FeedBuilder
      *
      * @param BookmarkServiceInterface $linkDB     LinkDB instance.
      * @param BookmarkFormatter        $formatter  instance.
-     * @param string                   $feedType   Type of feed.
      * @param array                    $serverInfo $_SERVER.
-     * @param array                    $userInput  $_GET.
      * @param boolean                  $isLoggedIn True if the user is currently logged in, false otherwise.
      */
-    public function __construct($linkDB, $formatter, $feedType, $serverInfo, $userInput, $isLoggedIn)
+    public function __construct($linkDB, $formatter, array $serverInfo, $isLoggedIn)
     {
         $this->linkDB = $linkDB;
         $this->formatter = $formatter;
-        $this->feedType = $feedType;
         $this->serverInfo = $serverInfo;
-        $this->userInput = $userInput;
         $this->isLoggedIn = $isLoggedIn;
     }
 
     /**
      * Build data for feed templates.
      *
+     * @param string $feedType   Type of feed (RSS/ATOM).
+     * @param array  $userInput  $_GET.
+     *
      * @return array Formatted data for feeds templates.
      */
-    public function buildData()
+    public function buildData(string $feedType, ?array $userInput)
     {
         // Search for untagged bookmarks
-        if (isset($this->userInput['searchtags']) && empty($this->userInput['searchtags'])) {
-            $this->userInput['searchtags'] = false;
+        if (isset($this->userInput['searchtags']) && empty($userInput['searchtags'])) {
+            $userInput['searchtags'] = false;
         }
 
         // Optionally filter the results:
-        $linksToDisplay = $this->linkDB->search($this->userInput);
+        $linksToDisplay = $this->linkDB->search($userInput);
 
-        $nblinksToDisplay = $this->getNbLinks(count($linksToDisplay));
+        $nblinksToDisplay = $this->getNbLinks(count($linksToDisplay), $userInput);
 
         // Can't use array_keys() because $link is a LinkDB instance and not a real array.
         $keys = array();
@@ -130,11 +116,11 @@ class FeedBuilder
         $this->formatter->addContextData('index_url', $pageaddr);
         $linkDisplayed = array();
         for ($i = 0; $i < $nblinksToDisplay && $i < count($keys); $i++) {
-            $linkDisplayed[$keys[$i]] = $this->buildItem($linksToDisplay[$keys[$i]], $pageaddr);
+            $linkDisplayed[$keys[$i]] = $this->buildItem($feedType, $linksToDisplay[$keys[$i]], $pageaddr);
         }
 
-        $data['language'] = $this->getTypeLanguage();
-        $data['last_update'] = $this->getLatestDateFormatted();
+        $data['language'] = $this->getTypeLanguage($feedType);
+        $data['last_update'] = $this->getLatestDateFormatted($feedType);
         $data['show_dates'] = !$this->hideDates || $this->isLoggedIn;
         // Remove leading slash from REQUEST_URI.
         $data['self_link'] = escape(server_url($this->serverInfo))
@@ -142,45 +128,6 @@ class FeedBuilder
         $data['index_url'] = $pageaddr;
         $data['usepermalinks'] = $this->usePermalinks === true;
         $data['links'] = $linkDisplayed;
-
-        return $data;
-    }
-
-    /**
-     * Build a feed item (one per shaare).
-     *
-     * @param Bookmark $link     Single link array extracted from LinkDB.
-     * @param string   $pageaddr Index URL.
-     *
-     * @return array Link array with feed attributes.
-     */
-    protected function buildItem($link, $pageaddr)
-    {
-        $data = $this->formatter->format($link);
-        $data['guid'] = $pageaddr . '?' . $data['shorturl'];
-        if ($this->usePermalinks === true) {
-            $permalink = '<a href="'. $data['url'] .'" title="'. t('Direct link') .'">'. t('Direct link') .'</a>';
-        } else {
-            $permalink = '<a href="'. $data['guid'] .'" title="'. t('Permalink') .'">'. t('Permalink') .'</a>';
-        }
-        $data['description'] .= PHP_EOL . PHP_EOL . '<br>&#8212; ' . $permalink;
-
-        $data['pub_iso_date'] = $this->getIsoDate($data['created']);
-
-        // atom:entry elements MUST contain exactly one atom:updated element.
-        if (!empty($link->getUpdated())) {
-            $data['up_iso_date'] = $this->getIsoDate($data['updated'], DateTime::ATOM);
-        } else {
-            $data['up_iso_date'] = $this->getIsoDate($data['created'], DateTime::ATOM);
-        }
-
-        // Save the more recent item.
-        if (empty($this->latestDate) || $this->latestDate < $data['created']) {
-            $this->latestDate = $data['created'];
-        }
-        if (!empty($data['updated']) && $this->latestDate < $data['updated']) {
-            $this->latestDate = $data['updated'];
-        }
 
         return $data;
     }
@@ -216,21 +163,63 @@ class FeedBuilder
     }
 
     /**
+     * Build a feed item (one per shaare).
+     *
+     * @param string $feedType Type of feed (RSS/ATOM).
+     * @param Bookmark $link     Single link array extracted from LinkDB.
+     * @param string   $pageaddr Index URL.
+     *
+     * @return array Link array with feed attributes.
+     */
+    protected function buildItem(string $feedType, $link, $pageaddr)
+    {
+        $data = $this->formatter->format($link);
+        $data['guid'] = $pageaddr . '?' . $data['shorturl'];
+        if ($this->usePermalinks === true) {
+            $permalink = '<a href="'. $data['url'] .'" title="'. t('Direct link') .'">'. t('Direct link') .'</a>';
+        } else {
+            $permalink = '<a href="'. $data['guid'] .'" title="'. t('Permalink') .'">'. t('Permalink') .'</a>';
+        }
+        $data['description'] .= PHP_EOL . PHP_EOL . '<br>&#8212; ' . $permalink;
+
+        $data['pub_iso_date'] = $this->getIsoDate($feedType, $data['created']);
+
+        // atom:entry elements MUST contain exactly one atom:updated element.
+        if (!empty($link->getUpdated())) {
+            $data['up_iso_date'] = $this->getIsoDate($feedType, $data['updated'], DateTime::ATOM);
+        } else {
+            $data['up_iso_date'] = $this->getIsoDate($feedType, $data['created'], DateTime::ATOM);
+        }
+
+        // Save the more recent item.
+        if (empty($this->latestDate) || $this->latestDate < $data['created']) {
+            $this->latestDate = $data['created'];
+        }
+        if (!empty($data['updated']) && $this->latestDate < $data['updated']) {
+            $this->latestDate = $data['updated'];
+        }
+
+        return $data;
+    }
+
+    /**
      * Get the language according to the feed type, based on the locale:
      *
      *   - RSS format: en-us (default: 'en-en').
      *   - ATOM format: fr (default: 'en').
      *
+     * @param string $feedType Type of feed (RSS/ATOM).
+     *
      * @return string The language.
      */
-    public function getTypeLanguage()
+    protected function getTypeLanguage(string $feedType)
     {
         // Use the locale do define the language, if available.
         if (!empty($this->locale) && preg_match('/^\w{2}[_\-]\w{2}/', $this->locale)) {
-            $length = ($this->feedType === self::$FEED_RSS) ? 5 : 2;
+            $length = ($feedType === self::$FEED_RSS) ? 5 : 2;
             return str_replace('_', '-', substr($this->locale, 0, $length));
         }
-        return ($this->feedType === self::$FEED_RSS) ? 'en-en' : 'en';
+        return ($feedType === self::$FEED_RSS) ? 'en-en' : 'en';
     }
 
     /**
@@ -238,32 +227,35 @@ class FeedBuilder
      *
      * Return an empty string if invalid DateTime is passed.
      *
+     * @param string $feedType Type of feed (RSS/ATOM).
+     *
      * @return string Formatted date.
      */
-    protected function getLatestDateFormatted()
+    protected function getLatestDateFormatted(string $feedType)
     {
         if (empty($this->latestDate) || !$this->latestDate instanceof DateTime) {
             return '';
         }
 
-        $type = ($this->feedType == self::$FEED_RSS) ? DateTime::RSS : DateTime::ATOM;
+        $type = ($feedType == self::$FEED_RSS) ? DateTime::RSS : DateTime::ATOM;
         return $this->latestDate->format($type);
     }
 
     /**
      * Get ISO date from DateTime according to feed type.
      *
+     * @param string      $feedType Type of feed (RSS/ATOM).
      * @param DateTime    $date   Date to format.
      * @param string|bool $format Force format.
      *
      * @return string Formatted date.
      */
-    protected function getIsoDate(DateTime $date, $format = false)
+    protected function getIsoDate(string $feedType, DateTime $date, $format = false)
     {
         if ($format !== false) {
             return $date->format($format);
         }
-        if ($this->feedType == self::$FEED_RSS) {
+        if ($feedType == self::$FEED_RSS) {
             return $date->format(DateTime::RSS);
         }
         return $date->format(DateTime::ATOM);
@@ -275,21 +267,22 @@ class FeedBuilder
      * If 'nb' not set or invalid, default value: $DEFAULT_NB_LINKS.
      * If 'nb' is set to 'all', display all filtered bookmarks (max parameter).
      *
-     * @param int $max maximum number of bookmarks to display.
+     * @param int   $max       maximum number of bookmarks to display.
+     * @param array $userInput $_GET.
      *
      * @return int number of bookmarks to display.
      */
-    public function getNbLinks($max)
+    protected function getNbLinks($max, ?array $userInput)
     {
-        if (empty($this->userInput['nb'])) {
+        if (empty($userInput['nb'])) {
             return self::$DEFAULT_NB_LINKS;
         }
 
-        if ($this->userInput['nb'] == 'all') {
+        if ($userInput['nb'] == 'all') {
             return $max;
         }
 
-        $intNb = intval($this->userInput['nb']);
+        $intNb = intval($userInput['nb']);
         if (!is_int($intNb) || $intNb == 0) {
             return self::$DEFAULT_NB_LINKS;
         }

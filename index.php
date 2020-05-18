@@ -452,15 +452,13 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         $feedGenerator = new FeedBuilder(
             $bookmarkService,
             $factory->getFormatter(),
-            $feedType,
             $_SERVER,
-            $_GET,
             $loginManager->isLoggedIn()
         );
         $feedGenerator->setLocale(strtolower(setlocale(LC_COLLATE, 0)));
         $feedGenerator->setHideDates($conf->get('privacy.hide_timestamps') && !$loginManager->isLoggedIn());
         $feedGenerator->setUsePermalinks(isset($_GET['permalinks']) || !$conf->get('feed.rss_permalinks'));
-        $data = $feedGenerator->buildData();
+        $data = $feedGenerator->buildData($feedType, $_GET);
 
         // Process plugin hook.
         $pluginManager->executeHooks('render_feed', $data, array(
