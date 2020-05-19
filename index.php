@@ -1451,6 +1451,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         } else {
             $prependNoteUrl = false;
         }
+        $extendExport = false;
+        if (isset($_GET['extend_export'])) {
+            $extendExport = $_GET['extend_export'];
+        }
 
         try {
             $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
@@ -1479,6 +1483,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         $PAGE->assign('date', $now->format(DateTime::RFC822));
         $PAGE->assign('eol', PHP_EOL);
         $PAGE->assign('selection', $selection);
+        $PAGE->assign('extend_export', $extendExport);
         $PAGE->renderPage('export.bookmarks');
         exit;
     }
