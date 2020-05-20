@@ -451,35 +451,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User clicks on a tag in result count: Remove the tag from the list of searched tags (searchtags=...)
     if (isset($_GET['removetag'])) {
-        // Get previous URL (http_referer) and remove the tag from the searchtags parameters in query.
-        if (empty($_SERVER['HTTP_REFERER'])) {
-            header('Location: ?');
-            exit;
-        }
-
-        // In case browser does not send HTTP_REFERER
-        parse_str(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY), $params);
-
-        // Prevent redirection loop
-        if (isset($params['removetag'])) {
-            unset($params['removetag']);
-        }
-
-        if (isset($params['searchtags'])) {
-            $tags = explode(' ', $params['searchtags']);
-            // Remove value from array $tags.
-            $tags = array_diff($tags, array($_GET['removetag']));
-            $params['searchtags'] = implode(' ', $tags);
-
-            if (empty($params['searchtags'])) {
-                unset($params['searchtags']);
-            }
-
-            // We also remove page (keeping the same page has no sense, since
-            // the results are different)
-            unset($params['page']);
-        }
-        header('Location: ?'.http_build_query($params));
+        header('Location: ./remove-tag/'. $_GET['removetag']);
         exit;
     }
 
@@ -1576,6 +1548,7 @@ $app->group('', function () {
     $this->get('/open-search', '\Shaarli\Front\Controller\OpenSearchController:index')->setName('opensearch');
 
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
+    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\TagController:removeTag')->setName('remove-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
 $response = $app->run(true);

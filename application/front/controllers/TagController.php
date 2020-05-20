@@ -35,7 +35,7 @@ class TagController extends ShaarliController
             return $response->withRedirect('./');
         }
 
-        $currentUrl = parse_url($this->container->environment['HTTP_REFERER']);
+        $currentUrl = parse_url($referer);
         parse_str($currentUrl['query'] ?? '', $params);
 
         if (null === $newTag) {
@@ -70,5 +70,51 @@ class TagController extends ShaarliController
         unset($params['page']);
 
         return $response->withRedirect(($currentUrl['path'] ?? './') .'?'. http_build_query($params));
+    }
+
+    /**
+     * Remove a tag from the current search through an HTTP redirection.
+     *
+     * @param array $args Should contain `tag` key as tag to remove from current search
+     */
+    public function removeTag(Request $request, Response $response, array $args): Response
+    {
+        $referer = $this->container->environment['HTTP_REFERER'] ?? null;
+
+        // If the referrer is not provided, we can update the search, so we failback on the bookmark list
+        if (empty($referer)) {
+            return $response->withRedirect('./');
+        }
+
+        $tagToRemove = $args['tag'] ?? null;
+        $currentUrl = parse_url($referer);
+        parse_str($currentUrl['query'] ?? '', $params);
+
+        if (null === $tagToRemove) {
+            return $response->withRedirect(($currentUrl['path'] ?? './') .'?'. http_build_query($params));
+        }
+
+        // Prevent redirection loop
+        if (isset($params['removetag'])) {
+            unset($params['removetag']);
+        }
+
+        if (isset($params['searchtags'])) {
+            $tags = explode(' ', $params['searchtags']);
+            // Remove value from array $tags.
+            $tags = array_diff($tags, [$tagToRemove]);
+            $params['searchtags'] = implode(' ', $tags);
+
+            if (empty($params['searchtags'])) {
+                unset($params['searchtags']);
+            }
+
+            // We also remove page (keeping the same page has no sense, since the results are different)
+            unset($params['page']);
+        }
+
+        $queryParams = count($params) > 0 ? '?' . http_build_query($params) : '';
+
+        return $response->withRedirect(($currentUrl['path'] ?? './') . $queryParams);
     }
 }

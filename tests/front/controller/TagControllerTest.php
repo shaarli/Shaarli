@@ -157,4 +157,86 @@ class TagControllerTest extends TestCase
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['./'], $result->getHeader('location'));
     }
+
+    public function testRemoveTagWithoutMatchingTag(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $tags = ['tag' => 'abc'];
+
+        $result = $this->controller->removeTag($request, $response, $tags);
+
+        static::assertInstanceOf(Response::class, $result);
+        static::assertSame(302, $result->getStatusCode());
+        static::assertSame(['/controller/?searchtags=def'], $result->getHeader('location'));
+    }
+
+    public function testRemoveTagWithoutTagsearch(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/'];
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $tags = ['tag' => 'abc'];
+
+        $result = $this->controller->removeTag($request, $response, $tags);
+
+        static::assertInstanceOf(Response::class, $result);
+        static::assertSame(302, $result->getStatusCode());
+        static::assertSame(['/controller/'], $result->getHeader('location'));
+    }
+
+    public function testRemoveTagWithoutReferer(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $tags = ['tag' => 'abc'];
+
+        $result = $this->controller->removeTag($request, $response, $tags);
+
+        static::assertInstanceOf(Response::class, $result);
+        static::assertSame(302, $result->getStatusCode());
+        static::assertSame(['./'], $result->getHeader('location'));
+    }
+
+    public function testRemoveTagWithoutTag(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtag=abc'];
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $result = $this->controller->removeTag($request, $response, []);
+
+        static::assertInstanceOf(Response::class, $result);
+        static::assertSame(302, $result->getStatusCode());
+        static::assertSame(['/controller/?searchtag=abc'], $result->getHeader('location'));
+    }
+
+    public function testRemoveTagWithoutTagWithoutReferer(): void
+    {
+        $this->createValidContainerMockSet();
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $result = $this->controller->removeTag($request, $response, []);
+
+        static::assertInstanceOf(Response::class, $result);
+        static::assertSame(302, $result->getStatusCode());
+        static::assertSame(['./'], $result->getHeader('location'));
+    }
 }
