@@ -66,7 +66,7 @@
                 tagged
                 {loop="$exploded_tags"}
                     <span class="linktag" title="Remove tag">
-                        <a href="?removetag={function="urlencode($value)"}">{$value} <span class="remove">x</span></a>
+                        <a href="./remove-tag/{function="urlencode($value)"}">{$value} <span class="remove">x</span></a>
                     </span>
                 {/loop}
             {elseif="$search_tags === false"}
