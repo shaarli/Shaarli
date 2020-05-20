@@ -12,8 +12,6 @@ if (!function_exists('Shaarli\Front\Controller\setcookie')) {
 }
 
 use PHPUnit\Framework\TestCase;
-use Shaarli\Container\ShaarliContainer;
-use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 use Slim\Http\Request;
@@ -21,15 +19,15 @@ use Slim\Http\Response;
 
 class LogoutControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var LogoutController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new LogoutController($this->container);
 
         setcookie(LoginManager::$STAY_SIGNED_IN_COOKIE, $cookie = 'hi there');
@@ -37,16 +35,15 @@ class LogoutControllerTest extends TestCase
 
     public function testValidControllerInvoke(): void
     {
+        $this->createValidContainerMockSet();
+
         $request = $this->createMock(Request::class);
         $response = new Response();
 
-        $pageCacheManager = $this->createMock(PageCacheManager::class);
-        $pageCacheManager->expects(static::once())->method('invalidateCaches');
-        $this->container->pageCacheManager = $pageCacheManager;
+        $this->container->pageCacheManager->expects(static::once())->method('invalidateCaches');
 
-        $sessionManager = $this->createMock(SessionManager::class);
-        $sessionManager->expects(static::once())->method('logout');
-        $this->container->sessionManager = $sessionManager;
+        $this->container->sessionManager = $this->createMock(SessionManager::class);
+        $this->container->sessionManager->expects(static::once())->method('logout');
 
         static::assertSame('hi there', $_COOKIE[LoginManager::$STAY_SIGNED_IN_COOKIE]);
 

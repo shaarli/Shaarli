@@ -5,29 +5,23 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
-use Shaarli\Bookmark\BookmarkServiceInterface;
-use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
 use Shaarli\Feed\FeedBuilder;
-use Shaarli\Formatter\FormatterFactory;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Render\PageCacheManager;
-use Shaarli\Security\LoginManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class FeedControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var FeedController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
+        $this->container->feedBuilder = $this->createMock(FeedBuilder::class);
+
         $this->controller = new FeedController($this->container);
     }
 
@@ -153,67 +147,5 @@ class FeedControllerTest extends TestCase
         static::assertStringContainsString('application/atom', $result->getHeader('Content-Type')[0]);
         static::assertSame('feed.atom', (string) $result->getBody());
         static::assertSame('data', $assignedVariables['content']);
-    }
-
-    protected function createValidContainerMockSet(): void
-    {
-        $loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager = $loginManager;
-
-        // Config
-        $conf = $this->createMock(ConfigManager::class);
-        $this->container->conf = $conf;
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
-            return $default;
-        });
-
-        // PageBuilder
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            })
-        ;
-        $this->container->pageBuilder = $pageBuilder;
-
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $this->container->bookmarkService = $bookmarkService;
-
-        // Plugin Manager
-        $pluginManager = $this->createMock(PluginManager::class);
-        $this->container->pluginManager = $pluginManager;
-
-        // Formatter
-        $formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory = $formatterFactory;
-
-        // CacheManager
-        $pageCacheManager = $this->createMock(PageCacheManager::class);
-        $this->container->pageCacheManager = $pageCacheManager;
-
-        // FeedBuilder
-        $feedBuilder = $this->createMock(FeedBuilder::class);
-        $this->container->feedBuilder = $feedBuilder;
-
-        // $_SERVER
-        $this->container->environment = [
-            'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
-            'REQUEST_URI' => '/daily-rss',
-        ];
-    }
-
-    protected function assignTemplateVars(array &$variables): void
-    {
-        $this->container->pageBuilder
-            ->expects(static::atLeastOnce())
-            ->method('assign')
-            ->willReturnCallback(function ($key, $value) use (&$variables) {
-                $variables[$key] = $value;
-
-                return $this;
-            })
-        ;
     }
 }

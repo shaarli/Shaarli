@@ -6,31 +6,21 @@ namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\Bookmark;
-use Shaarli\Bookmark\BookmarkServiceInterface;
-use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
 use Shaarli\Feed\CachedPage;
-use Shaarli\Formatter\BookmarkFormatter;
-use Shaarli\Formatter\BookmarkRawFormatter;
-use Shaarli\Formatter\FormatterFactory;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Render\PageCacheManager;
-use Shaarli\Security\LoginManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class DailyControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var DailyController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new DailyController($this->container);
         DailyController::$DAILY_RSS_NB_DAYS = 2;
     }
@@ -105,7 +95,8 @@ class DailyControllerTest extends TestCase
                 static::assertArrayHasKey('loggedin', $param);
 
                 return $data;
-            });
+            })
+        ;
 
         $result = $this->controller->index($request, $response);
 
@@ -495,71 +486,6 @@ class DailyControllerTest extends TestCase
         static::assertSame('http://shaarli/daily-rss', $assignedVariables['page_url']);
         static::assertFalse($assignedVariables['hide_timestamps']);
         static::assertCount(0, $assignedVariables['days']);
-    }
-
-    protected function createValidContainerMockSet(): void
-    {
-        $loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager = $loginManager;
-
-        // Config
-        $conf = $this->createMock(ConfigManager::class);
-        $this->container->conf = $conf;
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
-            return $default;
-        });
-
-        // PageBuilder
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            })
-        ;
-        $this->container->pageBuilder = $pageBuilder;
-
-        // Plugin Manager
-        $pluginManager = $this->createMock(PluginManager::class);
-        $this->container->pluginManager = $pluginManager;
-
-        // BookmarkService
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $this->container->bookmarkService = $bookmarkService;
-
-        // Formatter
-        $formatterFactory = $this->createMock(FormatterFactory::class);
-        $formatterFactory
-            ->method('getFormatter')
-            ->willReturnCallback(function (): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
-            })
-        ;
-        $this->container->formatterFactory = $formatterFactory;
-
-        // CacheManager
-        $pageCacheManager = $this->createMock(PageCacheManager::class);
-        $this->container->pageCacheManager = $pageCacheManager;
-
-        // $_SERVER
-        $this->container->environment = [
-            'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
-            'REQUEST_URI' => '/daily-rss',
-        ];
-    }
-
-    protected function assignTemplateVars(array &$variables): void
-    {
-        $this->container->pageBuilder
-            ->expects(static::atLeastOnce())
-            ->method('assign')
-            ->willReturnCallback(function ($key, $value) use (&$variables) {
-                $variables[$key] = $value;
-
-                return $this;
-            })
-        ;
     }
 
     protected static function generateContent(int $length): string

@@ -6,11 +6,6 @@ namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkFilter;
-use Shaarli\Bookmark\BookmarkServiceInterface;
-use Shaarli\Container\ShaarliContainer;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Security\LoginManager;
 
 /**
  * Class ShaarliControllerTest
@@ -20,8 +15,7 @@ use Shaarli\Security\LoginManager;
  */
 class ShaarliControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var LoginController */
     protected $controller;
@@ -31,7 +25,8 @@ class ShaarliControllerTest extends TestCase
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new class($this->container) extends ShaarliController
         {
             public function assignView(string $key, $value): ShaarliController
@@ -51,6 +46,8 @@ class ShaarliControllerTest extends TestCase
     {
         $this->createValidContainerMockSet();
 
+        $this->assignTemplateVars($this->assignedValues);
+
         $self = $this->controller->assignView('variableName', 'variableValue');
 
         static::assertInstanceOf(ShaarliController::class, $self);
@@ -60,6 +57,24 @@ class ShaarliControllerTest extends TestCase
     public function testRender(): void
     {
         $this->createValidContainerMockSet();
+
+        $this->assignTemplateVars($this->assignedValues);
+
+        $this->container->bookmarkService
+            ->method('count')
+            ->willReturnCallback(function (string $visibility): int {
+                return $visibility === BookmarkFilter::$PRIVATE ? 5 : 10;
+            })
+        ;
+
+        $this->container->pluginManager
+            ->method('executeHooks')
+            ->willReturnCallback(function (string $hook, array &$data, array $params): array {
+                return $data[$hook] = $params;
+            });
+        $this->container->pluginManager->method('getErrors')->willReturn(['error']);
+
+        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
 
         $render = $this->controller->render('templateName');
 
@@ -75,42 +90,5 @@ class ShaarliControllerTest extends TestCase
         static::assertTrue($this->assignedValues['plugins_header']['render_header']['loggedin']);
         static::assertSame('templateName', $this->assignedValues['plugins_footer']['render_footer']['target']);
         static::assertTrue($this->assignedValues['plugins_footer']['render_footer']['loggedin']);
-    }
-
-    protected function createValidContainerMockSet(): void
-    {
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('assign')
-            ->willReturnCallback(function (string $key, $value): void {
-                $this->assignedValues[$key] = $value;
-            });
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            });
-        $this->container->pageBuilder = $pageBuilder;
-
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $bookmarkService
-            ->method('count')
-            ->willReturnCallback(function (string $visibility): int {
-                return $visibility === BookmarkFilter::$PRIVATE ? 5 : 10;
-            });
-        $this->container->bookmarkService = $bookmarkService;
-
-        $pluginManager = $this->createMock(PluginManager::class);
-        $pluginManager
-            ->method('executeHooks')
-            ->willReturnCallback(function (string $hook, array &$data, array $params): array {
-                return $data[$hook] = $params;
-            });
-        $pluginManager->method('getErrors')->willReturn(['error']);
-        $this->container->pluginManager = $pluginManager;
-
-        $loginManager = $this->createMock(LoginManager::class);
-        $loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->loginManager = $loginManager;
     }
 }
