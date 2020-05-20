@@ -14,7 +14,8 @@
 <link type="text/css" rel="stylesheet" href="{$value}#"/>
 {/loop}
 {if="is_file('data/user.css')"}<link type="text/css" rel="stylesheet" href="data/user.css#" />{/if}
-<link rel="search" type="application/opensearchdescription+xml" href="./?do=opensearch#" title="Shaarli search - {$shaarlititle|htmlspecialchars}"/>
+<link rel="search" type="application/opensearchdescription+xml" href="./open-search#"
+      title="Shaarli search - {$shaarlititle|htmlspecialchars}" />
 {if="! empty($links) && count($links) === 1"}
   {$link=reset($links)}
   <meta property="og:title" content="{$link.title}" />

@@ -7,7 +7,9 @@
     <language>{$language}</language>
     <copyright>{$index_url}</copyright>
     <generator>Shaarli</generator>
-    <atom:link rel="self" href="{$self_link}"  />
+    <atom:link rel="self" href="{$self_link}" />
+    <atom:link rel="search" type="application/opensearchdescription+xml" href="{$index_url}open-search#"
+               title="Shaarli search - {$shaarlititle}" />
     {loop="$plugins_feed_header"}
       {$value}
     {/loop}

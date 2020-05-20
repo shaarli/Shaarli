@@ -6,8 +6,8 @@
     <updated>{$last_update}</updated>
   {/if}
   <link rel="self" href="{$self_link}#" />
-  <link rel="search" type="application/opensearchdescription+xml" href="{$index_url}?do=opensearch#"
-             title="Shaarli search - {$shaarlititle}" />
+  <link rel="search" type="application/opensearchdescription+xml" href="{$index_url}open-search#"
+        title="Shaarli search - {$shaarlititle}" />
   {loop="$feed_plugins_header"}
     {$value}
   {/loop}
