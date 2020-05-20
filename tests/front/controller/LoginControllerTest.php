@@ -5,27 +5,22 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
-use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
 use Shaarli\Front\Exception\LoginBannedException;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Security\LoginManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class LoginControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var LoginController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new LoginController($this->container);
     }
 
@@ -46,6 +41,8 @@ class LoginControllerTest extends TestCase
                 return $this;
             })
         ;
+
+        $this->container->loginManager->method('canLogin')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 
@@ -77,6 +74,8 @@ class LoginControllerTest extends TestCase
             })
         ;
 
+        $this->container->loginManager->expects(static::once())->method('canLogin')->willReturn(true);
+
         $result = $this->controller->index($request, $response);
 
         static::assertInstanceOf(Response::class, $result);
@@ -91,12 +90,12 @@ class LoginControllerTest extends TestCase
 
     public function testLoginControllerWhileLoggedIn(): void
     {
+        $this->createValidContainerMockSet();
+
         $request = $this->createMock(Request::class);
         $response = new Response();
 
-        $loginManager = $this->createMock(LoginManager::class);
-        $loginManager->expects(static::once())->method('isLoggedIn')->willReturn(true);
-        $this->container->loginManager = $loginManager;
+        $this->container->loginManager->expects(static::once())->method('isLoggedIn')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 
@@ -135,44 +134,11 @@ class LoginControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $response = new Response();
 
-        $loginManager = $this->createMock(LoginManager::class);
-        $loginManager->method('isLoggedIn')->willReturn(false);
-        $loginManager->method('canLogin')->willReturn(false);
-        $this->container->loginManager = $loginManager;
+        $this->container->loginManager->method('isLoggedIn')->willReturn(false);
+        $this->container->loginManager->method('canLogin')->willReturn(false);
 
         $this->expectException(LoginBannedException::class);
 
         $this->controller->index($request, $response);
-    }
-
-    protected function createValidContainerMockSet(): void
-    {
-        // User logged out
-        $loginManager = $this->createMock(LoginManager::class);
-        $loginManager->method('isLoggedIn')->willReturn(false);
-        $loginManager->method('canLogin')->willReturn(true);
-        $this->container->loginManager = $loginManager;
-
-        // Config
-        $conf = $this->createMock(ConfigManager::class);
-        $conf->method('get')->willReturnCallback(function (string $parameter, $default) {
-            return $default;
-        });
-        $this->container->conf = $conf;
-
-        // PageBuilder
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            })
-        ;
-        $this->container->pageBuilder = $pageBuilder;
-
-        $pluginManager = $this->createMock(PluginManager::class);
-        $this->container->pluginManager = $pluginManager;
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $this->container->bookmarkService = $bookmarkService;
     }
 }

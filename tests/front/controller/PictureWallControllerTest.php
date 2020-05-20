@@ -6,31 +6,23 @@ namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\Bookmark;
-use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
-use Shaarli\Formatter\BookmarkFormatter;
-use Shaarli\Formatter\BookmarkRawFormatter;
-use Shaarli\Formatter\FormatterFactory;
 use Shaarli\Front\Exception\ThumbnailsDisabledException;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Security\LoginManager;
 use Shaarli\Thumbnailer;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class PictureWallControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var PictureWallController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new PictureWallController($this->container);
     }
 
@@ -43,6 +35,7 @@ class PictureWallControllerTest extends TestCase
         $response = new Response();
 
         // ConfigManager: thumbnails are enabled
+        $this->container->conf = $this->createMock(ConfigManager::class);
         $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
             if ($parameter === 'thumbnails.mode') {
                 return Thumbnailer::MODE_COMMON;
@@ -53,15 +46,7 @@ class PictureWallControllerTest extends TestCase
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
-        $this->container->pageBuilder
-            ->expects(static::atLeastOnce())
-            ->method('assign')
-            ->willReturnCallback(function ($key, $value) use (&$assignedVariables) {
-                $assignedVariables[$key] = $value;
-
-                return $this;
-            })
-        ;
+        $this->assignTemplateVars($assignedVariables);
 
         // Links dataset: 2 links with thumbnails
         $this->container->bookmarkService
@@ -136,45 +121,5 @@ class PictureWallControllerTest extends TestCase
         });
 
         $this->controller->index($request, $response);
-    }
-
-    protected function createValidContainerMockSet(): void
-    {
-        $loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager = $loginManager;
-
-        // Config
-        $conf = $this->createMock(ConfigManager::class);
-        $this->container->conf = $conf;
-
-        // PageBuilder
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            })
-        ;
-        $this->container->pageBuilder = $pageBuilder;
-
-        // Plugin Manager
-        $pluginManager = $this->createMock(PluginManager::class);
-        $this->container->pluginManager = $pluginManager;
-
-        // BookmarkService
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $this->container->bookmarkService = $bookmarkService;
-
-        // Formatter
-        $formatterFactory = $this->createMock(FormatterFactory::class);
-        $formatterFactory
-            ->method('getFormatter')
-            ->willReturnCallback(function (string $type): BookmarkFormatter {
-                if ($type === 'raw') {
-                    return new BookmarkRawFormatter($this->container->conf, true);
-                }
-            })
-        ;
-        $this->container->formatterFactory = $formatterFactory;
     }
 }

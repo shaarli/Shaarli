@@ -439,9 +439,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // Display opensearch plugin (XML)
     if ($targetPage == Router::$PAGE_OPENSEARCH) {
-        header('Content-Type: application/xml; charset=utf-8');
-        $PAGE->assign('serverurl', index_url($_SERVER));
-        $PAGE->renderPage('opensearch');
+        header('Location: ./open-search');
         exit;
     }
 
@@ -1575,6 +1573,7 @@ $app->group('', function () {
     $this->get('/daily-rss', '\Shaarli\Front\Controller\DailyController:rss')->setName('dailyrss');
     $this->get('/feed-atom', '\Shaarli\Front\Controller\FeedController:atom')->setName('feedatom');
     $this->get('/feed-rss', '\Shaarli\Front\Controller\FeedController:rss')->setName('feedrss');
+    $this->get('/open-search', '\Shaarli\Front\Controller\OpenSearchController:index')->setName('opensearch');
 
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
 })->add('\Shaarli\Front\ShaarliMiddleware');

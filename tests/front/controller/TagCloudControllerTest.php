@@ -6,27 +6,20 @@ namespace Shaarli\Front\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkFilter;
-use Shaarli\Bookmark\BookmarkServiceInterface;
-use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
-use Shaarli\Plugin\PluginManager;
-use Shaarli\Render\PageBuilder;
-use Shaarli\Security\LoginManager;
-use Shaarli\Security\SessionManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class TagCloudControllerTest extends TestCase
 {
-    /** @var ShaarliContainer */
-    protected $container;
+    use FrontControllerMockHelper;
 
     /** @var TagCloudController */
     protected $controller;
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->createContainer();
+
         $this->controller = new TagCloudController($this->container);
     }
 
@@ -384,54 +377,5 @@ class TagCloudControllerTest extends TestCase
 
         static::assertSame('', $assignedVariables['search_tags']);
         static::assertCount(0, $assignedVariables['tags']);
-    }
-
-
-    protected function createValidContainerMockSet(): void
-    {
-        $loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager = $loginManager;
-
-        $sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager = $sessionManager;
-
-        // Config
-        $conf = $this->createMock(ConfigManager::class);
-        $this->container->conf = $conf;
-
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
-            return $default;
-        });
-
-        // PageBuilder
-        $pageBuilder = $this->createMock(PageBuilder::class);
-        $pageBuilder
-            ->method('render')
-            ->willReturnCallback(function (string $template): string {
-                return $template;
-            })
-        ;
-        $this->container->pageBuilder = $pageBuilder;
-
-        // Plugin Manager
-        $pluginManager = $this->createMock(PluginManager::class);
-        $this->container->pluginManager = $pluginManager;
-
-        // BookmarkService
-        $bookmarkService = $this->createMock(BookmarkServiceInterface::class);
-        $this->container->bookmarkService = $bookmarkService;
-    }
-
-    protected function assignTemplateVars(array &$variables): void
-    {
-        $this->container->pageBuilder
-            ->expects(static::atLeastOnce())
-            ->method('assign')
-            ->willReturnCallback(function ($key, $value) use (&$variables) {
-                $variables[$key] = $value;
-
-                return $this;
-            })
-        ;
     }
 }
