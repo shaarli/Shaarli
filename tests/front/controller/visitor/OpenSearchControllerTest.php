@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace front\controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use PHPUnit\Framework\TestCase;
-use Shaarli\Front\Controller\FrontControllerMockHelper;
-use Shaarli\Front\Controller\OpenSearchController;
 use Slim\Http\Request;
 use Slim\Http\Response;
 

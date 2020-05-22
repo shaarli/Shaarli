@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -12,10 +12,8 @@ use Slim\Http\Response;
  *
  * Slim controller used to render open search template.
  * This allows to add Shaarli as a search engine within the browser.
- *
- * @package front\controllers
  */
-class OpenSearchController extends ShaarliController
+class OpenSearchController extends ShaarliVisitorController
 {
     public function index(Request $request, Response $response): Response
     {

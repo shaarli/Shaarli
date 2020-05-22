@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Container\ShaarliContainer;
+use Slim\Http\Request;
 use Slim\Http\Response;
 
-abstract class ShaarliController
+abstract class ShaarliVisitorController
 {
     /** @var ShaarliContainer */
     protected $container;
@@ -89,9 +90,13 @@ abstract class ShaarliController
      * @param array $loopTerms   Terms to remove from path and query string to prevent direction loop.
      * @param array $clearParams List of parameter to remove from the query string of the referrer.
      */
-    protected function redirectFromReferer(Response $response, array $loopTerms = [], array $clearParams = []): Response
-    {
-        $defaultPath = './';
+    protected function redirectFromReferer(
+        Request $request,
+        Response $response,
+        array $loopTerms = [],
+        array $clearParams = []
+    ): Response {
+        $defaultPath = $request->getUri()->getBasePath();
         $referer = $this->container->environment['HTTP_REFERER'] ?? null;
 
         if (null !== $referer) {

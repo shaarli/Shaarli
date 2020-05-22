@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use PHPUnit\Framework\TestCase;
 use Slim\Http\Request;
@@ -12,8 +12,7 @@ class TagControllerTest extends TestCase
 {
     use FrontControllerMockHelper;
 
-    /** @var TagController */
-    protected $controller;
+    /** @var TagController */    protected $controller;
 
     public function setUp(): void
     {

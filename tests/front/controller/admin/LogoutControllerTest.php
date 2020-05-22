@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Admin;
 
 /** Override PHP builtin setcookie function in the local namespace to mock it... more or less */
 if (!function_exists('Shaarli\Front\Controller\setcookie')) {
@@ -19,7 +19,7 @@ use Slim\Http\Response;
 
 class LogoutControllerTest extends TestCase
 {
-    use FrontControllerMockHelper;
+    use FrontAdminControllerMockHelper;
 
     /** @var LogoutController */
     protected $controller;

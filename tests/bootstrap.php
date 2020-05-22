@@ -22,4 +22,5 @@ require_once 'tests/utils/ReferenceLinkDB.php';
 require_once 'tests/utils/ReferenceHistory.php';
 require_once 'tests/utils/FakeBookmarkService.php';
 require_once 'tests/container/ShaarliTestContainer.php';
-require_once 'tests/front/controller/FrontControllerMockHelper.php';
+require_once 'tests/front/controller/visitor/FrontControllerMockHelper.php';
+require_once 'tests/front/controller/admin/FrontAdminControllerMockHelper.php';

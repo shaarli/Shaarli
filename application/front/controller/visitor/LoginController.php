@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Front\Exception\LoginBannedException;
 use Slim\Http\Request;
@@ -15,10 +15,8 @@ use Slim\Http\Response;
  *
  * The login page is not available if the user is banned
  * or if open shaarli setting is enabled.
- *
- * @package Front\Controller
  */
-class LoginController extends ShaarliController
+class LoginController extends ShaarliVisitorController
 {
     public function index(Request $request, Response $response): Response
     {

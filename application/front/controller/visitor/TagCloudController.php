@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -11,10 +11,8 @@ use Slim\Http\Response;
  * Class TagCloud
  *
  * Slim controller used to render the tag cloud and tag list pages.
- *
- * @package Front\Controller
  */
-class TagCloudController extends ShaarliController
+class TagCloudController extends ShaarliVisitorController
 {
     protected const TYPE_CLOUD = 'cloud';
     protected const TYPE_LIST = 'list';

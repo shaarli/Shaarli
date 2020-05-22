@@ -1498,30 +1498,33 @@ $app->group('/api/v1', function () {
 })->add('\Shaarli\Api\ApiMiddleware');
 
 $app->group('', function () {
-    $this->get('/login', '\Shaarli\Front\Controller\LoginController:index')->setName('login');
-    $this->get('/logout', '\Shaarli\Front\Controller\LogoutController:index')->setName('logout');
-    $this->get('/picture-wall', '\Shaarli\Front\Controller\PictureWallController:index')->setName('picwall');
-    $this->get('/tag-cloud', '\Shaarli\Front\Controller\TagCloudController:cloud')->setName('tagcloud');
-    $this->get('/tag-list', '\Shaarli\Front\Controller\TagCloudController:list')->setName('taglist');
-    $this->get('/daily', '\Shaarli\Front\Controller\DailyController:index')->setName('daily');
-    $this->get('/daily-rss', '\Shaarli\Front\Controller\DailyController:rss')->setName('dailyrss');
-    $this->get('/feed-atom', '\Shaarli\Front\Controller\FeedController:atom')->setName('feedatom');
-    $this->get('/feed-rss', '\Shaarli\Front\Controller\FeedController:rss')->setName('feedrss');
-    $this->get('/open-search', '\Shaarli\Front\Controller\OpenSearchController:index')->setName('opensearch');
+    /* -- PUBLIC --*/
+    $this->get('/login', '\Shaarli\Front\Controller\Visitor\LoginController:index')->setName('login');
+    $this->get('/picture-wall', '\Shaarli\Front\Controller\Visitor\PictureWallController:index')->setName('picwall');
+    $this->get('/tag-cloud', '\Shaarli\Front\Controller\Visitor\TagCloudController:cloud')->setName('tagcloud');
+    $this->get('/tag-list', '\Shaarli\Front\Controller\Visitor\TagCloudController:list')->setName('taglist');
+    $this->get('/daily', '\Shaarli\Front\Controller\Visitor\DailyController:index')->setName('daily');
+    $this->get('/daily-rss', '\Shaarli\Front\Controller\Visitor\DailyController:rss')->setName('dailyrss');
+    $this->get('/feed-atom', '\Shaarli\Front\Controller\Visitor\FeedController:atom')->setName('feedatom');
+    $this->get('/feed-rss', '\Shaarli\Front\Controller\Visitor\FeedController:rss')->setName('feedrss');
+    $this->get('/open-search', '\Shaarli\Front\Controller\Visitor\OpenSearchController:index')->setName('opensearch');
 
-    $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
-    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\TagController:removeTag')->setName('remove-tag');
+    $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\Visitor\TagController:addTag')->setName('add-tag');
+    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\Visitor\TagController:removeTag')->setName('remove-tag');
+
+    /* -- LOGGED IN -- */
+    $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index')->setName('logout');
 
     $this
-        ->get('/links-per-page', '\Shaarli\Front\Controller\SessionFilterController:linksPerPage')
+        ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')
         ->setName('filter-links-per-page')
     ;
     $this
-        ->get('/visibility/{visibility}', '\Shaarli\Front\Controller\SessionFilterController:visibility')
+        ->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility')
         ->setName('visibility')
     ;
     $this
-        ->get('/untagged-only', '\Shaarli\Front\Controller\SessionFilterController:untaggedOnly')
+        ->get('/untagged-only', '\Shaarli\Front\Controller\Admin\SessionFilterController:untaggedOnly')
         ->setName('untagged-only')
     ;
 })->add('\Shaarli\Front\ShaarliMiddleware');

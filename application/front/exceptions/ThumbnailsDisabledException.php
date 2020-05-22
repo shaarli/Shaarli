@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Exception;
 
-class ThumbnailsDisabledException extends ShaarliException
+class ThumbnailsDisabledException extends ShaarliFrontException
 {
     public function __construct()
     {
