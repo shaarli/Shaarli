@@ -6,6 +6,7 @@ namespace Shaarli\Front\Controller;
 
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Container\ShaarliContainer;
+use Slim\Http\Response;
 
 abstract class ShaarliController
 {
@@ -79,5 +80,47 @@ abstract class ShaarliController
             );
             $this->assignView('plugins_' . $name, $plugin_data);
         }
+    }
+
+    /**
+     * Generates a redirection to the previous page, based on the HTTP_REFERER.
+     * It fails back to the home page.
+     *
+     * @param array $loopTerms   Terms to remove from path and query string to prevent direction loop.
+     * @param array $clearParams List of parameter to remove from the query string of the referrer.
+     */
+    protected function redirectFromReferer(Response $response, array $loopTerms = [], array $clearParams = []): Response
+    {
+        $defaultPath = './';
+        $referer = $this->container->environment['HTTP_REFERER'] ?? null;
+
+        if (null !== $referer) {
+            $currentUrl = parse_url($referer);
+            parse_str($currentUrl['query'] ?? '', $params);
+            $path = $currentUrl['path'] ?? $defaultPath;
+        } else {
+            $params = [];
+            $path = $defaultPath;
+        }
+
+        // Prevent redirection loop
+        if (isset($currentUrl)) {
+            foreach ($clearParams as $value) {
+                unset($params[$value]);
+            }
+
+            $checkQuery = implode('', array_keys($params));
+            foreach ($loopTerms as $value) {
+                if (strpos($path . $checkQuery, $value) !== false) {
+                    $params = [];
+                    $path = $defaultPath;
+                    break;
+                }
+            }
+        }
+
+        $queryString = count($params) > 0 ? '?'. http_build_query($params) : '';
+
+        return $response->withRedirect($path . $queryString);
     }
 }

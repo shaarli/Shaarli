@@ -269,4 +269,61 @@ class SessionManagerTest extends TestCase
         $this->session['ip'] = 'ip_id_one';
         $this->assertTrue($this->sessionManager->hasClientIpChanged('ip_id_two'));
     }
+
+    /**
+     * Test creating an entry in the session array
+     */
+    public function testSetSessionParameterCreate(): void
+    {
+        $this->sessionManager->setSessionParameter('abc', 'def');
+
+        static::assertSame('def', $this->session['abc']);
+    }
+
+    /**
+     * Test updating an entry in the session array
+     */
+    public function testSetSessionParameterUpdate(): void
+    {
+        $this->session['abc'] = 'ghi';
+
+        $this->sessionManager->setSessionParameter('abc', 'def');
+
+        static::assertSame('def', $this->session['abc']);
+    }
+
+    /**
+     * Test updating an entry in the session array with null value
+     */
+    public function testSetSessionParameterUpdateNull(): void
+    {
+        $this->session['abc'] = 'ghi';
+
+        $this->sessionManager->setSessionParameter('abc', null);
+
+        static::assertArrayHasKey('abc', $this->session);
+        static::assertNull($this->session['abc']);
+    }
+
+    /**
+     * Test deleting an existing entry in the session array
+     */
+    public function testDeleteSessionParameter(): void
+    {
+        $this->session['abc'] = 'def';
+
+        $this->sessionManager->deleteSessionParameter('abc');
+
+        static::assertArrayNotHasKey('abc', $this->session);
+    }
+
+    /**
+     * Test deleting a non existent entry in the session array
+     */
+    public function testDeleteSessionParameterNotExisting(): void
+    {
+        $this->sessionManager->deleteSessionParameter('abc');
+
+        static::assertArrayNotHasKey('abc', $this->session);
+    }
 }

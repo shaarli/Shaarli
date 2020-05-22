@@ -1,7 +1,7 @@
 <div class="paging">
 {if="$is_logged_in"}
     <div class="paging_privatelinks">
-      <a href="?visibility=private">
+      <a href="./visibility/private">
 		{if="$visibility=='private'"}
       <img src="img/private_16x16_active.png" width="16" height="16" title="Click to see all links" alt="Click to see all links">
     {else}
@@ -23,8 +23,13 @@
       </div>
     {/loop}
     <div class="paging_linksperpage">
-        Links per page: <a href="?linksperpage=20">20</a> <a href="?linksperpage=50">50</a> <a href="?linksperpage=100">100</a>
-        <form method="GET" class="linksperpage"><input type="text" name="linksperpage" size="2"></form>
+        Links per page:
+        <a href="./links-per-page?nb=20">20</a>
+        <a href="./links-per-page?nb=50">50</a>
+        <a href="./links-per-page?nb=100">100</a>
+        <form method="GET" class="linksperpage" action="./links-per-page">
+          <input type="text" name="nb" size="2">
+        </form>
     </div>
     {if="$previous_page_url"} <a href="{$previous_page_url}" class="paging_older">&#x25C4;Older</a> {/if}
     <div class="paging_current">page {$page_current} / {$page_max} </div>
