@@ -501,18 +501,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Display the Tools menu if requested (import/export/bookmarklet...)
     if ($targetPage == Router::$PAGE_TOOLS) {
-        $data = [
-            'pageabsaddr' => index_url($_SERVER),
-            'sslenabled' => is_https($_SERVER),
-        ];
-        $pluginManager->executeHooks('render_tools', $data);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->assign('pagetitle', t('Tools') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('tools');
+        header('Location: ./tools');
         exit;
     }
 
@@ -557,10 +546,10 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
                 );
 
                 // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=tools\';</script>';
+                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./tools\';</script>';
                 exit;
             }
-            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'./?do=tools\';</script>';
+            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'./tools\';</script>';
             exit;
         } else {
             // show the change password form.
@@ -1514,6 +1503,7 @@ $app->group('', function () {
 
     /* -- LOGGED IN -- */
     $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index')->setName('logout');
+    $this->get('/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index')->setName('tools');
 
     $this
         ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')
