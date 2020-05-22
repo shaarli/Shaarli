@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Admin;
 
 /** Override PHP builtin setcookie function in the local namespace to mock it... more or less */
-if (!function_exists('Shaarli\Front\Controller\setcookie')) {
+if (!function_exists('Shaarli\Front\Controller\Admin\setcookie')) {
     function setcookie(string $name, string $value): void {
         $_COOKIE[$name] = $value;
     }
