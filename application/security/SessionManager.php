@@ -8,6 +8,10 @@ use Shaarli\Config\ConfigManager;
  */
 class SessionManager
 {
+    public const KEY_LINKS_PER_PAGE = 'LINKS_PER_PAGE';
+    public const KEY_VISIBILITY = 'visibility';
+    public const KEY_UNTAGGED_ONLY = 'untaggedonly';
+
     /** @var int Session expiration timeout, in seconds */
     public static $SHORT_TIMEOUT = 3600;    // 1 hour
 
@@ -211,5 +215,34 @@ class SessionManager
     public function getSessionParameter(string $key, $default = null)
     {
         return $this->session[$key] ?? $default;
+    }
+
+    /**
+     * Store a variable in user session.
+     *
+     * @param string $key   Session key
+     * @param mixed  $value Session value to store
+     *
+     * @return $this
+     */
+    public function setSessionParameter(string $key, $value): self
+    {
+        $this->session[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Store a variable in user session.
+     *
+     * @param string $key   Session key
+     *
+     * @return $this
+     */
+    public function deleteSessionParameter(string $key): self
+    {
+        unset($this->session[$key]);
+
+        return $this;
     }
 }

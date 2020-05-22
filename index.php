@@ -457,57 +457,19 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User wants to change the number of bookmarks per page (linksperpage=...)
     if (isset($_GET['linksperpage'])) {
-        if (is_numeric($_GET['linksperpage'])) {
-            $_SESSION['LINKS_PER_PAGE']=abs(intval($_GET['linksperpage']));
-        }
-
-        if (! empty($_SERVER['HTTP_REFERER'])) {
-            $location = generateLocation($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'], array('linksperpage'));
-        } else {
-            $location = '?';
-        }
-        header('Location: '. $location);
+        header('Location: ./links-per-page?nb='. $_GET['linksperpage']);
         exit;
     }
 
     // -------- User wants to see only private bookmarks (toggle)
     if (isset($_GET['visibility'])) {
-        if ($_GET['visibility'] === 'private') {
-            // Visibility not set or not already private, set private, otherwise reset it
-            if (empty($_SESSION['visibility']) || $_SESSION['visibility'] !== 'private') {
-                // See only private bookmarks
-                $_SESSION['visibility'] = 'private';
-            } else {
-                unset($_SESSION['visibility']);
-            }
-        } elseif ($_GET['visibility'] === 'public') {
-            if (empty($_SESSION['visibility']) || $_SESSION['visibility'] !== 'public') {
-                // See only public bookmarks
-                $_SESSION['visibility'] = 'public';
-            } else {
-                unset($_SESSION['visibility']);
-            }
-        }
-
-        if (! empty($_SERVER['HTTP_REFERER'])) {
-            $location = generateLocation($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'], array('visibility'));
-        } else {
-            $location = '?';
-        }
-        header('Location: '. $location);
+        header('Location: ./visibility/'. $_GET['visibility']);
         exit;
     }
 
     // -------- User wants to see only untagged bookmarks (toggle)
     if (isset($_GET['untaggedonly'])) {
-        $_SESSION['untaggedonly'] = empty($_SESSION['untaggedonly']);
-
-        if (! empty($_SERVER['HTTP_REFERER'])) {
-            $location = generateLocation($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST'], array('untaggedonly'));
-        } else {
-            $location = '?';
-        }
-        header('Location: '. $location);
+        header('Location: ./untagged-only');
         exit;
     }
 
@@ -1549,6 +1511,19 @@ $app->group('', function () {
 
     $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\TagController:addTag')->setName('add-tag');
     $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\TagController:removeTag')->setName('remove-tag');
+
+    $this
+        ->get('/links-per-page', '\Shaarli\Front\Controller\SessionFilterController:linksPerPage')
+        ->setName('filter-links-per-page')
+    ;
+    $this
+        ->get('/visibility/{visibility}', '\Shaarli\Front\Controller\SessionFilterController:visibility')
+        ->setName('visibility')
+    ;
+    $this
+        ->get('/untagged-only', '\Shaarli\Front\Controller\SessionFilterController:untaggedOnly')
+        ->setName('untagged-only')
+    ;
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
 $response = $app->run(true);
