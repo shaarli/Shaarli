@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Exception;
 
-class LoginBannedException extends ShaarliException
+class LoginBannedException extends ShaarliFrontException
 {
     public function __construct()
     {

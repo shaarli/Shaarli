@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkFilter;
+use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Http\Uri;
 
 /**
  * Class ShaarliControllerTest
@@ -24,13 +26,16 @@ class ShaarliControllerTest extends TestCase
     /** @var mixed[] List of variable assigned to the template */
     protected $assignedValues;
 
+    /** @var Request */
+    protected $request;
+
     public function setUp(): void
     {
         $this->createContainer();
 
-        $this->controller = new class($this->container) extends ShaarliController
+        $this->controller = new class($this->container) extends ShaarliVisitorController
         {
-            public function assignView(string $key, $value): ShaarliController
+            public function assignView(string $key, $value): ShaarliVisitorController
             {
                 return parent::assignView($key, $value);
             }
@@ -41,14 +46,23 @@ class ShaarliControllerTest extends TestCase
             }
 
             public function redirectFromReferer(
+                Request $request,
                 Response $response,
                 array $loopTerms = [],
                 array $clearParams = []
             ): Response {
-                return parent::redirectFromReferer($response, $loopTerms, $clearParams);
+                return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams);
             }
         };
         $this->assignedValues = [];
+
+        $this->request = $this->createMock(Request::class);
+        $this->request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
     }
 
     public function testAssignView(): void
@@ -59,7 +73,7 @@ class ShaarliControllerTest extends TestCase
 
         $self = $this->controller->assignView('variableName', 'variableValue');
 
-        static::assertInstanceOf(ShaarliController::class, $self);
+        static::assertInstanceOf(ShaarliVisitorController::class, $self);
         static::assertSame('variableValue', $this->assignedValues['variableName']);
     }
 
@@ -112,7 +126,7 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response);
+        $result = $this->controller->redirectFromReferer($this->request, $response);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -129,7 +143,7 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['nope']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -146,10 +160,10 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['nope', 'controller']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'controller']);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder'], $result->getHeader('location'));
     }
 
     /**
@@ -163,10 +177,10 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['nope', 'other']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'other']);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder'], $result->getHeader('location'));
     }
 
     /**
@@ -181,7 +195,7 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['nope', 'param']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'param']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -199,7 +213,7 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['shaarli']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['shaarli']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -217,7 +231,7 @@ class ShaarliControllerTest extends TestCase
 
         $response = new Response();
 
-        $result = $this->controller->redirectFromReferer($response, ['query'], ['query']);
+        $result = $this->controller->redirectFromReferer($this->request, $response, ['query'], ['query']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?other=2'], $result->getHeader('location'));

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use DateTime;
 use DateTimeImmutable;
@@ -14,10 +14,8 @@ use Slim\Http\Response;
  * Class DailyController
  *
  * Slim controller used to render the daily page.
- *
- * @package Front\Controller
  */
-class DailyController extends ShaarliController
+class DailyController extends ShaarliVisitorController
 {
     public static $DAILY_RSS_NB_DAYS = 8;
 

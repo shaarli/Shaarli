@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\Security\LoginManager;
 use Slim\Http\Request;
@@ -13,10 +13,8 @@ use Slim\Http\Response;
  *
  * Slim controller used to logout the user.
  * It invalidates page cache and terminate the user session. Then it redirects to the homepage.
- *
- * @package Front\Controller
  */
-class LogoutController extends ShaarliController
+class LogoutController extends ShaarliAdminController
 {
     public function index(Request $request, Response $response): Response
     {

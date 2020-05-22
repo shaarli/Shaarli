@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkFilter;

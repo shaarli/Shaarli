@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Front\Exception\ThumbnailsDisabledException;
 use Shaarli\Thumbnailer;
@@ -14,10 +14,8 @@ use Slim\Http\Response;
  *
  * Slim controller used to render the pictures wall page.
  * If thumbnails mode is set to NONE, we just render the template without any image.
- *
- * @package Front\Controller
  */
-class PictureWallController extends ShaarliController
+class PictureWallController extends ShaarliVisitorController
 {
     public function index(Request $request, Response $response): Response
     {

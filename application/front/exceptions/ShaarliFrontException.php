@@ -13,7 +13,7 @@ use Throwable;
  *
  * @package Front\Exception
  */
-abstract class ShaarliException extends \Exception
+abstract class ShaarliFrontException extends \Exception
 {
     /** Override parent constructor to force $message and $httpCode parameters to be set. */
     public function __construct(string $message, int $httpCode, Throwable $previous = null)

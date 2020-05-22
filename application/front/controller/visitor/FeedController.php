@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Feed\FeedBuilder;
 use Slim\Http\Request;
@@ -12,10 +12,8 @@ use Slim\Http\Response;
  * Class FeedController
  *
  * Slim controller handling ATOM and RSS feed.
- *
- * @package Front\Controller
  */
-class FeedController extends ShaarliController
+class FeedController extends ShaarliVisitorController
 {
     public function atom(Request $request, Response $response): Response
     {

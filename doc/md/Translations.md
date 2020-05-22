@@ -37,7 +37,7 @@ http://<replace_domain>/?do=changepasswd
 http://<replace_domain>/?do=changetag
 http://<replace_domain>/?do=configure
 http://<replace_domain>/?do=tools
-http://<replace_domain>/?do=daily
+http://<replace_domain>/daily
 http://<replace_domain>/?post
 http://<replace_domain>/?do=export
 http://<replace_domain>/?do=import

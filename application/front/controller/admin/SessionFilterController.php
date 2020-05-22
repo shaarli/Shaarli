@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Security\SessionManager;
@@ -13,10 +13,8 @@ use Slim\Http\Response;
  * Class SessionFilterController
  *
  * Slim controller used to handle filters stored in the user session, such as visibility, links per page, etc.
- *
- * @package Shaarli\Front\Controller
  */
-class SessionFilterController extends ShaarliController
+class SessionFilterController extends ShaarliAdminController
 {
     /**
      * GET /links-per-page: set the number of bookmarks to display per page in homepage
@@ -33,7 +31,7 @@ class SessionFilterController extends ShaarliController
             abs(intval($linksPerPage))
         );
 
-        return $this->redirectFromReferer($response, ['linksperpage'], ['nb']);
+        return $this->redirectFromReferer($request, $response, ['linksperpage'], ['nb']);
     }
 
     /**
@@ -42,7 +40,7 @@ class SessionFilterController extends ShaarliController
     public function visibility(Request $request, Response $response, array $args): Response
     {
         if (false === $this->container->loginManager->isLoggedIn()) {
-            return $this->redirectFromReferer($response, ['visibility']);
+            return $this->redirectFromReferer($request, $response, ['visibility']);
         }
 
         $newVisibility = $args['visibility'] ?? null;
@@ -63,7 +61,7 @@ class SessionFilterController extends ShaarliController
             $this->container->sessionManager->deleteSessionParameter(SessionManager::KEY_VISIBILITY);
         }
 
-        return $this->redirectFromReferer($response, ['visibility']);
+        return $this->redirectFromReferer($request, $response, ['visibility']);
     }
 
     /**
@@ -76,6 +74,6 @@ class SessionFilterController extends ShaarliController
             empty($this->container->sessionManager->getSessionParameter(SessionManager::KEY_UNTAGGED_ONLY))
         );
 
-        return $this->redirectFromReferer($response, ['untaggedonly', 'untagged-only']);
+        return $this->redirectFromReferer($request, $response, ['untaggedonly', 'untagged-only']);
     }
 }

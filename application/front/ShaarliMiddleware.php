@@ -3,7 +3,8 @@
 namespace Shaarli\Front;
 
 use Shaarli\Container\ShaarliContainer;
-use Shaarli\Front\Exception\ShaarliException;
+use Shaarli\Front\Exception\ShaarliFrontException;
+use Shaarli\Front\Exception\UnauthorizedException;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -39,7 +40,7 @@ class ShaarliMiddleware
     {
         try {
             $response = $next($request, $response);
-        } catch (ShaarliException $e) {
+        } catch (ShaarliFrontException $e) {
             $this->container->pageBuilder->assign('message', $e->getMessage());
             if ($this->container->conf->get('dev.debug', false)) {
                 $this->container->pageBuilder->assign(
@@ -50,6 +51,8 @@ class ShaarliMiddleware
 
             $response = $response->withStatus($e->getCode());
             $response = $response->write($this->container->pageBuilder->render('error'));
+        } catch (UnauthorizedException $e) {
+            return $response->withRedirect($request->getUri()->getBasePath() . '/login');
         }
 
         return $response;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Visitor;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -11,10 +11,8 @@ use Slim\Http\Response;
  * Class TagController
  *
  * Slim controller handle tags.
- *
- * @package Front\Controller
  */
-class TagController extends ShaarliController
+class TagController extends ShaarliVisitorController
 {
     /**
      * Add another tag in the current search through an HTTP redirection.

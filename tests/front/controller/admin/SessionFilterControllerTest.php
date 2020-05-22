@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Shaarli\Front\Controller;
+namespace Shaarli\Front\Controller\Admin;
 
 use PHPUnit\Framework\TestCase;
+use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Http\Uri;
 
 class SessionFilterControllerTest extends TestCase
 {
-    use FrontControllerMockHelper;
+    use FrontAdminControllerMockHelper;
 
     /** @var SessionFilterController */
     protected $controller;
@@ -33,6 +35,12 @@ class SessionFilterControllerTest extends TestCase
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $request->method('getParam')->with('nb')->willReturn('8');
         $response = new Response();
 
@@ -57,6 +65,12 @@ class SessionFilterControllerTest extends TestCase
         $this->createValidContainerMockSet();
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $request->method('getParam')->with('nb')->willReturn('test');
         $response = new Response();
 
@@ -70,7 +84,7 @@ class SessionFilterControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder'], $result->getHeader('location'));
     }
 
     /**
@@ -92,6 +106,12 @@ class SessionFilterControllerTest extends TestCase
         ;
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $result = $this->controller->visibility($request, $response, $arg);
@@ -129,6 +149,12 @@ class SessionFilterControllerTest extends TestCase
         ;
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $result = $this->controller->visibility($request, $response, $arg);
@@ -160,13 +186,19 @@ class SessionFilterControllerTest extends TestCase
         ;
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder'], $result->getHeader('location'));
     }
 
     /**
@@ -192,6 +224,12 @@ class SessionFilterControllerTest extends TestCase
         ;
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $result = $this->controller->visibility($request, $response, $arg);
@@ -212,6 +250,7 @@ class SessionFilterControllerTest extends TestCase
 
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
+        $this->container->loginManager = $this->createMock(LoginManager::class);
         $this->container->loginManager->method('isLoggedIn')->willReturn(false);
         $this->container->sessionManager
             ->expects(static::never())
@@ -224,6 +263,12 @@ class SessionFilterControllerTest extends TestCase
         ;
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $result = $this->controller->visibility($request, $response, $arg);
@@ -243,6 +288,12 @@ class SessionFilterControllerTest extends TestCase
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
         $response = new Response();
 
         $this->container->sessionManager
@@ -268,6 +319,13 @@ class SessionFilterControllerTest extends TestCase
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
+
         $response = new Response();
 
         $this->container->sessionManager
