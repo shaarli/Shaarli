@@ -1451,10 +1451,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         } else {
             $prependNoteUrl = false;
         }
-        $extendExport = false;
-        if (isset($_GET['extend_export'])) {
-            $extendExport = $_GET['extend_export'];
-        }
+        $extendExport = !empty($_GET['extend_export']);
 
         try {
             $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
