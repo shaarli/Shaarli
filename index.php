@@ -1481,6 +1481,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         $PAGE->assign('eol', PHP_EOL);
         $PAGE->assign('selection', $selection);
         $PAGE->assign('extend_export', $extendExport);
+        $PAGE->assign('index_url', index_url($_SERVER));
         $PAGE->renderPage('export.bookmarks');
         exit;
     }
