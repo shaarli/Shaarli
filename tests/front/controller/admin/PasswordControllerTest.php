@@ -6,6 +6,7 @@ namespace Shaarli\Front\Controller\Admin;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Front\Exception\OpenShaarliPasswordException;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Slim\Http\Request;
@@ -182,5 +183,21 @@ class PasswordControllerTest extends TestCase
         static::assertSame(400, $result->getStatusCode());
         static::assertSame('changepassword', (string) $result->getBody());
         static::assertSame('Change password - Shaarli', $this->assignedVariables['pagetitle']);
+    }
+
+    /**
+     * Change the password on an open shaarli
+     */
+    public function testPostNewPasswordOnOpenShaarli(): void
+    {
+        $this->container->conf = $this->createMock(ConfigManager::class);
+        $this->container->conf->method('get')->with('security.open_shaarli')->willReturn(true);
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $this->expectException(OpenShaarliPasswordException::class);
+
+        $this->controller->change($request, $response);
     }
 }
