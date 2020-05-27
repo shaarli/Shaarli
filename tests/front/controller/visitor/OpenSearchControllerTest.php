@@ -24,8 +24,6 @@ class OpenSearchControllerTest extends TestCase
 
     public function testOpenSearchController(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

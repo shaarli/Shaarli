@@ -30,8 +30,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPage(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
@@ -62,8 +60,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPageNotValid(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request->method('getUri')->willReturnCallback(function (): Uri {
             $uri = $this->createMock(Uri::class);
@@ -92,8 +88,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testVisibility(): void
     {
-        $this->createValidContainerMockSet();
-
         $arg = ['visibility' => 'private'];
 
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
@@ -126,8 +120,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testVisibilityToggleOff(): void
     {
-        $this->createValidContainerMockSet();
-
         $arg = ['visibility' => 'private'];
 
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
@@ -169,8 +161,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testVisibilitySwitch(): void
     {
-        $this->createValidContainerMockSet();
-
         $arg = ['visibility' => 'private'];
 
         $this->container->loginManager->method('isLoggedIn')->willReturn(true);
@@ -206,8 +196,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testVisibilityInvalidValue(): void
     {
-        $this->createValidContainerMockSet();
-
         $arg = ['visibility' => 'test'];
 
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
@@ -244,8 +232,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testVisibilityLoggedOut(): void
     {
-        $this->createValidContainerMockSet();
-
         $arg = ['visibility' => 'test'];
 
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
@@ -283,8 +269,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnly(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
@@ -314,8 +298,6 @@ class SessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnlyToggleOff(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);

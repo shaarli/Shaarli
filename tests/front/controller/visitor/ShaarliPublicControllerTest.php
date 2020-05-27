@@ -67,8 +67,6 @@ class ShaarliControllerTest extends TestCase
 
     public function testAssignView(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->assignTemplateVars($this->assignedValues);
 
         $self = $this->controller->assignView('variableName', 'variableValue');
@@ -79,8 +77,6 @@ class ShaarliControllerTest extends TestCase
 
     public function testRender(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->assignTemplateVars($this->assignedValues);
 
         $this->container->bookmarkService
@@ -120,8 +116,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -137,8 +131,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithUnmatchedLoopTerm(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -154,8 +146,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInPath(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -171,8 +161,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryParam(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -189,8 +177,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryValue(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -207,8 +193,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithLoopTermInDomain(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();
@@ -225,8 +209,6 @@ class ShaarliControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingClearedParam(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment['HTTP_REFERER'] = 'http://shaarli.tld/subfolder/controller?query=param&other=2';
 
         $response = new Response();

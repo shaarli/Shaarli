@@ -7,6 +7,7 @@ use RainTPL;
 use Shaarli\ApplicationUtils;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
+use Shaarli\Security\SessionManager;
 use Shaarli\Thumbnailer;
 
 /**
@@ -136,15 +137,26 @@ class PageBuilder
         $this->tpl->assign('thumbnails_width', $this->conf->get('thumbnails.width'));
         $this->tpl->assign('thumbnails_height', $this->conf->get('thumbnails.height'));
 
-        if (!empty($_SESSION['warnings'])) {
-            $this->tpl->assign('global_warnings', $_SESSION['warnings']);
-            unset($_SESSION['warnings']);
-        }
-
         $this->tpl->assign('formatter', $this->conf->get('formatter', 'default'));
 
         // To be removed with a proper theme configuration.
         $this->tpl->assign('conf', $this->conf);
+    }
+
+    protected function finalize(): void
+    {
+        // TODO: use the SessionManager
+        $messageKeys = [
+            SessionManager::KEY_SUCCESS_MESSAGES,
+            SessionManager::KEY_WARNING_MESSAGES,
+            SessionManager::KEY_ERROR_MESSAGES
+        ];
+        foreach ($messageKeys as $messageKey) {
+            if (!empty($_SESSION[$messageKey])) {
+                $this->tpl->assign('global_' . $messageKey, $_SESSION[$messageKey]);
+                unset($_SESSION[$messageKey]);
+            }
+        }
     }
 
     /**
@@ -196,6 +208,8 @@ class PageBuilder
             $this->initialize();
         }
 
+        $this->finalize();
+
         $this->tpl->draw($page);
     }
 
@@ -212,6 +226,8 @@ class PageBuilder
         if ($this->tpl === false) {
             $this->initialize();
         }
+
+        $this->finalize();
 
         return $this->tpl->draw($page, true);
     }

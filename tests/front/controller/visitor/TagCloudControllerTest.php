@@ -28,8 +28,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidCloudControllerInvokeDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $allTags = [
             'ghi' => 1,
             'abc' => 3,
@@ -94,8 +92,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidCloudControllerInvokeWithParameters(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request
             ->method('getQueryParam')
@@ -161,8 +157,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyCloud(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -209,8 +203,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidListControllerInvokeDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $allTags = [
             'def' => 12,
             'abc' => 3,
@@ -271,8 +263,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidListControllerInvokeWithParameters(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request
             ->method('getQueryParam')
@@ -336,8 +326,6 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyList(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

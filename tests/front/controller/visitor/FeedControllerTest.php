@@ -30,8 +30,6 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultRssController(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -71,8 +69,6 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultAtomController(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -112,8 +108,6 @@ class FeedControllerTest extends TestCase
      */
     public function testAtomControllerWithParameters(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request->method('getParams')->willReturn(['parameter' => 'value']);
         $response = new Response();

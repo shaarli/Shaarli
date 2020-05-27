@@ -12,6 +12,10 @@ class SessionManager
     public const KEY_VISIBILITY = 'visibility';
     public const KEY_UNTAGGED_ONLY = 'untaggedonly';
 
+    public const KEY_SUCCESS_MESSAGES = 'successes';
+    public const KEY_WARNING_MESSAGES = 'warnings';
+    public const KEY_ERROR_MESSAGES = 'errors';
+
     /** @var int Session expiration timeout, in seconds */
     public static $SHORT_TIMEOUT = 3600;    // 1 hour
 

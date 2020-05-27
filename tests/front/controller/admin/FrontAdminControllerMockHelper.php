@@ -6,7 +6,6 @@ namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\Container\ShaarliTestContainer;
 use Shaarli\Front\Controller\Visitor\FrontControllerMockHelper;
-use Shaarli\Security\LoginManager;
 
 /**
  * Trait FrontControllerMockHelper
@@ -28,7 +27,7 @@ trait FrontAdminControllerMockHelper
     {
         $this->parentCreateContainer();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
         $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->sessionManager->method('checkToken')->willReturn(true);
     }
 }

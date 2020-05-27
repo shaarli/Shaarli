@@ -24,8 +24,6 @@ class ToolsControllerTestControllerTest extends TestCase
 
     public function testDefaultInvokeWithHttps(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -49,8 +47,6 @@ class ToolsControllerTestControllerTest extends TestCase
 
     public function testDefaultInvokeWithoutHttps(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

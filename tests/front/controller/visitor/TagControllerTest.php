@@ -23,8 +23,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithReferer(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/'];
 
         $request = $this->createMock(Request::class);
@@ -41,8 +39,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndExistingSearch(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
 
         $request = $this->createMock(Request::class);
@@ -59,8 +55,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutRefererAndExistingSearch(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -75,8 +69,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagRemoveLegacyQueryParam(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&addtag=abc'];
 
         $request = $this->createMock(Request::class);
@@ -93,8 +85,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagResetPagination(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&page=12'];
 
         $request = $this->createMock(Request::class);
@@ -111,8 +101,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndEmptySearch(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags='];
 
         $request = $this->createMock(Request::class);
@@ -129,8 +117,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithReferer(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
 
         $request = $this->createMock(Request::class);
@@ -145,8 +131,6 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithoutReferer(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -159,8 +143,6 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutMatchingTag(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
 
         $request = $this->createMock(Request::class);
@@ -177,8 +159,6 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagsearch(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/'];
 
         $request = $this->createMock(Request::class);
@@ -195,8 +175,6 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutReferer(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -211,8 +189,6 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTag(): void
     {
-        $this->createValidContainerMockSet();
-
         $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtag=abc'];
 
         $request = $this->createMock(Request::class);
@@ -227,8 +203,6 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagWithoutReferer(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

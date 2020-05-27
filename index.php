@@ -507,56 +507,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User wants to change his/her password.
     if ($targetPage == Router::$PAGE_CHANGEPASSWORD) {
-        if ($conf->get('security.open_shaarli')) {
-            die(t('You are not supposed to change a password on an Open Shaarli.'));
-        }
-
-        if (!empty($_POST['setpassword']) && !empty($_POST['oldpassword'])) {
-            if (!$sessionManager->checkToken($_POST['token'])) {
-                die(t('Wrong token.')); // Go away!
-            }
-
-            // Make sure old password is correct.
-            $oldhash = sha1(
-                $_POST['oldpassword'].$conf->get('credentials.login').$conf->get('credentials.salt')
-            );
-            if ($oldhash != $conf->get('credentials.hash')) {
-                echo '<script>alert("'
-                    . t('The old password is not correct.')
-                    .'");document.location=\'./?do=changepasswd\';</script>';
-                exit;
-            }
-            // Save new password
-            // Salt renders rainbow-tables attacks useless.
-            $conf->set('credentials.salt', sha1(uniqid('', true) .'_'. mt_rand()));
-            $conf->set(
-                'credentials.hash',
-                sha1(
-                    $_POST['setpassword']
-                    . $conf->get('credentials.login')
-                    . $conf->get('credentials.salt')
-                )
-            );
-            try {
-                $conf->write($loginManager->isLoggedIn());
-            } catch (Exception $e) {
-                error_log(
-                    'ERROR while writing config file after changing password.' . PHP_EOL .
-                    $e->getMessage()
-                );
-
-                // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./tools\';</script>';
-                exit;
-            }
-            echo '<script>alert("'. t('Your password has been changed') .'");document.location=\'./tools\';</script>';
-            exit;
-        } else {
-            // show the change password form.
-            $PAGE->assign('pagetitle', t('Change password') .' - '. $conf->get('general.title', 'Shaarli'));
-            $PAGE->renderPage('changepassword');
-            exit;
-        }
+        header('Location: ./password');
+        exit;
     }
 
     // -------- User wants to change configuration
@@ -1504,6 +1456,8 @@ $app->group('', function () {
     /* -- LOGGED IN -- */
     $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index')->setName('logout');
     $this->get('/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index')->setName('tools');
+    $this->get('/password', '\Shaarli\Front\Controller\Admin\PasswordController:index')->setName('password');
+    $this->post('/password', '\Shaarli\Front\Controller\Admin\PasswordController:change')->setName('changePassword');
 
     $this
         ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')

@@ -35,8 +35,6 @@ class LogoutControllerTest extends TestCase
 
     public function testValidControllerInvoke(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
