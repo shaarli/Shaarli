@@ -28,8 +28,6 @@ class PictureWallControllerTest extends TestCase
 
     public function testValidControllerInvokeDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request->expects(static::once())->method('getQueryParams')->willReturn([]);
         $response = new Response();
@@ -105,8 +103,6 @@ class PictureWallControllerTest extends TestCase
     public function testControllerWithThumbnailsDisabled(): void
     {
         $this->expectException(ThumbnailsDisabledException::class);
-
-        $this->createValidContainerMockSet();
 
         $request = $this->createMock(Request::class);
         $response = new Response();

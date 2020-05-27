@@ -9,11 +9,11 @@ use Throwable;
 /**
  * Class ShaarliException
  *
- * Abstract exception class used to defined any custom exception thrown during front rendering.
+ * Exception class used to defined any custom exception thrown during front rendering.
  *
  * @package Front\Exception
  */
-abstract class ShaarliFrontException extends \Exception
+class ShaarliFrontException extends \Exception
 {
     /** Override parent constructor to force $message and $httpCode parameters to be set. */
     public function __construct(string $message, int $httpCode, Throwable $previous = null)

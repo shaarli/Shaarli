@@ -26,8 +26,6 @@ class LoginControllerTest extends TestCase
 
     public function testValidControllerInvoke(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request->expects(static::once())->method('getServerParam')->willReturn('> referer');
         $response = new Response();
@@ -57,8 +55,6 @@ class LoginControllerTest extends TestCase
 
     public function testValidControllerInvokeWithUserName(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $request->expects(static::once())->method('getServerParam')->willReturn('> referer');
         $request->expects(static::exactly(2))->method('getParam')->willReturn('myUser>');
@@ -90,8 +86,6 @@ class LoginControllerTest extends TestCase
 
     public function testLoginControllerWhileLoggedIn(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -106,8 +100,6 @@ class LoginControllerTest extends TestCase
 
     public function testLoginControllerOpenShaarli(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -129,8 +121,6 @@ class LoginControllerTest extends TestCase
 
     public function testLoginControllerWhileBanned(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

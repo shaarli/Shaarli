@@ -31,18 +31,12 @@ trait FrontControllerMockHelper
     protected $container;
 
     /**
-     * Mock the container instance
+     * Mock the container instance and initialize container's services used by tests
      */
     protected function createContainer(): void
     {
         $this->container = $this->createMock(ShaarliTestContainer::class);
-    }
 
-    /**
-     * Initialize container's services used by tests
-     */
-    protected function createValidContainerMockSet(): void
-    {
         $this->container->loginManager = $this->createMock(LoginManager::class);
 
         // Config

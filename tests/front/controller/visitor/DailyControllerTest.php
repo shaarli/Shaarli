@@ -27,8 +27,6 @@ class DailyControllerTest extends TestCase
 
     public function testValidIndexControllerInvokeDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
         $request = $this->createMock(Request::class);
@@ -169,8 +167,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidIndexControllerInvokeNoFutureOrPast(): void
     {
-        $this->createValidContainerMockSet();
-
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
         $request = $this->createMock(Request::class);
@@ -243,8 +239,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidIndexControllerInvokeHeightAdjustment(): void
     {
-        $this->createValidContainerMockSet();
-
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
         $request = $this->createMock(Request::class);
@@ -314,8 +308,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidIndexControllerInvokeNoBookmark(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -363,8 +355,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeDefault(): void
     {
-        $this->createValidContainerMockSet();
-
         $dates = [
             new \DateTimeImmutable('2020-05-17'),
             new \DateTimeImmutable('2020-05-15'),
@@ -439,8 +429,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeTriggerCache(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 
@@ -465,8 +453,6 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeNoBookmark(): void
     {
-        $this->createValidContainerMockSet();
-
         $request = $this->createMock(Request::class);
         $response = new Response();
 

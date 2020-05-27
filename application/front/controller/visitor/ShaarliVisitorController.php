@@ -9,6 +9,14 @@ use Shaarli\Container\ShaarliContainer;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+/**
+ * Class ShaarliVisitorController
+ *
+ * All controllers accessible by visitors (non logged in users) should extend this abstract class.
+ * Contains a few helper function for template rendering, plugins, etc.
+ *
+ * @package Shaarli\Front\Controller\Visitor
+ */
 abstract class ShaarliVisitorController
 {
     /** @var ShaarliContainer */
