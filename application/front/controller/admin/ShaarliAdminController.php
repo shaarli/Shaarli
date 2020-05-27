@@ -34,11 +34,13 @@ abstract class ShaarliAdminController extends ShaarliVisitorController
     /**
      * Any persistent action to the config or data store must check the XSRF token validity.
      */
-    protected function checkToken(Request $request): void
+    protected function checkToken(Request $request): bool
     {
         if (!$this->container->sessionManager->checkToken($request->getParam('token'))) {
             throw new WrongTokenException();
         }
+
+        return true;
     }
 
     /**

@@ -16,7 +16,7 @@ use Slim\Http\Uri;
  * This class is used to test default behavior of ShaarliController abstract class.
  * It uses a dummy non abstract controller.
  */
-class ShaarliControllerTest extends TestCase
+class ShaarliPublicControllerTest extends TestCase
 {
     use FrontControllerMockHelper;
 
