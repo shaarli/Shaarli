@@ -42,7 +42,7 @@ trait FrontControllerMockHelper
         // Config
         $this->container->conf = $this->createMock(ConfigManager::class);
         $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
-            return $default;
+            return $default === null ? $parameter : $default;
         });
 
         // PageBuilder
@@ -99,6 +99,14 @@ trait FrontControllerMockHelper
                 return $this;
             })
         ;
+    }
+
+    protected static function generateString(int $length): string
+    {
+        // bin2hex(random_bytes) generates string twice as long as given parameter
+        $length = (int) ceil($length / 2);
+
+        return bin2hex(random_bytes($length));
     }
 
     /**
