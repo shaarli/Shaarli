@@ -513,88 +513,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User wants to change configuration
     if ($targetPage == Router::$PAGE_CONFIGURE) {
-        if (!empty($_POST['title'])) {
-            if (!$sessionManager->checkToken($_POST['token'])) {
-                die(t('Wrong token.')); // Go away!
-            }
-            $tz = 'UTC';
-            if (!empty($_POST['continent']) && !empty($_POST['city'])
-                && isTimeZoneValid($_POST['continent'], $_POST['city'])
-            ) {
-                $tz = $_POST['continent'] . '/' . $_POST['city'];
-            }
-            $conf->set('general.timezone', $tz);
-            $conf->set('general.title', escape($_POST['title']));
-            $conf->set('general.header_link', escape($_POST['titleLink']));
-            $conf->set('general.retrieve_description', !empty($_POST['retrieveDescription']));
-            $conf->set('resource.theme', escape($_POST['theme']));
-            $conf->set('security.session_protection_disabled', !empty($_POST['disablesessionprotection']));
-            $conf->set('privacy.default_private_links', !empty($_POST['privateLinkByDefault']));
-            $conf->set('feed.rss_permalinks', !empty($_POST['enableRssPermalinks']));
-            $conf->set('updates.check_updates', !empty($_POST['updateCheck']));
-            $conf->set('privacy.hide_public_links', !empty($_POST['hidePublicLinks']));
-            $conf->set('api.enabled', !empty($_POST['enableApi']));
-            $conf->set('api.secret', escape($_POST['apiSecret']));
-            $conf->set('formatter', escape($_POST['formatter']));
-
-            if (! empty($_POST['language'])) {
-                $conf->set('translation.language', escape($_POST['language']));
-            }
-
-            $thumbnailsMode = extension_loaded('gd') ? $_POST['enableThumbnails'] : Thumbnailer::MODE_NONE;
-            if ($thumbnailsMode !== Thumbnailer::MODE_NONE
-                && $thumbnailsMode !== $conf->get('thumbnails.mode', Thumbnailer::MODE_NONE)
-            ) {
-                $_SESSION['warnings'][] = t(
-                    'You have enabled or changed thumbnails mode. '
-                    .'<a href="./?do=thumbs_update">Please synchronize them</a>.'
-                );
-            }
-            $conf->set('thumbnails.mode', $thumbnailsMode);
-
-            try {
-                $conf->write($loginManager->isLoggedIn());
-                $history->updateSettings();
-                $pageCacheManager->invalidateCaches();
-            } catch (Exception $e) {
-                error_log(
-                    'ERROR while writing config file after configuration update.' . PHP_EOL .
-                    $e->getMessage()
-                );
-
-                // TODO: do not handle exceptions/errors in JS.
-                echo '<script>alert("'. $e->getMessage() .'");document.location=\'./?do=configure\';</script>';
-                exit;
-            }
-            echo '<script>alert("'. t('Configuration was saved.') .'");document.location=\'./?do=configure\';</script>';
-            exit;
-        } else {
-            // Show the configuration form.
-            $PAGE->assign('title', $conf->get('general.title'));
-            $PAGE->assign('theme', $conf->get('resource.theme'));
-            $PAGE->assign('theme_available', ThemeUtils::getThemes($conf->get('resource.raintpl_tpl')));
-            $PAGE->assign('formatter_available', ['default', 'markdown']);
-            list($continents, $cities) = generateTimeZoneData(
-                timezone_identifiers_list(),
-                $conf->get('general.timezone')
-            );
-            $PAGE->assign('continents', $continents);
-            $PAGE->assign('cities', $cities);
-            $PAGE->assign('retrieve_description', $conf->get('general.retrieve_description'));
-            $PAGE->assign('private_links_default', $conf->get('privacy.default_private_links', false));
-            $PAGE->assign('session_protection_disabled', $conf->get('security.session_protection_disabled', false));
-            $PAGE->assign('enable_rss_permalinks', $conf->get('feed.rss_permalinks', false));
-            $PAGE->assign('enable_update_check', $conf->get('updates.check_updates', true));
-            $PAGE->assign('hide_public_links', $conf->get('privacy.hide_public_links', false));
-            $PAGE->assign('api_enabled', $conf->get('api.enabled', true));
-            $PAGE->assign('api_secret', $conf->get('api.secret'));
-            $PAGE->assign('languages', Languages::getAvailableLanguages());
-            $PAGE->assign('gd_enabled', extension_loaded('gd'));
-            $PAGE->assign('thumbnails_mode', $conf->get('thumbnails.mode', Thumbnailer::MODE_NONE));
-            $PAGE->assign('pagetitle', t('Configure') .' - '. $conf->get('general.title', 'Shaarli'));
-            $PAGE->renderPage('configure');
-            exit;
-        }
+        header('Location: ./configure');
+        exit;
     }
 
     // -------- User wants to rename a tag or delete it
@@ -1458,6 +1378,8 @@ $app->group('', function () {
     $this->get('/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index')->setName('tools');
     $this->get('/password', '\Shaarli\Front\Controller\Admin\PasswordController:index')->setName('password');
     $this->post('/password', '\Shaarli\Front\Controller\Admin\PasswordController:change')->setName('changePassword');
+    $this->get('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:index')->setName('configure');
+    $this->post('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save')->setName('saveConfigure');
 
     $this
         ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')

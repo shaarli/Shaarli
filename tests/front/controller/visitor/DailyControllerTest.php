@@ -57,20 +57,20 @@ class DailyControllerTest extends TestCase
                     (new Bookmark())
                         ->setId(1)
                         ->setUrl('http://url.tld')
-                        ->setTitle(static::generateContent(50))
-                        ->setDescription(static::generateContent(500))
+                        ->setTitle(static::generateString(50))
+                        ->setDescription(static::generateString(500))
                     ,
                     (new Bookmark())
                         ->setId(2)
                         ->setUrl('http://url2.tld')
-                        ->setTitle(static::generateContent(50))
-                        ->setDescription(static::generateContent(500))
+                        ->setTitle(static::generateString(50))
+                        ->setDescription(static::generateString(500))
                     ,
                     (new Bookmark())
                         ->setId(3)
                         ->setUrl('http://url3.tld')
-                        ->setTitle(static::generateContent(50))
-                        ->setDescription(static::generateContent(500))
+                        ->setTitle(static::generateString(50))
+                        ->setDescription(static::generateString(500))
                     ,
                 ];
             })
@@ -194,8 +194,8 @@ class DailyControllerTest extends TestCase
                     (new Bookmark())
                         ->setId(1)
                         ->setUrl('http://url.tld')
-                        ->setTitle(static::generateContent(50))
-                        ->setDescription(static::generateContent(500))
+                        ->setTitle(static::generateString(50))
+                        ->setDescription(static::generateString(500))
                     ,
                 ];
             })
@@ -267,8 +267,8 @@ class DailyControllerTest extends TestCase
                     (new Bookmark())
                         ->setId(2)
                         ->setUrl('http://url.tld')
-                        ->setTitle(static::generateContent(50))
-                        ->setDescription(static::generateContent(5000))
+                        ->setTitle(static::generateString(50))
+                        ->setDescription(static::generateString(5000))
                     ,
                     (new Bookmark())->setId(3)->setUrl('http://url.tld')->setTitle('title'),
                     (new Bookmark())->setId(4)->setUrl('http://url.tld')->setTitle('title'),
@@ -472,12 +472,5 @@ class DailyControllerTest extends TestCase
         static::assertSame('http://shaarli/daily-rss', $assignedVariables['page_url']);
         static::assertFalse($assignedVariables['hide_timestamps']);
         static::assertCount(0, $assignedVariables['days']);
-    }
-
-    protected static function generateContent(int $length): string
-    {
-        // bin2hex(random_bytes) generates string twice as long as given parameter
-        $length = (int) ceil($length / 2);
-        return bin2hex(random_bytes($length));
     }
 }

@@ -143,6 +143,10 @@ class PageBuilder
         $this->tpl->assign('conf', $this->conf);
     }
 
+    /**
+     * Affect variable after controller processing.
+     * Used for alert messages.
+     */
     protected function finalize(): void
     {
         // TODO: use the SessionManager

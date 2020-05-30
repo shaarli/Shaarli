@@ -35,7 +35,7 @@ http://<replace_domain>/?nonope
 http://<replace_domain>/?do=addlink
 http://<replace_domain>/?do=changepasswd
 http://<replace_domain>/?do=changetag
-http://<replace_domain>/?do=configure
+http://<replace_domain>/configure
 http://<replace_domain>/tools
 http://<replace_domain>/daily
 http://<replace_domain>/?post
