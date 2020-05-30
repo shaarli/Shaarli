@@ -12,7 +12,7 @@ use Slim\Http\Response;
 use Throwable;
 
 /**
- * Class PasswordController
+ * Class ConfigureController
  *
  * Slim controller used to handle Shaarli configuration page (display + save new config).
  */
