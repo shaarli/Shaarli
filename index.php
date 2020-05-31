@@ -519,38 +519,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- User wants to rename a tag or delete it
     if ($targetPage == Router::$PAGE_CHANGETAG) {
-        if (empty($_POST['fromtag']) || (empty($_POST['totag']) && isset($_POST['renametag']))) {
-            $PAGE->assign('fromtag', ! empty($_GET['fromtag']) ? escape($_GET['fromtag']) : '');
-            $PAGE->assign('pagetitle', t('Manage tags') .' - '. $conf->get('general.title', 'Shaarli'));
-            $PAGE->renderPage('changetag');
-            exit;
-        }
-
-        if (!$sessionManager->checkToken($_POST['token'])) {
-            die(t('Wrong token.'));
-        }
-
-        $toTag = isset($_POST['totag']) ? escape($_POST['totag']) : null;
-        $fromTag = escape($_POST['fromtag']);
-        $count = 0;
-        $bookmarks = $bookmarkService->search(['searchtags' => $fromTag], BookmarkFilter::$ALL, true);
-        foreach ($bookmarks as $bookmark) {
-            if ($toTag) {
-                $bookmark->renameTag($fromTag, $toTag);
-            } else {
-                $bookmark->deleteTag($fromTag);
-            }
-            $bookmarkService->set($bookmark, false);
-            $history->updateLink($bookmark);
-            $count++;
-        }
-        $bookmarkService->save();
-        $delete = empty($_POST['totag']);
-        $redirect = $delete ? './do=changetag' : 'searchtags='. urlencode(escape($_POST['totag']));
-        $alert = $delete
-            ? sprintf(t('The tag was removed from %d link.', 'The tag was removed from %d bookmarks.', $count), $count)
-            : sprintf(t('The tag was renamed in %d link.', 'The tag was renamed in %d bookmarks.', $count), $count);
-        echo '<script>alert("'. $alert .'");document.location=\'?'. $redirect .'\';</script>';
+        header('./manage-tags');
         exit;
     }
 
@@ -1380,6 +1349,8 @@ $app->group('', function () {
     $this->post('/password', '\Shaarli\Front\Controller\Admin\PasswordController:change')->setName('changePassword');
     $this->get('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:index')->setName('configure');
     $this->post('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save')->setName('saveConfigure');
+    $this->get('/manage-tags', '\Shaarli\Front\Controller\Admin\ManageTagController:index')->setName('manageTag');
+    $this->post('/manage-tags', '\Shaarli\Front\Controller\Admin\ManageTagController:save')->setName('saveManageTag');
 
     $this
         ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')
