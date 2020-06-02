@@ -72,7 +72,15 @@ See [awesome-selfhosted: bookmarks & link sharing](https://github.com/Kickball/a
 - [Shaarli.fr/my](https://www.shaarli.fr/my.php) - Unofficial, unsupported (old fork) hosted Shaarlis provider, courtesy of [DMeloni](https://github.com/DMeloni)
 
 ### Articles and social media discussions
-- 2016-09-22 - Hacker News - https://news.ycombinator.com/item?id=12552176
+- 2020-04-05 - Hacker News - [Self-hosted instance of Shaarli - it is simple, fast and reliable](https://news.ycombinator.com/item?id=22780219)
+- 2016-10-10 - Framasoft - [MyFrama : vos favoris partout, avec vous, rien qu’à vous !](https://framablog.org/2016/10/10/myframa-vos-favoris-et-framasofteries-partout-avec-vous-rien-qua-vous/)
+- 2016-09-22 - Hacker News - [Shaarli – Personal, minimalist, database-free, bookmarking service (github.com)](https://news.ycombinator.com/item?id=12552176)
 - 2015-08-15 - Reddit - [Question about migrating from WordPress to Shaarli.](https://www.reddit.com/r/selfhosted/comments/3h3zwh/question_about_migrating_from_wordpress_to_shaarli/)
-- 2015-06-22 - Hacker News - https://news.ycombinator.com/item?id=9755366
+- 2015-06-22 - Hacker News - [Shaarli: Self-hosted del.icio.us alternative (sebsauvage.net)](https://news.ycombinator.com/item?id=9755366)
 - 2015-05-12 - Reddit - [shaarli - Self hosted Bookmarking / Delicious (PHP, MySQL)](https://www.reddit.com/r/selfhosted/comments/35pkkc/shaarli_self_hosted_bookmarking_delicious_php/)
+- 2014-10-15 - OpenSource.com - [Five open source alternatives to popular web apps](https://opensource.com/life/14/10/five-open-source-alternatives-popular-web-apps)
+
+It also appears in the following recommendation lists:
+- [AlternativeTo](https://alternativeto.net/software/shaarli/)
+- [FramaLibre](https://framalibre.org/content/shaarli)
+- [Project Awesome: Selfhosted Bookmarks and Link Sharing](https://project-awesome.org/Kickball/awesome-selfhosted)
