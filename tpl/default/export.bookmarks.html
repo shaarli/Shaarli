@@ -5,12 +5,8 @@
      Do Not Edit! -->{ignore}The RainTPL loop is formatted to avoid generating extra newlines{/ignore}
 <TITLE>{$pagetitle}</TITLE>
 <H1>Shaarli export of {$selection} bookmarks on {$date}</H1>
-<DL><p>{loop="links"}
-<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.taglist}">{$value.title}</A>
-{if="$value.description"}{$eol}<DD>{$value.description}
-{if="$config.extended_export"}
-<A HREF="{$index_url}?{$value.shorturl}">
-<IMG SRC="{$index_url}{$value.thumbnail}"/>
-{/if}
-{/if}{/loop}
-</DL><p>
+<DL><p>
+{loop="links"}<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.taglist}">{$value.title}</A>
+{if="$value.description"}{$eol}<DD>{$value.description}{if="$extend_export"}
+<A HREF="{$index_url}?{$value.shorturl}">{if="$value.thumbnail"}<IMG SRC="{$index_url}{$value.thumbnail}"/>{else}permalink{/if}</A>
+{/if}{/if}{/loop}</DL><p>
