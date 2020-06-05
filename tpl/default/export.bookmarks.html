@@ -8,7 +8,7 @@
 <DL><p>{loop="links"}
 <DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.taglist}">{$value.title}</A>
 {if="$value.description"}{$eol}<DD>{$value.description}
-{if=$config.extended_export}
+{if="$config.extended_export"}
 <A HREF="{$index_url}?{$value.shorturl}">
 <IMG SRC="{$index_url}{$value.thumbnail}"/>
 {/if}
