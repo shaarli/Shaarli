@@ -7,7 +7,11 @@
   {include="page.header"}
   <div id="editlinkform" class="edit-link-container" class="pure-g">
     <div class="pure-u-lg-1-5 pure-u-1-24"></div>
-    <form method="post" name="linkform" class="page-form pure-u-lg-3-5 pure-u-22-24 page-form page-form-light">
+    <form method="post"
+          name="linkform"
+          action="./shaare"
+          class="page-form pure-u-lg-3-5 pure-u-22-24 page-form page-form-light"
+    >
       <h2 class="window-title">
         {if="!$link_is_new"}{'Edit Shaare'|t}{else}{'New Shaare'|t}{/if}
       </h2>

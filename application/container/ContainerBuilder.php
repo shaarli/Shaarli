@@ -10,11 +10,13 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
+use Shaarli\Http\HttpAccess;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
+use Shaarli\Thumbnailer;
 
 /**
  * Class ContainerBuilder
@@ -108,6 +110,14 @@ class ContainerBuilder
                 $container->environment,
                 $container->loginManager->isLoggedIn()
             );
+        };
+
+        $container['thumbnailer'] = function (ShaarliContainer $container): Thumbnailer {
+            return new Thumbnailer($container->conf);
+        };
+
+        $container['httpAccess'] = function (): HttpAccess {
+            return new HttpAccess();
         };
 
         return $container;

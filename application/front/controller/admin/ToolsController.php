@@ -21,7 +21,7 @@ class ToolsController extends ShaarliAdminController
             'sslenabled' => is_https($this->container->environment),
         ];
 
-        $this->executeHooks($data);
+        $data = $this->executeHooks($data);
 
         foreach ($data as $key => $value) {
             $this->assignView($key, $value);

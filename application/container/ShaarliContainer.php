@@ -9,11 +9,13 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
+use Shaarli\Http\HttpAccess;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
+use Shaarli\Thumbnailer;
 use Slim\Container;
 
 /**
@@ -31,6 +33,8 @@ use Slim\Container;
  * @property FormatterFactory         $formatterFactory
  * @property PageCacheManager         $pageCacheManager
  * @property FeedBuilder              $feedBuilder
+ * @property Thumbnailer              $thumbnailer
+ * @property HttpAccess               $httpAccess
  */
 class ShaarliContainer extends Container
 {

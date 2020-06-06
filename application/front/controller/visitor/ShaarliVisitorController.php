@@ -78,16 +78,16 @@ abstract class ShaarliVisitorController
         ];
 
         foreach ($common_hooks as $name) {
-            $plugin_data = [];
+            $pluginData = [];
             $this->container->pluginManager->executeHooks(
                 'render_' . $name,
-                $plugin_data,
+                $pluginData,
                 [
                     'target' => $template,
                     'loggedin' => $this->container->loginManager->isLoggedIn()
                 ]
             );
-            $this->assignView('plugins_' . $name, $plugin_data);
+            $this->assignView('plugins_' . $name, $pluginData);
         }
     }
 
@@ -102,9 +102,10 @@ abstract class ShaarliVisitorController
         Request $request,
         Response $response,
         array $loopTerms = [],
-        array $clearParams = []
+        array $clearParams = [],
+        string $anchor = null
     ): Response {
-        $defaultPath = $request->getUri()->getBasePath();
+        $defaultPath = rtrim($request->getUri()->getBasePath(), '/') . '/';
         $referer = $this->container->environment['HTTP_REFERER'] ?? null;
 
         if (null !== $referer) {
@@ -133,7 +134,8 @@ abstract class ShaarliVisitorController
         }
 
         $queryString = count($params) > 0 ? '?'. http_build_query($params) : '';
+        $anchor = $anchor ? '#' . $anchor : '';
 
-        return $response->withRedirect($path . $queryString);
+        return $response->withRedirect($path . $queryString . $anchor);
     }
 }

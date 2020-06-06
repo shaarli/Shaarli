@@ -32,7 +32,7 @@ Here is a list :
 ```
 http://<replace_domain>/
 http://<replace_domain>/?nonope
-http://<replace_domain>/?do=addlink
+http://<replace_domain>/add-shaare
 http://<replace_domain>/?do=changepasswd
 http://<replace_domain>/?do=changetag
 http://<replace_domain>/configure
