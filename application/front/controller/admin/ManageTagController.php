@@ -16,7 +16,7 @@ use Slim\Http\Response;
 class ManageTagController extends ShaarliAdminController
 {
     /**
-     * GET /manage-tags - Displays the manage tags page
+     * GET /admin/tags - Displays the manage tags page
      */
     public function index(Request $request, Response $response): Response
     {
@@ -32,7 +32,7 @@ class ManageTagController extends ShaarliAdminController
     }
 
     /**
-     * POST /manage-tags - Update or delete provided tag
+     * POST /admin/tags - Update or delete provided tag
      */
     public function save(Request $request, Response $response): Response
     {
@@ -46,7 +46,7 @@ class ManageTagController extends ShaarliAdminController
         if (0 === strlen($fromTag) || false === $isDelete && 0 === strlen($toTag)) {
             $this->saveWarningMessage(t('Invalid tags provided.'));
 
-            return $response->withRedirect('./manage-tags');
+            return $this->redirect($response, '/admin/tags');
         }
 
         // TODO: move this to bookmark service
@@ -80,8 +80,8 @@ class ManageTagController extends ShaarliAdminController
 
         $this->saveSuccessMessage($alert);
 
-        $redirect = true === $isDelete ? './manage-tags' : './?searchtags='. urlencode($toTag);
+        $redirect = true === $isDelete ? '/admin/tags' : '/?searchtags='. urlencode($toTag);
 
-        return $response->withRedirect($redirect);
+        return $this->redirect($response, $redirect);
     }
 }

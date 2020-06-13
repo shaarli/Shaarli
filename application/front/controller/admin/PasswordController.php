@@ -29,7 +29,7 @@ class PasswordController extends ShaarliAdminController
     }
 
     /**
-     * GET /password - Displays the change password template
+     * GET /admin/password - Displays the change password template
      */
     public function index(Request $request, Response $response): Response
     {
@@ -37,7 +37,7 @@ class PasswordController extends ShaarliAdminController
     }
 
     /**
-     * POST /password - Change admin password - existing and new passwords need to be provided.
+     * POST /admin/password - Change admin password - existing and new passwords need to be provided.
      */
     public function change(Request $request, Response $response): Response
     {

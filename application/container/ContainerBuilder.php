@@ -38,19 +38,17 @@ class ContainerBuilder
     /** @var LoginManager */
     protected $login;
 
-    /** @var string */
-    protected $webPath;
+    /** @var string|null */
+    protected $basePath = null;
 
     public function __construct(
         ConfigManager $conf,
         SessionManager $session,
-        LoginManager $login,
-        string $webPath
+        LoginManager $login
     ) {
         $this->conf = $conf;
         $this->session = $session;
         $this->login = $login;
-        $this->webPath = $webPath;
     }
 
     public function build(): ShaarliContainer
@@ -60,7 +58,7 @@ class ContainerBuilder
         $container['conf'] = $this->conf;
         $container['sessionManager'] = $this->session;
         $container['loginManager'] = $this->login;
-        $container['webPath'] = $this->webPath;
+        $container['basePath'] = $this->basePath;
 
         $container['plugins'] = function (ShaarliContainer $container): PluginManager {
             return new PluginManager($container->conf);

@@ -9,7 +9,7 @@
   <div class="pure-u-lg-1-3 pure-u-1-24"></div>
   <div id="addlink-form" class="page-form page-form-light pure-u-lg-1-3 pure-u-22-24">
     <h2 class="window-title">{"Manage tags"|t}</h2>
-    <form method="POST" action="{$base_path}/manage-tags" name="changetag" id="changetag">
+    <form method="POST" action="{$base_path}/admin/tags" name="changetag" id="changetag">
       <div>
         <input type="text" name="fromtag" aria-label="{'Tag'|t}" placeholder="{'Tag'|t}" value="{$fromtag}"
                list="tagsList" autocomplete="off" class="awesomplete autofocus" data-minChars="1">
@@ -32,7 +32,7 @@
       </div>
     </form>
 
-    <p>{'You can also edit tags in the'|t} <a href="{$base_path}/tag-list?sort=usage">{'tag list'|t}</a>.</p>
+    <p>{'You can also edit tags in the'|t} <a href="{$base_path}/tags/list?sort=usage">{'tag list'|t}</a>.</p>
   </div>
 </div>
 {include="page.footer"}

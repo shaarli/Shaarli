@@ -93,7 +93,7 @@ class ManageTagControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./?searchtags=new-tag'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/?searchtags=new-tag'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
@@ -146,7 +146,7 @@ class ManageTagControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./manage-tags'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/admin/tags'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
@@ -197,7 +197,7 @@ class ManageTagControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./manage-tags'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/admin/tags'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
@@ -229,7 +229,7 @@ class ManageTagControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./manage-tags'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/admin/tags'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
@@ -262,7 +262,7 @@ class ManageTagControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./manage-tags'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/admin/tags'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);

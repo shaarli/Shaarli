@@ -395,7 +395,7 @@ class PostBookmarkControllerTest extends TestCase
             'lf_description' => 'Provided description.',
             'lf_tags' => 'abc def',
             'lf_private' => '1',
-            'returnurl' => 'http://shaarli.tld/subfolder/add-shaare'
+            'returnurl' => 'http://shaarli.tld/subfolder/admin/add-shaare'
         ];
 
         $request = $this->createMock(Request::class);
@@ -459,7 +459,7 @@ class PostBookmarkControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertRegExp('@/subfolder/#\w{6}@', $result->getHeader('location')[0]);
+        static::assertRegExp('@/subfolder/#[\w\-]{6}@', $result->getHeader('location')[0]);
     }
 
 
@@ -545,7 +545,7 @@ class PostBookmarkControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertRegExp('@/subfolder/\?page=2#\w{6}@', $result->getHeader('location')[0]);
+        static::assertRegExp('@/subfolder/\?page=2#[\w\-]{6}@', $result->getHeader('location')[0]);
     }
 
     /**

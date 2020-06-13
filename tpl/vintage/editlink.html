@@ -48,7 +48,7 @@
             {/if}
             <input type="submit" value="Save" name="save_edit" class="bigbutton">
             {if="!$link_is_new && isset($link.id)"}
-              <a href="{$base_path}/?delete_link&amp;lf_linkdate={$link.id}&amp;token={$token}"
+              <a href="{$base_path}/admin/shaare/delete?id={$link.id}&amp;token={$token}"
                  name="delete_link" class="bigbutton"
                  onClick="return confirmDeleteLink();">
                 {'Delete'|t}

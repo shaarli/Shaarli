@@ -21,21 +21,20 @@ use Slim\Container;
 /**
  * Extension of Slim container to document the injected objects.
  *
- * @property mixed[]                  $environment     $_SERVER automatically injected by Slim
  * @property string                   $basePath        Shaarli's instance base path (e.g. `/shaarli/`)
- * @property ConfigManager            $conf
- * @property SessionManager           $sessionManager
- * @property LoginManager             $loginManager
- * @property string                   $webPath
- * @property History                  $history
  * @property BookmarkServiceInterface $bookmarkService
- * @property PageBuilder              $pageBuilder
- * @property PluginManager            $pluginManager
- * @property FormatterFactory         $formatterFactory
- * @property PageCacheManager         $pageCacheManager
+ * @property ConfigManager            $conf
+ * @property mixed[]                  $environment     $_SERVER automatically injected by Slim
  * @property FeedBuilder              $feedBuilder
- * @property Thumbnailer              $thumbnailer
+ * @property FormatterFactory         $formatterFactory
+ * @property History                  $history
  * @property HttpAccess               $httpAccess
+ * @property LoginManager             $loginManager
+ * @property PageBuilder              $pageBuilder
+ * @property PageCacheManager         $pageCacheManager
+ * @property PluginManager            $pluginManager
+ * @property SessionManager           $sessionManager
+ * @property Thumbnailer              $thumbnailer
  */
 class ShaarliContainer extends Container
 {

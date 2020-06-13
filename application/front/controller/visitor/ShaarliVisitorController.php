@@ -105,6 +105,19 @@ abstract class ShaarliVisitorController
     }
 
     /**
+     * Simple helper which prepend the base path to redirect path.
+     *
+     * @param Response $response
+     * @param string $path Absolute path, e.g.: `/`, or `/admin/shaare/123` regardless of install directory
+     *
+     * @return Response updated
+     */
+    protected function redirect(Response $response, string $path): Response
+    {
+        return $response->withRedirect($this->container->basePath . $path);
+    }
+
+    /**
      * Generates a redirection to the previous page, based on the HTTP_REFERER.
      * It fails back to the home page.
      *

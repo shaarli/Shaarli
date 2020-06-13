@@ -51,7 +51,7 @@
           <div class="pure-u-1">
             {if="$is_logged_in===true"}
               <a href="#" class="delete-tag" aria-label="{'Delete'|t}"><i class="fa fa-trash" aria-hidden="true"></i></a>&nbsp;&nbsp;
-              <a href="{$base_path}/manage-tags?fromtag={$key|urlencode}" class="rename-tag" aria-label="{'Rename tag'|t}">
+              <a href="{$base_path}/admin/tags?fromtag={$key|urlencode}" class="rename-tag" aria-label="{'Rename tag'|t}">
                 <i class="fa fa-pencil-square-o {$key}" aria-hidden="true"></i>
               </a>
             {/if}

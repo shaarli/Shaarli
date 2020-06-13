@@ -23,7 +23,7 @@ class LoginController extends ShaarliVisitorController
         if ($this->container->loginManager->isLoggedIn()
             || $this->container->conf->get('security.open_shaarli', false)
         ) {
-            return $response->withRedirect('./');
+            return $this->redirect($response, '/');
         }
 
         $userCanLogin = $this->container->loginManager->canLogin($request->getServerParams());

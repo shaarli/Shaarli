@@ -19,7 +19,7 @@ use Slim\Http\Response;
 class PostBookmarkController extends ShaarliAdminController
 {
     /**
-     * GET /add-shaare - Displays the form used to create a new bookmark from an URL
+     * GET /admin/add-shaare - Displays the form used to create a new bookmark from an URL
      */
     public function addShaare(Request $request, Response $response): Response
     {
@@ -32,7 +32,7 @@ class PostBookmarkController extends ShaarliAdminController
     }
 
     /**
-     * GET /shaare - Displays the bookmark form for creation.
+     * GET /admin/shaare - Displays the bookmark form for creation.
      *               Note that if the URL is found in existing bookmarks, then it will be in edit mode.
      */
     public function displayCreateForm(Request $request, Response $response): Response
@@ -93,7 +93,7 @@ class PostBookmarkController extends ShaarliAdminController
     }
 
     /**
-     * GET /shaare-{id} - Displays the bookmark form in edition mode.
+     * GET /admin/shaare/{id} - Displays the bookmark form in edition mode.
      */
     public function displayEditForm(Request $request, Response $response, array $args): Response
     {
@@ -106,7 +106,7 @@ class PostBookmarkController extends ShaarliAdminController
         } catch (BookmarkNotFoundException $e) {
             $this->saveErrorMessage(t('Bookmark not found'));
 
-            return $response->withRedirect('./');
+            return $this->redirect($response, '/');
         }
 
         $formatter = $this->container->formatterFactory->getFormatter('raw');
@@ -116,7 +116,7 @@ class PostBookmarkController extends ShaarliAdminController
     }
 
     /**
-     * POST /shaare
+     * POST /admin/shaare
      */
     public function save(Request $request, Response $response): Response
     {
@@ -170,11 +170,14 @@ class PostBookmarkController extends ShaarliAdminController
         );
     }
 
+    /**
+     * GET /admin/shaare/delete
+     */
     public function deleteBookmark(Request $request, Response $response): Response
     {
         $this->checkToken($request);
 
-        $ids = escape(trim($request->getParam('lf_linkdate')));
+        $ids = escape(trim($request->getParam('id')));
         if (strpos($ids, ' ') !== false) {
             // multiple, space-separated ids provided
             $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'strlen'));
@@ -207,7 +210,7 @@ class PostBookmarkController extends ShaarliAdminController
         }
 
         // Don't redirect to where we were previously because the datastore has changed.
-        return $response->withRedirect('./');
+        return $this->redirect($response, '/');
     }
 
     protected function displayForm(array $link, bool $isNew, Request $request, Response $response): Response

@@ -19,19 +19,19 @@
 <li><a href="{$titleLink}" class="nomobile">Home</a></li>
     {if="$is_logged_in"}
     <li><a href="{$base_path}/logout">Logout</a></li>
-    <li><a href="{$base_path}/tools">Tools</a></li>
-    <li><a href="{$base_path}/add-shaare">Add link</a></li>
+    <li><a href="{$base_path}/admin/tools">Tools</a></li>
+    <li><a href="{$base_path}/admin/add-shaare">Add link</a></li>
     {elseif="$openshaarli"}
-    <li><a href="{$base_path}/tools">Tools</a></li>
-    <li><a href="{$base_path}/add-shaare">Add link</a></li>
+    <li><a href="{$base_path}/admin/tools">Tools</a></li>
+    <li><a href="{$base_path}/admin/add-shaare">Add link</a></li>
     {else}
     <li><a href="{$base_path}/login">Login</a></li>
     {/if}
-    <li><a href="{$feedurl}/feed-rss?{$searchcrits}" class="nomobile">RSS Feed</a></li>
+    <li><a href="{$feedurl}/feed/rss?{$searchcrits}" class="nomobile">RSS Feed</a></li>
     {if="$showatom"}
-    <li><a href="{$feedurl}/feed-atom?{$searchcrits}" class="nomobile">ATOM Feed</a></li>
+    <li><a href="{$feedurl}/feed/atom?{$searchcrits}" class="nomobile">ATOM Feed</a></li>
     {/if}
-    <li><a href="{$base_path}/tag-cloud">Tag cloud</a></li>
+    <li><a href="{$base_path}/tags/cloud">Tag cloud</a></li>
     <li><a href="{$base_path}/picture-wall{function="ltrim($searchcrits, '&')"}">Picture wall</a></li>
     <li><a href="{$base_path}/daily">Daily</a></li>
     {loop="$plugins_header.buttons_toolbar"}

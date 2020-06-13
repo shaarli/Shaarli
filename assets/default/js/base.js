@@ -463,7 +463,7 @@ function init(description) {
       });
 
       if (window.confirm(message)) {
-        window.location = `${basePath}/?delete_link&lf_linkdate=${ids.join('+')}&token=${token.value}`;
+        window.location = `${basePath}/admin/shaare/delete?id=${ids.join('+')}&token=${token.value}`;
       }
     });
   }
@@ -549,7 +549,7 @@ function init(description) {
       const refreshedToken = document.getElementById('token').value;
       const fromtag = block.getAttribute('data-tag');
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${basePath}/manage-tags`);
+      xhr.open('POST', `${basePath}/admin/tags`);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.onload = () => {
         if (xhr.status !== 200) {
@@ -566,7 +566,7 @@ function init(description) {
             .setAttribute('href', `${basePath}/?searchtags=${encodeURIComponent(totag)}`);
           block
             .querySelector('a.rename-tag')
-            .setAttribute('href', `${basePath}/manage-tags?fromtag=${encodeURIComponent(totag)}`);
+            .setAttribute('href', `${basePath}/admin/tags?fromtag=${encodeURIComponent(totag)}`);
 
           // Refresh awesomplete values
           existingTags = existingTags.map(tag => (tag === fromtag ? totag : tag));
@@ -600,7 +600,7 @@ function init(description) {
 
       if (confirm(`Are you sure you want to delete the tag "${tag}"?`)) {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${basePath}/manage-tags`);
+        xhr.open('POST', `${basePath}/admin/tags`);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = () => {
           block.remove();

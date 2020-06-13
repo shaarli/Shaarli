@@ -142,7 +142,7 @@ class ConfigureControllerTest extends TestCase
 
         $result = $this->controller->save($request, $response);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./configure'], $result->getHeader('Location'));
+        static::assertSame(['/subfolder/admin/configure'], $result->getHeader('Location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
@@ -193,7 +193,7 @@ class ConfigureControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./configure'], $result->getHeader('Location'));
+        static::assertSame(['/subfolder/admin/configure'], $result->getHeader('Location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
@@ -242,7 +242,7 @@ class ConfigureControllerTest extends TestCase
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./configure'], $result->getHeader('Location'));
+        static::assertSame(['/subfolder/admin/configure'], $result->getHeader('Location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);

@@ -22,8 +22,8 @@ class LogoutController extends ShaarliAdminController
         $this->container->sessionManager->logout();
 
         // TODO: switch to a simple Cookie manager allowing to check the session, and create mocks.
-        setcookie(LoginManager::$STAY_SIGNED_IN_COOKIE, 'false', 0, $this->container->webPath);
+        setcookie(LoginManager::$STAY_SIGNED_IN_COOKIE, 'false', 0, $this->container->basePath . '/');
 
-        return $response->withRedirect('./');
+        return $this->redirect($response, '/');
     }
 }

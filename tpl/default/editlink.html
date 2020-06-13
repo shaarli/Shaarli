@@ -9,7 +9,7 @@
     <div class="pure-u-lg-1-5 pure-u-1-24"></div>
     <form method="post"
           name="linkform"
-          action="{$base_path}/shaare"
+          action="{$base_path}/admin/shaare"
           class="page-form pure-u-lg-3-5 pure-u-22-24 page-form page-form-light"
     >
       <h2 class="window-title">
@@ -73,7 +73,7 @@
         <input type="submit" name="save_edit" class="" id="button-save-edit"
                value="{if="$link_is_new"}{'Save'|t}{else}{'Apply Changes'|t}{/if}">
         {if="!$link_is_new"}
-        <a href="{$base_path}/?delete_link&amp;lf_linkdate={$link.id}&amp;token={$token}"
+        <a href="{$base_path}/admin/shaare/delete?id={$link.id}&amp;token={$token}"
            title="" name="delete_link" class="button button-red confirm-delete">
           {'Delete'|t}
         </a>

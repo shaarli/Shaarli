@@ -38,9 +38,9 @@ class ShaarliMiddleware
      */
     public function __invoke(Request $request, Response $response, callable $next)
     {
-        try {
-            $this->container->basePath = rtrim($request->getUri()->getBasePath(), '/');
+        $this->container->basePath = rtrim($request->getUri()->getBasePath(), '/');
 
+        try {
             $response = $next($request, $response);
         } catch (ShaarliFrontException $e) {
             $this->container->pageBuilder->assign('message', $e->getMessage());
@@ -54,7 +54,7 @@ class ShaarliMiddleware
             $response = $response->withStatus($e->getCode());
             $response = $response->write($this->container->pageBuilder->render('error'));
         } catch (UnauthorizedException $e) {
-            return $response->withRedirect($request->getUri()->getBasePath() . '/login');
+            return $response->withRedirect($this->container->basePath . '/login');
         }
 
         return $response;

@@ -49,7 +49,7 @@ class LogoutControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertContains('./', $result->getHeader('Location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
         static::assertSame('false', $_COOKIE[LoginManager::$STAY_SIGNED_IN_COOKIE]);
     }
 }

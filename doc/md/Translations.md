@@ -32,11 +32,11 @@ Here is a list :
 ```
 http://<replace_domain>/
 http://<replace_domain>/?nonope
-http://<replace_domain>/add-shaare
-http://<replace_domain>/?do=changepasswd
+http://<replace_domain>/admin/add-shaare
+http://<replace_domain>/admin/password
 http://<replace_domain>/?do=changetag
-http://<replace_domain>/configure
-http://<replace_domain>/tools
+http://<replace_domain>/admin/configure
+http://<replace_domain>/admin/tools
 http://<replace_domain>/daily
 http://<replace_domain>/?post
 http://<replace_domain>/?do=export
@@ -44,8 +44,8 @@ http://<replace_domain>/?do=import
 http://<replace_domain>/login
 http://<replace_domain>/picture-wall
 http://<replace_domain>/?do=pluginadmin
-http://<replace_domain>/tag-cloud
-http://<replace_domain>/tag-list
+http://<replace_domain>/tags/cloud
+http://<replace_domain>/tags/list
 ```
 
 #### Improve existing translation

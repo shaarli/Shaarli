@@ -19,7 +19,7 @@ use Throwable;
 class ConfigureController extends ShaarliAdminController
 {
     /**
-     * GET /configure - Displays the configuration page
+     * GET /admin/configure - Displays the configuration page
      */
     public function index(Request $request, Response $response): Response
     {
@@ -56,7 +56,7 @@ class ConfigureController extends ShaarliAdminController
     }
 
     /**
-     * POST /configure - Update Shaarli's configuration
+     * POST /admin/configure - Update Shaarli's configuration
      */
     public function save(Request $request, Response $response): Response
     {
@@ -115,6 +115,6 @@ class ConfigureController extends ShaarliAdminController
 
         $this->saveSuccessMessage(t('Configuration was saved.'));
 
-        return $response->withRedirect('./configure');
+        return $this->redirect($response, '/admin/configure');
     }
 }
