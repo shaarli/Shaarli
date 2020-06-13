@@ -60,8 +60,8 @@ function hook_pubsubhubbub_render_feed($data, $conf)
 function hook_pubsubhubbub_save_link($data, $conf)
 {
     $feeds = array(
-        index_url($_SERVER) .'feed-atom',
-        index_url($_SERVER) .'feed-rss',
+        index_url($_SERVER) .'feed/atom',
+        index_url($_SERVER) .'feed/rss',
     );
 
     $httpPost = function_exists('curl_version') ? false : 'nocurl_http_post';

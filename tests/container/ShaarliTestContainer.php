@@ -10,11 +10,13 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
+use Shaarli\Http\HttpAccess;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
+use Shaarli\Thumbnailer;
 
 /**
  * Test helper allowing auto-completion for MockObjects.
@@ -31,6 +33,8 @@ use Shaarli\Security\SessionManager;
  * @property MockObject|FormatterFactory         $formatterFactory
  * @property MockObject|PageCacheManager         $pageCacheManager
  * @property MockObject|FeedBuilder              $feedBuilder
+ * @property MockObject|Thumbnailer              $thumbnailer
+ * @property MockObject|HttpAccess               $httpAccess
  */
 class ShaarliTestContainer extends ShaarliContainer
 {

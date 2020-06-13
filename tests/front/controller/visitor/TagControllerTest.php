@@ -64,7 +64,7 @@ class TagControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./?searchtags=abc'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/?searchtags=abc'], $result->getHeader('location'));
     }
 
     public function testAddTagRemoveLegacyQueryParam(): void
@@ -138,7 +138,7 @@ class TagControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 
     public function testRemoveTagWithoutMatchingTag(): void
@@ -184,7 +184,7 @@ class TagControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 
     public function testRemoveTagWithoutTag(): void
@@ -210,6 +210,6 @@ class TagControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 }

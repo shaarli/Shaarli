@@ -11,6 +11,7 @@ use Shaarli\Front\Exception\LoginBannedException;
 use Shaarli\Render\PageBuilder;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Http\Uri;
 
 class ShaarliMiddlewareTest extends TestCase
 {
@@ -29,6 +30,13 @@ class ShaarliMiddlewareTest extends TestCase
     public function testMiddlewareExecution(): void
     {
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
+
         $response = new Response();
         $controller = function (Request $request, Response $response): Response {
             return $response->withStatus(418); // I'm a tea pot
@@ -44,6 +52,13 @@ class ShaarliMiddlewareTest extends TestCase
     public function testMiddlewareExecutionWithException(): void
     {
         $request = $this->createMock(Request::class);
+        $request->method('getUri')->willReturnCallback(function (): Uri {
+            $uri = $this->createMock(Uri::class);
+            $uri->method('getBasePath')->willReturn('/subfolder');
+
+            return $uri;
+        });
+        
         $response = new Response();
         $controller = function (): void {
             $exception = new LoginBannedException();

@@ -95,7 +95,7 @@ class LoginControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('Location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('Location'));
     }
 
     public function testLoginControllerOpenShaarli(): void
@@ -116,7 +116,7 @@ class LoginControllerTest extends TestCase
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['./'], $result->getHeader('Location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('Location'));
     }
 
     public function testLoginControllerWhileBanned(): void

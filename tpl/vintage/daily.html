@@ -14,9 +14,9 @@
 
     <div class="dailyAbout">
         All links of one day<br>in a single page.<br>
-        {if="$previousday"} <a href="./daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
+        {if="$previousday"} <a href="{$base_path}/daily&amp;day={$previousday}"><b>&lt;</b>Previous day</a>{else}<b>&lt;</b>Previous day{/if}
         -
-        {if="$nextday"}<a href="./daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
+        {if="$nextday"}<a href="{$base_path}/daily&amp;day={$nextday}">Next day<b>&gt;</b></a>{else}Next day<b>&gt;</b>{/if}
         <br>
 
         {loop="$daily_about_plugin"}
@@ -24,13 +24,13 @@
         {/loop}
 
         <br>
-        <a href="./daily-rss" title="1 RSS entry per day"><img src="img/feed-icon-14x14.png" alt="rss_feed">Daily RSS Feed</a>
+        <a href="{$base_path}/daily-rss" title="1 RSS entry per day"><img src="{$asset_path}/img/feed-icon-14x14.png#" alt="rss_feed">Daily RSS Feed</a>
     </div>
 
     <div class="dailyTitle">
-        <img src="img/floral_left.png" width="51" height="50" class="nomobile" alt="floral_left">
+        <img src="{$asset_path}/img/floral_left.png#" width="51" height="50" class="nomobile" alt="floral_left">
         The Daily Shaarli
-        <img src="img/floral_right.png" width="51" height="50" class="nomobile" alt="floral_right">
+        <img src="{$asset_path}/img/floral_right.png#" width="51" height="50" class="nomobile" alt="floral_right">
     </div>
 
     <div class="dailyDate">
@@ -52,13 +52,13 @@
                     {$link=$value}
                     <div class="dailyEntry">
                         <div class="dailyEntryPermalink">
-                            <a href="?{$value.shorturl}">
-                                <img src="img/squiggle.png" width="25" height="26" title="permalink" alt="permalink">
+                            <a href="{$base_path}/?{$value.shorturl}">
+                                <img src="{$asset_path}/img/squiggle.png#" width="25" height="26" title="permalink" alt="permalink">
                             </a>
                         </div>
                         {if="!$hide_timestamps || $is_logged_in"}
                             <div class="dailyEntryLinkdate">
-                                <a href="?{$value.shorturl}">{function="strftime('%c', $link.timestamp)"}</a>
+                                <a href="{$base_path}/?{$value.shorturl}">{function="strftime('%c', $link.timestamp)"}</a>
                             </div>
                         {/if}
                         {if="$link.tags"}
@@ -101,9 +101,9 @@
             {$value}
         {/loop}
     </div>
-    <div id="closing"><img src="img/squiggle_closing.png" width="66" height="61" alt="-"></div>
+    <div id="closing"><img src="{$asset_path}/img/squiggle_closing.png#" width="66" height="61" alt="-"></div>
 </div>
 {include="page.footer"}
-<script src="js/thumbnails.min.js?v={$version_hash}"></script>
+<script src="{$asset_path}/js/thumbnails.min.js?v={$version_hash}#"></script>
 </body>
 </html>

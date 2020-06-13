@@ -91,6 +91,10 @@ function endsWith($haystack, $needle, $case = true)
  */
 function escape($input)
 {
+    if (null === $input) {
+        return null;
+    }
+
     if (is_bool($input)) {
         return $input;
     }

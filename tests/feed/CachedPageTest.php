@@ -11,7 +11,7 @@ class CachedPageTest extends \PHPUnit\Framework\TestCase
 {
     // test cache directory
     protected static $testCacheDir = 'sandbox/pagecache';
-    protected static $url = 'http://shaar.li/feed-atom';
+    protected static $url = 'http://shaar.li/feed/atom';
     protected static $filename;
 
     /**
@@ -42,8 +42,8 @@ class CachedPageTest extends \PHPUnit\Framework\TestCase
     {
         new CachedPage(self::$testCacheDir, '', true);
         new CachedPage(self::$testCacheDir, '', false);
-        new CachedPage(self::$testCacheDir, 'http://shaar.li/feed-rss', true);
-        new CachedPage(self::$testCacheDir, 'http://shaar.li/feed-atom', false);
+        new CachedPage(self::$testCacheDir, 'http://shaar.li/feed/rss', true);
+        new CachedPage(self::$testCacheDir, 'http://shaar.li/feed/atom', false);
         $this->addToAssertionCount(1);
     }
 

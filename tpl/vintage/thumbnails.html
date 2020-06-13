@@ -23,6 +23,7 @@
 <input type="hidden" name="ids" value="{function="implode(',', $ids)"}" />
 
 {include="page.footer"}
-<script src="js/thumbnails_update.min.js?v={$version_hash}"></script>
+<input type="hidden" name="js_base_path" value="{$base_path}" />
+<script src="{$asset_path}/js/thumbnails_update.min.js?v={$version_hash}#"></script>
 </body>
 </html>

@@ -10,11 +10,13 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
+use Shaarli\Http\HttpAccess;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
+use Shaarli\Thumbnailer;
 
 /**
  * Class ContainerBuilder
@@ -36,19 +38,17 @@ class ContainerBuilder
     /** @var LoginManager */
     protected $login;
 
-    /** @var string */
-    protected $webPath;
+    /** @var string|null */
+    protected $basePath = null;
 
     public function __construct(
         ConfigManager $conf,
         SessionManager $session,
-        LoginManager $login,
-        string $webPath
+        LoginManager $login
     ) {
         $this->conf = $conf;
         $this->session = $session;
         $this->login = $login;
-        $this->webPath = $webPath;
     }
 
     public function build(): ShaarliContainer
@@ -58,7 +58,7 @@ class ContainerBuilder
         $container['conf'] = $this->conf;
         $container['sessionManager'] = $this->session;
         $container['loginManager'] = $this->login;
-        $container['webPath'] = $this->webPath;
+        $container['basePath'] = $this->basePath;
 
         $container['plugins'] = function (ShaarliContainer $container): PluginManager {
             return new PluginManager($container->conf);
@@ -108,6 +108,14 @@ class ContainerBuilder
                 $container->environment,
                 $container->loginManager->isLoggedIn()
             );
+        };
+
+        $container['thumbnailer'] = function (ShaarliContainer $container): Thumbnailer {
+            return new Thumbnailer($container->conf);
+        };
+
+        $container['httpAccess'] = function (): HttpAccess {
+            return new HttpAccess();
         };
 
         return $container;

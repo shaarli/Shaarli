@@ -1,14 +1,14 @@
 ### Feeds options
 
-Feeds are available in ATOM with `/feed-atom` and RSS with `/feed-rss`.
+Feeds are available in ATOM with `/feed/atom` and RSS with `/feed/rss`.
 
 Options:
 
 - You can use `permalinks` in the feed URL to get permalink to Shaares instead of direct link to shaared URL.
-    - E.G. `https://my.shaarli.domain/feed-atom?permalinks`.
+    - E.G. `https://my.shaarli.domain/feed/atom?permalinks`.
 - You can use `nb` parameter in the feed URL to specify the number of Shaares you want in a feed (default if not specified: `50`). The keyword `all` is available if you want everything.
-    - `https://my.shaarli.domain/feed-atom?permalinks&nb=42`
-    - `https://my.shaarli.domain/feed-atom?permalinks&nb=all`
+    - `https://my.shaarli.domain/feed/atom?permalinks&nb=42`
+    - `https://my.shaarli.domain/feed/atom?permalinks&nb=all`
 
 ### RSS Feeds or Picture Wall for a specific search/tag
 

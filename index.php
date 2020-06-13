@@ -412,13 +412,13 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Tag cloud
     if ($targetPage == Router::$PAGE_TAGCLOUD) {
-        header('Location: ./tag-cloud');
+        header('Location: ./tags/cloud');
         exit;
     }
 
     // -------- Tag list
     if ($targetPage == Router::$PAGE_TAGLIST) {
-        header('Location: ./tag-list');
+        header('Location: ./tags/list');
         exit;
     }
 
@@ -433,7 +433,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     if ($targetPage == Router::$PAGE_FEED_ATOM || $targetPage == Router::$PAGE_FEED_RSS) {
         $feedType = $targetPage == Router::$PAGE_FEED_RSS ? FeedBuilder::$FEED_RSS : FeedBuilder::$FEED_ATOM;
 
-        header('Location: ./feed-'. $feedType .'?'. http_build_query($_GET));
+        header('Location: ./feed/'. $feedType .'?'. http_build_query($_GET));
         exit;
     }
 
@@ -501,142 +501,47 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Display the Tools menu if requested (import/export/bookmarklet...)
     if ($targetPage == Router::$PAGE_TOOLS) {
-        header('Location: ./tools');
+        header('Location: ./admin/tools');
         exit;
     }
 
     // -------- User wants to change his/her password.
     if ($targetPage == Router::$PAGE_CHANGEPASSWORD) {
-        header('Location: ./password');
+        header('Location: ./admin/password');
         exit;
     }
 
     // -------- User wants to change configuration
     if ($targetPage == Router::$PAGE_CONFIGURE) {
-        header('Location: ./configure');
+        header('Location: ./admin/configure');
         exit;
     }
 
     // -------- User wants to rename a tag or delete it
     if ($targetPage == Router::$PAGE_CHANGETAG) {
-        header('./manage-tags');
+        header('Location: ./admin/tags');
         exit;
     }
 
     // -------- User wants to add a link without using the bookmarklet: Show form.
     if ($targetPage == Router::$PAGE_ADDLINK) {
-        $PAGE->assign('pagetitle', t('Shaare a new link') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('addlink');
+        header('Location: ./admin/shaare');
         exit;
     }
 
     // -------- User clicked the "Save" button when editing a link: Save link to database.
     if (isset($_POST['save_edit'])) {
-        // Go away!
-        if (! $sessionManager->checkToken($_POST['token'])) {
-            die(t('Wrong token.'));
-        }
-
-        // lf_id should only be present if the link exists.
-        $id = isset($_POST['lf_id']) ? intval(escape($_POST['lf_id'])) : null;
-        if ($id && $bookmarkService->exists($id)) {
-            // Edit
-            $bookmark = $bookmarkService->get($id);
-        } else {
-            // New link
-            $bookmark = new Bookmark();
-        }
-
-        $bookmark->setTitle($_POST['lf_title']);
-        $bookmark->setDescription($_POST['lf_description']);
-        $bookmark->setUrl($_POST['lf_url'], $conf->get('security.allowed_protocols'));
-        $bookmark->setPrivate(isset($_POST['lf_private']));
-        $bookmark->setTagsString($_POST['lf_tags']);
-
-        if ($conf->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
-            && ! $bookmark->isNote()
-        ) {
-            $thumbnailer = new Thumbnailer($conf);
-            $bookmark->setThumbnail($thumbnailer->get($bookmark->getUrl()));
-        }
-        $bookmarkService->addOrSet($bookmark, false);
-
-        // To preserve backward compatibility with 3rd parties, plugins still use arrays
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        $formatter = $factory->getFormatter('raw');
-        $data = $formatter->format($bookmark);
-        $pluginManager->executeHooks('save_link', $data);
-
-        $bookmark->fromArray($data);
-        $bookmarkService->set($bookmark);
-
-        // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) {
-            echo '<script>self.close();</script>';
-            exit;
-        }
-
-        $returnurl = !empty($_POST['returnurl']) ? $_POST['returnurl'] : '?';
-        $location = generateLocation($returnurl, $_SERVER['HTTP_HOST'], array('addlink', 'post', 'edit_link'));
-        // Scroll to the link which has been edited.
-        $location .= '#' . $bookmark->getShortUrl();
-        // After saving the link, redirect to the page the user was on.
-        header('Location: '. $location);
+        // This route is no longer supported in legacy mode
+        header('Location: ./');
         exit;
     }
 
     // -------- User clicked the "Delete" button when editing a link: Delete link from database.
     if ($targetPage == Router::$PAGE_DELETELINK) {
-        if (! $sessionManager->checkToken($_GET['token'])) {
-            die(t('Wrong token.'));
-        }
+        $ids = $_GET['lf_linkdate'] ?? '';
+        $token = $_GET['token'] ?? '';
 
-        $ids = trim($_GET['lf_linkdate']);
-        if (strpos($ids, ' ') !== false) {
-            // multiple, space-separated ids provided
-            $ids = array_values(array_filter(
-                preg_split('/\s+/', escape($ids)),
-                function ($item) {
-                    return $item !== '';
-                }
-            ));
-        } else {
-            // only a single id provided
-            $shortUrl = $bookmarkService->get($ids)->getShortUrl();
-            $ids = [$ids];
-        }
-        // assert at least one id is given
-        if (!count($ids)) {
-            die('no id provided');
-        }
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        $formatter = $factory->getFormatter('raw');
-        foreach ($ids as $id) {
-            $id = (int) escape($id);
-            $bookmark = $bookmarkService->get($id);
-            $data = $formatter->format($bookmark);
-            $pluginManager->executeHooks('delete_link', $data);
-            $bookmarkService->remove($bookmark, false);
-        }
-        $bookmarkService->save();
-
-        // If we are called from the bookmarklet, we must close the popup:
-        if (isset($_GET['source']) && ($_GET['source']=='bookmarklet' || $_GET['source']=='firefoxsocialapi')) {
-            echo '<script>self.close();</script>';
-            exit;
-        }
-
-        $location = '?';
-        if (isset($_SERVER['HTTP_REFERER'])) {
-            // Don't redirect to where we were previously if it was a permalink or an edit_link, because it would 404.
-            $location = generateLocation(
-                $_SERVER['HTTP_REFERER'],
-                $_SERVER['HTTP_HOST'],
-                ['delete_link', 'edit_link', ! empty($shortUrl) ? $shortUrl : null]
-            );
-        }
-
-        header('Location: ' . $location); // After deleting the link, redirect to appropriate location
+        header('Location: ./admin/shaare/delete?id=' . $ids . '&token=' . $token);
         exit;
     }
 
@@ -695,110 +600,13 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     // -------- User clicked the "EDIT" button on a link: Display link edit form.
     if (isset($_GET['edit_link'])) {
         $id = (int) escape($_GET['edit_link']);
-        try {
-            $link = $bookmarkService->get($id);  // Read database
-        } catch (BookmarkNotFoundException $e) {
-            // Link not found in database.
-            header('Location: ?');
-            exit;
-        }
-
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        $formatter = $factory->getFormatter('raw');
-        $formattedLink = $formatter->format($link);
-        $tags = $bookmarkService->bookmarksCountPerTag();
-        if ($conf->get('formatter') === 'markdown') {
-            $tags[BookmarkMarkdownFormatter::NO_MD_TAG] = 1;
-        }
-        $data = array(
-            'link' => $formattedLink,
-            'link_is_new' => false,
-            'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
-            'tags' => $tags,
-        );
-        $pluginManager->executeHooks('render_editlink', $data);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->assign('pagetitle', t('Edit') .' '. t('Shaare') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('editlink');
+        header('Location: ./admin/shaare/' . $id);
         exit;
     }
 
     // -------- User want to post a new link: Display link edit form.
     if (isset($_GET['post'])) {
-        $url = cleanup_url($_GET['post']);
-
-        $link_is_new = false;
-        // Check if URL is not already in database (in this case, we will edit the existing link)
-        $bookmark = $bookmarkService->findByUrl($url);
-        if (! $bookmark) {
-            $link_is_new = true;
-            // Get title if it was provided in URL (by the bookmarklet).
-            $title = empty($_GET['title']) ? '' : escape($_GET['title']);
-            // Get description if it was provided in URL (by the bookmarklet). [Bronco added that]
-            $description = empty($_GET['description']) ? '' : escape($_GET['description']);
-            $tags = empty($_GET['tags']) ? '' : escape($_GET['tags']);
-            $private = !empty($_GET['private']) && $_GET['private'] === "1" ? 1 : 0;
-
-            // If this is an HTTP(S) link, we try go get the page to extract
-            // the title (otherwise we will to straight to the edit form.)
-            if (empty($title) && strpos(get_url_scheme($url), 'http') !== false) {
-                $retrieveDescription = $conf->get('general.retrieve_description');
-                // Short timeout to keep the application responsive
-                // The callback will fill $charset and $title with data from the downloaded page.
-                get_http_response(
-                    $url,
-                    $conf->get('general.download_timeout', 30),
-                    $conf->get('general.download_max_size', 4194304),
-                    get_curl_download_callback($charset, $title, $description, $tags, $retrieveDescription)
-                );
-                if (! empty($title) && strtolower($charset) != 'utf-8') {
-                    $title = mb_convert_encoding($title, 'utf-8', $charset);
-                }
-            }
-
-            if ($url == '') {
-                $title = $conf->get('general.default_note_title', t('Note: '));
-            }
-            $url = escape($url);
-            $title = escape($title);
-
-            $link = [
-                'title' => $title,
-                'url' => $url,
-                'description' => $description,
-                'tags' => $tags,
-                'private' => $private,
-            ];
-        } else {
-            $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-            $formatter = $factory->getFormatter('raw');
-            $link = $formatter->format($bookmark);
-        }
-
-        $tags = $bookmarkService->bookmarksCountPerTag();
-        if ($conf->get('formatter') === 'markdown') {
-            $tags[BookmarkMarkdownFormatter::NO_MD_TAG] = 1;
-        }
-        $data = [
-            'link' => $link,
-            'link_is_new' => $link_is_new,
-            'http_referer' => (isset($_SERVER['HTTP_REFERER']) ? escape($_SERVER['HTTP_REFERER']) : ''),
-            'source' => (isset($_GET['source']) ? $_GET['source'] : ''),
-            'tags' => $tags,
-            'default_private_links' => $conf->get('privacy.default_private_links', false),
-        ];
-        $pluginManager->executeHooks('render_editlink', $data);
-
-        foreach ($data as $key => $value) {
-            $PAGE->assign($key, $value);
-        }
-
-        $PAGE->assign('pagetitle', t('Shaare') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('editlink');
+        header('Location: ./admin/shaare?' . http_build_query($_GET));
         exit;
     }
 
@@ -1306,7 +1114,7 @@ if (isset($_SERVER['QUERY_STRING']) && startsWith($_SERVER['QUERY_STRING'], 'do=
     exit;
 }
 
-$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager, WEB_PATH);
+$containerBuilder = new ContainerBuilder($conf, $sessionManager, $loginManager);
 $container = $containerBuilder->build();
 $app = new App($container);
 
@@ -1329,41 +1137,37 @@ $app->group('/api/v1', function () {
 
 $app->group('', function () {
     /* -- PUBLIC --*/
-    $this->get('/login', '\Shaarli\Front\Controller\Visitor\LoginController:index')->setName('login');
-    $this->get('/picture-wall', '\Shaarli\Front\Controller\Visitor\PictureWallController:index')->setName('picwall');
-    $this->get('/tag-cloud', '\Shaarli\Front\Controller\Visitor\TagCloudController:cloud')->setName('tagcloud');
-    $this->get('/tag-list', '\Shaarli\Front\Controller\Visitor\TagCloudController:list')->setName('taglist');
-    $this->get('/daily', '\Shaarli\Front\Controller\Visitor\DailyController:index')->setName('daily');
-    $this->get('/daily-rss', '\Shaarli\Front\Controller\Visitor\DailyController:rss')->setName('dailyrss');
-    $this->get('/feed-atom', '\Shaarli\Front\Controller\Visitor\FeedController:atom')->setName('feedatom');
-    $this->get('/feed-rss', '\Shaarli\Front\Controller\Visitor\FeedController:rss')->setName('feedrss');
-    $this->get('/open-search', '\Shaarli\Front\Controller\Visitor\OpenSearchController:index')->setName('opensearch');
+    $this->get('/login', '\Shaarli\Front\Controller\Visitor\LoginController:index');
+    $this->get('/picture-wall', '\Shaarli\Front\Controller\Visitor\PictureWallController:index');
+    $this->get('/tags/cloud', '\Shaarli\Front\Controller\Visitor\TagCloudController:cloud');
+    $this->get('/tags/list', '\Shaarli\Front\Controller\Visitor\TagCloudController:list');
+    $this->get('/daily', '\Shaarli\Front\Controller\Visitor\DailyController:index');
+    $this->get('/daily-rss', '\Shaarli\Front\Controller\Visitor\DailyController:rss');
+    $this->get('/feed/atom', '\Shaarli\Front\Controller\Visitor\FeedController:atom');
+    $this->get('/feed/rss', '\Shaarli\Front\Controller\Visitor\FeedController:rss');
+    $this->get('/open-search', '\Shaarli\Front\Controller\Visitor\OpenSearchController:index');
 
-    $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\Visitor\TagController:addTag')->setName('add-tag');
-    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\Visitor\TagController:removeTag')->setName('remove-tag');
+    $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\Visitor\TagController:addTag');
+    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\Visitor\TagController:removeTag');
 
     /* -- LOGGED IN -- */
-    $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index')->setName('logout');
-    $this->get('/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index')->setName('tools');
-    $this->get('/password', '\Shaarli\Front\Controller\Admin\PasswordController:index')->setName('password');
-    $this->post('/password', '\Shaarli\Front\Controller\Admin\PasswordController:change')->setName('changePassword');
-    $this->get('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:index')->setName('configure');
-    $this->post('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save')->setName('saveConfigure');
-    $this->get('/manage-tags', '\Shaarli\Front\Controller\Admin\ManageTagController:index')->setName('manageTag');
-    $this->post('/manage-tags', '\Shaarli\Front\Controller\Admin\ManageTagController:save')->setName('saveManageTag');
+    $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index');
+    $this->get('/admin/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index');
+    $this->get('/admin/password', '\Shaarli\Front\Controller\Admin\PasswordController:index');
+    $this->post('/admin/password', '\Shaarli\Front\Controller\Admin\PasswordController:change');
+    $this->get('/admin/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:index');
+    $this->post('/admin/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save');
+    $this->get('/admin/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:index');
+    $this->post('/admin/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:save');
+    $this->get('/admin/add-shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:addShaare');
+    $this->get('/admin/shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:displayCreateForm');
+    $this->get('/admin/shaare/{id:[0-9]+}', '\Shaarli\Front\Controller\Admin\ManageShaareController:displayEditForm');
+    $this->post('/admin/shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:save');
+    $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\ManageShaareController:deleteBookmark');
 
-    $this
-        ->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage')
-        ->setName('filter-links-per-page')
-    ;
-    $this
-        ->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility')
-        ->setName('visibility')
-    ;
-    $this
-        ->get('/untagged-only', '\Shaarli\Front\Controller\Admin\SessionFilterController:untaggedOnly')
-        ->setName('untagged-only')
-    ;
+    $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
+    $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
+    $this->get('/untagged-only', '\Shaarli\Front\Controller\Admin\SessionFilterController:untaggedOnly');
 })->add('\Shaarli\Front\ShaarliMiddleware');
 
 $response = $app->run(true);

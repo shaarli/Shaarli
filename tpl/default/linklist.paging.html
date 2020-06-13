@@ -6,14 +6,14 @@
           {'Filters'|t}
         </span>
         {if="$is_logged_in"}
-        <a href="./visibility/private" aria-label="{'Only display private links'|t}" title="{'Only display private links'|t}"
+        <a href="{$base_path}/visibility/private" aria-label="{'Only display private links'|t}" title="{'Only display private links'|t}"
            class="{if="$visibility==='private'"}filter-on{else}filter-off{/if}"
         ><i class="fa fa-user-secret" aria-hidden="true"></i></a>
-        <a href="./visibility/public" aria-label="{'Only display public links'|t}" title="{'Only display public links'|t}"
+        <a href="{$base_path}/visibility/public" aria-label="{'Only display public links'|t}" title="{'Only display public links'|t}"
            class="{if="$visibility==='public'"}filter-on{else}filter-off{/if}"
         ><i class="fa fa-globe" aria-hidden="true"></i></a>
         {/if}
-        <a href="./untagged-only" aria-label="{'Filter untagged links'|t}" title="{'Filter untagged links'|t}"
+        <a href="{$base_path}/untagged-only" aria-label="{'Filter untagged links'|t}" title="{'Filter untagged links'|t}"
            class={if="$untaggedonly"}"filter-on"{else}"filter-off"{/if}
         ><i class="fa fa-tag" aria-hidden="true"></i></a>
         <a href="#" aria-label="{'Select all'|t}" title="{'Select all'|t}"
@@ -53,10 +53,10 @@
 
     <div class="linksperpage pure-u-1-3">
       <div class="pure-u-0 pure-u-lg-visible">{'Links per page'|t}</div>
-      <a href="./links-per-page?nb=20">20</a>
-      <a href="./links-per-page?nb=50">50</a>
-      <a href="./links-per-page?nb=100">100</a>
-      <form method="GET" class="pure-u-0 pure-u-lg-visible" action="./links-per-page">
+      <a href="{$base_path}/links-per-page?nb=20">20</a>
+      <a href="{$base_path}/links-per-page?nb=50">50</a>
+      <a href="{$base_path}/links-per-page?nb=100">100</a>
+      <form method="GET" class="pure-u-0 pure-u-lg-visible" action="{$base_path}/links-per-page">
         <input type="text" name="nb" placeholder="133">
       </form>
       <a href="#" class="filter-off fold-all pure-u-0 pure-u-lg-visible" aria-label="{'Fold all'|t}" title="{'Fold all'|t}">

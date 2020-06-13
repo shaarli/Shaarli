@@ -484,3 +484,109 @@ function is_https($server)
 
     return ! empty($server['HTTPS']);
 }
+
+/**
+ * Get cURL callback function for CURLOPT_WRITEFUNCTION
+ *
+ * @param string $charset     to extract from the downloaded page (reference)
+ * @param string $title       to extract from the downloaded page (reference)
+ * @param string $description to extract from the downloaded page (reference)
+ * @param string $keywords    to extract from the downloaded page (reference)
+ * @param bool   $retrieveDescription Automatically tries to retrieve description and keywords from HTML content
+ * @param string $curlGetInfo Optionally overrides curl_getinfo function
+ *
+ * @return Closure
+ */
+function get_curl_download_callback(
+    &$charset,
+    &$title,
+    &$description,
+    &$keywords,
+    $retrieveDescription,
+    $curlGetInfo = 'curl_getinfo'
+) {
+    $isRedirected = false;
+    $currentChunk = 0;
+    $foundChunk = null;
+
+    /**
+     * cURL callback function for CURLOPT_WRITEFUNCTION (called during the download).
+     *
+     * While downloading the remote page, we check that the HTTP code is 200 and content type is 'html/text'
+     * Then we extract the title and the charset and stop the download when it's done.
+     *
+     * @param resource $ch   cURL resource
+     * @param string   $data chunk of data being downloaded
+     *
+     * @return int|bool length of $data or false if we need to stop the download
+     */
+    return function (&$ch, $data) use (
+        $retrieveDescription,
+        $curlGetInfo,
+        &$charset,
+        &$title,
+        &$description,
+        &$keywords,
+        &$isRedirected,
+        &$currentChunk,
+        &$foundChunk
+    ) {
+        $currentChunk++;
+        $responseCode = $curlGetInfo($ch, CURLINFO_RESPONSE_CODE);
+        if (!empty($responseCode) && in_array($responseCode, [301, 302])) {
+            $isRedirected = true;
+            return strlen($data);
+        }
+        if (!empty($responseCode) && $responseCode !== 200) {
+            return false;
+        }
+        // After a redirection, the content type will keep the previous request value
+        // until it finds the next content-type header.
+        if (! $isRedirected || strpos(strtolower($data), 'content-type') !== false) {
+            $contentType = $curlGetInfo($ch, CURLINFO_CONTENT_TYPE);
+        }
+        if (!empty($contentType) && strpos($contentType, 'text/html') === false) {
+            return false;
+        }
+        if (!empty($contentType) && empty($charset)) {
+            $charset = header_extract_charset($contentType);
+        }
+        if (empty($charset)) {
+            $charset = html_extract_charset($data);
+        }
+        if (empty($title)) {
+            $title = html_extract_title($data);
+            $foundChunk = ! empty($title) ? $currentChunk : $foundChunk;
+        }
+        if ($retrieveDescription && empty($description)) {
+            $description = html_extract_tag('description', $data);
+            $foundChunk = ! empty($description) ? $currentChunk : $foundChunk;
+        }
+        if ($retrieveDescription && empty($keywords)) {
+            $keywords = html_extract_tag('keywords', $data);
+            if (! empty($keywords)) {
+                $foundChunk = $currentChunk;
+                // Keywords use the format tag1, tag2 multiple words, tag
+                // So we format them to match Shaarli's separator and glue multiple words with '-'
+                $keywords = implode(' ', array_map(function($keyword) {
+                    return implode('-', preg_split('/\s+/', trim($keyword)));
+                }, explode(',', $keywords)));
+            }
+        }
+
+        // We got everything we want, stop the download.
+        // If we already found either the title, description or keywords,
+        // it's highly unlikely that we'll found the other metas further than
+        // in the same chunk of data or the next one. So we also stop the download after that.
+        if ((!empty($responseCode) && !empty($contentType) && !empty($charset)) && $foundChunk !== null
+            && (! $retrieveDescription
+                || $foundChunk < $currentChunk
+                || (!empty($title) && !empty($description) && !empty($keywords))
+            )
+        ) {
+            return false;
+        }
+
+        return strlen($data);
+    };
+}

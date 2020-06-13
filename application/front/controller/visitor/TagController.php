@@ -11,6 +11,8 @@ use Slim\Http\Response;
  * Class TagController
  *
  * Slim controller handle tags.
+ *
+ * TODO: check redirections with new helper
  */
 class TagController extends ShaarliVisitorController
 {
@@ -27,10 +29,10 @@ class TagController extends ShaarliVisitorController
         // In case browser does not send HTTP_REFERER, we search a single tag
         if (null === $referer) {
             if (null !== $newTag) {
-                return $response->withRedirect('./?searchtags='. urlencode($newTag));
+                return $this->redirect($response, '/?searchtags='. urlencode($newTag));
             }
 
-            return $response->withRedirect('./');
+            return $this->redirect($response, '/');
         }
 
         $currentUrl = parse_url($referer);
@@ -81,7 +83,7 @@ class TagController extends ShaarliVisitorController
 
         // If the referrer is not provided, we can update the search, so we failback on the bookmark list
         if (empty($referer)) {
-            return $response->withRedirect('./');
+            return $this->redirect($response, '/');
         }
 
         $tagToRemove = $args['tag'] ?? null;

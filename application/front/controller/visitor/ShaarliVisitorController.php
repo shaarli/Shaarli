@@ -60,6 +60,19 @@ abstract class ShaarliVisitorController
         $this->assignView('privateLinkcount', $this->container->bookmarkService->count(BookmarkFilter::$PRIVATE));
         $this->assignView('plugin_errors', $this->container->pluginManager->getErrors());
 
+        /*
+         * Define base path (if Shaarli is installed in a domain's subfolder, e.g. `/shaarli`)
+         * and the asset path (subfolder/tpl/default for default theme).
+         * These MUST be used to create an internal link or to include an asset in templates.
+         */
+        $this->assignView('base_path', $this->container->basePath);
+        $this->assignView(
+            'asset_path',
+            $this->container->basePath . '/' .
+            rtrim($this->container->conf->get('resource.raintpl_tpl', 'tpl'), '/') . '/' .
+            $this->container->conf->get('resource.theme', 'default')
+        );
+
         $this->executeDefaultHooks($template);
 
         return $this->container->pageBuilder->render($template);
@@ -78,17 +91,30 @@ abstract class ShaarliVisitorController
         ];
 
         foreach ($common_hooks as $name) {
-            $plugin_data = [];
+            $pluginData = [];
             $this->container->pluginManager->executeHooks(
                 'render_' . $name,
-                $plugin_data,
+                $pluginData,
                 [
                     'target' => $template,
                     'loggedin' => $this->container->loginManager->isLoggedIn()
                 ]
             );
-            $this->assignView('plugins_' . $name, $plugin_data);
+            $this->assignView('plugins_' . $name, $pluginData);
         }
+    }
+
+    /**
+     * Simple helper which prepend the base path to redirect path.
+     *
+     * @param Response $response
+     * @param string $path Absolute path, e.g.: `/`, or `/admin/shaare/123` regardless of install directory
+     *
+     * @return Response updated
+     */
+    protected function redirect(Response $response, string $path): Response
+    {
+        return $response->withRedirect($this->container->basePath . $path);
     }
 
     /**
@@ -102,9 +128,10 @@ abstract class ShaarliVisitorController
         Request $request,
         Response $response,
         array $loopTerms = [],
-        array $clearParams = []
+        array $clearParams = [],
+        string $anchor = null
     ): Response {
-        $defaultPath = $request->getUri()->getBasePath();
+        $defaultPath = $this->container->basePath . '/';
         $referer = $this->container->environment['HTTP_REFERER'] ?? null;
 
         if (null !== $referer) {
@@ -133,7 +160,8 @@ abstract class ShaarliVisitorController
         }
 
         $queryString = count($params) > 0 ? '?'. http_build_query($params) : '';
+        $anchor = $anchor ? '#' . $anchor : '';
 
-        return $response->withRedirect($path . $queryString);
+        return $response->withRedirect($path . $queryString . $anchor);
     }
 }

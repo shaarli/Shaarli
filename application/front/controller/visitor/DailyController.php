@@ -71,7 +71,7 @@ class DailyController extends ShaarliVisitorController
         ];
 
         // Hooks are called before column construction so that plugins don't have to deal with columns.
-        $this->executeHooks($data);
+        $data = $this->executeHooks($data);
 
         $data['cols'] = $this->calculateColumns($data['linksToDisplay']);
 

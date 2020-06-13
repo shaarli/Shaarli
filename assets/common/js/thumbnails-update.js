@@ -10,13 +10,14 @@
  * It contains a recursive call to retrieve the thumb of the next link when it succeed.
  * It also update the progress bar and other visual feedback elements.
  *
+ * @param {string} basePath Shaarli subfolder for XHR requests
  * @param {array}  ids      List of LinkID to update
  * @param {int}    i        Current index in ids
  * @param {object} elements List of DOM element to avoid retrieving them at each iteration
  */
-function updateThumb(ids, i, elements) {
+function updateThumb(basePath, ids, i, elements) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', './?do=ajax_thumb_update');
+  xhr.open('POST', `${basePath}/?do=ajax_thumb_update`);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.responseType = 'json';
   xhr.onload = () => {
@@ -40,6 +41,7 @@ function updateThumb(ids, i, elements) {
 }
 
 (() => {
+  const basePath = document.querySelector('input[name="js_base_path"]').value;
   const ids = document.getElementsByName('ids')[0].value.split(',');
   const elements = {
     progressBar: document.querySelector('.progressbar > div'),
@@ -47,5 +49,5 @@ function updateThumb(ids, i, elements) {
     thumbnail: document.querySelector('.thumbnail-placeholder'),
     title: document.querySelector('.thumbnail-link-title'),
   };
-  updateThumb(ids, 0, elements);
+  updateThumb(basePath, ids, 0, elements);
 })();
