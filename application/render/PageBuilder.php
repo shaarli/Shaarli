@@ -149,6 +149,10 @@ class PageBuilder
      */
     protected function finalize(): void
     {
+        //FIXME - DEV _ REMOVE ME
+        $this->assign('base_path', '/Shaarli');
+        $this->assign('asset_path', '/Shaarli/tpl/default');
+
         // TODO: use the SessionManager
         $messageKeys = [
             SessionManager::KEY_SUCCESS_MESSAGES,

@@ -13,7 +13,6 @@ use Shaarli\Security\SessionManager;
 use Shaarli\Thumbnailer;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Http\Uri;
 
 class PostBookmarkControllerTest extends TestCase
 {
@@ -406,12 +405,6 @@ class PostBookmarkControllerTest extends TestCase
                 return $parameters[$key] ?? null;
             })
         ;
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
-
-            return $uri;
-        });
         $response = new Response();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters) {
@@ -493,12 +486,6 @@ class PostBookmarkControllerTest extends TestCase
                 return $parameters[$key] ?? null;
             })
         ;
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
-
-            return $uri;
-        });
         $response = new Response();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters, $id) {
@@ -575,12 +562,6 @@ class PostBookmarkControllerTest extends TestCase
                 return $parameters[$key] ?? null;
             })
         ;
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
-
-            return $uri;
-        });
         $response = new Response();
 
         $this->container->conf = $this->createMock(ConfigManager::class);

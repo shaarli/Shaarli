@@ -66,12 +66,12 @@
                 tagged
                 {loop="$exploded_tags"}
                     <span class="linktag" title="Remove tag">
-                        <a href="./remove-tag/{function="urlencode($value)"}">{$value} <span class="remove">x</span></a>
+                        <a href="{$base_path}/remove-tag/{function="urlencode($value)"}">{$value} <span class="remove">x</span></a>
                     </span>
                 {/loop}
             {elseif="$search_tags === false"}
                 <span class="linktag" title="Remove tag">
-                    <a href="?">untagged <span class="remove">x</span></a>
+                    <a href="{$base_path}/">untagged <span class="remove">x</span></a>
                 </span>
             {/if}
         </div>
@@ -95,13 +95,13 @@
                     <div class="linkeditbuttons">
                         <form method="GET" class="buttoneditform">
                             <input type="hidden" name="edit_link" value="{$value.id}">
-                            <input type="image" alt="Edit" src="img/edit_icon.png" title="Edit" class="button_edit">
+                            <input type="image" alt="Edit" src="{$asset_path}/img/edit_icon.png#" title="Edit" class="button_edit">
                         </form><br>
                         <form method="GET" class="buttoneditform">
                             <input type="hidden" name="lf_linkdate" value="{$value.id}">
                             <input type="hidden" name="token" value="{$token}">
                             <input type="hidden" name="delete_link">
-                            <input type="image" alt="Delete" src="img/delete_icon.png" title="Delete"
+                            <input type="image" alt="Delete" src="{$asset_path}/img/delete_icon.png#" title="Delete"
                                    class="button_delete" onClick="return confirmDeleteLink();">
                         </form>
                     </div>
@@ -114,7 +114,7 @@
                 {if="!$hide_timestamps || $is_logged_in"}
                     {$updated=$value.updated_timestamp ? 'Edited: '. format_date($value.updated) : 'Permalink'}
                     <span class="linkdate" title="Permalink">
-                        <a href="?{$value.shorturl}">
+                        <a href="{$base_path}/?{$value.shorturl}">
                             <span title="{$updated}">
                                 {$value.created|format_date}
                                 {if="$value.updated_timestamp"}*{/if}
@@ -123,7 +123,7 @@
                         </a> -
                     </span>
                 {else}
-                    <span class="linkdate" title="Short link here"><a href="?{$value.shorturl}">permalink</a> - </span>
+                    <span class="linkdate" title="Short link here"><a href="{$base_path}/?{$value.shorturl}">permalink</a> - </span>
                 {/if}
 
                 {loop="$value.link_plugin"}
@@ -133,7 +133,7 @@
                 <a href="{$value.real_url}"><span class="linkurl" title="Short link">{$value.url}</span></a><br>
                 {if="$value.tags"}
                     <div class="linktaglist">
-                    {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="./add-tag/{$value|urlencode}">{$value}</a></span> {/loop}
+                    {loop="$value.taglist"}<span class="linktag" title="Add tag"><a href="{$base_path}/add-tag/{$value|urlencode}">{$value}</a></span> {/loop}
                     </div>
                 {/if}
 
@@ -154,7 +154,7 @@
 </div>
 
     {include="page.footer"}
-<script src="js/thumbnails.min.js"></script>
+<script src="{$asset_path}/js/thumbnails.min.js#"></script>
 
 </body>
 </html>

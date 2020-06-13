@@ -5,11 +5,11 @@
 <meta name="referrer" content="same-origin">
 <link rel="alternate" type="application/atom+xml" href="{$feedurl}feed-atom?{$searchcrits}#" title="ATOM Feed" />
 <link rel="alternate" type="application/rss+xml" href="{$feedurl}feed-rss?{$searchcrits}#" title="RSS Feed" />
-<link href="img/favicon.png" rel="shortcut icon" type="image/png" />
-<link href="img/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
-<link type="text/css" rel="stylesheet" href="css/shaarli.min.css?v={$version_hash}" />
+<link href="{$asset_path}/img/favicon.png#" rel="shortcut icon" type="image/png" />
+<link href="{$asset_path}/img/apple-touch-icon.png#" rel="apple-touch-icon" sizes="180x180" />
+<link type="text/css" rel="stylesheet" href="{$asset_path}/css/shaarli.min.css?v={$version_hash}#" />
 {if="$formatter==='markdown'"}
-  <link type="text/css" rel="stylesheet" href="css/markdown.min.css?v={$version_hash}" />
+  <link type="text/css" rel="stylesheet" href="{$asset_path}/css/markdown.min.css?v={$version_hash}#" />
 {/if}
 {loop="$plugins_includes.css_files"}
   <link type="text/css" rel="stylesheet" href="{$value}?v={$version_hash}#"/>
@@ -17,7 +17,7 @@
 {if="is_file('data/user.css')"}
   <link type="text/css" rel="stylesheet" href="data/user.css#" />
 {/if}
-<link rel="search" type="application/opensearchdescription+xml" href="./open-search#"
+<link rel="search" type="application/opensearchdescription+xml" href="{$base_path}/open-search#"
       title="Shaarli search - {$shaarlititle}" />
 {if="! empty($links) && count($links) === 1"}
   {$link=reset($links)}

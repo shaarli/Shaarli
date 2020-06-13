@@ -1,11 +1,11 @@
 <div class="paging">
 {if="$is_logged_in"}
     <div class="paging_privatelinks">
-      <a href="./visibility/private">
+      <a href="{$base_path}/visibility/private">
 		{if="$visibility=='private'"}
-      <img src="img/private_16x16_active.png" width="16" height="16" title="Click to see all links" alt="Click to see all links">
+      <img src="{$asset_path}/img/private_16x16_active.png#" width="16" height="16" title="Click to see all links" alt="Click to see all links">
     {else}
-      <img src="img/private_16x16.png" width="16" height="16" title="Click to see only private links" alt="Click to see only private links">
+      <img src="{$asset_path}/img/private_16x16.png#" width="16" height="16" title="Click to see only private links" alt="Click to see only private links">
 		{/if}
 		</a>
 
@@ -24,10 +24,10 @@
     {/loop}
     <div class="paging_linksperpage">
         Links per page:
-        <a href="./links-per-page?nb=20">20</a>
-        <a href="./links-per-page?nb=50">50</a>
-        <a href="./links-per-page?nb=100">100</a>
-        <form method="GET" class="linksperpage" action="./links-per-page">
+        <a href="{$base_path}/links-per-page?nb=20">20</a>
+        <a href="{$base_path}/links-per-page?nb=50">50</a>
+        <a href="{$base_path}/links-per-page?nb=100">100</a>
+        <form method="GET" class="linksperpage" action="{$base_path}/links-per-page">
           <input type="text" name="nb" size="2">
         </form>
     </div>

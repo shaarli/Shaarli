@@ -10,7 +10,7 @@
     {/if}
     &middot;
     {'The personal, minimalist, super-fast, database free, bookmarking service'|t} {'by the Shaarli community'|t} &middot;
-    <a href="doc/html/index.html" rel="nofollow">{'Documentation'|t}</a>
+    <a href="{$base_path}/doc/html/index.html" rel="nofollow">{'Documentation'|t}</a>
       {loop="$plugins_footer.text"}
           {$value}
       {/loop}
@@ -39,4 +39,5 @@
   </span>
 </div>
 
-<script src="js/shaarli.min.js?v={$version_hash}"></script>
+<input type="hidden" name="js_base_path" value="{$base_path}" />
+<script src="{$asset_path}/js/shaarli.min.js?v={$version_hash}#"></script>

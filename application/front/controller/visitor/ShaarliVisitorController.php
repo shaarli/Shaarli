@@ -60,6 +60,19 @@ abstract class ShaarliVisitorController
         $this->assignView('privateLinkcount', $this->container->bookmarkService->count(BookmarkFilter::$PRIVATE));
         $this->assignView('plugin_errors', $this->container->pluginManager->getErrors());
 
+        /*
+         * Define base path (if Shaarli is installed in a domain's subfolder, e.g. `/shaarli`)
+         * and the asset path (subfolder/tpl/default for default theme).
+         * These MUST be used to create an internal link or to include an asset in templates.
+         */
+        $this->assignView('base_path', $this->container->basePath);
+        $this->assignView(
+            'asset_path',
+            $this->container->basePath . '/' .
+            rtrim($this->container->conf->get('resource.raintpl_tpl', 'tpl'), '/') . '/' .
+            $this->container->conf->get('resource.theme', 'default')
+        );
+
         $this->executeDefaultHooks($template);
 
         return $this->container->pageBuilder->render($template);
@@ -105,7 +118,7 @@ abstract class ShaarliVisitorController
         array $clearParams = [],
         string $anchor = null
     ): Response {
-        $defaultPath = rtrim($request->getUri()->getBasePath(), '/') . '/';
+        $defaultPath = $this->container->basePath . '/';
         $referer = $this->container->environment['HTTP_REFERER'] ?? null;
 
         if (null !== $referer) {

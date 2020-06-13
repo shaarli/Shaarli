@@ -15,7 +15,7 @@
     <h2 class="window-title">{'Tag list'|t} - {$countTags} {'tags'|t}</h2>
     {if="!empty($search_tags)"}
       <p class="center">
-        <a href="./?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
+        <a href="{$base_path}/?searchtags={$search_tags|urlencode}" class="pure-button pure-button-shaarli">
           {'List all links with those tags'|t}
         </a>
       </p>
@@ -51,13 +51,13 @@
           <div class="pure-u-1">
             {if="$is_logged_in===true"}
               <a href="#" class="delete-tag" aria-label="{'Delete'|t}"><i class="fa fa-trash" aria-hidden="true"></i></a>&nbsp;&nbsp;
-              <a href="./manage-tags?fromtag={$key|urlencode}" class="rename-tag" aria-label="{'Rename tag'|t}">
+              <a href="{$base_path}/manage-tags?fromtag={$key|urlencode}" class="rename-tag" aria-label="{'Rename tag'|t}">
                 <i class="fa fa-pencil-square-o {$key}" aria-hidden="true"></i>
               </a>
             {/if}
 
-            <a href="./add-tag/{$key|urlencode}" title="{'Filter by tag'|t}" class="count">{$value}</a>
-            <a href="./?searchtags={$key|urlencode} {$search_tags|urlencode}" class="tag-link">{$key}</a>
+            <a href="{$base_path}/add-tag/{$key|urlencode}" title="{'Filter by tag'|t}" class="count">{$value}</a>
+            <a href="{$base_path}/?searchtags={$key|urlencode} {$search_tags|urlencode}" class="tag-link">{$key}</a>
 
             {loop="$value.tag_plugin"}
               {$value}

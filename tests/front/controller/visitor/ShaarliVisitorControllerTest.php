@@ -8,15 +8,14 @@ use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\BookmarkFilter;
 use Slim\Http\Request;
 use Slim\Http\Response;
-use Slim\Http\Uri;
 
 /**
  * Class ShaarliControllerTest
  *
- * This class is used to test default behavior of ShaarliController abstract class.
+ * This class is used to test default behavior of ShaarliVisitorController abstract class.
  * It uses a dummy non abstract controller.
  */
-class ShaarliPublicControllerTest extends TestCase
+class ShaarliVisitorControllerTest extends TestCase
 {
     use FrontControllerMockHelper;
 
@@ -49,20 +48,15 @@ class ShaarliPublicControllerTest extends TestCase
                 Request $request,
                 Response $response,
                 array $loopTerms = [],
-                array $clearParams = []
+                array $clearParams = [],
+                string $anchor = null
             ): Response {
-                return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams);
+                return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams, $anchor);
             }
         };
         $this->assignedValues = [];
 
         $this->request = $this->createMock(Request::class);
-        $this->request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
-
-            return $uri;
-        });
     }
 
     public function testAssignView(): void
@@ -102,6 +96,8 @@ class ShaarliPublicControllerTest extends TestCase
         static::assertSame(10, $this->assignedValues['linkcount']);
         static::assertSame(5, $this->assignedValues['privateLinkcount']);
         static::assertSame(['error'], $this->assignedValues['plugin_errors']);
+        static::assertSame('/subfolder', $this->assignedValues['base_path']);
+        static::assertSame('/subfolder/tpl/default', $this->assignedValues['asset_path']);
 
         static::assertSame('templateName', $this->assignedValues['plugins_includes']['render_includes']['target']);
         static::assertTrue($this->assignedValues['plugins_includes']['render_includes']['loggedin']);
@@ -153,7 +149,7 @@ class ShaarliPublicControllerTest extends TestCase
         $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'controller']);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['/subfolder'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 
     /**
@@ -168,7 +164,7 @@ class ShaarliPublicControllerTest extends TestCase
         $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'other']);
 
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['/subfolder'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 
     /**

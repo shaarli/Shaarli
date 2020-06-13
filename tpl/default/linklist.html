@@ -94,7 +94,7 @@
           {'tagged'|t}
           {loop="$exploded_tags"}
               <span class="label label-tag" title="{'Remove tag'|t}">
-                <a href="./remove-tag/{function="urlencode($value)"}" aria-label="{'Remove tag'|t}">
+                <a href="{$base_path}/remove-tag/{function="urlencode($value)"}" aria-label="{'Remove tag'|t}">
                   {$value}<span class="remove"><i class="fa fa-times" aria-hidden="true"></i></span>
                 </a>
               </span>
@@ -183,7 +183,7 @@
                 {$tag_counter=count($value.taglist)}
                 {loop="value.taglist"}
                   <span class="label label-tag" title="{$strAddTag}">
-                    <a href="./add-tag/{$value|urlencode}">{$value}</a>
+                    <a href="{$base_path}/add-tag/{$value|urlencode}">{$value}</a>
                   </span>
                   {if="$tag_counter - 1 != $counter"}&middot;{/if}
                 {/loop}
@@ -198,16 +198,16 @@
                       <input type="checkbox" class="link-checkbox" value="{$value.id}">
                     </span>
                     <span class="linklist-item-infos-controls-item ctrl-edit">
-                      <a href="?edit_link={$value.id}" aria-label="{$strEdit}" title="{$strEdit}"><i class="fa fa-pencil-square-o edit-link" aria-hidden="true"></i></a>
+                      <a href="{$base_path}/?edit_link={$value.id}" aria-label="{$strEdit}" title="{$strEdit}"><i class="fa fa-pencil-square-o edit-link" aria-hidden="true"></i></a>
                     </span>
                     <span class="linklist-item-infos-controls-item ctrl-delete">
-                      <a href="?delete_link&amp;lf_linkdate={$value.id}&amp;token={$token}" aria-label="{$strDelete}"
+                      <a href="{$base_path}/?delete_link&amp;lf_linkdate={$value.id}&amp;token={$token}" aria-label="{$strDelete}"
                          title="{$strDelete}" class="delete-link pure-u-0 pure-u-lg-visible confirm-delete">
                         <i class="fa fa-trash" aria-hidden="true"></i>
                       </a>
                     </span>
                     <span class="linklist-item-infos-controls-item ctrl-pin">
-                      <a href="./?do=pin&amp;id={$value.id}&amp;token={$token}"
+                      <a href="{$base_path}/?do=pin&amp;id={$value.id}&amp;token={$token}"
                          title="{$strToggleSticky}" aria-label="{$strToggleSticky}" class="pin-link {if="$value.sticky"}pinned-link{/if} pure-u-0 pure-u-lg-visible">
                         <i class="fa fa-thumb-tack" aria-hidden="true"></i>
                       </a>
@@ -224,7 +224,7 @@
                     </div>
                   {/if}
                 {/if}
-                <a href="?{$value.shorturl}" title="{$strPermalink}">
+                <a href="{$base_path}/?{$value.shorturl}" title="{$strPermalink}">
                   {if="!$hide_timestamps || $is_logged_in"}
                     {$updated=$value.updated_timestamp ? $strEdited. format_date($value.updated) : $strPermalink}
                     <span class="linkdate" title="{$updated}">
@@ -267,12 +267,12 @@
                 {/if}
                 {if="$is_logged_in"}
                   &middot;
-                  <a href="?delete_link&amp;lf_linkdate={$value.id}&amp;token={$token}" aria-label="{$strDelete}"
+                  <a href="{$base_path}/?delete_link&amp;lf_linkdate={$value.id}&amp;token={$token}" aria-label="{$strDelete}"
                      title="{$strDelete}" class="delete-link confirm-delete">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                   </a>
                   &middot;
-                  <a href="?edit_link={$value.id}" aria-label="{$strEdit}" title="{$strEdit}"><i class="fa fa-pencil-square-o edit-link" aria-hidden="true"></i></a>
+                  <a href="{$base_path}/?edit_link={$value.id}" aria-label="{$strEdit}" title="{$strEdit}"><i class="fa fa-pencil-square-o edit-link" aria-hidden="true"></i></a>
                 {/if}
               </div>
             </div>
@@ -297,6 +297,6 @@
 </div>
 
 {include="page.footer"}
-<script src="js/thumbnails.min.js?v={$version_hash}"></script>
+<script src="{$asset_path}/js/thumbnails.min.js?v={$version_hash}#"></script>
 </body>
 </html>

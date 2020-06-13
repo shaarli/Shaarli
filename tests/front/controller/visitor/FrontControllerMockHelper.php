@@ -81,6 +81,8 @@ trait FrontControllerMockHelper
             'SERVER_PORT' => '80',
             'REQUEST_URI' => '/daily-rss',
         ];
+
+        $this->container->basePath = '/subfolder';
     }
 
     /**

@@ -39,6 +39,8 @@ class ShaarliMiddleware
     public function __invoke(Request $request, Response $response, callable $next)
     {
         try {
+            $this->container->basePath = rtrim($request->getUri()->getBasePath(), '/');
+
             $response = $next($request, $response);
         } catch (ShaarliFrontException $e) {
             $this->container->pageBuilder->assign('message', $e->getMessage());

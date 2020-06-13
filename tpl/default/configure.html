@@ -11,7 +11,7 @@
 {$ratioInput='7-12'}
 {$ratioInputMobile='1-8'}
 
-<form method="POST" action="#" name="configform" id="configform">
+<form method="POST" action="{$base_path}/configure" name="configform" id="configform">
   <div class="pure-g">
     <div class="pure-u-lg-1-8 pure-u-1-24"></div>
     <div class="pure-u-lg-3-4 pure-u-22-24 page-form page-form-complete">
@@ -35,7 +35,7 @@
           <div class="form-label">
             <label for="titleLink">
               <span class="label-name">{'Home link'|t}</span><br>
-              <span class="label-desc">{'Default value'|t}: ./</span>
+              <span class="label-desc">{'Default value'|t}: {$base_path}</span>
             </label>
           </div>
         </div>
@@ -289,7 +289,7 @@
                 {if="! $gd_enabled"}
                   {'You need to enable the extension <code>php-gd</code> to use thumbnails.'|t}
                 {elseif="$thumbnails_enabled"}
-                  <a href="./?do=thumbs_update">{'Synchronize thumbnails'|t}</a>
+                  <a href="{$base_path}/?do=thumbs_update">{'Synchronize thumbnails'|t}</a>
                 {/if}
               </span>
             </label>

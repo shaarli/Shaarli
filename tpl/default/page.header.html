@@ -21,24 +21,24 @@
         </li>
         {if="$is_logged_in || $openshaarli"}
           <li class="pure-menu-item">
-            <a href="./add-shaare" class="pure-menu-link" id="shaarli-menu-shaare">
+            <a href="{$base_path}/add-shaare" class="pure-menu-link" id="shaarli-menu-shaare">
               <i class="fa fa-plus" aria-hidden="true"></i> {'Shaare'|t}
             </a>
           </li>
           <li class="pure-menu-item" id="shaarli-menu-tools">
-            <a href="./tools" class="pure-menu-link">{'Tools'|t}</a>
+            <a href="{$base_path}/tools" class="pure-menu-link">{'Tools'|t}</a>
           </li>
         {/if}
         <li class="pure-menu-item" id="shaarli-menu-tags">
-          <a href="./tag-cloud" class="pure-menu-link">{'Tag cloud'|t}</a>
+          <a href="{$base_path}/tag-cloud" class="pure-menu-link">{'Tag cloud'|t}</a>
         </li>
         {if="$thumbnails_enabled"}
           <li class="pure-menu-item" id="shaarli-menu-picwall">
-            <a href="./picture-wall?{function="ltrim($searchcrits, '&')"}" class="pure-menu-link">{'Picture wall'|t}</a>
+            <a href="{$base_path}/picture-wall?{function="ltrim($searchcrits, '&')"}" class="pure-menu-link">{'Picture wall'|t}</a>
           </li>
         {/if}
         <li class="pure-menu-item" id="shaarli-menu-daily">
-          <a href="./daily" class="pure-menu-link">{'Daily'|t}</a>
+          <a href="{$base_path}/daily" class="pure-menu-link">{'Daily'|t}</a>
         </li>
         {loop="$plugins_header.buttons_toolbar"}
           <li class="pure-menu-item shaarli-menu-plugin">
@@ -52,15 +52,15 @@
           </li>
         {/loop}
         <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-rss">
-            <a href="./feed-{$feed_type}?{$searchcrits}" class="pure-menu-link">{'RSS Feed'|t}</a>
+            <a href="{$base_path}/feed-{$feed_type}?{$searchcrits}" class="pure-menu-link">{'RSS Feed'|t}</a>
         </li>
         {if="$is_logged_in"}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-logout">
-            <a href="./logout" class="pure-menu-link">{'Logout'|t}</a>
+            <a href="{$base_path}/logout" class="pure-menu-link">{'Logout'|t}</a>
           </li>
         {else}
           <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-login">
-            <a href="./login" class="pure-menu-link">{'Login'|t}</a>
+            <a href="{$base_path}/login" class="pure-menu-link">{'Login'|t}</a>
           </li>
         {/if}
       </ul>
@@ -74,13 +74,13 @@
             </a>
           </li>
           <li class="pure-menu-item" id="shaarli-menu-desktop-rss">
-            <a href="./feed-{$feed_type}?{$searchcrits}" class="pure-menu-link" title="{'RSS Feed'|t}" aria-label="{'RSS Feed'|t}">
+            <a href="{$base_path}/feed-{$feed_type}?{$searchcrits}" class="pure-menu-link" title="{'RSS Feed'|t}" aria-label="{'RSS Feed'|t}">
               <i class="fa fa-rss" aria-hidden="true"></i>
             </a>
           </li>
           {if="!$is_logged_in"}
             <li class="pure-menu-item" id="shaarli-menu-desktop-login">
-              <a href="./login" class="pure-menu-link"
+              <a href="{$base_path}/login" class="pure-menu-link"
                  data-open-id="header-login-form"
                  id="login-button" aria-label="{'Login'|t}" title="{'Login'|t}">
                 <i class="fa fa-user" aria-hidden="true"></i>
@@ -88,7 +88,7 @@
             </li>
           {else}
             <li class="pure-menu-item" id="shaarli-menu-desktop-logout">
-              <a href="./logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
+              <a href="{$base_path}/logout" class="pure-menu-link" aria-label="{'Logout'|t}" title="{'Logout'|t}">
                 <i class="fa fa-sign-out" aria-hidden="true"></i>
               </a>
             </li>

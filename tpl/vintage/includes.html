@@ -8,13 +8,13 @@
 <link href="img/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 <link type="text/css" rel="stylesheet" href="css/shaarli.min.css" />
 {if="$formatter==='markdown'"}
-  <link type="text/css" rel="stylesheet" href="css/markdown.min.css?v={$version_hash}" />
+  <link type="text/css" rel="stylesheet" href="{$asset_path}/css/markdown.min.css?v={$version_hash}#" />
 {/if}
 {loop="$plugins_includes.css_files"}
 <link type="text/css" rel="stylesheet" href="{$value}#"/>
 {/loop}
 {if="is_file('data/user.css')"}<link type="text/css" rel="stylesheet" href="data/user.css#" />{/if}
-<link rel="search" type="application/opensearchdescription+xml" href="./open-search#"
+<link rel="search" type="application/opensearchdescription+xml" href="{$base_path}/open-search#"
       title="Shaarli search - {$shaarlititle|htmlspecialchars}" />
 {if="! empty($links) && count($links) === 1"}
   {$link=reset($links)}
