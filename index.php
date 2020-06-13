@@ -1159,11 +1159,11 @@ $app->group('', function () {
     $this->post('/admin/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save');
     $this->get('/admin/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:index');
     $this->post('/admin/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:save');
-    $this->get('/admin/add-shaare', '\Shaarli\Front\Controller\Admin\PostBookmarkController:addShaare');
-    $this->get('/admin/shaare', '\Shaarli\Front\Controller\Admin\PostBookmarkController:displayCreateForm');
-    $this->get('/admin/shaare/{id:[0-9]+}', '\Shaarli\Front\Controller\Admin\PostBookmarkController:displayEditForm');
-    $this->post('/admin/shaare', '\Shaarli\Front\Controller\Admin\PostBookmarkController:save');
-    $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\PostBookmarkController:deleteBookmark');
+    $this->get('/admin/add-shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:addShaare');
+    $this->get('/admin/shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:displayCreateForm');
+    $this->get('/admin/shaare/{id:[0-9]+}', '\Shaarli\Front\Controller\Admin\ManageShaareController:displayEditForm');
+    $this->post('/admin/shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:save');
+    $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\ManageShaareController:deleteBookmark');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');

@@ -16,7 +16,7 @@ use Slim\Http\Response;
  *
  * Slim controller used to handle Shaarli create or edit bookmarks.
  */
-class PostBookmarkController extends ShaarliAdminController
+class ManageShaareController extends ShaarliAdminController
 {
     /**
      * GET /admin/add-shaare - Displays the form used to create a new bookmark from an URL
@@ -33,7 +33,7 @@ class PostBookmarkController extends ShaarliAdminController
 
     /**
      * GET /admin/shaare - Displays the bookmark form for creation.
-     *               Note that if the URL is found in existing bookmarks, then it will be in edit mode.
+     *                     Note that if the URL is found in existing bookmarks, then it will be in edit mode.
      */
     public function displayCreateForm(Request $request, Response $response): Response
     {
@@ -97,14 +97,17 @@ class PostBookmarkController extends ShaarliAdminController
      */
     public function displayEditForm(Request $request, Response $response, array $args): Response
     {
-        $id = $args['id'];
+        $id = $args['id'] ?? '';
         try {
             if (false === ctype_digit($id)) {
                 throw new BookmarkNotFoundException();
             }
-            $bookmark = $this->container->bookmarkService->get($id);  // Read database
+            $bookmark = $this->container->bookmarkService->get((int) $id);  // Read database
         } catch (BookmarkNotFoundException $e) {
-            $this->saveErrorMessage(t('Bookmark not found'));
+            $this->saveErrorMessage(sprintf(
+                t('Bookmark with identifier %s could not be found.'),
+                $id
+            ));
 
             return $this->redirect($response, '/');
         }
@@ -177,10 +180,10 @@ class PostBookmarkController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        $ids = escape(trim($request->getParam('id')));
-        if (strpos($ids, ' ') !== false) {
+        $ids = escape(trim($request->getParam('id') ?? ''));
+        if (empty($ids) || strpos($ids, ' ') !== false) {
             // multiple, space-separated ids provided
-            $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'strlen'));
+            $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
         } else {
             $ids = [$ids];
         }
@@ -193,16 +196,28 @@ class PostBookmarkController extends ShaarliAdminController
         }
 
         $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $count = 0;
         foreach ($ids as $id) {
-            $id = (int) $id;
-            // TODO: check if it exists
-            $bookmark = $this->container->bookmarkService->get($id);
+            try {
+                $bookmark = $this->container->bookmarkService->get((int) $id);
+            } catch (BookmarkNotFoundException $e) {
+                $this->saveErrorMessage(sprintf(
+                    t('Bookmark with identifier %s could not be found.'),
+                    $id
+                ));
+
+                continue;
+            }
+
             $data = $formatter->format($bookmark);
             $this->container->pluginManager->executeHooks('delete_link', $data);
             $this->container->bookmarkService->remove($bookmark, false);
+            ++ $count;
         }
 
-        $this->container->bookmarkService->save();
+        if ($count > 0) {
+            $this->container->bookmarkService->save();
+        }
 
         // If we are called from the bookmarklet, we must close the popup:
         if ($request->getParam('source') === 'bookmarklet') {
@@ -213,6 +228,11 @@ class PostBookmarkController extends ShaarliAdminController
         return $this->redirect($response, '/');
     }
 
+    /**
+     * Helper function used to display the shaare form whether it's a new or existing bookmark.
+     *
+     * @param array $link data used in template, either from parameters or from the data store
+     */
     protected function displayForm(array $link, bool $isNew, Request $request, Response $response): Response
     {
         $tags = $this->container->bookmarkService->bookmarksCountPerTag();
