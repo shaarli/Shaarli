@@ -486,7 +486,7 @@ function init(description) {
 
         const ids = links.map(item => item.id);
         window.location =
-          `${basePath}/?change_visibility&token=${token.value}&newVisibility=${visibility}&ids=${ids.join('+')}`;
+          `${basePath}/admin/shaare/visibility?token=${token.value}&newVisibility=${visibility}&id=${ids.join('+')}`;
       });
     });
   }
