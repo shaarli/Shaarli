@@ -8,9 +8,7 @@
 {elseif="$link.description==''"}onload="document.linkform.lf_description.focus();"
 {else}onload="document.linkform.lf_tags.focus();"{/if} >
 <div id="pageheader">
-    {if="$source !== 'firefoxsocialapi'"}
     {include="page.header"}
-    {else}
     <div id="shaarli_title"><a href="{$titleLink}">{$shaarlititle}</a></div>
     {/if}
     <div id="editlinkform">
@@ -55,12 +53,11 @@
               </a>
             {/if}
             <input type="hidden" name="token" value="{$token}">
+            <input type="hidden" name="source" value="{$source}">
             {if="$http_referer"}<input type="hidden" name="returnurl" value="{$http_referer}">{/if}
         </form>
     </div>
 </div>
-{if="$source !== 'firefoxsocialapi'"}
 {include="page.footer"}
-{/if}
 </body>
 </html>
