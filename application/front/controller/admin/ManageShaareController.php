@@ -174,7 +174,7 @@ class ManageShaareController extends ShaarliAdminController
     }
 
     /**
-     * GET /admin/shaare/delete
+     * GET /admin/shaare/delete - Delete one or multiple bookmarks (depending on `id` query parameter).
      */
     public function deleteBookmark(Request $request, Response $response): Response
     {
@@ -226,6 +226,74 @@ class ManageShaareController extends ShaarliAdminController
 
         // Don't redirect to where we were previously because the datastore has changed.
         return $this->redirect($response, '/');
+    }
+
+    /**
+     * GET /admin/shaare/visibility
+     *
+     * Change visibility (public/private) of one or multiple bookmarks (depending on `id` query parameter).
+     */
+    public function changeVisibility(Request $request, Response $response): Response
+    {
+        $this->checkToken($request);
+
+        $ids = trim(escape($request->getParam('id') ?? ''));
+        if (empty($ids) || strpos($ids, ' ') !== false) {
+            // multiple, space-separated ids provided
+            $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
+        } else {
+            // only a single id provided
+            $ids = [$ids];
+        }
+
+        // assert at least one id is given
+        if (0 === count($ids)) {
+            $this->saveErrorMessage(t('Invalid bookmark ID provided.'));
+
+            return $this->redirectFromReferer($request, $response, [], ['change_visibility']);
+        }
+
+        // assert that the visibility is valid
+        $visibility = $request->getParam('newVisibility');
+        if (null === $visibility || false === in_array($visibility, ['public', 'private'], true)) {
+            $this->saveErrorMessage(t('Invalid visibility provided.'));
+
+            return $this->redirectFromReferer($request, $response, [], ['change_visibility']);
+        } else {
+            $isPrivate = $visibility === 'private';
+        }
+
+        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $count = 0;
+
+        foreach ($ids as $id) {
+            try {
+                $bookmark = $this->container->bookmarkService->get((int) $id);
+            } catch (BookmarkNotFoundException $e) {
+                $this->saveErrorMessage(sprintf(
+                    t('Bookmark with identifier %s could not be found.'),
+                    $id
+                ));
+
+                continue;
+            }
+
+            $bookmark->setPrivate($isPrivate);
+
+            // To preserve backward compatibility with 3rd parties, plugins still use arrays
+            $data = $formatter->format($bookmark);
+            $this->container->pluginManager->executeHooks('save_link', $data);
+            $bookmark->fromArray($data);
+
+            $this->container->bookmarkService->set($bookmark, false);
+            ++$count;
+        }
+
+        if ($count > 0) {
+            $this->container->bookmarkService->save();
+        }
+
+        return $this->redirectFromReferer($request, $response, ['/visibility'], ['change_visibility']);
     }
 
     /**
