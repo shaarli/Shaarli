@@ -297,6 +297,42 @@ class ManageShaareController extends ShaarliAdminController
     }
 
     /**
+     * GET /admin/shaare/{id}/pin - Pin or unpin a bookmark.
+     */
+    public function pinBookmark(Request $request, Response $response, array $args): Response
+    {
+        $this->checkToken($request);
+
+        $id = $args['id'] ?? '';
+        try {
+            if (false === ctype_digit($id)) {
+                throw new BookmarkNotFoundException();
+            }
+            $bookmark = $this->container->bookmarkService->get((int) $id);  // Read database
+        } catch (BookmarkNotFoundException $e) {
+            $this->saveErrorMessage(sprintf(
+                t('Bookmark with identifier %s could not be found.'),
+                $id
+            ));
+
+            return $this->redirectFromReferer($request, $response, ['/pin'], ['pin']);
+        }
+
+        $formatter = $this->container->formatterFactory->getFormatter('raw');
+
+        $bookmark->setSticky(!$bookmark->isSticky());
+
+        // To preserve backward compatibility with 3rd parties, plugins still use arrays
+        $data = $formatter->format($bookmark);
+        $this->container->pluginManager->executeHooks('save_link', $data);
+        $bookmark->fromArray($data);
+
+        $this->container->bookmarkService->set($bookmark);
+
+        return $this->redirectFromReferer($request, $response, ['/pin'], ['pin']);
+    }
+
+    /**
      * Helper function used to display the shaare form whether it's a new or existing bookmark.
      *
      * @param array $link data used in template, either from parameters or from the data store

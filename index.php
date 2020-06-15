@@ -567,20 +567,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     }
 
     if ($targetPage == Router::$PAGE_PINLINK) {
-        if (! isset($_GET['id']) || !$bookmarkService->exists($_GET['id'])) {
-            // FIXME! Use a proper error system.
-            $msg = t('Invalid link ID provided');
-            echo '<script>alert("'. $msg .'");document.location=\''. index_url($_SERVER) .'\';</script>';
-            exit;
-        }
-        if (! $sessionManager->checkToken($_GET['token'])) {
-            die('Wrong token.');
-        }
-
-        $link = $bookmarkService->get($_GET['id']);
-        $link->setSticky(! $link->isSticky());
-        $bookmarkService->set($link);
-        header('Location: '.index_url($_SERVER));
+        // This route is no longer supported in legacy mode
+        header('Location: ./');
         exit;
     }
 
@@ -1121,6 +1109,7 @@ $app->group('', function () {
     $this->post('/admin/shaare', '\Shaarli\Front\Controller\Admin\ManageShaareController:save');
     $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\ManageShaareController:deleteBookmark');
     $this->get('/admin/shaare/visibility', '\Shaarli\Front\Controller\Admin\ManageShaareController:changeVisibility');
+    $this->get('/admin/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ManageShaareController:pinBookmark');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
