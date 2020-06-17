@@ -5,8 +5,7 @@
   <div id="pageheader">
     {include="page.header"}
     <div id="toolsdiv">
-      <form method="GET">
-        <input type="hidden" name="do" value="export">
+      <form method="POST" action="{$base_path}/admin/export">
         Selection:<br>
         <input type="radio" name="selection" value="all" checked="true"> All<br>
         <input type="radio" name="selection" value="private"> Private<br>

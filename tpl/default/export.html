@@ -6,14 +6,13 @@
 <body>
 {include="page.header"}
 
-<form method="GET" action="{$base_path}/?do=export" name="exportform" id="exportform">
+<form method="POST" action="{$base_path}/admin/export" name="exportform" id="exportform">
   <div class="pure-g">
     <div class="pure-u-lg-1-4 pure-u-1-24"></div>
     <div class="pure-u-lg-1-2 pure-u-22-24 page-form page-form-complete">
       <div>
         <h2 class="window-title">{"Export Database"|t}</h2>
       </div>
-      <input type="hidden" name="do" value="export">
       <input type="hidden" name="token" value="{$token}">
 
       <div class="pure-g">

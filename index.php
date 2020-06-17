@@ -573,50 +573,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     }
 
     if ($targetPage == Router::$PAGE_EXPORT) {
-        // Export bookmarks as a Netscape Bookmarks file
-
-        if (empty($_GET['selection'])) {
-            $PAGE->assign('pagetitle', t('Export') .' - '. $conf->get('general.title', 'Shaarli'));
-            $PAGE->renderPage('export');
-            exit;
-        }
-
-        // export as bookmarks_(all|private|public)_YYYYmmdd_HHMMSS.html
-        $selection = $_GET['selection'];
-        if (isset($_GET['prepend_note_url'])) {
-            $prependNoteUrl = $_GET['prepend_note_url'];
-        } else {
-            $prependNoteUrl = false;
-        }
-
-        try {
-            $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-            $formatter = $factory->getFormatter('raw');
-            $PAGE->assign(
-                'links',
-                NetscapeBookmarkUtils::filterAndFormat(
-                    $bookmarkService,
-                    $formatter,
-                    $selection,
-                    $prependNoteUrl,
-                    index_url($_SERVER)
-                )
-            );
-        } catch (Exception $exc) {
-            header('Content-Type: text/plain; charset=utf-8');
-            echo $exc->getMessage();
-            exit;
-        }
-        $now = new DateTime();
-        header('Content-Type: text/html; charset=utf-8');
-        header(
-            'Content-disposition: attachment; filename=bookmarks_'
-            .$selection.'_'.$now->format(Bookmark::LINK_DATE_FORMAT).'.html'
-        );
-        $PAGE->assign('date', $now->format(DateTime::RFC822));
-        $PAGE->assign('eol', PHP_EOL);
-        $PAGE->assign('selection', $selection);
-        $PAGE->renderPage('export.bookmarks');
+        header('Location: ./admin/export');
         exit;
     }
 
@@ -1105,6 +1062,8 @@ $app->group('', function () {
     $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\ManageShaareController:deleteBookmark');
     $this->get('/admin/shaare/visibility', '\Shaarli\Front\Controller\Admin\ManageShaareController:changeVisibility');
     $this->get('/admin/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ManageShaareController:pinBookmark');
+    $this->get('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:index');
+    $this->post('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:export');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
