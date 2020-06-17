@@ -39,7 +39,7 @@ http://<replace_domain>/admin/configure
 http://<replace_domain>/admin/tools
 http://<replace_domain>/daily
 http://<replace_domain>/?post
-http://<replace_domain>/?do=export
+http://<replace_domain>/admin/export
 http://<replace_domain>/?do=import
 http://<replace_domain>/login
 http://<replace_domain>/picture-wall

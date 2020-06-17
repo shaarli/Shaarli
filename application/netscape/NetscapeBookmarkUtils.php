@@ -16,10 +16,24 @@ use Shaarli\NetscapeBookmarkParser\NetscapeBookmarkParser;
 
 /**
  * Utilities to import and export bookmarks using the Netscape format
- * TODO: Not static, use a container.
  */
 class NetscapeBookmarkUtils
 {
+    /** @var BookmarkServiceInterface */
+    protected $bookmarkService;
+
+    /** @var ConfigManager */
+    protected $conf;
+
+    /** @var History */
+    protected $history;
+
+    public function __construct(BookmarkServiceInterface $bookmarkService, ConfigManager $conf, History $history)
+    {
+        $this->bookmarkService = $bookmarkService;
+        $this->conf = $conf;
+        $this->history = $history;
+    }
 
     /**
      * Filters bookmarks and adds Netscape-formatted fields
@@ -28,18 +42,16 @@ class NetscapeBookmarkUtils
      * - timestamp  link addition date, using the Unix epoch format
      * - taglist    comma-separated tag list
      *
-     * @param BookmarkServiceInterface $bookmarkService Link datastore
      * @param BookmarkFormatter        $formatter       instance
      * @param string                   $selection       Which bookmarks to export: (all|private|public)
      * @param bool                     $prependNoteUrl  Prepend note permalinks with the server's URL
      * @param string                   $indexUrl        Absolute URL of the Shaarli index page
      *
      * @return array The bookmarks to be exported, with additional fields
-     *@throws Exception Invalid export selection
      *
+     * @throws Exception Invalid export selection
      */
-    public static function filterAndFormat(
-        $bookmarkService,
+    public function filterAndFormat(
         $formatter,
         $selection,
         $prependNoteUrl,
@@ -51,7 +63,7 @@ class NetscapeBookmarkUtils
         }
 
         $bookmarkLinks = array();
-        foreach ($bookmarkService->search([], $selection) as $bookmark) {
+        foreach ($this->bookmarkService->search([], $selection) as $bookmark) {
             $link = $formatter->format($bookmark);
             $link['taglist'] = implode(',', $bookmark->getTags());
             if ($bookmark->isNote() && $prependNoteUrl) {
@@ -65,52 +77,14 @@ class NetscapeBookmarkUtils
     }
 
     /**
-     * Generates an import status summary
-     *
-     * @param string $filename       name of the file to import
-     * @param int    $filesize       size of the file to import
-     * @param int    $importCount    how many bookmarks were imported
-     * @param int    $overwriteCount how many bookmarks were overwritten
-     * @param int    $skipCount      how many bookmarks were skipped
-     * @param int    $duration       how many seconds did the import take
-     *
-     * @return string Summary of the bookmark import status
-     */
-    private static function importStatus(
-        $filename,
-        $filesize,
-        $importCount = 0,
-        $overwriteCount = 0,
-        $skipCount = 0,
-        $duration = 0
-    ) {
-        $status = sprintf(t('File %s (%d bytes) '), $filename, $filesize);
-        if ($importCount == 0 && $overwriteCount == 0 && $skipCount == 0) {
-            $status .= t('has an unknown file format. Nothing was imported.');
-        } else {
-            $status .= vsprintf(
-                t(
-                    'was successfully processed in %d seconds: '
-                    . '%d bookmarks imported, %d bookmarks overwritten, %d bookmarks skipped.'
-                ),
-                [$duration, $importCount, $overwriteCount, $skipCount]
-            );
-        }
-        return $status;
-    }
-
-    /**
      * Imports Web bookmarks from an uploaded Netscape bookmark dump
      *
      * @param array                    $post            Server $_POST parameters
      * @param array                    $files           Server $_FILES parameters
-     * @param BookmarkServiceInterface $bookmarkService Loaded LinkDB instance
-     * @param ConfigManager            $conf            instance
-     * @param History                  $history         History instance
      *
      * @return string Summary of the bookmark import status
      */
-    public static function import($post, $files, $bookmarkService, $conf, $history)
+    public function import($post, $files)
     {
         $start = time();
         $filename = $files['filetoupload']['name'];
@@ -141,11 +115,11 @@ class NetscapeBookmarkUtils
             true,                           // nested tag support
             $defaultTags,                   // additional user-specified tags
             strval(1 - $defaultPrivacy),    // defaultPub = 1 - defaultPrivacy
-            $conf->get('resource.data_dir') // log path, will be overridden
+            $this->conf->get('resource.data_dir') // log path, will be overridden
         );
         $logger = new Logger(
-            $conf->get('resource.data_dir'),
-            !$conf->get('dev.debug') ? LogLevel::INFO : LogLevel::DEBUG,
+            $this->conf->get('resource.data_dir'),
+            !$this->conf->get('dev.debug') ? LogLevel::INFO : LogLevel::DEBUG,
             [
                 'prefix' => 'import.',
                 'extension' => 'log',
@@ -171,7 +145,7 @@ class NetscapeBookmarkUtils
                 $private = 0;
             }
 
-            $link = $bookmarkService->findByUrl($bkm['uri']);
+            $link = $this->bookmarkService->findByUrl($bkm['uri']);
             $existingLink = $link !== null;
             if (! $existingLink) {
                 $link = new Bookmark();
@@ -193,20 +167,21 @@ class NetscapeBookmarkUtils
             }
 
             $link->setTitle($bkm['title']);
-            $link->setUrl($bkm['uri'], $conf->get('security.allowed_protocols'));
+            $link->setUrl($bkm['uri'], $this->conf->get('security.allowed_protocols'));
             $link->setDescription($bkm['note']);
             $link->setPrivate($private);
             $link->setTagsString($bkm['tags']);
 
-            $bookmarkService->addOrSet($link, false);
+            $this->bookmarkService->addOrSet($link, false);
             $importCount++;
         }
 
-        $bookmarkService->save();
-        $history->importLinks();
+        $this->bookmarkService->save();
+        $this->history->importLinks();
 
         $duration = time() - $start;
-        return self::importStatus(
+
+        return $this->importStatus(
             $filename,
             $filesize,
             $importCount,
@@ -214,5 +189,40 @@ class NetscapeBookmarkUtils
             $skipCount,
             $duration
         );
+    }
+
+    /**
+     * Generates an import status summary
+     *
+     * @param string $filename       name of the file to import
+     * @param int    $filesize       size of the file to import
+     * @param int    $importCount    how many bookmarks were imported
+     * @param int    $overwriteCount how many bookmarks were overwritten
+     * @param int    $skipCount      how many bookmarks were skipped
+     * @param int    $duration       how many seconds did the import take
+     *
+     * @return string Summary of the bookmark import status
+     */
+    protected function importStatus(
+        $filename,
+        $filesize,
+        $importCount = 0,
+        $overwriteCount = 0,
+        $skipCount = 0,
+        $duration = 0
+    ) {
+        $status = sprintf(t('File %s (%d bytes) '), $filename, $filesize);
+        if ($importCount == 0 && $overwriteCount == 0 && $skipCount == 0) {
+            $status .= t('has an unknown file format. Nothing was imported.');
+        } else {
+            $status .= vsprintf(
+                t(
+                    'was successfully processed in %d seconds: '
+                    . '%d bookmarks imported, %d bookmarks overwritten, %d bookmarks skipped.'
+                ),
+                [$duration, $importCount, $overwriteCount, $skipCount]
+            );
+        }
+        return $status;
     }
 }

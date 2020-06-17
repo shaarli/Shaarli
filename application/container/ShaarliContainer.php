@@ -10,6 +10,7 @@ use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Http\HttpAccess;
+use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
@@ -30,6 +31,7 @@ use Slim\Container;
  * @property History                  $history
  * @property HttpAccess               $httpAccess
  * @property LoginManager             $loginManager
+ * @property NetscapeBookmarkUtils    $netscapeBookmarkUtils
  * @property PageBuilder              $pageBuilder
  * @property PageCacheManager         $pageCacheManager
  * @property PluginManager            $pluginManager
