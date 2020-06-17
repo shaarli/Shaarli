@@ -662,13 +662,8 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
         if (! $sessionManager->checkToken($_POST['token'])) {
             die('Wrong token.');
         }
-        $status = NetscapeBookmarkUtils::import(
-            $_POST,
-            $_FILES,
-            $bookmarkService,
-            $conf,
-            $history
-        );
+        $netscapeBookmarkUtils = new NetscapeBookmarkUtils($bookmarkService, $conf, $history);
+        $status = $netscapeBookmarkUtils->import($_POST, $_FILES);
         echo '<script>alert("'.$status.'");document.location=\'./?do='
              .Router::$PAGE_IMPORT .'\';</script>';
         exit;

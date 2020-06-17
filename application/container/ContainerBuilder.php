@@ -11,6 +11,7 @@ use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
 use Shaarli\History;
 use Shaarli\Http\HttpAccess;
+use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
@@ -116,6 +117,10 @@ class ContainerBuilder
 
         $container['httpAccess'] = function (): HttpAccess {
             return new HttpAccess();
+        };
+
+        $container['netscapeBookmarkUtils'] = function (ShaarliContainer $container): NetscapeBookmarkUtils {
+            return new NetscapeBookmarkUtils($container->bookmarkService, $container->conf, $container->history);
         };
 
         return $container;
