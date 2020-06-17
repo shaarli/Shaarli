@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace front\controller\admin;
+namespace Shaarli\Front\Controller\Admin;
 
 use PHPUnit\Framework\TestCase;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Formatter\BookmarkFormatter;
 use Shaarli\Formatter\BookmarkRawFormatter;
-use Shaarli\Front\Controller\Admin\ExportController;
-use Shaarli\Front\Controller\Admin\FrontAdminControllerMockHelper;
 use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Slim\Http\Request;
@@ -117,7 +115,6 @@ class ExportControllerTest extends TestCase
         $request = $this->createMock(Request::class);
         $response = new Response();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
         $this->container->sessionManager
             ->expects(static::once())
             ->method('setSessionParameter')
@@ -152,7 +149,6 @@ class ExportControllerTest extends TestCase
             ->willThrowException(new \Exception($message = 'error message'));
         ;
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
         $this->container->sessionManager
             ->expects(static::once())
             ->method('setSessionParameter')

@@ -578,51 +578,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
     }
 
     if ($targetPage == Router::$PAGE_IMPORT) {
-        // Upload a Netscape bookmark dump to import its contents
-
-        if (! isset($_POST['token']) || ! isset($_FILES['filetoupload'])) {
-            // Show import dialog
-            $PAGE->assign(
-                'maxfilesize',
-                get_max_upload_size(
-                    ini_get('post_max_size'),
-                    ini_get('upload_max_filesize'),
-                    false
-                )
-            );
-            $PAGE->assign(
-                'maxfilesizeHuman',
-                get_max_upload_size(
-                    ini_get('post_max_size'),
-                    ini_get('upload_max_filesize'),
-                    true
-                )
-            );
-            $PAGE->assign('pagetitle', t('Import') .' - '. $conf->get('general.title', 'Shaarli'));
-            $PAGE->renderPage('import');
-            exit;
-        }
-
-        // Import bookmarks from an uploaded file
-        if (isset($_FILES['filetoupload']['size']) && $_FILES['filetoupload']['size'] == 0) {
-            // The file is too big or some form field may be missing.
-            $msg = sprintf(
-                t(
-                    'The file you are trying to upload is probably bigger than what this webserver can accept'
-                    .' (%s). Please upload in smaller chunks.'
-                ),
-                get_max_upload_size(ini_get('post_max_size'), ini_get('upload_max_filesize'))
-            );
-            echo '<script>alert("'. $msg .'");document.location=\'./?do='.Router::$PAGE_IMPORT .'\';</script>';
-            exit;
-        }
-        if (! $sessionManager->checkToken($_POST['token'])) {
-            die('Wrong token.');
-        }
-        $netscapeBookmarkUtils = new NetscapeBookmarkUtils($bookmarkService, $conf, $history);
-        $status = $netscapeBookmarkUtils->import($_POST, $_FILES);
-        echo '<script>alert("'.$status.'");document.location=\'./?do='
-             .Router::$PAGE_IMPORT .'\';</script>';
+        header('Location: ./admin/import');
         exit;
     }
 
@@ -1064,6 +1020,8 @@ $app->group('', function () {
     $this->get('/admin/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ManageShaareController:pinBookmark');
     $this->get('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:index');
     $this->post('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:export');
+    $this->get('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:index');
+    $this->post('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:import');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');

@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use Katzgrau\KLogger\Logger;
+use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LogLevel;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkServiceInterface;
@@ -79,20 +80,20 @@ class NetscapeBookmarkUtils
     /**
      * Imports Web bookmarks from an uploaded Netscape bookmark dump
      *
-     * @param array                    $post            Server $_POST parameters
-     * @param array                    $files           Server $_FILES parameters
+     * @param array                 $post Server $_POST parameters
+     * @param UploadedFileInterface $file File in PSR-7 object format
      *
      * @return string Summary of the bookmark import status
      */
-    public function import($post, $files)
+    public function import($post, UploadedFileInterface $file)
     {
         $start = time();
-        $filename = $files['filetoupload']['name'];
-        $filesize = $files['filetoupload']['size'];
-        $data = file_get_contents($files['filetoupload']['tmp_name']);
+        $filename = $file->getClientFilename();
+        $filesize = $file->getSize();
+        $data = (string) $file->getStream();
 
         if (preg_match('/<!DOCTYPE NETSCAPE-Bookmark-file-1>/i', $data) === 0) {
-            return self::importStatus($filename, $filesize);
+            return $this->importStatus($filename, $filesize);
         }
 
         // Overwrite existing bookmarks?
