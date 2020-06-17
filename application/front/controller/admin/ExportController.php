@@ -33,6 +33,8 @@ class ExportController extends ShaarliAdminController
      */
     public function export(Request $request, Response $response): Response
     {
+        $this->checkToken($request);
+
         $selection = $request->getParam('selection');
 
         if (empty($selection)) {
@@ -73,20 +75,5 @@ class ExportController extends ShaarliAdminController
         $this->assignView('selection', $selection);
 
         return $response->write($this->render('export.bookmarks'));
-    }
-
-    /**
-     * @param mixed[] $data Variables passed to the template engine
-     *
-     * @return mixed[] Template data after active plugins render_picwall hook execution.
-     */
-    protected function executeHooks(array $data): array
-    {
-        $this->container->pluginManager->executeHooks(
-            'render_tools',
-            $data
-        );
-
-        return $data;
     }
 }

@@ -4,27 +4,28 @@ namespace Shaarli\Netscape;
 
 use DateTime;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\UploadedFileInterface;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
+use Slim\Http\UploadedFile;
 
 /**
  * Utility function to load a file's metadata in a $_FILES-like array
  *
  * @param string $filename Basename of the file
  *
- * @return array A $_FILES-like array
+ * @return UploadedFileInterface Upload file in PSR-7 compatible object
  */
 function file2array($filename)
 {
-    return array(
-        'filetoupload' => array(
-            'name'     => $filename,
-            'tmp_name' => __DIR__ . '/input/' . $filename,
-            'size'     => filesize(__DIR__ . '/input/' . $filename)
-        )
+    return new UploadedFile(
+        __DIR__ . '/input/' . $filename,
+        $filename,
+        null,
+        filesize(__DIR__ . '/input/' . $filename)
     );
 }
 
