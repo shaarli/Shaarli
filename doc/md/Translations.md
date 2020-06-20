@@ -43,7 +43,7 @@ http://<replace_domain>/admin/export
 http://<replace_domain>/admin/import
 http://<replace_domain>/login
 http://<replace_domain>/picture-wall
-http://<replace_domain>/?do=pluginadmin
+http://<replace_domain>/admin/plugins
 http://<replace_domain>/tags/cloud
 http://<replace_domain>/tags/list
 ```

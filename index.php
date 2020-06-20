@@ -584,60 +584,14 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // Plugin administration page
     if ($targetPage == Router::$PAGE_PLUGINSADMIN) {
-        $pluginMeta = $pluginManager->getPluginsMeta();
-
-        // Split plugins into 2 arrays: ordered enabled plugins and disabled.
-        $enabledPlugins = array_filter($pluginMeta, function ($v) {
-            return $v['order'] !== false;
-        });
-        // Load parameters.
-        $enabledPlugins = load_plugin_parameter_values($enabledPlugins, $conf->get('plugins', array()));
-        uasort(
-            $enabledPlugins,
-            function ($a, $b) {
-                return $a['order'] - $b['order'];
-            }
-        );
-        $disabledPlugins = array_filter($pluginMeta, function ($v) {
-            return $v['order'] === false;
-        });
-
-        $PAGE->assign('enabledPlugins', $enabledPlugins);
-        $PAGE->assign('disabledPlugins', $disabledPlugins);
-        $PAGE->assign('pagetitle', t('Plugin administration') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('pluginsadmin');
+        header('Location: ./admin/plugins');
         exit;
     }
 
     // Plugin administration form action
     if ($targetPage == Router::$PAGE_SAVE_PLUGINSADMIN) {
-        try {
-            if (isset($_POST['parameters_form'])) {
-                $pluginManager->executeHooks('save_plugin_parameters', $_POST);
-                unset($_POST['parameters_form']);
-                foreach ($_POST as $param => $value) {
-                    $conf->set('plugins.'. $param, escape($value));
-                }
-            } else {
-                $conf->set('general.enabled_plugins', save_plugin_config($_POST));
-            }
-            $conf->write($loginManager->isLoggedIn());
-            $history->updateSettings();
-        } catch (Exception $e) {
-            error_log(
-                'ERROR while saving plugin configuration:.' . PHP_EOL .
-                $e->getMessage()
-            );
-
-            // TODO: do not handle exceptions/errors in JS.
-            echo '<script>alert("'
-                . $e->getMessage()
-                .'");document.location=\'./?do='
-                . Router::$PAGE_PLUGINSADMIN
-                .'\';</script>';
-            exit;
-        }
-        header('Location: ./?do='. Router::$PAGE_PLUGINSADMIN);
+        // This route is no longer supported in legacy mode
+        header('Location: ./admin/plugins');
         exit;
     }
 
@@ -1022,6 +976,8 @@ $app->group('', function () {
     $this->post('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:export');
     $this->get('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:index');
     $this->post('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:import');
+    $this->get('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:index');
+    $this->post('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:save');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
