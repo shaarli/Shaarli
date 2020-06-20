@@ -21,7 +21,7 @@ The directory structure should look like:
 
 To enable the plugin, you can either:
 
-  * enable it in the plugins administration page (`?do=pluginadmin`). 
+  * enable it in the plugins administration page (`/admin/plugins`).
   * add `wallabag` to your list of enabled plugins in `data/config.json.php` (`general.enabled_plugins` section).
 
 ### Configuration

@@ -88,7 +88,12 @@ class ContainerBuilder
         };
 
         $container['pluginManager'] = function (ShaarliContainer $container): PluginManager {
-            return new PluginManager($container->conf);
+            $pluginManager = new PluginManager($container->conf);
+
+            // FIXME! Configuration is already injected
+            $pluginManager->load($container->conf->get('general.enabled_plugins'));
+
+            return $pluginManager;
         };
 
         $container['formatterFactory'] = function (ShaarliContainer $container): FormatterFactory {

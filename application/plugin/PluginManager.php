@@ -16,7 +16,7 @@ class PluginManager
      *
      * @var array $authorizedPlugins
      */
-    private $authorizedPlugins;
+    private $authorizedPlugins = [];
 
     /**
      * List of loaded plugins.
