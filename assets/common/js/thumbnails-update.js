@@ -33,7 +33,7 @@ function updateThumb(basePath, ids, i, elements) {
         elements.thumbnail.innerHTML = `<img src="${response.thumbnail}">`;
       }
       if (i < ids.length) {
-        updateThumb(ids, i, elements);
+        updateThumb(basePath, ids, i, elements);
       }
     }
   };

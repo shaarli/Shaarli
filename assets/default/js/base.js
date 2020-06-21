@@ -27,7 +27,7 @@ function findParent(element, tagName, attributes) {
  */
 function refreshToken(basePath) {
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', `${basePath}/?do=token`);
+  xhr.open('GET', `${basePath}/admin/token`);
   xhr.onload = () => {
     const token = document.getElementById('token');
     token.setAttribute('value', xhr.responseText);

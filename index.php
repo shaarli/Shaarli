@@ -597,8 +597,7 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // Get a fresh token
     if ($targetPage == Router::$GET_TOKEN) {
-        header('Content-Type:text/plain');
-        echo $sessionManager->generateToken();
+        header('Location: ./admin/token');
         exit;
     }
 
@@ -978,6 +977,7 @@ $app->group('', function () {
     $this->post('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:import');
     $this->get('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:index');
     $this->post('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:save');
+    $this->get('/admin/token', '\Shaarli\Front\Controller\Admin\TokenController:getToken');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
