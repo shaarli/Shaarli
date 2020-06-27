@@ -17,7 +17,7 @@
  */
 function updateThumb(basePath, ids, i, elements) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', `${basePath}/?do=ajax_thumb_update`);
+  xhr.open('PATCH', `${basePath}/admin/shaare/${ids[i]}/update-thumbnail`);
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhr.responseType = 'json';
   xhr.onload = () => {
@@ -30,14 +30,14 @@ function updateThumb(basePath, ids, i, elements) {
       elements.current.innerHTML = i;
       elements.title.innerHTML = response.title;
       if (response.thumbnail !== false) {
-        elements.thumbnail.innerHTML = `<img src="${response.thumbnail}">`;
+        elements.thumbnail.innerHTML = `<img src="${basePath}/${response.thumbnail}">`;
       }
       if (i < ids.length) {
         updateThumb(basePath, ids, i, elements);
       }
     }
   };
-  xhr.send(`id=${ids[i]}`);
+  xhr.send();
 }
 
 (() => {

@@ -603,38 +603,14 @@ function renderPage($conf, $pluginManager, $bookmarkService, $history, $sessionM
 
     // -------- Thumbnails Update
     if ($targetPage == Router::$PAGE_THUMBS_UPDATE) {
-        $ids = [];
-        foreach ($bookmarkService->search() as $bookmark) {
-            // A note or not HTTP(S)
-            if ($bookmark->isNote() || ! startsWith(strtolower($bookmark->getUrl()), 'http')) {
-                continue;
-            }
-            $ids[] = $bookmark->getId();
-        }
-        $PAGE->assign('ids', $ids);
-        $PAGE->assign('pagetitle', t('Thumbnails update') .' - '. $conf->get('general.title', 'Shaarli'));
-        $PAGE->renderPage('thumbnails');
+        header('Location: ./admin/thumbnails');
         exit;
     }
 
     // -------- Single Thumbnail Update
     if ($targetPage == Router::$AJAX_THUMB_UPDATE) {
-        if (! isset($_POST['id']) || ! ctype_digit($_POST['id'])) {
-            http_response_code(400);
-            exit;
-        }
-        $id = (int) $_POST['id'];
-        if (! $bookmarkService->exists($id)) {
-            http_response_code(404);
-            exit;
-        }
-        $thumbnailer = new Thumbnailer($conf);
-        $bookmark = $bookmarkService->get($id);
-        $bookmark->setThumbnail($thumbnailer->get($bookmark->getUrl()));
-        $bookmarkService->set($bookmark);
-
-        $factory = new FormatterFactory($conf, $loginManager->isLoggedIn());
-        echo json_encode($factory->getFormatter('raw')->format($bookmark));
+        // This route is no longer supported in legacy mode
+        http_response_code(404);
         exit;
     }
 
@@ -971,6 +947,10 @@ $app->group('', function () {
     $this->get('/admin/shaare/delete', '\Shaarli\Front\Controller\Admin\ManageShaareController:deleteBookmark');
     $this->get('/admin/shaare/visibility', '\Shaarli\Front\Controller\Admin\ManageShaareController:changeVisibility');
     $this->get('/admin/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ManageShaareController:pinBookmark');
+    $this->patch(
+        '/admin/shaare/{id:[0-9]+}/update-thumbnail',
+        '\Shaarli\Front\Controller\Admin\ThumbnailsController:ajaxUpdate'
+    );
     $this->get('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:index');
     $this->post('/admin/export', '\Shaarli\Front\Controller\Admin\ExportController:export');
     $this->get('/admin/import', '\Shaarli\Front\Controller\Admin\ImportController:index');
@@ -978,6 +958,7 @@ $app->group('', function () {
     $this->get('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:index');
     $this->post('/admin/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:save');
     $this->get('/admin/token', '\Shaarli\Front\Controller\Admin\TokenController:getToken');
+    $this->get('/admin/thumbnails', '\Shaarli\Front\Controller\Admin\ThumbnailsController:index');
 
     $this->get('/links-per-page', '\Shaarli\Front\Controller\Admin\SessionFilterController:linksPerPage');
     $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');

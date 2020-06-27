@@ -140,7 +140,7 @@
                 <div class="thumbnail">
                   {ignore}RainTPL hack: put the 2 src on two different line to avoid path replace bug{/ignore}
                   <a href="{$value.real_url}" aria-hidden="true" tabindex="-1">
-                  <img data-src="{$value.thumbnail}#" class="b-lazy"
+                  <img data-src="{$base_path}/{$value.thumbnail}#" class="b-lazy"
                     src=""
                     alt="" width="{$thumbnails_width}" height="{$thumbnails_height}" />
                   </a>

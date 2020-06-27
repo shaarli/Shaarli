@@ -9,7 +9,7 @@
 {if="count($linksToDisplay)===0 && $is_logged_in"}
   <div class="pure-g pure-alert pure-alert-warning page-single-alert">
     <div class="pure-u-1 center">
-      {'There is no cached thumbnail. Try to <a href="{$base_path}/do=thumbs_update">synchronize them</a>.'|t}
+      {'There is no cached thumbnail. Try to <a href="{$base_path}/admin/thumbnails">synchronize them</a>.'|t}
     </div>
   </div>
 {/if}

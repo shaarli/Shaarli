@@ -99,7 +99,7 @@ class ConfigureController extends ShaarliAdminController
         ) {
             $this->saveWarningMessage(t(
                 'You have enabled or changed thumbnails mode. '
-                .'<a href="./?do=thumbs_update">Please synchronize them</a>.'
+                .'<a href="'. $this->container->basePath .'/admin/thumbnails">Please synchronize them</a>.'
             ));
         }
         $this->container->conf->set('thumbnails.mode', $thumbnailsMode);

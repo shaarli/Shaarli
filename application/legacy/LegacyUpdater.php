@@ -534,7 +534,7 @@ class LegacyUpdater
 
         if ($thumbnailsEnabled) {
             $this->session['warnings'][] = t(
-                'You have enabled or changed thumbnails mode. <a href="./?do=thumbs_update">Please synchronize them</a>.'
+                'You have enabled or changed thumbnails mode. <a href="./admin/thumbnails">Please synchronize them</a>.'
             );
         }
 
