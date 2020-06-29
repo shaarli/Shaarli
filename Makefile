@@ -2,6 +2,7 @@
 # Makefile for PHP code analysis & testing, documentation and release generation
 
 BIN = vendor/bin
+TAG = shaarli/shaarli
 
 all: static_analysis_summary check_permissions test
 
@@ -175,3 +176,7 @@ eslint:
 ### Run CSSLint check against Shaarli's SCSS files
 sasslint:
 	@yarn run sass-lint -c .dev/.sasslintrc 'assets/default/scss/*.scss' -v -q
+
+### Make the Docker image and push it.
+docker_image:
+	docker buildx build . --platform linux/amd64,linux/arm/v7 --tag $(TAG) --push
