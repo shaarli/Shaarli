@@ -51,7 +51,7 @@ See [Theming](Theming) for a list of community-contributed themes, and an instal
 ### Server apps
 - [shaarchiver](https://github.com/nodiscc/shaarchiver) - Archive your Shaarli bookmarks and their content
 - [shaarli-river](https://github.com/mknexen/shaarli-river) - An aggregator for shaarlis with many features 
-- [Shaarlo](https://github.com/DMeloni/shaarlo) - An aggregator for shaarlis with many features
+- [Shaarlo](https://github.com/DMeloni/shaarlo) - An aggregator for shaarlis with many features (a very popular running instance among French shaarliers: <https://www.shaarlo.fr>)
 - [Shaarlimages](https://github.com/BoboTiG/shaarlimages) - An image-oriented aggregator for Shaarlis
 - [mknexen/shaarli-api](https://github.com/mknexen/shaarli-api) - A REST API for Shaarli
 - [Self dead link](https://framagit.org/qwertygc/shaarli-dev-code/blob/master/self-dead-link.php) - Detect dead links on shaarli. This version use the database of shaarli. [Another version](https://framagit.org/qwertygc/shaarli-dev-code/blob/master/dead-link.php), can be used for other shaarli instances (but is more resource consuming).
