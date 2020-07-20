@@ -1,24 +1,27 @@
 # Stage 1:
 # - Copy Shaarli sources
 # - Build documentation
-FROM python:3-alpine as docs
+FROM alpine:3.8 as docs
 ADD . /usr/src/app/shaarli
-RUN cd /usr/src/app/shaarli \
+RUN apk --update --no-cache add py2-pip \
+    && cd /usr/src/app/shaarli \
     && pip install --no-cache-dir mkdocs \
     && mkdocs build --clean
 
 # Stage 2:
 # - Resolve PHP dependencies with Composer
-FROM composer:latest as composer
+FROM alpine:3.8 as composer
 COPY --from=docs /usr/src/app/shaarli /app/shaarli
-RUN cd shaarli \
+RUN apk --update --no-cache add php7-curl php7-mbstring php7-simplexml composer \
+    && cd /app/shaarli \
     && composer --prefer-dist --no-dev install
 
 # Stage 3:
 # - Frontend dependencies
-FROM node:12-alpine as node
+FROM alpine:3.8 as node
 COPY --from=composer /app/shaarli shaarli
-RUN cd shaarli \
+RUN apk --update --no-cache add yarn nodejs-current python2 build-base \
+    && cd shaarli \
     && yarn install \
     && yarn run build \
     && rm -rf node_modules
