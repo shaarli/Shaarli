@@ -9,19 +9,21 @@ See [REST API](REST-API) for a list of official and community clients.
 
 
 ### Third party plugins
-- [autosave](https://github.com/kalvn/shaarli-plugin-autosave) by [@kalvn](https://github.com/kalvn): Automatically saves data when editing a link to avoid any loss in case of crash or unexpected shutdown.
-- [Code Coloration](https://github.com/ArthurHoaro/code-coloration) by [@ArthurHoaro](https://github.com/ArthurHoaro): client side code syntax highlighter.
-- [Disqus](https://github.com/kalvn/shaarli-plugin-disqus) by [@kalvn](https://github.com/kalvn): Adds Disqus comment system to your Shaarli.
-- [google analytics](https://github.com/ericjuden/Shaarli-Google-Analytics-Plugin) by [@ericjuden](http://github.com/ericjuden): Adds Google Analytics tracking support
+- [autosave](https://github.com/kalvn/shaarli-plugin-autosave) by [@kalvn](https://github.com/kalvn) - Automatically saves data when editing a link to avoid any loss in case of crash or unexpected shutdown.
+- [code-coloration](https://github.com/ArthurHoaro/code-coloration) by [@ArthurHoaro](https://github.com/ArthurHoaro) - Client side code syntax highlighter
+- [custom-css](https://github.com/immanuelfodor/shaarli-custom-css) by [@immanuelfodor](https://github.com/immanuelfodor) - Customize the look and feel of the UI with custom CSS rules
+- [disqus](https://github.com/kalvn/shaarli-plugin-disqus) by [@kalvn](https://github.com/kalvn) - Adds Disqus comment system to your Shaarli.
+- [emojione](https://github.com/immanuelfodor/emojione) by [@immanuelfodor](https://github.com/immanuelfodor) - Resurrected fork of the original emojione project
+- [favicons](https://github.com/trailjeep/shaarli-favicons) by [@trailjeep](https://github.com/trailjeep) - Shaarli plugin to add favicon/filetype icons to links.
+- [google analytics](https://github.com/ericjuden/Shaarli-Google-Analytics-Plugin) by [@ericjuden](http://github.com/ericjuden) - Adds Google Analytics tracking support
 - [launch](https://github.com/ArthurHoaro/launch-plugin) - Launch Plugin is a plugin designed to enhance and customize Launch Theme for Shaarli.
 - [markdown-toolbar](https://github.com/immanuelfodor/shaarli-markdown-toolbar) by [@immanuelfodor](https://github.com/immanuelfodor) - Easily insert markdown syntax into the Description field when editing a link.
 - [related](https://github.com/ilesinge/shaarli-related) by [@ilesinge](https://github.com/ilesinge) - Show related links based on the number of identical tags.
-- [social](https://github.com/alexisju/social) by [@alexisju](https://github.com/alexisju): share links to social networks.
+- [social](https://github.com/alexisju/social) by [@alexisju](https://github.com/alexisju) - Share links to social networks.
 - [shaarli2twitter](https://github.com/ArthurHoaro/shaarli2twitter) by [@ArthurHoaro](https://github.com/ArthurHoaro) - Automatically tweet your shared links from Shaarli
 - [shaarli2mastodon](https://github.com/kalvn/shaarli2mastodon) by [@kalvn](https://github.com/kalvn) - This Shaarli plugin allows you to automatically publish links you post on your Mastodon timeline.
 - [shaarli-descriptor](https://github.com/immanuelfodor/shaarli-descriptor) by [@immanuelfodor](https://github.com/immanuelfodor) - Customize the default height/number of rows of the Description field when editing a link.
 - [urlextern](https://github.com/trailjeep/shaarli-urlextern) by [@trailjeep](https://github.com/trailjeep) - Shaarli plugin to open external links in a new tab/window.
-- [favicons](https://github.com/trailjeep/shaarli-favicons) by [@trailjeep](https://github.com/trailjeep) - Shaarli plugin to add favicon/filetype icons to links.
 
 ### Third-party themes
 See [Theming](Theming) for a list of community-contributed themes, and an installation guide.
@@ -45,8 +47,8 @@ See [Theming](Theming) for a list of community-contributed themes, and an instal
 - [Ulauncher Extension](https://github.com/sebw/ulauncher-shaarli) - Ulauncher is an an application launcher for Linux, this extension allows research in your Shaarli
 
 ### Browser addons
-- [Shaarli Firefox Extension](https://github.com/ikipatang/shaarli-web-extension) - toolbar button to share your current tab with Shaarli.
-- [Shaarli Chrome Extension](https://github.com/octplane/Shiny-Shaarli) - toolbar button to share your current tab with Shaarli.
+- [Shaarli Firefox Extension](https://github.com/ikipatang/shaarli-web-extension) - Toolbar button to share your current tab with Shaarli.
+- [Shaarli Chrome Extension](https://github.com/octplane/Shiny-Shaarli) - Toolbar button to share your current tab with Shaarli.
 
 ### Server apps
 - [shaarchiver](https://github.com/nodiscc/shaarchiver) - Archive your Shaarli bookmarks and their content
@@ -61,7 +63,7 @@ See [Theming](Theming) for a list of community-contributed themes, and an instal
 See [awesome-selfhosted: bookmarks & link sharing](https://github.com/Kickball/awesome-selfhosted/#bookmarks--link-sharing).
 
 ## Community
-- [Liens en vrac de sebsauvage](http://sebsauvage.net/links/) - the original Shaarli
+- [Liens en vrac de sebsauvage](http://sebsauvage.net/links/) - The original Shaarli
 - [A large list of Shaarlis](http://porneia.free.fr/pub/links/ou-est-shaarli.html)
 - [A list of working Shaarli aggregators](https://raw.githubusercontent.com/Oros42/find_shaarlis/master/annuaires.json)
 - [A list of some known Shaarlis](https://github.com/Oros42/shaarlis_list)
