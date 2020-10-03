@@ -63,7 +63,7 @@
     },
     "updates": {
         "check_updates": false,
-        "check_updates_branch": "stable",
+        "check_updates_branch": "release",
         "check_updates_interval": 86400
     },
     "feed": {

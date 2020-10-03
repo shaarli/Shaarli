@@ -37,7 +37,7 @@ class ApplicationUtilsTest extends \Shaarli\TestCase
     }
 
     /**
-     * Retrieve the latest version code available on Git
+     * Retrieve the latest release version code available on Git
      *
      * Expected format: Semantic Versioning - major.minor.patch
      */
@@ -57,14 +57,14 @@ class ApplicationUtilsTest extends \Shaarli\TestCase
             self::$versionPattern,
             ApplicationUtils::getVersion(
                 'https://raw.githubusercontent.com/shaarli/Shaarli/'
-                .'latest/shaarli_version.php',
+                .'release/shaarli_version.php',
                 $testTimeout
             )
         );
     }
 
     /**
-     * Attempt to retrieve the latest version from an invalid File
+     * Attempt to retrieve the latest release version from an invalid File
      */
     public function testGetVersionCodeFromFile()
     {
@@ -76,7 +76,7 @@ class ApplicationUtilsTest extends \Shaarli\TestCase
     }
 
     /**
-     * Attempt to retrieve the latest version from an invalid File
+     * Attempt to retrieve the latest release version from an invalid File
      */
     public function testGetVersionCodeInvalidFile()
     {

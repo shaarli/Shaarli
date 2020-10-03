@@ -23,13 +23,13 @@ These components are required to build Shaarli:
 Clone the repository, either pointing to:
 
 - any [tagged release](https://github.com/shaarli/Shaarli/releases)
-- `latest`: the latest tagged release
+- `release`: the latest tagged release
 - `master`: development branch
 
 ```bash
 # clone the branch/tag of your choice
-$ git clone -b latest https://github.com/shaarli/Shaarli.git /home/me/Shaarli
-# OR download/extract the tar.gz/zip: wget https://github.com/shaarli/Shaarli/archive/latest.tar.gz...
+$ git clone -b release https://github.com/shaarli/Shaarli.git /home/me/Shaarli
+# OR download/extract the tar.gz/zip: wget https://github.com/shaarli/Shaarli/archive/release.tar.gz...
 
 # enter the directory
 $ cd /home/me/Shaarli

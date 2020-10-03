@@ -15,23 +15,22 @@ class ApplicationUtils
      */
     public static $VERSION_FILE = 'shaarli_version.php';
 
-    public static $GITHUB_URL = 'https://github.com/shaarli/Shaarli';
-    public static $GIT_RAW_URL = 'https://raw.githubusercontent.com/shaarli/Shaarli';
-    public static $GIT_BRANCHES = ['latest', 'stable'];
+    private static $GIT_URL = 'https://raw.githubusercontent.com/shaarli/Shaarli';
+    private static $GIT_BRANCHES = array('latest', 'stable');
     private static $VERSION_START_TAG = '<?php /* ';
     private static $VERSION_END_TAG = ' */ ?>';
 
     /**
-     * Gets the latest version code from the Git repository
+     * Gets the latest release version code from the Git repository
      *
      * The code is read from the raw content of the version file on the Git server.
      *
-     * @param string $url     URL to reach to get the latest version.
+     * @param string $url     URL to reach to get the latest release version.
      * @param int    $timeout Timeout to check the URL (in seconds).
      *
      * @return mixed the version code from the repository if available, else 'false'
      */
-    public static function getLatestGitVersionCode($url, $timeout = 2)
+    public static function getLatestReleaseGitVersionCode($url, $timeout = 2)
     {
         list($headers, $data) = get_http_response($url, $timeout);
 
@@ -54,7 +53,7 @@ class ApplicationUtils
     public static function getVersion($remote, $timeout = 2)
     {
         if (startsWith($remote, 'http')) {
-            if (($data = static::getLatestGitVersionCode($remote, $timeout)) === false) {
+            if (($data = static::getLatestReleaseGitVersionCode($remote, $timeout)) === false) {
                 return false;
             }
         } else {
@@ -83,7 +82,7 @@ class ApplicationUtils
      *   to avoid intempestive connection attempts.
      *
      * @param string $currentVersion the current version code
-     * @param string $updateFile     the file where to store the latest version code
+     * @param string $updateFile     the file where to store the latest release version code
      * @param int    $checkInterval  the minimum interval between update checks (in seconds
      * @param bool   $enableCheck    whether to check for new versions
      * @param bool   $isLoggedIn     whether the user is logged in
@@ -99,7 +98,7 @@ class ApplicationUtils
         $checkInterval,
         $enableCheck,
         $isLoggedIn,
-        $branch = 'stable'
+        $branch = 'release'
     ) {
         // Do not check versions for visitors
         // Do not check if the user doesn't want to
@@ -126,21 +125,21 @@ class ApplicationUtils
 
         // Late Static Binding allows overriding within tests
         // See http://php.net/manual/en/language.oop5.late-static-bindings.php
-        $latestVersion = static::getVersion(
+        $latestReleaseVersion = static::getVersion(
             self::$GIT_RAW_URL . '/' . $branch . '/' . self::$VERSION_FILE
         );
 
-        if (!$latestVersion) {
+        if (!$latestReleaseVersion) {
             // Only update the file's modification date
             file_put_contents($updateFile, $currentVersion);
             return false;
         }
 
         // Update the file's content and modification date
-        file_put_contents($updateFile, $latestVersion);
+        file_put_contents($updateFile, $latestReleaseVersion);
 
-        if (version_compare($latestVersion, $currentVersion) == 1) {
-            return $latestVersion;
+        if (version_compare($latestReleaseVersion, $currentVersion) == 1) {
+            return $latestReleaseVersion;
         }
 
         return false;

@@ -39,11 +39,11 @@ docker run hello-world
 
 ## Get and run a Shaarli image
 
-Shaarli images are available on [DockerHub](https://hub.docker.com/r/shaarli/shaarli/) `shaarli/shaarli`:
+Shaarli images are available on [DockerHub](https://hub.docker.com/r/shaarli/shaarli/):
 
-- `latest`: latest branch (last release)
-- `stable`: stable branch (last release in previous major version)
-- `master`: master branch (development branch)
+- `shaarli/shaarli:vX.Y.Z`: where `X.Y.Z` is any  [tagged release](https://github.com/shaarli/Shaarli/releases)
+- `shaarli/shaarli:release`: latest tagged release
+- `shaarli/shaarli:latest`: master branch (development version)
 
 These images are built automatically on DockerHub and rely on:
 
@@ -57,7 +57,7 @@ Here is an example of how to run Shaarli latest image using Docker:
 
 ```bash
 # download the 'latest' image from dockerhub
-docker pull shaarli/shaarli
+docker pull shaarli/shaarli:latest
 
 # create persistent data volumes/directories on the host
 docker volume create shaarli-data
@@ -91,13 +91,15 @@ docker ps -a | grep myshaarli # verify th container has been destroyed
 
 After running `docker run` command, your Shaarli instance should be available on the host machine at [localhost:8000](http://localhost:8000). In order to access your instance through a reverse proxy, we recommend using our [Docker Compose](#docker-compose) build.
 
+
 ## Docker Compose
 
-A [Compose file](https://docs.docker.com/compose/compose-file/) is a common format for defining and running multi-container Docker applications.
+A [Compose file](https://docs.docker.com/compose/compose-file/) is a common format for defining and running multi-container Docker applications. It can be used to run a persistent/autostarted Shaarli service using [Docker Compose](https://docs.docker.com/compose/) or in a [Docker stack](https://docs.docker.com/engine/reference/commandline/stack_deploy/).
 
-A `docker-compose.yml` file can be used to run a persistent/autostarted shaarli service using [Docker Compose](https://docs.docker.com/compose/) or in a [Docker stack](https://docs.docker.com/engine/reference/commandline/stack_deploy/).
-
-Shaarli provides configuration file for Docker Compose, that will setup a Shaarli instance, a [Træfik](https://containo.us/traefik/) instance (reverse proxy) with [Let's Encrypt](https://letsencrypt.org/) certificates, a Docker network, and volumes for Shaarli data and Træfik TLS configuration and certificates.
+Shaarli provides a `docker-compose.yml` file, that will setup:
+- a Shaarli instance
+- a [Træfik](https://containo.us/traefik/) instance (reverse proxy) with [Let's Encrypt](https://letsencrypt.org/) certificates
+- a Docker network, and volumes for data/configuration/certificates persistence.
 
 Download docker-compose from the [release page](https://docs.docker.com/compose/install/):
 
@@ -126,6 +128,8 @@ $ docker-compose up -d
 ```
 
 After a few seconds, you should be able to access your Shaarli instance at [https://shaarli.mydomain.org](https://shaarli.mydomain.org) (replace your own domain name).
+
+The default docker-compose.yml file runs the `:latest` (development version) Shaarli image. You can edit the file to point to [another Shaarli image](#get-and-run-a-shaarli-image) if needed.
 
 ## Running dockerized Shaarli as a systemd service
 

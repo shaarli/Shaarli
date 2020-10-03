@@ -141,13 +141,13 @@ This will create `shaarli-v0.x.y-full.tar`, `shaarli-v0.x.y-full.zip`. These arc
 ### Update the `latest` branch
 
 ```bash
-# checkout the 'latest' branch
-git checkout latest
+# checkout the 'release' branch
+git checkout release
 # merge changes from your newly published release branch
 git merge v0.x.y
 # fix eventual conflicts with git mergetool...
 # run tests
 make test
-# push the latest branch
-git push upstream latest
+# push the 'release' branch
+git push upstream release
 ```

@@ -64,7 +64,7 @@ Some settings can be configured directly from a web browser by accesing the `Too
         "default_private_links": true,
         "enable_thumbnails": true,
         "enable_localcache": true,
-        "check_updates_branch": "stable",
+        "check_updates_branch": "release",
         "check_updates_interval": 86400,
         "enabled_plugins": [
             "markdown",
@@ -97,7 +97,7 @@ Some settings can be configured directly from a web browser by accesing the `Too
     },
     "updates": {
         "check_updates": true,
-        "check_updates_branch": "stable",
+        "check_updates_branch": "release",
         "check_updates_interval": 86400
     },
     "feed": {
@@ -213,7 +213,7 @@ Must be an associative array: `translation domain => translation path`.
 ### Updates
 
 - **check_updates**: Enable or disable update check to the git repository.
-- **check_updates_branch**: Git branch used to check updates (e.g. `stable` or `master`).
+- **check_updates_branch**: Git branch used to check updates (only `release` is supported).
 - **check_updates_interval**: Look for new version every N seconds (default: every day).
 
 ### Privacy
