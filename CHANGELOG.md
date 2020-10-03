@@ -78,6 +78,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add manual configuration for root URL
 - Added PATCH to the allowed Apache request methods.
 - REST API: compatibility with ionos Apache's headers
+- Added `release` branch/Docker image which always points to the latest [release](https://github.com/shaarli/Shaarli/releases)
 
 ### Changed
 - Introduce Bookmark object and Service layer
@@ -91,6 +92,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Improve default bookmarks after install
 - Upgrade all front end dependencies and webpack build
 - Default theme: Make tag cloud/list views buttons more obvious
+- `:latest` Docker image tag now points to the development (`master`) version of Shaarli. Users of the `:latest` Docker image are advised to switch to the `:release` image which always points to the latest release.
 
 ### Fixed
 - Undefined index: thumbnail in daily page
@@ -123,6 +125,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - emojione & twemoji removed
 - Makefile: remove static_analysis_summary from all: target
 - doc/Makefile: remove references to composer update
+- Removed support for the `stable` release branch/Docker image. Users of the `stable` branch/image are advised to switch to the `release` version which always points to the latest release.
+- Removed support for the `latest` branch, now known as `release`
 
 ## [v0.11.1](https://github.com/shaarli/Shaarli/releases/tag/v0.11.1) - 2019-08-03
 
