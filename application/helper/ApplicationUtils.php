@@ -16,6 +16,7 @@ class ApplicationUtils
     public static $VERSION_FILE = 'shaarli_version.php';
 
     private static $GIT_URL = 'https://raw.githubusercontent.com/shaarli/Shaarli';
+    public static $GIT_RAW_URL = 'https://raw.githubusercontent.com/shaarli/Shaarli'; 
     private static $GIT_BRANCHES = array('latest', 'stable');
     private static $VERSION_START_TAG = '<?php /* ';
     private static $VERSION_END_TAG = ' */ ?>';
