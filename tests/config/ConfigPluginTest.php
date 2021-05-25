@@ -113,7 +113,7 @@ class ConfigPluginTest extends TestCase
         $plugins = [
             'plugin_name' => [
                 'parameters' => [
-                    'param1' => ['value' => true],
+                    'param1' => ['value' => false],
                     'param2' => ['value' => false],
                     'param3' => ['value' => ''],
                 ]
