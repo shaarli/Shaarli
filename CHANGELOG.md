@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.12.2]() - UNRELEASED
 
+> The `:master` Docker image is deprecated, please use `:latest` instead.
+> The `:stable` Docker image is deprecated, please use `:release` instead.
+
 ## [v0.12.1](https://github.com/shaarli/Shaarli/releases/tag/v0.12.0) - 2020-11-12
 
 > nginx ([#1628](https://github.com/shaarli/Shaarli/pull/1628)) and Apache ([#1630](https://github.com/shaarli/Shaarli/pull/1630)) configurations have been reviewed. It is recommended that you

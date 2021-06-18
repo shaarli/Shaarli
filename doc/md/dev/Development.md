@@ -143,17 +143,19 @@ A [`Makefile`](https://github.com/shaarli/Shaarli/blob/master/Makefile) is avail
 
 ### Continuous Integration
 
-[Drone CI](https://cloud.drone.io/shaarli/Shaarli) is a Continuous Integration build server, that runs a build:
+[Github Actions](https://github.com/shaarli/Shaarli/actions) is a Continuous Integration build server, that runs a build:
 
 - each time a commit is pushed to any branch
 - each time a Pull Request is submitted or updated
 
-After all jobs have finished, Drone returns the results to GitHub:
+After all jobs have finished, Github Actions returns the results to GitHub:
 
-- a status icon represents the result for the `master` branch: [![Build Status](https://cloud.drone.io/api/badges/shaarli/Shaarli/status.svg?ref=refs/heads/master)](https://cloud.drone.io/shaarli/Shaarli)
-- Pull Requests are updated with the Drone build result.
+- a status icon represents the result for the `master` branch: [![Build Status](https://github.com/shaarli/Shaarli/actions/workflows/ci.yml/badge.svg)](https://github.com/shaarli/Shaarli/actions)
+- Pull Requests are updated with the Github Actions build result.
 
-See [`.drone.yml`](https://github.com/shaarli/Shaarli/blob/master/.drone.yml).
+Github Actions is also used to build and push [Docker](../Docker.md) images to <https://hub.docker.com/r/shaarli/shaarli> for the `master` branch and on every git `tag`/[release](https://github.com/shaarli/Shaarli/releases).
+
+See [`.github/workflows/`](https://github.com/shaarli/Shaarli/tree/master/.github/workflows).
 
 
 ### Documentation

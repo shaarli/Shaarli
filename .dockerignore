@@ -4,7 +4,6 @@
 .github
 .gitattributes
 .gitignore
-.travis.yml
 tests
 
 # Docker related resources are not needed inside the container

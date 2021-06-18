@@ -41,9 +41,10 @@ docker run hello-world
 
 Shaarli images are available on [DockerHub](https://hub.docker.com/r/shaarli/shaarli/) `shaarli/shaarli`:
 
-- `latest`: latest branch (last release)
-- `stable`: stable branch (last release in previous major version)
-- `master`: master branch (development branch)
+- `latest`: master (development) branch
+- `vX.Y.Z`: shaarli [releases](https://github.com/shaarli/Shaarli/releases)
+- `release`: always points to the last release
+- `stable` and `master`: **deprecated**. These tags are no longer maintained and may be removed without notice
 
 These images are built automatically on DockerHub and rely on:
 

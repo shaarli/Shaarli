@@ -13,7 +13,7 @@ _It is designed to be personal (single-user), fast and handy._
 [![](https://img.shields.io/travis/shaarli/Shaarli/latest.svg?label=latest)](https://travis-ci.org/shaarli/Shaarli)
 &bull;
 [![](https://img.shields.io/badge/master-v0.12.x-blue.svg)](https://github.com/shaarli/Shaarli)
-[![](https://cloud.drone.io/api/badges/shaarli/Shaarli/status.svg?ref=refs/heads/master)](https://cloud.drone.io/shaarli/Shaarli)
+[![](https://github.com/shaarli/Shaarli/actions/workflows/ci.yml/badge.svg)](https://github.com/shaarli/Shaarli/actions)
 
 [![Join the chat at https://gitter.im/shaarli/Shaarli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/shaarli/Shaarli)
 [![Bountysource](https://www.bountysource.com/badge/team?team_id=19583&style=bounties_received)](https://www.bountysource.com/teams/shaarli/issues)
