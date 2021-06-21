@@ -304,6 +304,7 @@ server {
     client_max_body_size 100m;
 
     # relative path to shaarli from the root of the webserver
+    # if shaarli is installed in a subdirectory of the main domain, edit the location accordingly
     location / {
         # default index file when no file URI is requested
         index index.php;
