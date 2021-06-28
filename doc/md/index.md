@@ -60,6 +60,7 @@ Shaarli can be used:
 - Easily extensible by any client using the [REST API](REST-API.md) exposed by Shaarli
 - Bookmarklet and [other tools](Community-and-related-software.md) to share links in one click
 - Responsive/support for mobile browsers, degrades gracefully with Javascript disabled
+- LDAP (single-user) login support
 
 
 ### Easy setup
