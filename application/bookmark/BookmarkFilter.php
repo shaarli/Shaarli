@@ -290,7 +290,7 @@ class BookmarkFilter
             }
 
             if ($found !== false) {
-                $bookmark->addAdditionalContentEntry(
+                $bookmark->setAdditionalContentEntry(
                     'search_highlight',
                     $this->postProcessFoundPositions($lengths, $foundPositions)
                 );

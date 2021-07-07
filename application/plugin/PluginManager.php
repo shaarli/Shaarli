@@ -343,6 +343,8 @@ class PluginManager
      * Checks whether provided input is valid to register a new route.
      * It must contain keys `method`, `route`, `callable` (all strings).
      *
+     * We do not check the format because Slim routes support regexes.
+     *
      * @param string[] $input
      *
      * @return bool
@@ -353,10 +355,6 @@ class PluginManager
             !array_key_exists('method', $input)
             || !in_array(strtoupper($input['method']), ['GET', 'PUT', 'PATCH', 'POST', 'DELETE'])
         ) {
-            return false;
-        }
-
-        if (!array_key_exists('route', $input) || !preg_match('#^[a-z\d/\.\-_]+$#', $input['route'])) {
             return false;
         }
 

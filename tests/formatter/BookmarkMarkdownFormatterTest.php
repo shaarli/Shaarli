@@ -145,7 +145,7 @@ class BookmarkMarkdownFormatterTest extends TestCase
 
         $bookmark = new Bookmark();
         $bookmark->setDescription($description);
-        $bookmark->addAdditionalContentEntry(
+        $bookmark->setAdditionalContentEntry(
             'search_highlight',
             ['description' => [
                 ['start' => 18, 'end' => 26], // cription

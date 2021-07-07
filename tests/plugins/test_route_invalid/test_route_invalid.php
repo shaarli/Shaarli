@@ -4,8 +4,8 @@ function test_route_invalid_register_routes(): array
 {
     return [
         [
-            'method' => 'GET',
-            'route' => 'not a route',
+            'method' => 'I_INVENT_MY_HTTP_METHODS',
+            'route' => '/hello',
             'callable' => 'getFunction',
         ],
     ];

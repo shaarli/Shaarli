@@ -194,7 +194,7 @@ class ShaareManageController extends ShaarliAdminController
 
         if (empty($bookmark->getAdditionalContentEntry('private_key'))) {
             $privateKey = bin2hex(random_bytes(16));
-            $bookmark->addAdditionalContentEntry('private_key', $privateKey);
+            $bookmark->setAdditionalContentEntry('private_key', $privateKey);
             $this->container->bookmarkService->set($bookmark);
         }
 

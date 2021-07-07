@@ -1,0 +1,3 @@
+description="Mark bookmarks to read them later, with bookmark list highlight and filter."
+parameters="READITLATER_DEFAULT_CHECK"
+parameter.READITLATER_DEFAULT_CHECK="By default, mark new bookmarks to read them later (with <code>1</code>) or not (with <code>0</code>)"

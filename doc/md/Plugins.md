@@ -54,6 +54,7 @@ Usage of each plugin is documented in it's README file:
  * [`playvideos`](https://github.com/shaarli/Shaarli/blob/master/plugins/playvideos/README.md): Add a button in the toolbar allowing to watch all videos.
  * `pubsubhubbub`: Enable PubSubHubbub feed publishing
  * `qrcode`: For each Shaare, add a QRCode icon.
+ * `readitlater`: Mark bookmarks to read them later, with bookmark list highlight and filter.
  * [`wallabag`](https://github.com/shaarli/Shaarli/blob/master/plugins/wallabag/README.md):  For each Shaare, add a Wallabag icon to save it in your instance.
 
 

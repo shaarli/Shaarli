@@ -66,6 +66,7 @@
             "Shaarli\\Plugin\\": "application/plugin",
             "Shaarli\\Plugin\\Exception\\": "application/plugin/exception",
             "Shaarli\\Plugin\\Wallabag\\": "plugins/wallabag",
+            "Shaarli\\Plugin\\ReadItLater\\": "plugins/readitlater",
             "Shaarli\\Render\\": "application/render",
             "Shaarli\\Security\\": "application/security",
             "Shaarli\\Updater\\": "application/updater",

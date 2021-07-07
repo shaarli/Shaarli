@@ -95,6 +95,7 @@ abstract class BookmarkFormatter
         $out['updated'] = $this->formatUpdated($bookmark);
         $out['timestamp'] = $this->formatCreatedTimestamp($bookmark);
         $out['updated_timestamp'] = $this->formatUpdatedTimestamp($bookmark);
+        $out['additional_content'] = $this->formatAdditionalContent($bookmark);
 
         return $out;
     }
@@ -347,6 +348,18 @@ abstract class BookmarkFormatter
             return $bookmark->getUpdated()->getTimestamp();
         }
         return 0;
+    }
+
+    /**
+     * Format bookmark's additional content
+     *
+     * @param Bookmark $bookmark instance
+     *
+     * @return mixed[]
+     */
+    protected function formatAdditionalContent(Bookmark $bookmark): array
+    {
+        return $bookmark->getAdditionalContent();
     }
 
     /**

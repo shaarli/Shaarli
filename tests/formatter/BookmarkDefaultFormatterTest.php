@@ -184,7 +184,7 @@ class BookmarkDefaultFormatterTest extends TestCase
 
         $bookmark = new Bookmark();
         $bookmark->setTitle('PSR-2: Coding Style Guide');
-        $bookmark->addAdditionalContentEntry(
+        $bookmark->setAdditionalContentEntry(
             'search_highlight',
             ['title' => [
                 ['start' => 0, 'end' => 5], // "psr-2"
@@ -215,7 +215,7 @@ class BookmarkDefaultFormatterTest extends TestCase
             'This guide extends and expands on PSR-1, the basic coding standard.' . PHP_EOL .
             'https://www.php-fig.org/psr/psr-1/'
         );
-        $bookmark->addAdditionalContentEntry(
+        $bookmark->setAdditionalContentEntry(
             'search_highlight',
             ['description' => [
                 ['start' => 0, 'end' => 10], // "This guide"
@@ -247,7 +247,7 @@ class BookmarkDefaultFormatterTest extends TestCase
 
         $bookmark = new Bookmark();
         $bookmark->setUrl('http://www.php-fig.org/psr/psr-2/');
-        $bookmark->addAdditionalContentEntry(
+        $bookmark->setAdditionalContentEntry(
             'search_highlight',
             ['url' => [
                 ['start' => 0, 'end' => 4], // http
@@ -275,7 +275,7 @@ class BookmarkDefaultFormatterTest extends TestCase
 
         $bookmark = new Bookmark();
         $bookmark->setTagsString('coding-style standards quality assurance');
-        $bookmark->addAdditionalContentEntry(
+        $bookmark->setAdditionalContentEntry(
             'search_highlight',
             ['tags' => [
                 ['start' => 0, 'end' => 12], // coding-style

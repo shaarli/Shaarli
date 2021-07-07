@@ -988,7 +988,7 @@ class BookmarkFileServiceTest extends TestCase
         $privateKey = 'this is usually auto generated';
 
         $bookmark = $this->privateLinkDB->findByHash($hash);
-        $bookmark->addAdditionalContentEntry('private_key', $privateKey);
+        $bookmark->setAdditionalContentEntry('private_key', $privateKey);
         $this->privateLinkDB->save();
 
         $this->privateLinkDB = new BookmarkFileService(

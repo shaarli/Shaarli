@@ -84,7 +84,7 @@ class SharePrivateTest extends TestCase
             ->setUrl('http://domain.tld')
             ->setTitle('Title 123')
             ->setPrivate(true)
-            ->addAdditionalContentEntry('private_key', $existingKey)
+            ->setAdditionalContentEntry('private_key', $existingKey)
         ;
 
         $this->container->bookmarkService

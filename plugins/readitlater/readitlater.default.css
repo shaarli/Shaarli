@@ -1,0 +1,21 @@
+.linklist-item.readitlater-unread::after {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 51;
+    background: red;
+    width: 2px;
+    height: 100%;
+    content: '';
+}
+
+.readitlater-unread .label-unread {
+    color: red;
+    border: 1px solid red;
+    text-decoration: none;
+}
+
+.readitlater-unread .readitlater-toggle .fa-eye-slash {
+    color: red;
+}

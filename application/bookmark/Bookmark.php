@@ -85,6 +85,7 @@ class Bookmark
             $this->updated = $data['updated'];
         }
         $this->private = ($data['private'] ?? false) ? true : false;
+        $this->additionalContent = $data['additional_content'] ?? [];
 
         return $this;
     }
@@ -483,7 +484,7 @@ class Bookmark
      *
      * @return $this
      */
-    public function addAdditionalContentEntry(string $key, $value): self
+    public function setAdditionalContentEntry(string $key, $value): self
     {
         $this->additionalContent[$key] = $value;
 
