@@ -172,7 +172,7 @@ You can use the third-party tool [Derefind](https://github.com/ShawnPConroy/Dere
 
 ### The bookmarklet doesn't work
 
-Websites which enforce Content Security Policy (CSP), such as github.com, disallow usage of bookmarklets. Unfortunately, there is nothing Shaarli can do about it ([1](https://github.com/shaarli/Shaarli/issues/196), [2](https://bugzilla.mozilla.org/show_bug.cgi?id=866522), [3](https://code.google.com/p/chromium/issues/detail?id=233903).
+Some websites may disallow usage of bookmarklets through [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP). Unfortunately, there is nothing Shaarli can do about it ([1](https://github.com/shaarli/Shaarli/issues/196), [2](https://bugzilla.mozilla.org/show_bug.cgi?id=866522), [3](https://code.google.com/p/chromium/issues/detail?id=233903).
 
 Under Opera, you can't drag'n drop the button: You have to right-click on it and add a bookmark to your personal toolbar.
 
