@@ -65,7 +65,8 @@ class ContainerBuilder
         CookieManager $cookieManager,
         LoginManager $login,
         PluginManager $pluginManager,
-        LoggerInterface $logger
+		LoggerInterface $logger,
+		string $basePath = null
     ) {
         $this->conf = $conf;
         $this->session = $session;
@@ -73,6 +74,7 @@ class ContainerBuilder
         $this->cookieManager = $cookieManager;
         $this->pluginManager = $pluginManager;
         $this->logger = $logger;
+        $this->basePath = $basePath;
     }
 
     public function build(): ShaarliContainer

@@ -62,7 +62,7 @@ class ContainerBuilderTest extends TestCase
             $this->cookieManager,
             $this->loginManager,
             $this->pluginManager,
-            $this->createMock(LoggerInterface::class)
+			$this->createMock(LoggerInterface::class)
         );
     }
 

@@ -97,7 +97,8 @@ $containerBuilder = new ContainerBuilder(
     $cookieManager,
     $loginManager,
     $pluginManager,
-    $logger
+	$logger,
+	$conf->get('general.root_url', null)
 );
 $container = $containerBuilder->build();
 $app = new App($container);
