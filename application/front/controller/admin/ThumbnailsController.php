@@ -45,7 +45,7 @@ class ThumbnailsController extends ShaarliAdminController
      */
     public function ajaxUpdate(Request $request, Response $response, array $args): Response
     {
-        $id = $args['id'] ?? null;
+        $id = $args['id'] ?? '';
 
         if (false === ctype_digit($id)) {
             return $response->withStatus(400);

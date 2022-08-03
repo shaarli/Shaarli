@@ -30,7 +30,7 @@ class HistoryController extends ApiController
         $history = $this->history->getHistory();
 
         // Return history operations from the {offset}th, starting from {since}.
-        $since = \DateTime::createFromFormat(\DateTime::ATOM, $request->getParam('since'));
+        $since = \DateTime::createFromFormat(\DateTime::ATOM, $request->getParam('since', ''));
         $offset = $request->getParam('offset');
         if (empty($offset)) {
             $offset = 0;

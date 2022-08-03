@@ -219,7 +219,7 @@ function tags_str2array(?string $tags, string $separator): array
     // For whitespaces, we use the special \s regex character
     $separator = $separator === ' ' ? '\s' : $separator;
 
-    return preg_split('/\s*' . $separator . '+\s*/', trim($tags) ?? '', -1, PREG_SPLIT_NO_EMPTY);
+    return preg_split('/\s*' . $separator . '+\s*/', trim($tags ?? ''), -1, PREG_SPLIT_NO_EMPTY);
 }
 
 /**

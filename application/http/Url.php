@@ -61,6 +61,7 @@ class Url
      */
     public function __construct($url)
     {
+        $url = $url ?? '';
         $url = self::cleanupUnparsedUrl(trim($url));
         $this->parts = parse_url($url);
 

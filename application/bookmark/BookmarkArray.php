@@ -57,7 +57,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return int Number of bookmarks
      */
-    public function count()
+    public function count(): int
     {
         return count($this->bookmarks);
     }
@@ -70,7 +70,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @throws InvalidBookmarkException
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if (
             ! $value instanceof Bookmark
@@ -106,7 +106,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return bool true if it exists, false otherwise
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($this->getBookmarkOffset($offset), $this->bookmarks);
     }
@@ -116,7 +116,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @param int $offset Bookmark ID
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         $realOffset = $this->getBookmarkOffset($offset);
         $url = $this->bookmarks[$realOffset]->getUrl();
@@ -132,7 +132,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return Bookmark|null The Bookmark if found, null otherwise
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): ?Bookmark
     {
         $realOffset = $this->getBookmarkOffset($offset);
         return isset($this->bookmarks[$realOffset]) ? $this->bookmarks[$realOffset] : null;
@@ -143,7 +143,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return Bookmark corresponding to the current position
      */
-    public function current()
+    public function current(): Bookmark
     {
         return $this[$this->keys[$this->position]];
     }
@@ -153,7 +153,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return int Bookmark ID corresponding to the current position
      */
-    public function key()
+    public function key(): int
     {
         return $this->keys[$this->position];
     }
@@ -161,7 +161,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
     /**
      * Iterator - Moves forward to next element
      */
-    public function next()
+    public function next(): void
     {
         ++$this->position;
     }
@@ -171,7 +171,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * Entries are sorted by date (latest first)
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->keys = array_keys($this->ids);
         $this->position = 0;
@@ -182,7 +182,7 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
      *
      * @return bool true if the current Bookmark ID exists, false otherwise
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->keys[$this->position]);
     }
