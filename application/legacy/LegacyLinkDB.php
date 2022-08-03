@@ -196,7 +196,8 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * Iterator - Returns the key of the current element
      */
-    public function key(): string
+    #[\ReturnTypeWillChange]
+    public function key()
     {
         return $this->keys[$this->position];
     }
