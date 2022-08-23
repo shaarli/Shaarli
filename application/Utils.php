@@ -181,8 +181,8 @@ function generateLocation($referer, $host, $loopTerms = [])
         $host = substr($host, 0, $pos);
     }
 
-    $refererHost = parse_url($referer, PHP_URL_HOST);
-    if (!empty($referer) && (strpos($refererHost ?? '', $host) !== false || startsWith('?', $refererHost))) {
+    $refererHost = parse_url($referer, PHP_URL_HOST) ?? '';
+    if (!empty($referer) && (strpos($refererHost, $host) !== false || startsWith('?', $refererHost))) {
         $finalReferer = $referer;
     }
 
