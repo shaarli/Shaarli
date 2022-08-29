@@ -52,7 +52,7 @@ class ThumbnailerTest extends TestCase
      */
     public function testThumbnailAllValid()
     {
-        $thumb = $this->thumbnailer->get('https://github.com/shaarli/Shaarli/');
+        $thumb = $this->thumbnailer->get('https://gitlab.com/shaarli/Shaarli');
         $this->assertNotFalse($thumb);
         $image = imagecreatefromstring(file_get_contents($thumb));
         $this->assertEquals(self::WIDTH, imagesx($image));

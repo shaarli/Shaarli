@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "83852dec81e299a117a81206a5091472",
+    "content-hash": "326e743376bd043cd7de28c02b5ac1d5",
     "packages": [
         {
             "name": "arthurhoaro/web-thumbnailer",
@@ -806,21 +806,21 @@
         },
         {
             "name": "shaarli/netscape-bookmark-parser",
-            "version": "v3.2.0",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shaarli/netscape-bookmark-parser.git",
-                "reference": "5b2eb8d478f5e6938359e116880763e6b1892e62"
+                "reference": "aa024e5731959966660d98fcefe27deada40d88e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shaarli/netscape-bookmark-parser/zipball/5b2eb8d478f5e6938359e116880763e6b1892e62",
-                "reference": "5b2eb8d478f5e6938359e116880763e6b1892e62",
+                "url": "https://api.github.com/repos/shaarli/netscape-bookmark-parser/zipball/aa024e5731959966660d98fcefe27deada40d88e",
+                "reference": "aa024e5731959966660d98fcefe27deada40d88e",
                 "shasum": ""
             },
             "require": {
-                "katzgrau/klogger": "~1.0",
-                "php": ">=7.1"
+                "php": ">=7.1",
+                "psr/log": "^1.1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0",
@@ -828,9 +828,9 @@
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "NetscapeBookmarkParser.php"
-                ]
+                "psr-4": {
+                    "Shaarli\\NetscapeBookmarkParser\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -848,21 +848,29 @@
                     "email": "virtualtam@flibidi.net",
                     "homepage": "https://github.com/virtualtam",
                     "role": "Developer"
+                },
+                {
+                    "name": "Matthias Morin",
+                    "email": "mat@tangoman.io",
+                    "homepage": "https://github.com/TangoMan75",
+                    "role": "Developer"
                 }
             ],
             "description": "Generic Netscape bookmark parser",
             "homepage": "https://github.com/shaarli/netscape-bookmark-parser",
             "keywords": [
                 "bookmark",
+                "decoder",
+                "encoder",
                 "link",
                 "netscape",
                 "parse"
             ],
             "support": {
                 "issues": "https://github.com/shaarli/netscape-bookmark-parser/issues",
-                "source": "https://github.com/shaarli/netscape-bookmark-parser/tree/v3.2.0"
+                "source": "https://github.com/shaarli/netscape-bookmark-parser/tree/v4.0.0"
             },
-            "time": "2021-01-31T09:39:07+00:00"
+            "time": "2022-08-13T09:57:26+00:00"
         },
         {
             "name": "slim/slim",

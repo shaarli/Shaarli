@@ -109,15 +109,9 @@ class NetscapeBookmarkUtils
             );
         }
 
-        // bookmarks are imported as public by default
-        $defaultPrivacy = 0;
+        // Optionally Force all imported link to be either public or private.
+        $forcedPrivateStatus = !empty($post['privacy']) ? (string) $post['privacy'] : null;
 
-        $parser = new NetscapeBookmarkParser(
-            true,                           // nested tag support
-            $defaultTags,                   // additional user-specified tags
-            strval(1 - $defaultPrivacy),    // defaultPub = 1 - defaultPrivacy
-            $this->conf->get('resource.data_dir') // log path, will be overridden
-        );
         $logger = new Logger(
             $this->conf->get('resource.data_dir'),
             !$this->conf->get('dev.debug') ? LogLevel::INFO : LogLevel::DEBUG,
@@ -126,7 +120,8 @@ class NetscapeBookmarkUtils
                 'extension' => 'log',
             ]
         );
-        $parser->setLogger($logger);
+        $parser = new NetscapeBookmarkParser([], $logger);
+
         $bookmarks = $parser->parseString($data);
 
         $importCount = 0;
@@ -134,19 +129,18 @@ class NetscapeBookmarkUtils
         $skipCount = 0;
 
         foreach ($bookmarks as $bkm) {
-            $private = $defaultPrivacy;
-            if (empty($post['privacy']) || $post['privacy'] == 'default') {
-                // use value from the imported file
-                $private = $bkm['pub'] == '1' ? 0 : 1;
-            } elseif ($post['privacy'] == 'private') {
+            if ($forcedPrivateStatus == 'private') {
                 // all imported bookmarks are private
-                $private = 1;
-            } elseif ($post['privacy'] == 'public') {
+                $isPrivate = true;
+            } elseif ($forcedPrivateStatus == 'public') {
                 // all imported bookmarks are public
-                $private = 0;
+                $isPrivate = false;
+            } else {
+                // Use private value from imported file or default to public
+                $isPrivate = isset($bkm['public']) && !$bkm['public'];
             }
 
-            $link = $this->bookmarkService->findByUrl($bkm['uri']);
+            $link = $this->bookmarkService->findByUrl($bkm['url']);
             $existingLink = $link !== null;
             if (! $existingLink) {
                 $link = new Bookmark();
@@ -162,15 +156,19 @@ class NetscapeBookmarkUtils
                 $link->setUpdated(new DateTime());
                 $overwriteCount++;
             } else {
-                $newLinkDate = new DateTime('@' . strval($bkm['time']));
+                $newLinkDate = new DateTime('@' . $bkm['dateCreated']);
                 $newLinkDate->setTimezone(new DateTimeZone(date_default_timezone_get()));
                 $link->setCreated($newLinkDate);
             }
 
-            $link->setTitle($bkm['title']);
-            $link->setUrl($bkm['uri'], $this->conf->get('security.allowed_protocols'));
-            $link->setDescription($bkm['note']);
-            $link->setPrivate($private);
+            if (!empty($defaultTags)) {
+                $bkm['tags'] = array_merge($defaultTags, $bkm['tags']);
+            }
+
+            $link->setTitle($bkm['name']);
+            $link->setUrl($bkm['url'], $this->conf->get('security.allowed_protocols'));
+            $link->setDescription($bkm['description']);
+            $link->setPrivate($isPrivate);
             $link->setTags($bkm['tags']);
 
             $this->bookmarkService->addOrSet($link, false);

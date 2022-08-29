@@ -26,7 +26,7 @@
         "katzgrau/klogger": "^1.2",
         "malkusch/lock": "^2.1",
         "pubsubhubbub/publisher": "dev-master",
-        "shaarli/netscape-bookmark-parser": "^3.0",
+        "shaarli/netscape-bookmark-parser": "^4.0",
         "slim/slim": "^3.0"
     },
     "require-dev": {
