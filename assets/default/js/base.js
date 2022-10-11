@@ -383,6 +383,10 @@ function init(description) {
           });
 
           sub.classList.toggle('open');
+          const autofocus = sub.querySelector('.autofocus');
+          if (autofocus) {
+            autofocus.focus();
+          }
         }
       });
     });
@@ -506,6 +510,37 @@ function init(description) {
       });
     });
   }
+
+  ['add', 'delete'].forEach((action) => {
+    const subHeader = document.getElementById(`bulk-tag-action-${action}`);
+
+    if (subHeader) {
+      subHeader.querySelectorAll('a.button').forEach((link) => {
+        if (!link.classList.contains('action')) {
+          return;
+        }
+
+        subHeader.querySelector('input[name="tag"]').addEventListener('keypress', (event) => {
+          if (event.keyCode === 13) { // enter
+            link.click();
+          }
+        });
+
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+
+          const ids = [];
+          const linkCheckedCheckboxes = document.querySelectorAll('.link-checkbox:checked');
+          [...linkCheckedCheckboxes].forEach((checkbox) => {
+            ids.push(checkbox.value);
+          });
+
+          subHeader.querySelector('input[name="id"]').value = ids.join(' ');
+          subHeader.querySelector('form').submit();
+        });
+      });
+    }
+  });
 
   /**
    * Select all button

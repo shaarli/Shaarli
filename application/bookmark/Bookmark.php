@@ -518,6 +518,16 @@ class Bookmark
     }
 
     /**
+     * Add a tag in tags list.
+     *
+     * @param string $tag
+     */
+    public function addTag(string $tag): self
+    {
+        return $this->setTags(array_merge($this->getTags(), [$tag]));
+    }
+
+    /**
      * Delete a tag from tags list.
      *
      * @param string $tag

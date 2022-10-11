@@ -203,4 +203,85 @@ class ShaareManageController extends ShaarliAdminController
             '/shaare/' . $hash . '?key=' . $bookmark->getAdditionalContentEntry('private_key')
         );
     }
+
+    /**
+     * POST /admin/shaare/update-tags
+     *
+     * Bulk add or delete a tags on one or multiple bookmarks.
+     */
+    public function addOrDeleteTags(Request $request, Response $response): Response
+    {
+        $this->checkToken($request);
+
+        $ids = trim(escape($request->getParam('id') ?? ''));
+        if (empty($ids) || strpos($ids, ' ') !== false) {
+            // multiple, space-separated ids provided
+            $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
+        } else {
+            // only a single id provided
+            $ids = [$ids];
+        }
+
+        // assert at least one id is given
+        if (0 === count($ids)) {
+            $this->saveErrorMessage(t('Invalid bookmark ID provided.'));
+
+            return $this->redirectFromReferer($request, $response, ['/updateTag'], []);
+        }
+
+        // assert that the action is valid
+        $action = $request->getParam('action');
+        if (!in_array($action, ['add', 'delete'], true)) {
+            $this->saveErrorMessage(t('Invalid action provided.'));
+
+            return $this->redirectFromReferer($request, $response, ['/updateTag'], []);
+        }
+
+        // assert that the tag name is valid
+        $tagString = trim($request->getParam('tag'));
+        if (empty($tagString)) {
+            $this->saveErrorMessage(t('Invalid tag name provided.'));
+
+            return $this->redirectFromReferer($request, $response, ['/updateTag'], []);
+        }
+
+        $tags = tags_str2array($tagString, $this->container->conf->get('general.tags_separator', ' '));
+        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $count = 0;
+
+        foreach ($ids as $id) {
+            try {
+                $bookmark = $this->container->bookmarkService->get((int) $id);
+            } catch (BookmarkNotFoundException $e) {
+                $this->saveErrorMessage(sprintf(
+                    t('Bookmark with identifier %s could not be found.'),
+                    $id
+                ));
+
+                continue;
+            }
+
+            foreach ($tags as $tag) {
+                if ($action === 'add') {
+                    $bookmark->addTag($tag);
+                } else {
+                    $bookmark->deleteTag($tag);
+                }
+            }
+
+            // To preserve backward compatibility with 3rd parties, plugins still use arrays
+            $data = $formatter->format($bookmark);
+            $this->executePageHooks('save_link', $data);
+            $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
+
+            $this->container->bookmarkService->set($bookmark, false);
+            ++$count;
+        }
+
+        if ($count > 0) {
+            $this->container->bookmarkService->save();
+        }
+
+        return $this->redirectFromReferer($request, $response, ['/updateTag'], []);
+    }
 }
