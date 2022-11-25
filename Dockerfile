@@ -41,6 +41,7 @@ RUN apk --update --no-cache add \
         php8-iconv \
         php8-intl \
         php8-json \
+        php8-ldap \
         php8-mbstring \
         php8-openssl \
         php8-session \

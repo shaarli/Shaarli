@@ -12,7 +12,11 @@ RUN apk --update --no-cache add py3-pip \
 # - Resolve PHP dependencies with Composer
 FROM arm32v6/alpine:3.16 as composer
 COPY --from=docs /usr/src/app/shaarli /app/shaarli
-RUN apk --update --no-cache add php8-curl php8-mbstring php8-simplexml composer \
+RUN apk --update --no-cache add \
+    php8-curl \
+    php8-mbstring \
+    php8-simplexml \
+    composer \
     && cd /app/shaarli \
     && composer --prefer-dist --no-dev install
 
@@ -42,6 +46,7 @@ RUN apk --update --no-cache add \
         php8-iconv \
         php8-intl \
         php8-json \
+        php8-ldap \
         php8-mbstring \
         php8-openssl \
         php8-session \
