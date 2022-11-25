@@ -48,7 +48,12 @@ if ($conf->get('dev.debug', false)) {
     // See all errors (for debugging only)
     error_reporting(-1);
 
-    set_error_handler(function ($errno, $errstr, $errfile, $errline, array $errcontext) {
+    set_error_handler(function ($errno, $errstr, $errfile, $errline, array $errcontext = []) {
+        // Skip PHP 8 deprecation warning with Pimple.
+        if (strpos($errfile, 'src/Pimple/Container.php') !== -1 && strpos($errstr, 'ArrayAccess::') !== -1) {
+            return error_log($errstr);
+        }
+
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     });
 }
