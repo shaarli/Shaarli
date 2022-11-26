@@ -65,8 +65,11 @@ function hook_readitlater_render_editlink(array $data, ConfigManager $conf): arr
     // Load HTML into a string
     $html = file_get_contents(PluginManager::$PLUGINS_PATH . '/readitlater/readitlater_editlink.html');
 
+    // Random ID for batch shaare (multiple inputs on the same page)
+    $random = uniqid();
+
      // Replace value in HTML if it exists in $data
-    $html = sprintf($html, $default ? 'checked' : '');
+    $html = sprintf($html, $random, $default ? 'checked' : '', $random);
 
     // field_plugin
     $data['edit_link_plugin'][] = $html;
