@@ -151,7 +151,7 @@ $app->group('/admin', function () {
     $this->post('/shaare', '\Shaarli\Front\Controller\Admin\ShaarePublishController:save');
     $this->get('/shaare/delete', '\Shaarli\Front\Controller\Admin\ShaareManageController:deleteBookmark');
     $this->get('/shaare/visibility', '\Shaarli\Front\Controller\Admin\ShaareManageController:changeVisibility');
-    $this->post('/shaare/update-tags', '\Shaarli\Front\Controller\Admin\ShaareManageController:addOrDeleteSingleTag');
+    $this->post('/shaare/update-tags', '\Shaarli\Front\Controller\Admin\ShaareManageController:addOrDeleteTags');
     $this->get('/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ShaareManageController:pinBookmark');
     $this->patch(
         '/shaare/{id:[0-9]+}/update-thumbnail',
