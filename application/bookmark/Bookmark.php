@@ -524,7 +524,7 @@ class Bookmark
      */
     public function addTag(string $tag): self
     {
-        return $this->setTags(array_merge($this->getTags(), [$tag]));
+        return $this->setTags(array_unique(array_merge($this->getTags(), [$tag])));
     }
 
     /**
@@ -534,7 +534,7 @@ class Bookmark
      */
     public function deleteTag(string $tag): void
     {
-        if (($pos = array_search($tag, $this->tags ?? [])) !== false) {
+        while (($pos = array_search($tag, $this->tags ?? [])) !== false) {
             unset($this->tags[$pos]);
             $this->tags = array_values($this->tags);
         }
