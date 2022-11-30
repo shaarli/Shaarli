@@ -263,7 +263,7 @@ class BookmarkTest extends TestCase
     }
 
     /**
-     * Test addTag() and DeleteTag() 
+     * Test addTag() and DeleteTag()
      */
 
     public function testAddDeleteTags()
@@ -300,8 +300,8 @@ class BookmarkTest extends TestCase
         );
 
         // Delete multiples
-        $bookmark->setTags( ['tag3', 'tag1', 'tag4', 'tag3', 'tag3', 'tag4'] );
-        $bookmark->deleteTag( 'tag3' );
+        $bookmark->setTags(['tag3', 'tag1', 'tag4', 'tag3', 'tag3', 'tag4']);
+        $bookmark->deleteTag('tag3');
         $this->assertEquals(
             [
                 'tag1',
@@ -310,7 +310,7 @@ class BookmarkTest extends TestCase
             ],
             $bookmark->getTags()
         );
-        $bookmark->deleteTag( 'tag4' );
+        $bookmark->deleteTag('tag4');
         $this->assertEquals(
             [
                 'tag1',
