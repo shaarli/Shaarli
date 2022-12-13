@@ -38,7 +38,7 @@ Here is an example of how to run Shaarli latest image using Podman:
 
 ```bash
 # download the image from dockerhub
-podman pull shaarli/shaarli
+podman pull docker.io/shaarli/shaarli:release
 
 # create persistent data volumes/directories on the host
 podman volume create shaarli-data
