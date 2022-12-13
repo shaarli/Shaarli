@@ -56,7 +56,7 @@ podman run --detach \
            --rm \
            --volume shaarli-data:/var/www/shaarli/data \
            --volume shaarli-cache:/var/www/shaarli/cache \
-           shaarli/shaarli:release
+           docker.io/shaarli/shaarli:release
            
 # verify that the container is running
 podman ps | grep myshaarli
