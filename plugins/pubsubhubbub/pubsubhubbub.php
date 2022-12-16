@@ -48,6 +48,8 @@ function hook_pubsubhubbub_render_feed($data, $conf)
     return $data;
 }
 
+$published = false;
+
 /**
  * Save link hook.
  * Publish to the hub when a link is saved.
@@ -59,6 +61,11 @@ function hook_pubsubhubbub_render_feed($data, $conf)
  */
 function hook_pubsubhubbub_save_link($data, $conf)
 {
+    global $published;
+    if ($published) {
+        return $data;
+    }
+
     $feeds = [
         index_url($_SERVER) . 'feed/atom',
         index_url($_SERVER) . 'feed/rss',
@@ -68,6 +75,7 @@ function hook_pubsubhubbub_save_link($data, $conf)
     try {
         $p = new Publisher($conf->get('plugins.PUBSUBHUB_URL'));
         $p->publish_update($feeds, $httpPost);
+        $published = true;
     } catch (Exception $e) {
         error_log(sprintf(t('Could not publish to PubSubHubbub: %s'), $e->getMessage()));
     }

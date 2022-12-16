@@ -198,6 +198,13 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
         Require all granted
     </Directory>
 
+    <Directory /var/www/shaarli.mydomain.org/doc/html/>
+        DirectoryIndex index.html
+        <FilesMatch ".*\.html">
+            Require all granted
+        </FilesMatch>
+    </Directory>
+    
     # BE CAREFUL: directives order matter!
 
     <FilesMatch ".*\.(?!(ico|css|js|gif|jpe?g|png|ttf|oet|woff2?)$)[^\.]*$">
@@ -214,7 +221,6 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
         # allow client-side caching of static files
         Header set Cache-Control "max-age=2628000, public, must-revalidate, proxy-revalidate"
     </FilesMatch>
-
 
     # serve the Shaarli favicon from its custom location
     Alias favicon.ico /var/www/shaarli.mydomain.org/images/favicon.ico

@@ -518,13 +518,23 @@ class Bookmark
     }
 
     /**
+     * Add a tag in tags list.
+     *
+     * @param string $tag
+     */
+    public function addTag(string $tag): self
+    {
+        return $this->setTags(array_unique(array_merge($this->getTags(), [$tag])));
+    }
+
+    /**
      * Delete a tag from tags list.
      *
      * @param string $tag
      */
     public function deleteTag(string $tag): void
     {
-        if (($pos = array_search($tag, $this->tags ?? [])) !== false) {
+        while (($pos = array_search($tag, $this->tags ?? [])) !== false) {
             unset($this->tags[$pos]);
             $this->tags = array_values($this->tags);
         }

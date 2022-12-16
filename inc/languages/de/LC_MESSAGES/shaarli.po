@@ -127,7 +127,7 @@ msgstr ""
 
 #: application/bookmark/BookmarkInitializer.php:58
 msgid "Note: Shaare descriptions"
-msgstr "Hinweis: Shaare Beschreibungen"
+msgstr "Hinweis: Shaare-Beschreibungen"
 
 #: application/bookmark/BookmarkInitializer.php:60
 msgid ""
@@ -886,7 +886,7 @@ msgstr ""
 #: plugins/isso/isso.php:92
 msgid "Let visitor comment your shaares on permalinks with Isso."
 msgstr ""
-"Lassen Sie Besucher ihre geteilten Links auf Permalinks mit Isso "
+"Lassen Sie Besucher Ihre Shaares auf Permalinks mit Isso "
 "kommentieren."
 
 #: plugins/isso/isso.php:93
@@ -1431,8 +1431,8 @@ msgstr "Server-Anforderungen"
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:79
 msgid "shaare"
 msgid_plural "shaares"
-msgstr[0] "Teile"
-msgstr[1] "Teilen"
+msgstr[0] "Shaare"
+msgstr[1] "Shaares"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:18
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:83

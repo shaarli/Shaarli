@@ -32,29 +32,31 @@ LABEL maintainer="Shaarli Community"
 RUN apk --update --no-cache add \
         ca-certificates \
         nginx \
-        php7 \
-        php7-ctype \
-        php7-curl \
-        php7-fpm \
-        php7-gd \
-        php7-iconv \
-        php7-intl \
-        php7-json \
-        php7-mbstring \
-        php7-openssl \
-        php7-session \
-        php7-xml \
-        php7-simplexml \
-        php7-zlib \
+        php8 \
+        php8-ctype \
+        php8-curl \
+        php8-fpm \
+        php8-gd \
+        php8-gettext \
+        php8-iconv \
+        php8-intl \
+        php8-json \
+        php8-ldap \
+        php8-mbstring \
+        php8-openssl \
+        php8-session \
+        php8-xml \
+        php8-simplexml \
+        php8-zlib \
         s6
 
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
-COPY .docker/php-fpm.conf /etc/php7/php-fpm.conf
+COPY .docker/php-fpm.conf /etc/php8/php-fpm.conf
 COPY .docker/services.d /etc/services.d
 
-RUN rm -rf /etc/php7/php-fpm.d/www.conf \
-    && sed -i 's/post_max_size.*/post_max_size = 10M/' /etc/php7/php.ini \
-    && sed -i 's/upload_max_filesize.*/upload_max_filesize = 10M/' /etc/php7/php.ini
+RUN rm -rf /etc/php8/php-fpm.d/www.conf \
+    && sed -i 's/post_max_size.*/post_max_size = 10M/' /etc/php8/php.ini \
+    && sed -i 's/upload_max_filesize.*/upload_max_filesize = 10M/' /etc/php8/php.ini
 
 
 WORKDIR /var/www

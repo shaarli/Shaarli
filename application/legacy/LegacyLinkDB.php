@@ -116,7 +116,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * Countable - Counts elements of an object
      */
-    public function count()
+    public function count(): int
     {
         return count($this->links);
     }
@@ -124,7 +124,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * ArrayAccess - Assigns a value to the specified offset
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         // TODO: use exceptions instead of "die"
         if (!$this->loggedIn) {
@@ -155,7 +155,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * ArrayAccess - Whether or not an offset exists
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($this->getLinkOffset($offset), $this->links);
     }
@@ -163,7 +163,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * ArrayAccess - Unsets an offset
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if (!$this->loggedIn) {
             // TODO: raise an exception
@@ -179,7 +179,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * ArrayAccess - Returns the value at specified offset
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): ?array
     {
         $realOffset = $this->getLinkOffset($offset);
         return isset($this->links[$realOffset]) ? $this->links[$realOffset] : null;
@@ -188,14 +188,17 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * Iterator - Returns the current element
      */
-    public function current()
+    public function current(): array
     {
         return $this[$this->keys[$this->position]];
     }
 
     /**
      * Iterator - Returns the key of the current element
+     *
+     * @return int|string
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->keys[$this->position];
@@ -204,7 +207,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * Iterator - Moves forward to next element
      */
-    public function next()
+    public function next(): void
     {
         ++$this->position;
     }
@@ -214,7 +217,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
      *
      * Entries are sorted by date (latest first)
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->keys = array_keys($this->ids);
         $this->position = 0;
@@ -223,7 +226,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
     /**
      * Iterator - Checks if current position is valid
      */
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->keys[$this->position]);
     }

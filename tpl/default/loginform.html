@@ -12,7 +12,7 @@
       <h2 class="window-title">{'Login'|t}</h2>
       <div>
         <input type="text" name="login" aria-label="{'Username'|t}" placeholder="{'Username'|t}"
-           {if="!empty($username)"}value="{$username}"{/if} class="autofocus">
+           {if="!empty($username)"}value="{$username}"{/if} class="autofocus" autocapitalize="off">
       </div>
       <div>
         <input type="password" name="password" aria-label="{'Password'|t}" placeholder="{'Password'|t}" class="autofocus">

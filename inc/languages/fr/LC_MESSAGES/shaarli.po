@@ -678,7 +678,7 @@ msgstr "Tri des textes traduits (ex : e->è->f)"
 
 #: application/helper/ApplicationUtils.php:298
 msgid "Better retrieval of bookmark metadata and thumbnail"
-msgstr "Meilleure récupération des meta-données des marque-pages et minatures"
+msgstr "Meilleure récupération des meta-données des marque-pages et miniatures"
 
 #: application/helper/ApplicationUtils.php:299
 msgid "Use the translation system in gettext mode"

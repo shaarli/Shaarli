@@ -238,7 +238,7 @@ class ApplicationUtils
                  $conf->get('resource.update_check'),
              ] as $path
         ) {
-            if (!is_file(realpath($path))) {
+            if (!is_string($path) || !is_file(realpath($path))) {
                 # the file may not exist yet
                 continue;
             }

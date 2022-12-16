@@ -278,8 +278,8 @@ class PluginQrcodeTest extends TestCase
         ];
         $data = hook_readitlater_render_editlink($originalData, $this->confDefaultTheme);
 
-        static::assertContainsPolyfill(
-            '<input type="checkbox" name="readitlater" id="readitlater"  />',
+        static::assertRegExp(
+            '#<input type="checkbox" name="readitlater" id="readitlater_[a-z0-9]+"  />#',
             $data['edit_link_plugin'][0]
         );
 
@@ -288,8 +288,8 @@ class PluginQrcodeTest extends TestCase
 
         $data = hook_readitlater_render_editlink($originalData, $this->confDefaultTheme);
 
-        static::assertContainsPolyfill(
-            '<input type="checkbox" name="readitlater" id="readitlater"  />',
+        static::assertRegExp(
+            '#<input type="checkbox" name="readitlater" id="readitlater_[a-z0-9]+"  />#',
             $data['edit_link_plugin'][0]
         );
     }
@@ -307,8 +307,8 @@ class PluginQrcodeTest extends TestCase
         ];
         $data = hook_readitlater_render_editlink($originalData, $this->confDefaultTheme);
 
-        static::assertContainsPolyfill(
-            '<input type="checkbox" name="readitlater" id="readitlater" checked />',
+        static::assertRegExp(
+            '#<input type="checkbox" name="readitlater" id="readitlater_[a-z0-9]+" checked />#',
             $data['edit_link_plugin'][0]
         );
     }

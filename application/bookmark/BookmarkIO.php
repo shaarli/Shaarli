@@ -9,6 +9,8 @@ use malkusch\lock\mutex\Mutex;
 use malkusch\lock\mutex\NoMutex;
 use Shaarli\Bookmark\Exception\DatastoreNotInitializedException;
 use Shaarli\Bookmark\Exception\EmptyDataStoreException;
+use Shaarli\Bookmark\Exception\InvalidWritableDataException;
+use Shaarli\Bookmark\Exception\NotEnoughSpaceException;
 use Shaarli\Bookmark\Exception\NotWritableDataStoreException;
 use Shaarli\Config\ConfigManager;
 
@@ -107,6 +109,7 @@ class BookmarkIO
      * @param Bookmark[] $links
      *
      * @throws NotWritableDataStoreException the datastore is not writable
+     * @throws InvalidWritableDataException
      */
     public function write($links)
     {
@@ -118,9 +121,19 @@ class BookmarkIO
             throw new NotWritableDataStoreException(dirname($this->datastore));
         }
 
-        $data = self::$phpPrefix . base64_encode(gzdeflate(serialize($links))) . self::$phpSuffix;
+        $data = base64_encode(gzdeflate(serialize($links)));
+
+        if (empty($data)) {
+            throw new InvalidWritableDataException();
+        }
+
+        $data = self::$phpPrefix . $data . self::$phpSuffix;
 
         $this->synchronized(function () use ($data) {
+            if (!$this->checkDiskSpace($data)) {
+                throw new NotEnoughSpaceException();
+            }
+
             file_put_contents(
                 $this->datastore,
                 $data
@@ -143,5 +156,18 @@ class BookmarkIO
         } catch (LockAcquireException $exception) {
             $function();
         }
+    }
+
+    /**
+     * Make sure that there is enough disk space available to save the current data store.
+     * We add an arbitrary margin of 500kB.
+     *
+     * @param string $data to be saved
+     *
+     * @return bool True if data can safely be saved
+     */
+    public function checkDiskSpace(string $data): bool
+    {
+        return disk_free_space(dirname($this->datastore)) > (strlen($data) + 1024 * 500);
     }
 }

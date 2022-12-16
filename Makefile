@@ -165,7 +165,13 @@ htmldoc:
 
 ### Generate Shaarli's translation compiled file (.mo)
 translate:
-	@find inc/languages/ -name shaarli.po -execdir msgfmt shaarli.po -o shaarli.mo \;
+	@echo "----------------------"
+	@echo "Compile translation files"
+	@echo "----------------------"
+	@for pofile in `find inc/languages/ -name shaarli.po`; do \
+		echo "Compiling $$pofile"; \
+		msgfmt -v "$$pofile" -o "`dirname "$$pofile"`/`basename "$$pofile" .po`.mo"; \
+	done;
 
 ### Run ESLint check against Shaarli's JS files
 eslint:

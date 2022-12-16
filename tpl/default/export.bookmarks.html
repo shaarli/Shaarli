@@ -5,6 +5,6 @@
      Do Not Edit! -->{ignore}The RainTPL loop is formatted to avoid generating extra newlines{/ignore}
 <TITLE>{$pagetitle}</TITLE>
 <H1>Shaarli export of {$selection} bookmarks on {$date}</H1>
-<DL><p>{loop="links"}
-<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" PRIVATE="{$value.private}" TAGS="{$value.taglist}">{$value.title}</A>{if="$value.description"}{$eol}<DD>{$value.description}{/if}{/loop}
+<DL><p>{loop="links"}{$private=intval($value.private)}
+<DT><A HREF="{$value.url}" ADD_DATE="{$value.timestamp}" {if="$value.updated_timestamp"}LAST_MODIFIED="{$value.updated_timestamp}" {/if}PRIVATE="{$private}" TAGS="{$value.taglist}">{$value.title}</A>{if="$value.description"}{$eol}<DD>{$value.description}{/if}{/loop}
 </DL><p>

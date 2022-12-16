@@ -120,7 +120,7 @@ class BookmarkDefaultFormatter extends BookmarkFormatter
                 $prefix = rtrim($this->contextData['base_path'], '/') . '/';
             }
 
-            return escape($prefix ?? '') . escape(ltrim($bookmark->getUrl(), '/'));
+            return escape($prefix ?? '') . escape(ltrim($bookmark->getUrl() ?? '', '/'));
         }
 
         return escape($bookmark->getUrl());

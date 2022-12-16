@@ -13,7 +13,7 @@
   <div id="headerform">
     <form method="post" name="loginform" action="{$base_path}/login">
       <label for="login">Login: <input type="text" id="login" name="login" tabindex="1"
-         {if="!empty($username)"}value="{$username}"{/if}>
+         {if="!empty($username)"}value="{$username}"{/if} autocapitalize="off">
       </label>
       <label for="password">Password: <input type="password" id="password" name="password" tabindex="2">
       </label>

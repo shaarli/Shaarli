@@ -5,23 +5,25 @@ RUN apk --update --no-cache add \
         ca-certificates \
         curl \
         make \
-        php7 \
-        php7-ctype \
-        php7-curl \
-        php7-dom \
-        php7-gd \
-        php7-iconv \
-        php7-intl \
-        php7-json \
-        php7-mbstring \
-        php7-openssl \
-        php7-phar \
-        php7-session \
-        php7-simplexml \
-        php7-tokenizer \
-        php7-xdebug \
-        php7-xml \
-        php7-zlib \
+        php8 \
+        php8-ctype \
+        php8-curl \
+        php8-dom \
+        php8-gd \
+        php8-gettext \
+        php8-iconv \
+        php8-intl \
+        php8-json \
+        php8-mbstring \
+        php8-openssl \
+        php8-phar \
+        php8-session \
+        php8-simplexml \
+        php8-tokenizer \
+        php8-xdebug \
+        php8-xmlwriter \
+        php8-xml \
+        php8-zlib \
         rsync
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

@@ -19,6 +19,7 @@ While logged in to your Shaarli, you can add, edit or delete Shaares:
 - Using the [REST API](https://shaarli.github.io/api-documentation/)
 - Any Shaare can edited by clicking its ![](images/edit_icon.png) `Edit` button.
 
+The `Shaare a new link` dialog also allows you to create multiple bookmarks at once (unfold the `bulk creation` section and add one URL per line).
 
 ### Tags
 

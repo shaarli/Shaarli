@@ -61,6 +61,7 @@ function smallHash($text)
  */
 function startsWith($haystack, $needle, $case = true)
 {
+    $needle = $needle ?? '';
     if ($case) {
         return (strcmp(substr($haystack, 0, strlen($needle)), $needle) === 0);
     }
@@ -180,7 +181,7 @@ function generateLocation($referer, $host, $loopTerms = [])
         $host = substr($host, 0, $pos);
     }
 
-    $refererHost = parse_url($referer, PHP_URL_HOST);
+    $refererHost = parse_url($referer, PHP_URL_HOST) ?? '';
     if (!empty($referer) && (strpos($refererHost, $host) !== false || startsWith('?', $refererHost))) {
         $finalReferer = $referer;
     }
@@ -292,7 +293,7 @@ function generate_api_secret($username, $salt)
  */
 function normalize_spaces($string)
 {
-    return preg_replace('/\s{2,}/', ' ', trim($string));
+    return preg_replace('/\s{2,}/', ' ', trim($string ?? ''));
 }
 
 /**
