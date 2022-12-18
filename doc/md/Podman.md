@@ -44,6 +44,12 @@ podman pull docker.io/shaarli/shaarli:release
 podman volume create shaarli-data
 podman volume create shaarli-cache
 
+# Since the NGINX process in the container is running with UID 100 and GID 101 the
+# UID and GID for the volumes just created have to adjusted in the user namespace.
+# For detailed information see podman-unshare(1).
+podman unshare chown 100:101 -R \
+            .local/share/containers/storage/volumes/shaarli-{cache,data}
+
 # create a new container using the Shaarli image
 # --detach: run the container in background
 # --name: name of the created container/instance
