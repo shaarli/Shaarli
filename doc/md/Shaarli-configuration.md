@@ -154,7 +154,7 @@ _These settings should not be edited_
 - **ban_duration**: IP ban duration in seconds.
 - **open_shaarli**: Anyone can add a new Shaare while logged out if enabled.
 - **trusted_proxies**: List of trusted IP which won't be banned after failed login attemps. Useful if Shaarli is behind a reverse proxy.
-- **allowed_protocols**: List of allowed protocols in shaare URLs or markdown-rendered descriptions. Useful if you want to store `javascript:` links (bookmarklets) in Shaarli (default: `["ftp", "ftps", "magnet"]`).
+- **allowed_protocols**: List of allowed protocols in shaare URLs or markdown-rendered descriptions. Useful if you want to store `javascript:` links (bookmarklets) or `file:///` URIs in Shaarli (default: `["ftp", "ftps", "magnet"]`).
 
 ### Formatter
 

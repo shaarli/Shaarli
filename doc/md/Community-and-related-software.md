@@ -68,6 +68,7 @@ See [Theming](Theming) for a list of community-contributed themes, and an instal
 
 ### Server apps
 
+- [Shaarli Archiver](https://github.com/sebw/shaarli-archiver) - Shaarli and SingleFile to archive your bookmarks
 - [shaarchiver](https://github.com/nodiscc/shaarchiver) - Archive your Shaarli bookmarks and their content
 - [shaarli-river](https://github.com/mknexen/shaarli-river) - An aggregator for shaarlis with many features
 - [Shaarlo](https://github.com/DMeloni/shaarlo) - An aggregator for shaarlis with many features

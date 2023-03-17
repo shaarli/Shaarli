@@ -70,7 +70,6 @@ pre {
   font-weight: 400;
   font-style: normal;
   src:
-    local('Roboto'),
     local('Roboto-Regular'),
     url('../fonts/Roboto-Regular.woff2') format('woff2'),
     url('../fonts/Roboto-Regular.woff') format('woff');
@@ -81,7 +80,6 @@ pre {
   font-weight: 700;
   font-style: normal;
   src:
-    local('Roboto'),
     local('Roboto-Bold'),
     url('../fonts/Roboto-Bold.woff2') format('woff2'),
     url('../fonts/Roboto-Bold.woff') format('woff');

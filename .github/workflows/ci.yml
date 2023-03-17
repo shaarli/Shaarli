@@ -38,10 +38,10 @@ jobs:
       - name: Update dependencies for PHP 8.x
         if: ${{ matrix.php-versions == '8.0' || matrix.php-versions == '8.1' }}
         run: |
-          composer update --ignore-platform-req=php && \
-          composer remove --dev --ignore-platform-req=php phpunit/phpunit && \
-          composer require --dev --ignore-platform-req=php phpunit/php-text-template ^2.0 && \
-          composer require --dev --ignore-platform-req=php phpunit/phpunit ^9.0
+          composer update && \
+          composer remove --dev phpunit/phpunit && \
+          composer require --dev phpunit/php-text-template ^2.0 && \
+          composer require --dev phpunit/phpunit ^9.0
 
       - name: Update dependencies for PHP 7.x
         if: ${{ matrix.php-versions != '8.0' && matrix.php-versions != '8.1' }}

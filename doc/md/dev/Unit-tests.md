@@ -17,6 +17,8 @@ sudo apt install composer
 
 ## Install Shaarli dev dependencies
 
+After installing [required PHP extensions](../Server-configuration.md#php), install development dependencies:
+
 ```bash
 $ cd /path/to/shaarli
 $ make composer_dependencies_dev

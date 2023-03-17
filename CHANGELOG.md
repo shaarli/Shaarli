@@ -462,7 +462,7 @@ configuration to enable URL rewriting, see:
         - `/api/v1/info`: get general information on the Shaarli instance
         - `/api/v1/links`: get a list of shaared links
         - `/api/v1/history`: get a list of latest actions
-Theming:
+- Theming:
     - Introduce a new theme
     - Allow selecting themes/templates from the configuration page
     - New/Edit link form can be submitted using CTRL+Enter in the textarea

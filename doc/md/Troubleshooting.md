@@ -104,6 +104,11 @@ If attempting to save a link results in a `Not acceptable` error (HTTP status co
 On some shared hosting services (such as **Bluehost**), `mod_security` is enabled by default, so the recommended course of action is to get in touch with the helpdesk and ask them to disable `mod_security` for your domain, sub-domain, or the subdirectory where Shaarli is installed. Ideally, you want to narrow it down to a very specific location, so as to continue reaping the benefits of `mod_security` elsewhere on your domain. If asked for specific, you can refer support staff to this [issue](https://github.com/shaarli/Shaarli/issues/1736), where more technical details are available.
 
 
+### Timeout during long-lasting operations
+
+You may need to adjust timeouts to larger values in your [reverse proxy configuration](Reverse-proxy.md) if you're getting `504 Gateway Timeout` errors during long-lasting operations (like importing many bookmarks from HTML, or batch deleting tags) on slow hardware. The PHP setting `max_execution_time` may also need to be adjusted for your specific setup. See issues [#1854](https://github.com/shaarli/Shaarli/issues/1854) and [#1910](https://github.com/shaarli/Shaarli/issues/1910).
+
+
 ----------------------------------------------------------
 
 ## Upgrades
