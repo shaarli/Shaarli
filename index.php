@@ -59,7 +59,7 @@ if ($conf->get('dev.debug', false)) {
 }
 
 $logger = new Logger(
-    dirname($conf->get('resource.log')),
+    is_writable($conf->get('resource.log')) ? dirname($conf->get('resource.log')) : 'php://temp',
     !$conf->get('dev.debug') ? LogLevel::INFO : LogLevel::DEBUG,
     ['filename' => basename($conf->get('resource.log'))]
 );
