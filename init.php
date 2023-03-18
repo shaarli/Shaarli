@@ -20,7 +20,7 @@ ini_set('post_max_size', '16M');
 ini_set('upload_max_filesize', '16M');
 
 // See all error except warnings
-error_reporting(E_ALL^E_WARNING);
+error_reporting(E_ALL & ~E_WARNING & ~E_DEPRECATED);
 
 // 3rd-party libraries
 if (! file_exists(__DIR__ . '/vendor/autoload.php')) {
