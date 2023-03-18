@@ -4,12 +4,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v0.12.2]() - UNRELEASED
+## [v0.12.2](https://github.com/shaarli/Shaarli/releases/tag/v0.12.2) - 2023-03-18
 
-> The `:master` Docker image is deprecated, please use `:latest` instead.
-> The `:stable` Docker image is deprecated, please use `:release` instead.
+> Docker: use `ghcr.io/shaarli/shaarli` as Docker image instead of `shaarli/shaarli`.
+> The `:master` Docker image has been removed, please use `:latest` instead.
+> The `:stable` Docker image has been removed, please use `:release` instead.
 
-## [v0.12.1](https://github.com/shaarli/Shaarli/releases/tag/v0.12.0) - 2020-11-12
+## Added
+
+- Bulk action: add or delete tag to multiple bookmarks
+- New Core Plugin: ReadItLater
+- Plugin system: allow plugins to provide custom routes 
+- Support search highlights when matching URL content
+- Support for OR (~) and optional AND (+) operators for tag search
+- Russian translation
+- Chinese translation
+- Export:
+  - Export: set a bookmark's LAST_MODIFIED attribute to its update timestamp
+  - Export: set a bookmark's PRIVATE attribute using an integer value 
+- Add an additional free disk space check before saving the datastore
+- curl: support HTTP/2 response code header
+- CI:
+  - Build and push Docker images through Github Actions
+  - push container images to github registry in addition to dockerhub
+- Documentation: 
+  - Add '206 not acceptable' to the Troubleshooting section
+  - Add mention to Shaarli Archiver
+  - doc: add note to adjust proxy timeouts or PHP max execution time
+  - doc: shaarli configuration: mention file:/// URIs 
+  - add "formatter" key to example config.json.php
+
+## Changed
+
+- docker latest: replace dev in shaarli_version.php with the latest commit
+- Daily RSS Cache: invalidate cache base on the date
+- Update Japanese translations
+- Update German translations
+- Templates: Inject current template name
+- format_date: include timezone in IntlDateFormatter object 
+- Handle pagination through BookmarkService
+- autocapitalize off for username input
+- More intuitive label for plugin checkboxes
+- Simple and uniform localized website title 
+- Use rewrited version of Netscape Bookmark Parser
+- tests/makefile: rewrite translate target to be compatible with busybox
+- PubSubHub Plugin: make 1 external call per request
+- Docker: 
+  - newer alpine (for newer PHP) and apk upgrade
+  - Dockerfile.armhf: upgrade python2 -> python3
+  - Dockerfile: add php8-gettext package
+  - update s6 service definition to use php-fpm8
+  - install php8-ldap in Docker images
+- CI: 
+  - use Github Action instead of Travis CI
+  - use the yarnpkg command instead of yarn 
+  - tools: github actions: fix PHP 8.0 tests
+  - github actions: add tests for PHP 8.2
+- Documentation: 
+  - apache: explicitely ste index.php as DirectoryIndex
+  - bookmarklet is now working on github.com
+  - LDAP login support, update php requirements list
+  - installation/tests: clarify build tools installation procedure
+  - doc: PHP extensions are also required for development
+  - doc: move OCI images hosting to ghcr.io
+
+## Fixed
+
+- Error handling if the datastore mutex is not working
+- Synchronous metadata retrieval is failing in strict mode
+- Improve metadata extraction
+- Typo: 'Authentication' -> 
+- default_colors plugin: update CSS file on color change
+- API: POST/PUT Link - properly parse tags string
+- Error when using bulk shaare with a single URL 
+- Bulk Shaare: 
+  - use unique HTML ID
+  - error with a single URL
+  - redirection with ending slash
+- Bug when trying to access ATOM feed without bookmarks
+- Documentation build
+- pubsubhubbub hub link in RSS / Atom.
+- Monthly views previous/next month links during month
+- Resolve PHP 8.1 deprecation warnings
+- Fix PHP 8 incompatibility with debug mode enabled
+- Fixed Roboto-Regular and Roboto-Bold font declarations
+- template/vintage: fix typo in visibility selection link
+- Do not display deprecated warnings by default
+- Fix a bug when using '/' as a tag separator
+- Fix Logger exception: gracefully handle permission issue
+- Documentation: 
+  - plugins.md: fix link casing
+
+## Removed
+
+- Daily RSS: Remove relative description (today, yesterday)
+- Documentation: 
+  - remove the markdown plugin from the plugins list 
+  - remove duplicate "general" key in example config.php.json
+
+## [v0.12.1](https://github.com/shaarli/Shaarli/releases/tag/v0.12.1) - 2020-11-12
 
 > nginx ([#1628](https://github.com/shaarli/Shaarli/pull/1628)) and Apache ([#1630](https://github.com/shaarli/Shaarli/pull/1630)) configurations have been reviewed. It is recommended that you
 > update yours using [the documentation](https://shaarli.readthedocs.io/en/master/Server-configuration/).
