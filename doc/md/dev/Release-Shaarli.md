@@ -14,6 +14,7 @@ This guide assumes that you have:
     - create a new release
 - [Composer](https://getcomposer.org/) needs to be installed
 - The [venv](https://docs.python.org/3/library/venv.html) Python 3 module needs to be installed for HTML documentation generation.
+- Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
 
 ## Release notes and `CHANGELOG.md`
 
