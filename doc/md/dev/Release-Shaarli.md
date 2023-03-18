@@ -46,7 +46,7 @@ GitHub allows drafting the release notes for the upcoming release, from the [Rel
 ## Update the list of Git contributors
 
 ```bash
-$ make authors
+$ make generate_authors
 $ git commit -s -m "Update AUTHORS"
 ```
 

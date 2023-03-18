@@ -143,7 +143,7 @@ clean:
 	@rm -rf sandbox
 
 ### generate the AUTHORS file from Git commit information
-authors:
+generate_authors:
 	@cp .github/mailmap .mailmap
 	@git shortlog -sne > AUTHORS
 	@rm .mailmap
