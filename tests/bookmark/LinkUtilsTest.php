@@ -653,6 +653,25 @@ class LinkUtilsTest extends TestCase
     }
 
     /**
+     * Test tags_str2array with / separator.
+     */
+    public function testTagsStr2ArrayWithRegexDelimiterSeparator(): void
+    {
+        $separator = '/';
+
+        static::assertSame(['tag1', 'tag2', 'tag3'], tags_str2array('tag1/tag2/tag3', $separator));
+        static::assertSame(['tag1', 'tag2', 'tag3'], tags_str2array('tag1////tag2////tag3', $separator));
+        static::assertSame(['tag1', 'tag2', 'tag3'], tags_str2array('///tag1///tag2////tag3//', $separator));
+        static::assertSame(
+            ['tag1#', 'tag2, and other', '.tag3'],
+            tags_str2array('///   tag1#     /// tag2, and other ////.tag3//', $separator)
+        );
+        static::assertSame([], tags_str2array('', $separator));
+        static::assertSame([], tags_str2array('   ', $separator));
+        static::assertSame([], tags_str2array(null, $separator));
+    }
+
+    /**
      * Test tags_array2str with ' ' separator.
      */
     public function testTagsArray2StrWithSpaceSeparator(): void
