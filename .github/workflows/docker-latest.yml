@@ -31,11 +31,11 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: |
             ${{ secrets.DOCKER_IMAGE }}:latest
             ghcr.io/${{ secrets.DOCKER_IMAGE }}:latest
