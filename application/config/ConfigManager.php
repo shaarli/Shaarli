@@ -372,7 +372,6 @@ class ConfigManager
         $this->setEmpty('general.tags_separator', ' ');
 
         $this->setEmpty('updates.check_updates', true);
-        $this->setEmpty('updates.check_updates_branch', 'latest');
         $this->setEmpty('updates.check_updates_interval', 86400);
 
         $this->setEmpty('feed.rss_permalinks', true);

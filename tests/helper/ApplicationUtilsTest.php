@@ -143,17 +143,6 @@ class ApplicationUtilsTest extends \Shaarli\TestCase
     }
 
     /**
-     * Test update checks - invalid Git branch
-     */
-    public function testCheckUpdateInvalidGitBranch()
-    {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessageRegExp('/Invalid branch selected for updates/');
-
-        ApplicationUtils::checkUpdate('', 'null', 0, true, true, 'unstable');
-    }
-
-    /**
      * Shaarli is up-to-date
      */
     public function testCheckUpdateNewVersionUpToDate()
@@ -376,6 +365,17 @@ class ApplicationUtilsTest extends \Shaarli\TestCase
     {
         $this->assertFalse(
             ApplicationUtils::checkUpdate('dev', self::$testUpdateFile, 100, true, true)
+        );
+    }
+
+    /**
+     * Check update with a short git object name as curent version (Docker build).
+     * It should always return false.
+     */
+    public function testCheckUpdateDevHash()
+    {
+        $this->assertFalse(
+            ApplicationUtils::checkUpdate('abc123d', self::$testUpdateFile, 100, true, true)
         );
     }
 
