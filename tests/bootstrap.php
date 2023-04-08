@@ -1,6 +1,6 @@
 <?php
 
-require_once 'vendor/autoload.php';
+require_once  __DIR__ . '/../vendor/autoload.php';
 
 use Shaarli\Tests\Utils\ReferenceSessionIdHashes;
 
@@ -28,6 +28,7 @@ require_once 'tests/utils/RainTPL.php';
 // TODO: remove this after fixing UT
 require_once 'tests/TestCase.php';
 require_once 'tests/container/ShaarliTestContainer.php';
+require_once 'tests/api/ApiUtilsTest.php';
 require_once 'tests/front/controller/visitor/FrontControllerMockHelper.php';
 require_once 'tests/front/controller/admin/FrontAdminControllerMockHelper.php';
 require_once 'tests/updater/DummyUpdater.php';

@@ -5,6 +5,7 @@ namespace Shaarli\Tests\Utils;
 use DateTime;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkArray;
+use Shaarli\Helper\FileUtils;
 
 /**
  * Populates a reference datastore to test Bookmark
@@ -199,10 +200,7 @@ class ReferenceLinkDB
     public function write($filename)
     {
         $this->reorder();
-        file_put_contents(
-            $filename,
-            '<?php /* ' . base64_encode(gzdeflate(serialize($this->bookmarks))) . ' */ ?>'
-        );
+        FileUtils::writeFlatDB($filename, $this->bookmarks);
     }
 
     /**

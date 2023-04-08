@@ -2,6 +2,7 @@
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+    bootstrap="tests/bootstrap.php"
     colors="true">
   <testsuites>
     <testsuite name="unit-tests">
@@ -18,10 +19,5 @@
       <directory>tests/languages/fr</directory>
     </testsuite>
   </testsuites>
-
-  <filter>
-    <whitelist addUncoveredFilesFromWhitelist="true">
-      <directory suffix=".php">application</directory>
-    </whitelist>
-  </filter>
+  
 </phpunit>

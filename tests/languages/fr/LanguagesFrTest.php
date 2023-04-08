@@ -37,11 +37,13 @@ class LanguagesFrTest extends TestCase
     /**
      * Reset the locale since gettext seems to mess with it, making it too long
      */
-    public static function tearDownAfterClass(): void
+    protected function tearDown(): void
     {
-        if (! empty(getenv('UT_LOCALE'))) {
-            setlocale(LC_ALL, getenv('UT_LOCALE'));
-        }
+        // Reset config-language
+        $currentLang = getenv('UT_LOCALE') ?? 'en';
+        $fallbackLang = 'en';
+        $this->conf->set('translation.language', $currentLang);
+        new Languages($fallbackLang, $this->conf);
     }
 
     /**

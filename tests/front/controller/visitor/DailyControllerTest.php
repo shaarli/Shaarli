@@ -20,6 +20,7 @@ class DailyControllerTest extends TestCase
 
     public function setUp(): void
     {
+        setlocale(LC_TIME, 'en_US.UTF-8');
         $this->createContainer();
 
         $this->controller = new DailyController($this->container);
