@@ -2,18 +2,20 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 /**
  * Class GetLinksTest
@@ -68,17 +70,17 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->refDB->write(self::$testDatastore);
         $history = new History('sandbox/history.php');
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
         $pluginManager = new PluginManager($this->conf);
-        $this->container['db'] = new BookmarkFileService(
+        $this->container->set('db', new BookmarkFileService(
             $this->conf,
             $pluginManager,
             $history,
             $mutex,
             true
-        );
-        $this->container['history'] = null;
+        ));
+        $this->container->set('history', null);
 
         $this->controller = new Links($this->container);
     }
@@ -96,17 +98,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinks()
     {
-        // Used by index_url().
-        $_SERVER['SERVER_NAME'] = 'domain.tld';
-        $_SERVER['SERVER_PORT'] = 80;
-        $_SERVER['SCRIPT_NAME'] = '/';
+        $request = (new FakeRequest(
+            'GET'
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
 
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-        ]);
-        $request = Request::createFromEnvironment($env);
-
-        $response = $this->controller->getLinks($request, new Response());
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -153,12 +149,12 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksOffsetLimit()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=3&limit=1'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'offset=3&limit=1'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -171,12 +167,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksLimitAll()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'limit=all'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'limit=all'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -195,12 +190,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksOffsetTooHigh()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=100'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'offset=100'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEmpty(count($data));
@@ -211,14 +205,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityAll()
     {
-        $env = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'QUERY_STRING' => 'visibility=all'
-            ]
-        );
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'visibility=all'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -232,12 +223,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityPrivate()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'visibility=private'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'visibility=private'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countPrivateLinks(), count($data));
@@ -250,14 +240,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityPublic()
     {
-        $env = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'QUERY_STRING' => 'visibility=public'
-            ]
-        );
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'visibility=public'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countPublicLinks(), count($data));
@@ -273,12 +260,14 @@ class GetLinksTest extends \Shaarli\TestCase
     public function testGetLinksSearchTerm()
     {
         // Only in description - 1 result
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=Tropical'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=Tropical'),
+            null,
+            [],
+            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
+        );
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -286,12 +275,11 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // Only in tags - 1 result
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=tag3'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=tag3'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -299,12 +287,14 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // Multiple results (2)
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=stallman'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=stallman'),
+            null,
+            [],
+            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
+        );
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -314,12 +304,11 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // Multiword - 2 results
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=stallman+software'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=stallman+software'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -329,12 +318,11 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // URL encoding
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=' . urlencode('@web')
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=' . urlencode('@web')),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -346,12 +334,11 @@ class GetLinksTest extends \Shaarli\TestCase
 
     public function testGetLinksSearchTermNoResult()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=nope'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=nope'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(0, count($data));
@@ -360,12 +347,11 @@ class GetLinksTest extends \Shaarli\TestCase
     public function testGetLinksSearchTags()
     {
         // Single tag
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=dev',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=dev'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -375,12 +361,11 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // Multitag + exclude
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=stuff+-gnu',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=stuff+-gnu')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -388,48 +373,50 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // wildcard: placeholder at the start
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=*Tuff',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=*Tuff'),
+            null,
+            [],
+            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
+        );
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
         $this->assertEquals(41, $data[0]['id']);
 
         // wildcard: placeholder at the end
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=c*',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=c*')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(5, count($data));
         $this->assertEquals(6, $data[0]['id']);
 
         // wildcard: placeholder at the middle
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=w*b',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=w*b'),
+            null,
+            [],
+            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
+        );
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(4, count($data));
         $this->assertEquals(6, $data[0]['id']);
 
         // wildcard: match all
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=*',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=*')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data));
@@ -437,36 +424,33 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(41, $data[2]['id']);
 
         // wildcard: optional ('*' does not need to expand)
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=*stuff*',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=*stuff*')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
         $this->assertEquals(41, $data[0]['id']);
 
         // wildcard: exclusions
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=*a*+-*e*',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=*a*+-*e*')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
         $this->assertEquals(41, $data[0]['id']); // finds '#hashtag' in descr.
 
         // wildcard: exclude all
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchtags=-*',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchtags=-*'),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(0, count($data));
@@ -477,12 +461,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksSearchTermsAndTags()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'searchterm=poke&searchtags=dev',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getLinks($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'searchterm=poke&searchtags=dev')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $response = $this->controller->getLinks($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));

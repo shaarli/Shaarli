@@ -2,14 +2,15 @@
 
 namespace Shaarli\Api;
 
+use DI\Container as DIContainer;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
+use Shaarli\Tests\Utils\FakeRequestHandler;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Uri;
 
 /**
  * Class ApiMiddlewareTest
@@ -39,7 +40,7 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     protected $refDB = null;
 
     /**
-     * @var Container instance.
+     * @var DIContainer instance.
      */
     protected $container;
 
@@ -56,10 +57,10 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
 
         $history = new History('sandbox/history.php');
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['history'] = $history;
-        $this->container['pluginManager'] = new PluginManager($this->conf);
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('history', $history);
+        $this->container->set('pluginManager', new PluginManager($this->conf));
     }
 
     /**
@@ -75,19 +76,15 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
      */
     public function testInvokeMiddlewareWithValidToken(): void
     {
-        $next = function (Request $request, Response $response): Response {
-            return $response;
-        };
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-            'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard'),
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, $next);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -98,21 +95,18 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
      */
     public function testInvokeMiddlewareWithValidTokenFromRedirectedHeader(): void
     {
-        $next = function (Request $request, Response $response): Response {
-            return $response;
-        };
-
         $token = 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
-        $this->container->environment['REDIRECT_HTTP_AUTHORIZATION'] = $token;
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, $next);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([]),
+            [],
+            [
+                'REDIRECT_HTTP_AUTHORIZATION' => $token,
+            ]
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -124,15 +118,17 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     public function testInvokeMiddlewareApiDisabled()
     {
         $this->conf->set('api.enabled', false);
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -147,15 +143,17 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     {
         $this->conf->set('api.enabled', false);
         $this->conf->set('dev.debug', true);
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -170,15 +168,14 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     public function testInvokeMiddlewareNoTokenProvidedDebug()
     {
         $this->conf->set('dev.debug', true);
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello')
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -194,16 +191,17 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     {
         $this->conf->set('dev.debug', true);
         $this->conf->set('api.secret', '');
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-            'HTTP_AUTHORIZATION' => 'Bearer jwt',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'Bearer jwt'
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -217,16 +215,17 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     public function testInvalidJwtAuthHeaderDebug()
     {
         $this->conf->set('dev.debug', true);
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-            'HTTP_AUTHORIZATION' => 'PolarBearer jwt',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'PolarBearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -243,16 +242,17 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     public function testInvokeMiddlewareInvalidJwtDebug()
     {
         $this->conf->set('dev.debug', true);
+        $this->container->set('conf', $this->conf);
+
         $mw = new ApiMiddleware($this->container);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'REQUEST_URI' => '/echo',
-            'HTTP_AUTHORIZATION' => 'Bearer jwt',
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = new Response();
-        /** @var Response $response */
-        $response = $mw($request, $response, null);
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withPath('/hello'),
+            new Headers([
+                'HTTP_AUTHORIZATION' => 'Bearer jwt'
+            ])
+        );
+        $response = $mw($request, new FakeRequestHandler());
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());

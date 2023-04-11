@@ -200,6 +200,9 @@ class ReferenceLinkDB
     public function write($filename)
     {
         $this->reorder();
+        if (!file_exists(dirname($filename))) {
+            mkdir(dirname($filename), 0755, true);
+        }
         FileUtils::writeFlatDB($filename, $this->bookmarks);
     }
 

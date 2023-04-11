@@ -8,9 +8,10 @@ use Psr\Http\Message\UploadedFileInterface;
 use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Http\UploadedFile;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\UploadedFile;
+use Slim\Psr7\Uri;
 
 class ImportControllerTest extends TestCase
 {
@@ -34,8 +35,8 @@ class ImportControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -59,15 +60,14 @@ class ImportControllerTest extends TestCase
 
         $requestFile = new UploadedFile('file', 'name', 'type', 123);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParams')->willReturnCallback(function () use ($parameters) {
-            return $parameters;
-        });
-        $request->method('getUploadedFiles')->willReturn(['filetoupload' => $requestFile]);
-        $response = new Response();
+        $request = (new FakeRequest(
+            'POST',
+            (new Uri('', ''))
+        ))->withParsedBody($parameters)->withUploadedFiles(['filetoupload' => $requestFile]);
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils
+        $response = new SlimResponse();
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')
             ->expects(static::once())
             ->method('import')
             ->willReturnCallback(
@@ -86,7 +86,7 @@ class ImportControllerTest extends TestCase
             )
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, ['status'])
@@ -103,10 +103,10 @@ class ImportControllerTest extends TestCase
      */
     public function testImportFileMissing(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['No import file provided.'])
@@ -125,21 +125,23 @@ class ImportControllerTest extends TestCase
     {
         $requestFile = new UploadedFile('file', 'name', 'type', 0);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getUploadedFiles')->willReturn(['filetoupload' => $requestFile]);
-        $response = new Response();
+        $request = (new FakeRequest(
+            'POST',
+            (new Uri('', ''))
+        ))->withUploadedFiles(['filetoupload' => $requestFile]);
+        $response = new SlimResponse();
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils->expects(static::never())->method('filterAndFormat');
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')->expects(static::never())->method('filterAndFormat');
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->willReturnCallback(function (string $key, array $value): SessionManager {
                 static::assertSame(SessionManager::KEY_ERROR_MESSAGES, $key);
                 static::assertStringStartsWith('The file you are trying to upload is probably bigger', $value[0]);
 
-                return $this->container->sessionManager;
+                return $this->container->get('sessionManager');
             })
         ;
 

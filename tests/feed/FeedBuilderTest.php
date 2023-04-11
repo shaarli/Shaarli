@@ -87,7 +87,7 @@ class FeedBuilderTest extends TestCase
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_RSS, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_RSS, null, self::$serverInfo);
         // Test headers (RSS)
         $this->assertEquals(self::$RSS_LANGUAGE, $data['language']);
         $this->assertRegExp('/Wed, 03 Aug 2016 09:30:33 \+\d{4}/', $data['last_update']);
@@ -139,7 +139,7 @@ class FeedBuilderTest extends TestCase
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null, self::$serverInfo);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertRegExp('/2016-08-03T09:30:33\+\d{2}:\d{2}/', $data['last_update']);
         $link = $data['links'][array_keys($data['links'])[0]];
@@ -163,7 +163,7 @@ class FeedBuilderTest extends TestCase
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria, self::$serverInfo);
         $this->assertEquals(1, count($data['links']));
         $link = array_shift($data['links']);
         $this->assertEquals(41, $link['id']);
@@ -188,7 +188,7 @@ class FeedBuilderTest extends TestCase
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, $criteria, self::$serverInfo);
         $this->assertEquals(3, count($data['links']));
         $link = $data['links'][array_keys($data['links'])[0]];
         $this->assertEquals(41, $link['id']);
@@ -211,7 +211,7 @@ class FeedBuilderTest extends TestCase
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setUsePermalinks(true);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null, self::$serverInfo);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertTrue($data['usepermalinks']);
         // First link is a permalink
@@ -246,12 +246,11 @@ class FeedBuilderTest extends TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            static::$serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setHideDates(true);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null, self::$serverInfo);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertFalse($data['show_dates']);
 
@@ -264,7 +263,7 @@ class FeedBuilderTest extends TestCase
         );
         $feedBuilder->setLocale(self::$LOCALE);
         $feedBuilder->setHideDates(true);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null, self::$serverInfo);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data['links']));
         $this->assertTrue($data['show_dates']);
     }
@@ -284,11 +283,10 @@ class FeedBuilderTest extends TestCase
         $feedBuilder = new FeedBuilder(
             self::$bookmarkService,
             self::$formatter,
-            $serverInfo,
             false
         );
         $feedBuilder->setLocale(self::$LOCALE);
-        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null);
+        $data = $feedBuilder->buildData(FeedBuilder::$FEED_ATOM, null, $serverInfo);
 
         $this->assertEquals(
             'http://host.tld:8080/~user/shaarli/feed/atom',

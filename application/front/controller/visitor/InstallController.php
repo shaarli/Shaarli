@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
-use Shaarli\Container\ShaarliContainer;
+use Psr\Container\ContainerInterface as Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Exception\AlreadyInstalledException;
 use Shaarli\Front\Exception\ResourcePermissionException;
 use Shaarli\Helper\ApplicationUtils;
 use Shaarli\Languages;
+use Shaarli\Render\TemplatePage;
 use Shaarli\Security\SessionManager;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Slim controller used to render install page, and create initial configuration file.
@@ -21,11 +22,11 @@ class InstallController extends ShaarliVisitorController
     public const SESSION_TEST_KEY = 'session_tested';
     public const SESSION_TEST_VALUE = 'Working';
 
-    public function __construct(ShaarliContainer $container)
+    public function __construct(Container $container)
     {
         parent::__construct($container);
 
-        if (is_file($this->container->conf->getConfigFileExt())) {
+        if (is_file($this->container->get('conf')->getConfigFileExt())) {
             throw new AlreadyInstalledException();
         }
     }
@@ -41,9 +42,9 @@ class InstallController extends ShaarliVisitorController
 
         if (
             static::SESSION_TEST_VALUE
-            !== $this->container->sessionManager->getSessionParameter(static::SESSION_TEST_KEY)
+            !== $this->container->get('sessionManager')->getSessionParameter(static::SESSION_TEST_KEY)
         ) {
-            $this->container->sessionManager->setSessionParameter(static::SESSION_TEST_KEY, static::SESSION_TEST_VALUE);
+            $this->container->get('sessionManager')->setSessionParameter(static::SESSION_TEST_KEY, static::SESSION_TEST_VALUE);
 
             return $this->redirect($response, '/install/session-test');
         }
@@ -57,7 +58,7 @@ class InstallController extends ShaarliVisitorController
         $phpEol = new \DateTimeImmutable(ApplicationUtils::getPhpEol(PHP_VERSION));
 
         $permissions = array_merge(
-            ApplicationUtils::checkResourcePermissions($this->container->conf),
+            ApplicationUtils::checkResourcePermissions($this->container->get('conf')),
             ApplicationUtils::checkDatastoreMutex()
         );
 
@@ -69,7 +70,7 @@ class InstallController extends ShaarliVisitorController
 
         $this->assignView('pagetitle', t('Install Shaarli'));
 
-        return $response->write($this->render('install'));
+        return $this->respondWithTemplate($response, TemplatePage::INSTALL);
     }
 
     /**
@@ -83,7 +84,7 @@ class InstallController extends ShaarliVisitorController
         // or we may not have write access to it.)
         if (
             static::SESSION_TEST_VALUE
-            !== $this->container->sessionManager->getSessionParameter(static::SESSION_TEST_KEY)
+            !== $this->container->get('sessionManager')->getSessionParameter(static::SESSION_TEST_KEY)
         ) {
             // Step 2: Check if data in session is correct.
             $msg = t(
@@ -95,11 +96,11 @@ class InstallController extends ShaarliVisitorController
                 'or any custom hostname without a dot causes cookie storage to fail. ' .
                 'We recommend accessing your server via it\'s IP address or Fully Qualified Domain Name.<br>'
             );
-            $msg = sprintf($msg, $this->container->sessionManager->getSavePath());
+            $msg = sprintf($msg, $this->container->get('sessionManager')->getSavePath());
 
             $this->assignView('message', $msg);
 
-            return $response->write($this->render('error'));
+            return $this->respondWithTemplate($response, TemplatePage::ERROR);
         }
 
         return $this->redirect($response, '/install');
@@ -112,52 +113,58 @@ class InstallController extends ShaarliVisitorController
     {
         $timezone = 'UTC';
         if (
-            !empty($request->getParam('continent'))
-            && !empty($request->getParam('city'))
-            && isTimeZoneValid($request->getParam('continent'), $request->getParam('city'))
+            !empty($request->getParsedBody()['continent'] ?? null)
+            && !empty($request->getParsedBody()['city'] ?? null)
+            && isTimeZoneValid(
+                $request->getParsedBody()['continent'] ?? null,
+                $request->getParsedBody()['city'] ?? null
+            )
         ) {
-            $timezone = $request->getParam('continent') . '/' . $request->getParam('city');
+            $timezone = $request->getParsedBody()['continent'] . '/' . $request->getParsedBody()['city'];
         }
-        $this->container->conf->set('general.timezone', $timezone);
+        $this->container->get('conf')->set('general.timezone', $timezone);
 
-        $login = $request->getParam('setlogin');
-        $this->container->conf->set('credentials.login', $login);
+        $login = $request->getParsedBody()['setlogin'] ?? null;
+        $this->container->get('conf')->set('credentials.login', $login);
         $salt = sha1(uniqid('', true) . '_' . mt_rand());
-        $this->container->conf->set('credentials.salt', $salt);
-        $this->container->conf->set('credentials.hash', sha1($request->getParam('setpassword') . $login . $salt));
+        $this->container->get('conf')->set('credentials.salt', $salt);
+        $this->container->get('conf')
+            ->set('credentials.hash', sha1(($request->getParsedBody()['setpassword'] ?? null) . $login . $salt));
 
-        if (!empty($request->getParam('title'))) {
-            $this->container->conf->set('general.title', escape($request->getParam('title')));
+        if (!empty($request->getParsedBody()['title'] ?? null)) {
+            $this->container->get('conf')->set('general.title', escape($request->getParsedBody()['title'] ?? null));
         } else {
-            $this->container->conf->set(
+            $this->container->get('conf')->set(
                 'general.title',
                 t('Shared Bookmarks')
             );
         }
 
-        $this->container->conf->set('translation.language', escape($request->getParam('language')));
-        $this->container->conf->set('updates.check_updates', !empty($request->getParam('updateCheck')));
-        $this->container->conf->set('api.enabled', !empty($request->getParam('enableApi')));
-        $this->container->conf->set(
+        $this->container->get('conf')
+            ->set('translation.language', escape($request->getParsedBody()['language'] ?? null));
+        $this->container->get('conf')
+            ->set('updates.check_updates', !empty($request->getParsedBody()['updateCheck'] ?? null));
+        $this->container->get('conf')->set('api.enabled', !empty($request->getParsedBody()['enableApi'] ?? null));
+        $this->container->get('conf')->set(
             'api.secret',
             generate_api_secret(
-                $this->container->conf->get('credentials.login'),
-                $this->container->conf->get('credentials.salt')
+                $this->container->get('conf')->get('credentials.login'),
+                $this->container->get('conf')->get('credentials.salt')
             )
         );
-        $this->container->conf->set('general.header_link', $this->container->basePath . '/');
+        $this->container->get('conf')->set('general.header_link', $this->container->get('basePath') . '/');
 
         try {
             // Everything is ok, let's create config file.
-            $this->container->conf->write($this->container->loginManager->isLoggedIn());
+            $this->container->get('conf')->write($this->container->get('loginManager')->isLoggedIn());
         } catch (\Exception $e) {
             $this->assignView('message', t('Error while writing config file after configuration update.'));
             $this->assignView('stacktrace', $e->getMessage() . PHP_EOL . $e->getTraceAsString());
 
-            return $response->write($this->render('error'));
+            return $this->respondWithTemplate($response, TemplatePage::ERROR);
         }
 
-        $this->container->sessionManager->setSessionParameter(
+        $this->container->get('sessionManager')->setSessionParameter(
             SessionManager::KEY_SUCCESS_MESSAGES,
             [t('Shaarli is now configured. Please login and start shaaring your bookmarks!')]
         );
@@ -168,7 +175,7 @@ class InstallController extends ShaarliVisitorController
     protected function checkPermissions(): bool
     {
         // Ensure Shaarli has proper access to its resources
-        $errors = ApplicationUtils::checkResourcePermissions($this->container->conf, true);
+        $errors = ApplicationUtils::checkResourcePermissions($this->container->get('conf'), true);
         if (empty($errors)) {
             return true;
         }

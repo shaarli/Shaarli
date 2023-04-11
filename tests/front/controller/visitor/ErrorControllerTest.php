@@ -6,8 +6,9 @@ namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Front\Exception\ShaarliFrontException;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class ErrorControllerTest extends TestCase
 {
@@ -28,8 +29,11 @@ class ErrorControllerTest extends TestCase
      */
     public function testDisplayFrontExceptionError(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $response = new SlimResponse();
 
         $message = 'error message';
         $errorCode = 418;
@@ -56,14 +60,14 @@ class ErrorControllerTest extends TestCase
      */
     public function testDisplayAnyExceptionErrorNoDebugLoggedIn(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
         $result = ($this->controller)($request, $response, new \Exception('abc'));
 
@@ -79,14 +83,14 @@ class ErrorControllerTest extends TestCase
      */
     public function testDisplayAnyExceptionErrorNoDebug(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(false);
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(false);
 
         $result = ($this->controller)($request, $response, new \Exception('abc'));
 

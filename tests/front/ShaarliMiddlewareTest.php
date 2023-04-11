@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 namespace Shaarli\Front;
 
+use DI\Container as DIContainer;
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
 use Shaarli\Front\Exception\LoginBannedException;
 use Shaarli\Front\Exception\UnauthorizedException;
 use Shaarli\Render\PageBuilder;
 use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
+use Shaarli\Tests\Utils\FakeRequestHandler;
 use Shaarli\Updater\Updater;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Http\Uri;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class ShaarliMiddlewareTest extends TestCase
 {
     protected const TMP_MOCK_FILE = '.tmp';
 
-    /** @var ShaarliContainer */
+    /** @var Container */
     protected $container;
 
     /** @var ShaarliMiddleware  */
@@ -29,16 +31,17 @@ class ShaarliMiddlewareTest extends TestCase
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->container = new DIContainer();
 
         touch(static::TMP_MOCK_FILE);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
+        $conf = $this->container->get('conf');
+        $conf->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
 
-        $this->container->environment = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->set('basePath', '/subfolder');
 
         $this->middleware = new ShaarliMiddleware($this->container);
     }
@@ -53,21 +56,13 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecution(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('http', 'shaarli'))->withPath('/subfolder/path')
+        );
 
-            return $uri;
-        });
-
-        $response = new Response();
-        $controller = function (Request $request, Response $response): Response {
-            return $response->withStatus(418); // I'm a tea pot
-        };
-
-        /** @var Response $result */
-        $result = $this->middleware->__invoke($request, $response, $controller);
+        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot
+        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(418, $result->getStatusCode());
@@ -79,16 +74,13 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithFrontException(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('http', 'shaarli'))->withPath('/subfolder/path')
+        );
 
-            return $uri;
-        });
-
-        $response = new Response();
-        $controller = function (): void {
+        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot
+        $callback = function ($request) {
             $exception = new LoginBannedException();
 
             throw new $exception();
@@ -98,11 +90,10 @@ class ShaarliMiddlewareTest extends TestCase
         $pageBuilder->method('render')->willReturnCallback(function (string $message): string {
             return $message;
         });
-        $this->container->pageBuilder = $pageBuilder;
+        $this->container->set('pageBuilder', $pageBuilder);
 
         $this->expectException(LoginBannedException::class);
-
-        $this->middleware->__invoke($request, $response, $controller);
+        ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
     }
 
     /**
@@ -111,21 +102,20 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithUnauthorizedException(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
+            null,
+            [],
+            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        );
 
-            return $uri;
-        });
-
-        $response = new Response();
-        $controller = function (): void {
+        $fakeResponse = new SlimResponse();
+        $callback = function ($request) {
             throw new UnauthorizedException();
         };
 
-        /** @var Response $result */
-        $result = $this->middleware->__invoke($request, $response, $controller);
+        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(
@@ -140,81 +130,76 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithServerException(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
+            null,
+            [],
+            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        );
 
-            return $uri;
-        });
-
+        $fakeResponse = new SlimResponse();
         $dummyException = new class () extends \Exception {
         };
-
-        $response = new Response();
-        $controller = function () use ($dummyException): void {
+        $callback = function ($request) use ($dummyException) {
             throw $dummyException;
         };
 
-        $parameters = [];
-        $this->container->pageBuilder = $this->createMock(PageBuilder::class);
-        $this->container->pageBuilder->method('render')->willReturnCallback(function (string $message): string {
+        $pageBuilder = $this->createMock(PageBuilder::class);
+        $pageBuilder->method('render')->willReturnCallback(function (string $message): string {
             return $message;
         });
-        $this->container->pageBuilder
+        $parameters = [];
+        $pageBuilder
             ->method('assign')
             ->willReturnCallback(function (string $key, string $value) use (&$parameters): void {
                 $parameters[$key] = $value;
             })
         ;
+        $this->container->set('pageBuilder', $pageBuilder);
 
         $this->expectException(get_class($dummyException));
-
-        $this->middleware->__invoke($request, $response, $controller);
+        ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
     }
 
     public function testMiddlewareExecutionWithUpdates(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
+            null,
+            [],
+            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        );
 
-            return $uri;
-        });
+        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot;
 
-        $response = new Response();
-        $controller = function (Request $request, Response $response): Response {
-            return $response->withStatus(418); // I'm a tea pot
-        };
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key): string {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key): string {
             return $key;
         });
-        $this->container->conf->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
+        $this->container->get('conf')->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
 
-        $this->container->pageCacheManager = $this->createMock(PageCacheManager::class);
-        $this->container->pageCacheManager->expects(static::once())->method('invalidateCaches');
+        $this->container->set('pageCacheManager', $this->createMock(PageCacheManager::class));
+        $this->container->get('pageCacheManager')->expects(static::once())->method('invalidateCaches');
 
-        $this->container->updater = $this->createMock(Updater::class);
-        $this->container->updater
+        $this->container->set('updater', $this->createMock(Updater::class));
+        $this->container->get('updater')
             ->expects(static::once())
             ->method('update')
             ->willReturn(['update123'])
         ;
-        $this->container->updater->method('getDoneUpdates')->willReturn($updates = ['update123', 'other']);
-        $this->container->updater
+        $this->container->get('updater')->method('getDoneUpdates')->willReturn($updates = ['update123', 'other']);
+        $this->container->get('updater')
             ->expects(static::once())
             ->method('writeUpdates')
             ->with('resource.updates', $updates)
         ;
 
-        /** @var Response $result */
-        $result = $this->middleware->__invoke($request, $response, $controller);
+        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(418, $result->getStatusCode());

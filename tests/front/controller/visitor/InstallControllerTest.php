@@ -8,8 +8,8 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\AlreadyInstalledException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 class InstallControllerTest extends TestCase
 {
@@ -24,9 +24,9 @@ class InstallControllerTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('getConfigFileExt')->willReturn(static::MOCK_FILE);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('getConfigFileExt')->willReturn(static::MOCK_FILE);
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ($key === 'resource.raintpl_tpl') {
                 return '.';
             }
@@ -52,11 +52,11 @@ class InstallControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->willReturnCallback(function (string $key, $default) {
                 return $key === 'session_tested' ? 'Working' : $default;
@@ -107,11 +107,11 @@ class InstallControllerTest extends TestCase
      */
     public function testInstallRedirectToSessionTest(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(InstallController::SESSION_TEST_KEY, InstallController::SESSION_TEST_VALUE)
@@ -128,11 +128,11 @@ class InstallControllerTest extends TestCase
      */
     public function testInstallSessionTestValid(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->with(InstallController::SESSION_TEST_KEY)
             ->willReturn(InstallController::SESSION_TEST_VALUE)
@@ -152,11 +152,11 @@ class InstallControllerTest extends TestCase
         $assignedVars = [];
         $this->assignTemplateVars($assignedVars);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->with(InstallController::SESSION_TEST_KEY)
             ->willReturn('KO')
@@ -201,14 +201,11 @@ class InstallControllerTest extends TestCase
             'general.header_link' => '/subfolder',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($providedParameters) {
-            return $providedParameters[$key] ?? null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest('POST'))->withParsedBody(($providedParameters));
+        $response = new SlimResponse;
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->method('get')
             ->willReturnCallback(function (string $key, $value) {
                 if ($key === 'credentials.login') {
@@ -220,7 +217,7 @@ class InstallControllerTest extends TestCase
                 return $value;
             })
         ;
-        $this->container->conf
+        $this->container->get('conf')
             ->expects(static::exactly(count($expectedSettings)))
             ->method('set')
             ->willReturnCallback(function (string $key, $value) use ($expectedSettings) {
@@ -231,9 +228,9 @@ class InstallControllerTest extends TestCase
                 }
             })
         ;
-        $this->container->conf->expects(static::once())->method('write');
+        $this->container->get('conf')->expects(static::once())->method('write');
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES)
@@ -253,12 +250,13 @@ class InstallControllerTest extends TestCase
     {
         $confSettings = [];
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->conf->method('set')->willReturnCallback(function (string $key, $value) use (&$confSettings) {
-            $confSettings[$key] = $value;
-        });
+        $this->container->get('conf')->method('set')
+            ->willReturnCallback(function (string $key, $value) use (&$confSettings) {
+                $confSettings[$key] = $value;
+            });
 
         $result = $this->controller->save($request, $response);
 
@@ -276,22 +274,23 @@ class InstallControllerTest extends TestCase
     {
         $confSettings = [];
 
-        $this->container->environment = [
+        $this->container->set('environment', [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => '80',
             'REQUEST_URI' => '/install',
             'REMOTE_ADDR' => '1.2.3.4',
             'SCRIPT_NAME' => '/index.php',
-        ];
+        ]);
 
-        $this->container->basePath = '';
+        $this->container->set('basePath', '');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->conf->method('set')->willReturnCallback(function (string $key, $value) use (&$confSettings) {
-            $confSettings[$key] = $value;
-        });
+        $this->container->get('conf')->method('set')
+            ->willReturnCallback(function (string $key, $value) use (&$confSettings) {
+                $confSettings[$key] = $value;
+            });
 
         $result = $this->controller->save($request, $response);
 

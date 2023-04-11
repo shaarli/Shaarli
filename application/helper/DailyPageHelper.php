@@ -7,8 +7,8 @@ namespace Shaarli\Helper;
 use DatePeriod;
 use DateTimeImmutable;
 use Exception;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Bookmark;
-use Slim\Http\Request;
 
 class DailyPageHelper
 {
@@ -21,13 +21,13 @@ class DailyPageHelper
      *
      * @param Request $request HTTP request
      *
-     * @return string month/week/day
+     * @return string|null month/week/day
      */
     public static function extractRequestedType(Request $request): string
     {
-        if ($request->getQueryParam(static::MONTH) !== null) {
+        if (!is_null($request->getQueryParams()[static::MONTH] ?? null)) {
             return static::MONTH;
-        } elseif ($request->getQueryParam(static::WEEK) !== null) {
+        } elseif (!is_null($request->getQueryParams()[static::WEEK] ?? null)) {
             return static::WEEK;
         }
 

@@ -27,21 +27,30 @@ require_once 'application/Utils.php';
 require_once __DIR__ . '/init.php';
 
 use Katzgrau\KLogger\Logger;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LogLevel;
+use Shaarli\Api\Controllers as ApiControllers;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Container\ContainerBuilder;
+use Shaarli\Front\Controller;
+use Shaarli\Front\ShaarliErrorHandler;
 use Shaarli\Languages;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Security\BanManager;
 use Shaarli\Security\CookieManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
-use Slim\App;
+use Slim\Factory\AppFactory;
+use Slim\Routing\RouteCollectorProxy;
 
 $conf = new ConfigManager();
 
 // Manually override root URL for complex server configurations
 define('SHAARLI_ROOT_URL', $conf->get('general.root_url', null));
+
+// In dev mode, throw exception on any warning
+$displayErrorDetails = $conf->get('dev.debug', false); // // See all errors (for debugging only)
 
 // In dev mode, throw exception on any warning
 if ($conf->get('dev.debug', false)) {
@@ -105,102 +114,114 @@ $containerBuilder = new ContainerBuilder(
     $logger
 );
 $container = $containerBuilder->build();
-$app = new App($container);
+AppFactory::setContainer($container);
+$app = AppFactory::create();
 
 // Main Shaarli routes
-$app->group('', function () {
-    $this->get('/install', '\Shaarli\Front\Controller\Visitor\InstallController:index')->setName('displayInstall');
-    $this->get('/install/session-test', '\Shaarli\Front\Controller\Visitor\InstallController:sessionTest');
-    $this->post('/install', '\Shaarli\Front\Controller\Visitor\InstallController:save')->setName('saveInstall');
+$app->get('/hello', function (Request $request, Response $response, $args) {
+    throw new Exception('abc');
+    $response->getBody()->write("Hello world!");
+    return $response;
+});
+
+$app->group('', function (RouteCollectorProxy $group) {
+    $group->get('/install', Controller\Visitor\InstallController::class . ':index')->setName('displayInstall');
+    $group->get('/install/session-test', Controller\Visitor\InstallController::class . ':sessionTest');
+    $group->post('/install', Controller\Visitor\InstallController::class . ':save')->setName('saveInstall');
 
     /* -- PUBLIC --*/
-    $this->get('/', '\Shaarli\Front\Controller\Visitor\BookmarkListController:index');
-    $this->get('/shaare/{hash}', '\Shaarli\Front\Controller\Visitor\BookmarkListController:permalink');
-    $this->get('/login', '\Shaarli\Front\Controller\Visitor\LoginController:index')->setName('login');
-    $this->post('/login', '\Shaarli\Front\Controller\Visitor\LoginController:login')->setName('processLogin');
-    $this->get('/picture-wall', '\Shaarli\Front\Controller\Visitor\PictureWallController:index');
-    $this->get('/tags/cloud', '\Shaarli\Front\Controller\Visitor\TagCloudController:cloud');
-    $this->get('/tags/list', '\Shaarli\Front\Controller\Visitor\TagCloudController:list');
-    $this->get('/daily', '\Shaarli\Front\Controller\Visitor\DailyController:index');
-    $this->get('/daily-rss', '\Shaarli\Front\Controller\Visitor\DailyController:rss')->setName('rss');
-    $this->get('/feed/atom', '\Shaarli\Front\Controller\Visitor\FeedController:atom')->setName('atom');
-    $this->get('/feed/rss', '\Shaarli\Front\Controller\Visitor\FeedController:rss');
-    $this->get('/open-search', '\Shaarli\Front\Controller\Visitor\OpenSearchController:index');
+    $group->get('/', Controller\Visitor\BookmarkListController::class . ':index');
+    $group->get('/shaare/{hash}', Controller\Visitor\BookmarkListController::class . ':permalink');
+    $group->get('/login', Controller\Visitor\LoginController::class . ':index')->setName('login');
+    $group->post('/login', Controller\Visitor\LoginController::class . ':login')->setName('processLogin');
+    $group->get('/picture-wall', Controller\Visitor\PictureWallController::class . ':index');
+    $group->get('/tags/cloud', Controller\Visitor\TagCloudController::class . ':cloud');
+    $group->get('/tags/list', Controller\Visitor\TagCloudController::class . ':list');
+    $group->get('/daily', Controller\Visitor\DailyController::class . ':index');
+    $group->get('/daily-rss', Controller\Visitor\DailyController::class . ':rss')->setName('rss');
+    $group->get('/feed/atom', Controller\Visitor\FeedController::class . ':atom')->setName('atom');
+    $group->get('/feed/rss', Controller\Visitor\FeedController::class . ':rss');
+    $group->get('/open-search', Controller\Visitor\OpenSearchController::class . ':index');
 
-    $this->get('/add-tag/{newTag}', '\Shaarli\Front\Controller\Visitor\TagController:addTag');
-    $this->get('/remove-tag/{tag}', '\Shaarli\Front\Controller\Visitor\TagController:removeTag');
-    $this->get('/links-per-page', '\Shaarli\Front\Controller\Visitor\PublicSessionFilterController:linksPerPage');
-    $this->get('/untagged-only', '\Shaarli\Front\Controller\Visitor\PublicSessionFilterController:untaggedOnly');
-})->add('\Shaarli\Front\ShaarliMiddleware');
+    $group->get('/add-tag/{newTag}', Controller\Visitor\TagController::class . ':addTag');
+    $group->get('/remove-tag/{tag}', Controller\Visitor\TagController::class . ':removeTag');
+    $group->get('/links-per-page', Controller\Visitor\PublicSessionFilterController::class . ':linksPerPage');
+    $group->get('/untagged-only', Controller\Visitor\PublicSessionFilterController::class . ':untaggedOnly');
+})->add(\Shaarli\Front\ShaarliMiddleware::class);
 
-$app->group('/admin', function () {
-    $this->get('/logout', '\Shaarli\Front\Controller\Admin\LogoutController:index');
-    $this->get('/tools', '\Shaarli\Front\Controller\Admin\ToolsController:index');
-    $this->get('/password', '\Shaarli\Front\Controller\Admin\PasswordController:index');
-    $this->post('/password', '\Shaarli\Front\Controller\Admin\PasswordController:change');
-    $this->get('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:index');
-    $this->post('/configure', '\Shaarli\Front\Controller\Admin\ConfigureController:save');
-    $this->get('/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:index');
-    $this->post('/tags', '\Shaarli\Front\Controller\Admin\ManageTagController:save');
-    $this->post('/tags/change-separator', '\Shaarli\Front\Controller\Admin\ManageTagController:changeSeparator');
-    $this->get('/add-shaare', '\Shaarli\Front\Controller\Admin\ShaareAddController:addShaare');
-    $this->get('/shaare', '\Shaarli\Front\Controller\Admin\ShaarePublishController:displayCreateForm');
-    $this->get('/shaare/{id:[0-9]+}', '\Shaarli\Front\Controller\Admin\ShaarePublishController:displayEditForm');
-    $this->get('/shaare/private/{hash}', '\Shaarli\Front\Controller\Admin\ShaareManageController:sharePrivate');
-    $this->post('/shaare-batch', '\Shaarli\Front\Controller\Admin\ShaarePublishController:displayCreateBatchForms');
-    $this->post('/shaare', '\Shaarli\Front\Controller\Admin\ShaarePublishController:save');
-    $this->get('/shaare/delete', '\Shaarli\Front\Controller\Admin\ShaareManageController:deleteBookmark');
-    $this->get('/shaare/visibility', '\Shaarli\Front\Controller\Admin\ShaareManageController:changeVisibility');
-    $this->post('/shaare/update-tags', '\Shaarli\Front\Controller\Admin\ShaareManageController:addOrDeleteTags');
-    $this->get('/shaare/{id:[0-9]+}/pin', '\Shaarli\Front\Controller\Admin\ShaareManageController:pinBookmark');
-    $this->patch(
+$app->group('/admin', function (RouteCollectorProxy $group) {
+    $group->get('/logout', Controller\Admin\LogoutController::class . ':index');
+    $group->get('/tools', Controller\Admin\ToolsController::class . ':index');
+    $group->get('/password', Controller\Admin\PasswordController::class . ':index');
+    $group->post('/password', Controller\Admin\PasswordController::class . ':change');
+    $group->get('/configure', Controller\Admin\ConfigureController::class . ':index');
+    $group->post('/configure', Controller\Admin\ConfigureController::class . ':save');
+    $group->get('/tags', Controller\Admin\ManageTagController::class . ':index');
+    $group->post('/tags', Controller\Admin\ManageTagController::class . ':save');
+    $group->post('/tags/change-separator', Controller\Admin\ManageTagController::class . ':changeSeparator');
+    $group->get('/add-shaare', Controller\Admin\ShaareAddController::class . ':addShaare');
+    $group->get('/shaare', Controller\Admin\ShaarePublishController::class . ':displayCreateForm');
+    $group->get('/shaare/{id:[0-9]+}', Controller\Admin\ShaarePublishController::class . ':displayEditForm');
+    $group->get('/shaare/private/{hash}', Controller\Admin\ShaareManageController::class . ':sharePrivate');
+    $group->post('/shaare-batch', Controller\Admin\ShaarePublishController::class . ':displayCreateBatchForms');
+    $group->post('/shaare', Controller\Admin\ShaarePublishController::class . ':save');
+    $group->get('/shaare/delete', Controller\Admin\ShaareManageController::class . ':deleteBookmark');
+    $group->get('/shaare/visibility', Controller\Admin\ShaareManageController::class . ':changeVisibility');
+    $group->post('/shaare/update-tags', Controller\Admin\ShaareManageController::class . ':addOrDeleteTags');
+    $group->get('/shaare/{id:[0-9]+}/pin', Controller\Admin\ShaareManageController::class . ':pinBookmark');
+    $group->patch(
         '/shaare/{id:[0-9]+}/update-thumbnail',
-        '\Shaarli\Front\Controller\Admin\ThumbnailsController:ajaxUpdate'
+        Controller\Admin\ThumbnailsController::class . ':ajaxUpdate'
     );
-    $this->get('/export', '\Shaarli\Front\Controller\Admin\ExportController:index');
-    $this->post('/export', '\Shaarli\Front\Controller\Admin\ExportController:export');
-    $this->get('/import', '\Shaarli\Front\Controller\Admin\ImportController:index');
-    $this->post('/import', '\Shaarli\Front\Controller\Admin\ImportController:import');
-    $this->get('/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:index');
-    $this->post('/plugins', '\Shaarli\Front\Controller\Admin\PluginsController:save');
-    $this->get('/token', '\Shaarli\Front\Controller\Admin\TokenController:getToken');
-    $this->get('/server', '\Shaarli\Front\Controller\Admin\ServerController:index');
-    $this->get('/clear-cache', '\Shaarli\Front\Controller\Admin\ServerController:clearCache');
-    $this->get('/thumbnails', '\Shaarli\Front\Controller\Admin\ThumbnailsController:index');
-    $this->get('/metadata', '\Shaarli\Front\Controller\Admin\MetadataController:ajaxRetrieveTitle');
-    $this->get('/visibility/{visibility}', '\Shaarli\Front\Controller\Admin\SessionFilterController:visibility');
-})->add('\Shaarli\Front\ShaarliAdminMiddleware');
+    $group->get('/export', Controller\Admin\ExportController::class . ':index');
+    $group->post('/export', Controller\Admin\ExportController::class . ':export');
+    $group->get('/import', Controller\Admin\ImportController::class . ':index');
+    $group->post('/import', Controller\Admin\ImportController::class . ':import');
+    $group->get('/plugins', Controller\Admin\PluginsController::class . ':index');
+    $group->post('/plugins', Controller\Admin\PluginsController::class . ':save');
+    $group->get('/token', Controller\Admin\TokenController::class . ':getToken');
+    $group->get('/server', Controller\Admin\ServerController::class . ':index');
+    $group->get('/clear-cache', Controller\Admin\ServerController::class . ':clearCache');
+    $group->get('/thumbnails', Controller\Admin\ThumbnailsController::class . ':index');
+    $group->get('/metadata', Controller\Admin\MetadataController::class . ':ajaxRetrieveTitle');
+    $group->get('/visibility/{visibility}', Controller\Admin\SessionFilterController::class . ':visibility');
+})->add(\Shaarli\Front\ShaarliAdminMiddleware::class);
 
-$app->group('/plugin', function () use ($pluginManager) {
+$app->group('/plugin', function (RouteCollectorProxy $group) use ($pluginManager) {
     foreach ($pluginManager->getRegisteredRoutes() as $pluginName => $routes) {
-        $this->group('/' . $pluginName, function () use ($routes) {
+        $group->group('/' . $pluginName, function (RouteCollectorProxy $subgroup) use ($routes) {
             foreach ($routes as $route) {
-                $this->{strtolower($route['method'])}('/' . ltrim($route['route'], '/'), $route['callable']);
+                $subgroup->{strtolower($route['method'])}('/' . ltrim($route['route'], '/'), $route['callable']);
             }
         });
     }
-})->add('\Shaarli\Front\ShaarliMiddleware');
+})->add(\Shaarli\Front\ShaarliMiddleware::class);
 
 // REST API routes
-$app->group('/api/v1', function () {
-    $this->get('/info', '\Shaarli\Api\Controllers\Info:getInfo')->setName('getInfo');
-    $this->get('/links', '\Shaarli\Api\Controllers\Links:getLinks')->setName('getLinks');
-    $this->get('/links/{id:[\d]+}', '\Shaarli\Api\Controllers\Links:getLink')->setName('getLink');
-    $this->post('/links', '\Shaarli\Api\Controllers\Links:postLink')->setName('postLink');
-    $this->put('/links/{id:[\d]+}', '\Shaarli\Api\Controllers\Links:putLink')->setName('putLink');
-    $this->delete('/links/{id:[\d]+}', '\Shaarli\Api\Controllers\Links:deleteLink')->setName('deleteLink');
+$app->group('/api/v1', function (RouteCollectorProxy $group) {
+    $group->get('/info', ApiControllers\Info::class . ':getInfo')->setName('getInfo');
+    $group->get('/links', ApiControllers\Links::class . ':getLinks')->setName('getLinks');
+    $group->get('/links/{id:[\d]+}', ApiControllers\Links::class . ':getLink')->setName('getLink');
+    $group->post('/links', ApiControllers\Links::class . ':postLink')->setName('postLink');
+    $group->put('/links/{id:[\d]+}', ApiControllers\Links::class . ':putLink')->setName('putLink');
+    $group->delete('/links/{id:[\d]+}', ApiControllers\Links::class . ':deleteLink')->setName('deleteLink');
 
-    $this->get('/tags', '\Shaarli\Api\Controllers\Tags:getTags')->setName('getTags');
-    $this->get('/tags/{tagName:[\w]+}', '\Shaarli\Api\Controllers\Tags:getTag')->setName('getTag');
-    $this->put('/tags/{tagName:[\w]+}', '\Shaarli\Api\Controllers\Tags:putTag')->setName('putTag');
-    $this->delete('/tags/{tagName:[\w]+}', '\Shaarli\Api\Controllers\Tags:deleteTag')->setName('deleteTag');
+    $group->get('/tags', ApiControllers\Tags::class . ':getTags')->setName('getTags');
+    $group->get('/tags/{tagName:[\w]+}', ApiControllers\Tags::class . ':getTag')->setName('getTag');
+    $group->put('/tags/{tagName:[\w]+}', ApiControllers\Tags::class . ':putTag')->setName('putTag');
+    $group->delete('/tags/{tagName:[\w]+}', ApiControllers\Tags::class . ':deleteTag')->setName('deleteTag');
 
-    $this->get('/history', '\Shaarli\Api\Controllers\HistoryController:getHistory')->setName('getHistory');
-})->add('\Shaarli\Api\ApiMiddleware');
+    $group->get('/history', ApiControllers\HistoryController::class . ':getHistory')->setName('getHistory');
+})->add(\Shaarli\Api\ApiMiddleware::class);
+
+$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, true, true);
+$errorMiddleware->setDefaultErrorHandler(
+    new ShaarliErrorHandler($app->getCallableResolver(), $app->getResponseFactory(), $logger, $container)
+);
+
 
 try {
-    $response = $app->run(true);
-    $app->respond($response);
+    $app->run();
 } catch (Throwable $e) {
     die(nl2br(
         'An unexpected error happened, and the error template could not be displayed.' . PHP_EOL . PHP_EOL .

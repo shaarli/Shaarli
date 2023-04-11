@@ -9,8 +9,9 @@ use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class PluginsControllerTest extends TestCase
 {
@@ -51,8 +52,8 @@ class PluginsControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $data = [
             'plugin1' => ['order' => 2, 'other' => 'field'],
@@ -61,7 +62,7 @@ class PluginsControllerTest extends TestCase
             'plugin4' => [],
         ];
 
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('getPluginsMeta')
             ->willReturn($data);
@@ -93,22 +94,18 @@ class PluginsControllerTest extends TestCase
             'plugin2' => 'on',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParams')
-            ->willReturnCallback(function () use ($parameters): array {
-                return $parameters;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withParsedBody($parameters);
+        $response = new SlimResponse();
 
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_plugin_parameters', $parameters)
         ;
-        $this->container->conf
+        $this->container->get('conf')
             ->expects(static::atLeastOnce())
             ->method('set')
             ->with('general.enabled_plugins', ['plugin1', 'plugin2'])
@@ -132,22 +129,18 @@ class PluginsControllerTest extends TestCase
             'token' => 'this parameter should not be saved'
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParams')
-            ->willReturnCallback(function () use ($parameters): array {
-                return $parameters;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withParsedBody($parameters);
+        $response = new SlimResponse();
 
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_plugin_parameters', $parameters)
         ;
-        $this->container->conf
+        $this->container->get('conf')
             ->expects(static::exactly(2))
             ->method('set')
             ->withConsecutive(['plugins.parameter1', 'blip'], ['plugins.parameter2', 'blop'])
@@ -164,19 +157,19 @@ class PluginsControllerTest extends TestCase
      */
     public function testSaveWithError(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->expects(static::atLeastOnce())
             ->method('write')
             ->willThrowException(new \Exception($message = 'error message'))
         ;
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(true);
-        $this->container->sessionManager
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(true);
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(
@@ -196,11 +189,11 @@ class PluginsControllerTest extends TestCase
      */
     public function testSaveWrongToken(): void
     {
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $this->expectException(WrongTokenException::class);
 

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 class SessionFilterControllerTest extends TestCase
 {
@@ -31,17 +32,19 @@ class SessionFilterControllerTest extends TestCase
     {
         $arg = ['visibility' => 'private'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
-
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->sessionManager
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY, 'private')
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
+            'SERVER_PORT' => '80',
+            'SERVER_NAME' => 'shaarli'
+        ]);
+        $response = new SlimResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -57,26 +60,28 @@ class SessionFilterControllerTest extends TestCase
     {
         $arg = ['visibility' => 'private'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
-
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->sessionManager
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY)
             ->willReturn('private')
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::never())
             ->method('setSessionParameter')
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('deleteSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
+            'SERVER_PORT' => '80',
+            'SERVER_NAME' => 'shaarli'
+        ]);
+        $response = new SlimResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -92,20 +97,20 @@ class SessionFilterControllerTest extends TestCase
     {
         $arg = ['visibility' => 'private'];
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->sessionManager
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY)
             ->willReturn('public')
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY, 'private')
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -121,21 +126,23 @@ class SessionFilterControllerTest extends TestCase
     {
         $arg = ['visibility' => 'test'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
-
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->sessionManager
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('sessionManager')
             ->expects(static::never())
             ->method('setSessionParameter')
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('deleteSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
+            'SERVER_PORT' => '80',
+            'SERVER_NAME' => 'shaarli'
+        ]);
+        $response = new SlimResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -151,22 +158,24 @@ class SessionFilterControllerTest extends TestCase
     {
         $arg = ['visibility' => 'test'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
-
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(false);
-        $this->container->sessionManager
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(false);
+        $this->container->get('sessionManager')
             ->expects(static::never())
             ->method('setSessionParameter')
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::never())
             ->method('deleteSessionParameter')
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
+            'SERVER_PORT' => '80',
+            'SERVER_NAME' => 'shaarli'
+        ]);
+        $response = new SlimResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 

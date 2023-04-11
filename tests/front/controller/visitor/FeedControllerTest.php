@@ -6,8 +6,9 @@ namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class FeedControllerTest extends TestCase
 {
@@ -20,7 +21,7 @@ class FeedControllerTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->feedBuilder = $this->createMock(FeedBuilder::class);
+        $this->container->set('feedBuilder', $this->createMock(FeedBuilder::class));
 
         $this->controller = new FeedController($this->container);
     }
@@ -30,21 +31,24 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultRssController(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->feedBuilder->expects(static::once())->method('setLocale');
-        $this->container->feedBuilder->expects(static::once())->method('setHideDates')->with(false);
-        $this->container->feedBuilder->expects(static::once())->method('setUsePermalinks')->with(true);
+        $this->container->get('feedBuilder')->expects(static::once())->method('setLocale');
+        $this->container->get('feedBuilder')->expects(static::once())->method('setHideDates')->with(false);
+        $this->container->get('feedBuilder')->expects(static::once())->method('setUsePermalinks')->with(true);
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->feedBuilder->method('buildData')->willReturn(['content' => 'data']);
+        $this->container->get('feedBuilder')->method('buildData')->willReturn(['content' => 'data']);
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_feed'])
@@ -71,21 +75,24 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultAtomController(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->feedBuilder->expects(static::once())->method('setLocale');
-        $this->container->feedBuilder->expects(static::once())->method('setHideDates')->with(false);
-        $this->container->feedBuilder->expects(static::once())->method('setUsePermalinks')->with(true);
+        $this->container->get('feedBuilder')->expects(static::once())->method('setLocale');
+        $this->container->get('feedBuilder')->expects(static::once())->method('setHideDates')->with(false);
+        $this->container->get('feedBuilder')->expects(static::once())->method('setUsePermalinks')->with(true);
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->feedBuilder->method('buildData')->willReturn(['content' => 'data']);
+        $this->container->get('feedBuilder')->method('buildData')->willReturn(['content' => 'data']);
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_feed'])
@@ -112,22 +119,27 @@ class FeedControllerTest extends TestCase
      */
     public function testAtomControllerWithParameters(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParams')->willReturn(['parameter' => 'value']);
-        $response = new Response();
+        $request = new FakeRequest();
+        $request = (new FakeRequest('GET', (new Uri('', ''))
+            ->withQuery(http_build_query(['parameter' => 'value']))))
+            ->withServerParams([
+                'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                ]);
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->feedBuilder
+        $this->container->get('feedBuilder')
             ->method('buildData')
             ->with('atom', ['parameter' => 'value'])
             ->willReturn(['content' => 'data'])
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_feed'])

@@ -8,8 +8,9 @@ use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\SearchResult;
 use Shaarli\Feed\CachedPage;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class DailyControllerTest extends TestCase
 {
@@ -33,17 +34,19 @@ class DailyControllerTest extends TestCase
         $previousDate = new \DateTime('2 days ago 00:00:00');
         $nextDate = new \DateTime('today 00:00:00');
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key) use ($currentDay): ?string {
-            return $key === 'day' ? $currentDay->format('Ymd') : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(
+                ['day' => $currentDay->format('Ymd')]
+            ))
+        ));
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(
@@ -76,7 +79,7 @@ class DailyControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_daily'])
@@ -176,17 +179,19 @@ class DailyControllerTest extends TestCase
     {
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key) use ($currentDay): ?string {
-            return $key === 'day' ? $currentDay->format('Ymd') : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(
+                ['day' => $currentDay->format('Ymd')]
+            ))
+        ));
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(function () use ($currentDay): array {
@@ -202,7 +207,7 @@ class DailyControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_daily'])
@@ -242,14 +247,14 @@ class DailyControllerTest extends TestCase
     {
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(function () use ($currentDay): array {
@@ -271,7 +276,7 @@ class DailyControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->willReturnCallback(function (string $hook, array $data, array $param): array {
@@ -301,15 +306,15 @@ class DailyControllerTest extends TestCase
      */
     public function testValidIndexControllerInvokeNoBookmark(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
         // Links dataset: 2 links with thumbnails
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(function (): array {
@@ -318,7 +323,7 @@ class DailyControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->willReturnCallback(function (string $hook, array $data, array $param): array {
@@ -348,10 +353,15 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('+1 month'),
         ];
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->bookmarkService->expects(static::once())->method('search')->willReturn(
+        $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([
                 (new Bookmark())->setId(1)->setCreated($dates[0])->setUrl('http://domain.tld/1'),
                 (new Bookmark())->setId(2)->setCreated($dates[1])->setUrl('http://domain.tld/2'),
@@ -361,7 +371,7 @@ class DailyControllerTest extends TestCase
             ])
         );
 
-        $this->container->pageCacheManager
+        $this->container->get('pageCacheManager')
             ->expects(static::once())
             ->method('getCachePage')
             ->willReturnCallback(function (): CachedPage {
@@ -432,17 +442,22 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeTriggerCache(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->pageCacheManager->method('getCachePage')->willReturnCallback(function (): CachedPage {
+        $this->container->get('pageCacheManager')->method('getCachePage')->willReturnCallback(function (): CachedPage {
             $cachedPage = $this->createMock(CachedPage::class);
             $cachedPage->method('cachedVersion')->willReturn('this is cache!');
 
             return $cachedPage;
         });
 
-        $this->container->bookmarkService->expects(static::never())->method('search');
+        $this->container->get('bookmarkService')->expects(static::never())->method('search');
 
         $result = $this->controller->rss($request, $response);
 
@@ -456,10 +471,15 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeNoBookmark(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())->method('search')
             ->willReturn(SearchResult::getSearchResult([]));
 
@@ -487,17 +507,22 @@ class DailyControllerTest extends TestCase
         $currentDay = new \DateTimeImmutable('2020-05-13');
         $expectedDay = new \DateTimeImmutable('2020-05-11');
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key) use ($currentDay): ?string {
-            return $key === 'week' ? $currentDay->format('YW') : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(['week' => $currentDay->format('YW')]))
+        ))->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+        ]);
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(
@@ -547,17 +572,22 @@ class DailyControllerTest extends TestCase
         $currentDay = new \DateTimeImmutable('2020-05-13');
         $expectedDay = new \DateTimeImmutable('2020-05-01');
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key) use ($currentDay): ?string {
-            return $key === 'month' ? $currentDay->format('Ym') : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(['month' => $currentDay->format('Ym')]))
+        ))->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+        ]);
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByDate')
             ->willReturnCallback(
@@ -613,14 +643,19 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('2020-05-17 23:59:59'),
         ];
 
-        $this->container->environment['QUERY_STRING'] = 'week';
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key): ?string {
-            return $key === 'week' ? '' : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(['week' => '']))
+        ))->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+            'QUERY_STRING' => 'week',
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->bookmarkService->expects(static::once())->method('search')->willReturn(
+        $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([
                 (new Bookmark())->setId(1)->setCreated($dates[0])->setUrl('http://domain.tld/1'),
                 (new Bookmark())->setId(2)->setCreated($dates[1])->setUrl('http://domain.tld/2'),
@@ -676,14 +711,19 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('2020-04-30 23:59:59'),
         ];
 
-        $this->container->environment['QUERY_STRING'] = 'month';
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function (string $key): ?string {
-            return $key === 'month' ? '' : null;
-        });
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(['month' => '']))
+        ))->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+            'REQUEST_URI' => '/subfolder/daily-rss',
+            'QUERY_STRING' => 'month',
+        ]);
+        $response = new SlimResponse();
 
-        $this->container->bookmarkService->expects(static::once())->method('search')->willReturn(
+        $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([
                 (new Bookmark())->setId(1)->setCreated($dates[0])->setUrl('http://domain.tld/1'),
                 (new Bookmark())->setId(2)->setCreated($dates[1])->setUrl('http://domain.tld/2'),

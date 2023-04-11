@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Exception\CantLoginException;
 use Shaarli\Front\Exception\LoginBannedException;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Render\TemplatePage;
 use Shaarli\Security\CookieManager;
 use Shaarli\Security\SessionManager;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class LoginController
@@ -29,24 +29,28 @@ class LoginController extends ShaarliVisitorController
     public function index(Request $request, Response $response): Response
     {
         try {
-            $this->checkLoginState();
+            $this->checkLoginState($request->getServerParams());
         } catch (CantLoginException $e) {
             return $this->redirect($response, '/');
         }
 
-        if ($request->getParam('login') !== null) {
-            $this->assignView('username', escape($request->getParam('login')));
+        if (($request->getQueryParams()['login'] ?? null) !== null) {
+            $this->assignView('username', escape($request->getQueryParams()['login'] ?? null));
         }
 
-        $returnUrl = $request->getParam('returnurl') ?? $this->container->environment['HTTP_REFERER'] ?? null;
+        $returnUrl = $request->getQueryParams()['returnurl'] ?? $request->getServerParams()['HTTP_REFERER'] ?? null;
 
-        $this
-            ->assignView('returnurl', escape($returnUrl))
-            ->assignView('remember_user_default', $this->container->conf->get('privacy.remember_user_default', true))
-            ->assignView('pagetitle', t('Login') . ' - ' . $this->container->conf->get('general.title', 'Shaarli'))
+        $this->assignView('returnurl', escape($returnUrl))
+            ->assignView(
+                'remember_user_default',
+                $this->container->get('conf')->get('privacy.remember_user_default', true)
+            )->assignView(
+                'pagetitle',
+                t('Login') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
+            )
         ;
 
-        return $response->write($this->render(TemplatePage::LOGIN));
+        return $this->respondWithTemplate($response, TemplatePage::LOGIN);
     }
 
     /**
@@ -54,26 +58,26 @@ class LoginController extends ShaarliVisitorController
      */
     public function login(Request $request, Response $response): Response
     {
-        if (!$this->container->sessionManager->checkToken($request->getParam('token'))) {
+        if (!$this->container->get('sessionManager')->checkToken($request->getParsedBody()['token'] ?? null)) {
             throw new WrongTokenException();
         }
 
         try {
-            $this->checkLoginState();
+            $this->checkLoginState($request->getServerParams());
         } catch (CantLoginException $e) {
             return $this->redirect($response, '/');
         }
 
         if (
-            !$this->container->loginManager->checkCredentials(
-                client_ip_id($this->container->environment),
-                $request->getParam('login'),
-                $request->getParam('password')
+            !$this->container->get('loginManager')->checkCredentials(
+                client_ip_id($request->getServerParams()),
+                $request->getParsedBody()['login'] ?? null,
+                $request->getParsedBody()['password'] ?? null
             )
         ) {
-            $this->container->loginManager->handleFailedLogin($this->container->environment);
+            $this->container->get('loginManager')->handleFailedLogin($request->getServerParams());
 
-            $this->container->sessionManager->setSessionParameter(
+            $this->container->get('sessionManager')->setSessionParameter(
                 SessionManager::KEY_ERROR_MESSAGES,
                 [t('Wrong login/password.')]
             );
@@ -82,16 +86,16 @@ class LoginController extends ShaarliVisitorController
             return $this->index($request, $response);
         }
 
-        $this->container->loginManager->handleSuccessfulLogin($this->container->environment);
+        $this->container->get('loginManager')->handleSuccessfulLogin($request->getServerParams());
 
-        $cookiePath = $this->container->basePath . '/';
+        $cookiePath = $this->container->get('basePath') . '/';
         $expirationTime = $this->saveLongLastingSession($request, $cookiePath);
-        $this->renewUserSession($cookiePath, $expirationTime);
+        $this->renewUserSession($request->getServerParams()['SERVER_NAME'] ?? null, $cookiePath, $expirationTime);
 
         // Force referer from given return URL
-        $this->container->environment['HTTP_REFERER'] = $request->getParam('returnurl');
+        $referer = $request->getParsedBody()['returnurl'] ?? null;
 
-        return $this->redirectFromReferer($request, $response, ['login', 'install']);
+        return $this->redirectFromReferer($request, $response, ['login', 'install'], [], null, $referer);
     }
 
     /**
@@ -100,16 +104,16 @@ class LoginController extends ShaarliVisitorController
      *   - not open shaarli
      *   - not banned
      */
-    protected function checkLoginState(): bool
+    protected function checkLoginState(array $serverParams): bool
     {
         if (
-            $this->container->loginManager->isLoggedIn()
-            || $this->container->conf->get('security.open_shaarli', false)
+            $this->container->get('loginManager')->isLoggedIn()
+            || $this->container->get('conf')->get('security.open_shaarli', false)
         ) {
             throw new CantLoginException();
         }
 
-        if (true !== $this->container->loginManager->canLogin($this->container->environment)) {
+        if (true !== $this->container->get('loginManager')->canLogin($serverParams)) {
             throw new LoginBannedException();
         }
 
@@ -121,18 +125,18 @@ class LoginController extends ShaarliVisitorController
      */
     protected function saveLongLastingSession(Request $request, string $cookiePath): int
     {
-        if (empty($request->getParam('longlastingsession'))) {
+        if (empty($request->getParsedBody()['longlastingsession']) ?? null) {
             // Standard session expiration (=when browser closes)
             $expirationTime = 0;
         } else {
             // Keep the session cookie even after the browser closes
-            $this->container->sessionManager->setStaySignedIn(true);
-            $expirationTime = $this->container->sessionManager->extendSession();
+            $this->container->get('sessionManager')->setStaySignedIn(true);
+            $expirationTime = $this->container->get('sessionManager')->extendSession();
         }
 
-        $this->container->cookieManager->setCookieParameter(
+        $this->container->get('cookieManager')->setCookieParameter(
             CookieManager::STAY_SIGNED_IN,
-            $this->container->loginManager->getStaySignedInToken(),
+            $this->container->get('loginManager')->getStaySignedInToken(),
             $expirationTime,
             $cookiePath
         );
@@ -140,16 +144,16 @@ class LoginController extends ShaarliVisitorController
         return $expirationTime;
     }
 
-    protected function renewUserSession(string $cookiePath, int $expirationTime): void
+    protected function renewUserSession(string $serverName, string $cookiePath, int $expirationTime): void
     {
         // Send cookie with the new expiration date to the browser
-        $this->container->sessionManager->destroy();
-        $this->container->sessionManager->cookieParameters(
+        $this->container->get('sessionManager')->destroy();
+        $this->container->get('sessionManager')->cookieParameters(
             $expirationTime,
             $cookiePath,
-            $this->container->environment['SERVER_NAME']
+            $serverName
         );
-        $this->container->sessionManager->start();
-        $this->container->sessionManager->regenerateId(true);
+        $this->container->get('sessionManager')->start();
+        $this->container->get('sessionManager')->regenerateId(true);
     }
 }

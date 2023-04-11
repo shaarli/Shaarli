@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Legacy;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Front\Controller\Visitor\ShaarliVisitorController;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * We use this to maintain legacy routes, and redirect requests to the corresponding Slim route.
@@ -49,7 +49,7 @@ class LegacyController extends ShaarliVisitorController
         };
 
 
-        if (!$this->container->loginManager->isLoggedIn()) {
+        if (!$this->container->get('loginManager')->isLoggedIn()) {
             $parameters = $buildParameters($request->getQueryParams(), true);
             return $this->redirect($response, '/login?returnurl=' . $this->getBasePath() . $route . $parameters);
         }
@@ -64,7 +64,7 @@ class LegacyController extends ShaarliVisitorController
     {
         $route = '/admin/add-shaare';
 
-        if (!$this->container->loginManager->isLoggedIn()) {
+        if (!$this->container->get('loginManager')->isLoggedIn()) {
             return $this->redirect($response, '/login?returnurl=' . $this->getBasePath() . $route);
         }
 
@@ -74,7 +74,7 @@ class LegacyController extends ShaarliVisitorController
     /** Legacy route: ?do=login */
     protected function login(Request $request, Response $response): Response
     {
-        $returnUrl = $request->getQueryParam('returnurl');
+        $returnUrl = $request->getQueryParams()['returnurl'] ?? null;
 
         return $this->redirect($response, '/login' . ($returnUrl ? '?returnurl=' . $returnUrl : ''));
     }
@@ -106,7 +106,8 @@ class LegacyController extends ShaarliVisitorController
     /** Legacy route: ?do=daily */
     protected function daily(Request $request, Response $response): Response
     {
-        $dayParam = !empty($request->getParam('day')) ? '?day=' . escape($request->getParam('day')) : '';
+        $dayParam = !empty($request->getQueryParams()['day'] ?? null) ?
+            '?day=' . escape($request->getQueryParams()['day']) : '';
 
         return $this->redirect($response, '/daily' . $dayParam);
     }
@@ -148,7 +149,7 @@ class LegacyController extends ShaarliVisitorController
     {
         $route = '/admin/configure';
 
-        if (!$this->container->loginManager->isLoggedIn()) {
+        if (!$this->container->get('loginManager')->isLoggedIn()) {
             return $this->redirect($response, '/login?returnurl=' . $this->getBasePath() . $route);
         }
 
@@ -157,6 +158,6 @@ class LegacyController extends ShaarliVisitorController
 
     protected function getBasePath(): string
     {
-        return $this->container->basePath ?: '';
+        return $this->container->get('basePath') ?: '';
     }
 }

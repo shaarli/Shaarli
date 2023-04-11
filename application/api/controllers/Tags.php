@@ -2,12 +2,12 @@
 
 namespace Shaarli\Api\Controllers;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Api\ApiUtils;
 use Shaarli\Api\Exceptions\ApiBadParametersException;
 use Shaarli\Api\Exceptions\ApiTagNotFoundException;
 use Shaarli\Bookmark\BookmarkFilter;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class Tags
@@ -35,21 +35,22 @@ class Tags extends ApiController
      */
     public function getTags($request, $response)
     {
-        $visibility = $request->getParam('visibility');
+        $visibility = $request->getQueryParams()['visibility'] ?? '';
         $tags = $this->bookmarkService->bookmarksCountPerTag([], $visibility);
 
         // Return tags from the {offset}th tag, starting from 0.
-        $offset = $request->getParam('offset');
+        $offset = $request->getQueryParams()['offset'] ?? '';
         if (! empty($offset) && ! ctype_digit($offset)) {
             throw new ApiBadParametersException('Invalid offset');
         }
         $offset = ! empty($offset) ? intval($offset) : 0;
         if ($offset > count($tags)) {
-            return $response->withJson([], 200, $this->jsonStyle);
+            return $this->respondWithJson($response, [], $this->jsonStyle)
+                ->withStatus(200);
         }
 
         // limit parameter is either a number of bookmarks or 'all' for everything.
-        $limit = $request->getParam('limit');
+        $limit = $request->getQueryParams()['limit'] ?? null;
         if (empty($limit)) {
             $limit = self::$DEFAULT_LIMIT;
         }
@@ -72,7 +73,8 @@ class Tags extends ApiController
             }
         }
 
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)
+            ->withStatus(200);
     }
 
     /**
@@ -94,7 +96,8 @@ class Tags extends ApiController
         }
         $out = ApiUtils::formatTag($args['tagName'], $tags[$args['tagName']]);
 
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)
+            ->withStatus(200);
     }
 
     /**
@@ -136,7 +139,8 @@ class Tags extends ApiController
 
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $out = ApiUtils::formatTag($data['name'], $tags[$data['name']]);
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)
+            ->withStatus(200);
     }
 
     /**

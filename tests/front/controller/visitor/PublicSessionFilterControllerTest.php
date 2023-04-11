@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class PublicSessionFilterControllerTest extends TestCase
 {
@@ -28,13 +30,18 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPage(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery('nb=8')
+        ))->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
+        ]);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->with('nb')->willReturn('8');
-        $response = new Response();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_LINKS_PER_PAGE, 8)
@@ -52,11 +59,13 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPageNotValid(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->with('nb')->willReturn('test');
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery('nb=test')
+        ));
+        $response = new SlimResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_LINKS_PER_PAGE, 20)
@@ -74,12 +83,17 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnly(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))
+        ))->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => '80',
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
+        ]);
+        $response = new SlimResponse();
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
-
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_UNTAGGED_ONLY, true)
@@ -97,17 +111,22 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnlyToggleOff(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller/?searchtag=abc';
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', '', 80, 'shaarli'))
+        ))->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => '80',
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
+        ]);
+        $response = new SlimResponse();
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
-
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_UNTAGGED_ONLY)
             ->willReturn(true)
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_UNTAGGED_ONLY, false)

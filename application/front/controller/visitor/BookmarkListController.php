@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
 use Shaarli\Legacy\LegacyController;
 use Shaarli\Legacy\UnknowLegacyRouteException;
 use Shaarli\Render\TemplatePage;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class BookmarkListController
@@ -31,30 +31,30 @@ class BookmarkListController extends ShaarliVisitorController
             return $legacyResponse;
         }
 
-        $formatter = $this->container->formatterFactory->getFormatter();
-        $formatter->addContextData('base_path', $this->container->basePath);
-        $formatter->addContextData('index_url', index_url($this->container->environment));
+        $formatter = $this->container->get('formatterFactory')->getFormatter();
+        $formatter->addContextData('base_path', $this->container->get('basePath'));
+        $formatter->addContextData('index_url', index_url($request->getServerParams()));
 
-        $searchTags = normalize_spaces($request->getParam('searchtags') ?? '');
-        $searchTerm = escape(normalize_spaces($request->getParam('searchterm') ?? ''));
+        $searchTags = normalize_spaces($request->getQueryParams()['searchtags'] ?? '');
+        $searchTerm = escape(normalize_spaces($request->getQueryParams()['searchterm'] ?? ''));
 
         // Filter bookmarks according search parameters.
-        $visibility = $this->container->sessionManager->getSessionParameter('visibility');
+        $visibility = $this->container->get('sessionManager')->getSessionParameter('visibility');
         $search = [
             'searchtags' => $searchTags,
             'searchterm' => $searchTerm,
         ];
 
         // Select articles according to paging.
-        $page = (int) ($request->getParam('page') ?? 1);
+        $page = (int) ($request->getQueryParams()['page'] ?? 1);
         $page = $page < 1 ? 1 : $page;
-        $linksPerPage = $this->container->sessionManager->getSessionParameter('LINKS_PER_PAGE', 20) ?: 20;
+        $linksPerPage = $this->container->get('sessionManager')->getSessionParameter('LINKS_PER_PAGE', 20) ?: 20;
 
-        $searchResult = $this->container->bookmarkService->search(
+        $searchResult = $this->container->get('bookmarkService')->search(
             $search,
             $visibility,
             false,
-            !!$this->container->sessionManager->getSessionParameter('untaggedonly'),
+            !!$this->container->get('sessionManager')->getSessionParameter('untaggedonly'),
             false,
             ['offset' => $linksPerPage * ($page - 1), 'limit' => $linksPerPage]
         ) ?? [];
@@ -67,7 +67,7 @@ class BookmarkListController extends ShaarliVisitorController
         }
 
         if ($save) {
-            $this->container->bookmarkService->save();
+            $this->container->get('bookmarkService')->save();
         }
 
         // Compute paging navigation
@@ -78,7 +78,7 @@ class BookmarkListController extends ShaarliVisitorController
         $previousPageUrl = !$searchResult->isLastPage() ? '?page=' . ($page + 1) . $searchtermUrl . $searchtagsUrl : '';
         $nextPageUrl = !$searchResult->isFirstPage() ? '?page=' . ($page - 1) . $searchtermUrl . $searchtagsUrl : '';
 
-        $tagsSeparator = $this->container->conf->get('general.tags_separator', ' ');
+        $tagsSeparator = $this->container->get('conf')->get('general.tags_separator', ' ');
         $searchTagsUrlEncoded = array_map('urlencode', tags_str2array($searchTags, $tagsSeparator));
         $searchTags = !empty($searchTags) ? trim($searchTags, $tagsSeparator) . $tagsSeparator : '';
 
@@ -112,12 +112,12 @@ class BookmarkListController extends ShaarliVisitorController
             $data['pagetitle'] .= '- ';
         }
 
-        $data['pagetitle'] = ($data['pagetitle'] ?? '') . $this->container->conf->get('general.title', 'Shaarli');
+        $data['pagetitle'] = ($data['pagetitle'] ?? '') . $this->container->get('conf')->get('general.title', 'Shaarli');
 
         $this->executePageHooks('render_linklist', $data, TemplatePage::LINKLIST);
         $this->assignAllView($data);
 
-        return $response->write($this->render(TemplatePage::LINKLIST));
+        return $this->respondWithTemplate($response, TemplatePage::LINKLIST);
     }
 
     /**
@@ -125,26 +125,26 @@ class BookmarkListController extends ShaarliVisitorController
      */
     public function permalink(Request $request, Response $response, array $args): Response
     {
-        $privateKey = $request->getParam('key');
+        $privateKey = $request->getQueryParams()['key'] ?? null;
 
         try {
-            $bookmark = $this->container->bookmarkService->findByHash($args['hash'], $privateKey);
+            $bookmark = $this->container->get('bookmarkService')->findByHash($args['hash'], $privateKey);
         } catch (BookmarkNotFoundException $e) {
             $this->assignView('error_message', $e->getMessage());
 
-            return $response->write($this->render(TemplatePage::ERROR_404));
+            return $this->respondWithTemplate($response, TemplatePage::ERROR_404);
         }
 
         $this->updateThumbnail($bookmark);
 
-        $formatter = $this->container->formatterFactory->getFormatter();
-        $formatter->addContextData('base_path', $this->container->basePath);
-        $formatter->addContextData('index_url', index_url($this->container->environment));
+        $formatter = $this->container->get('formatterFactory')->getFormatter();
+        $formatter->addContextData('base_path', $this->container->get('basePath'));
+        $formatter->addContextData('index_url', index_url($request->getServerParams()));
 
         $data = array_merge(
             $this->initializeTemplateVars(),
             [
-                'pagetitle' => $bookmark->getTitle() . ' - ' . $this->container->conf->get('general.title', 'Shaarli'),
+                'pagetitle' => $bookmark->getTitle() . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli'),
                 'links' => [$formatter->format($bookmark)],
             ]
         );
@@ -152,7 +152,7 @@ class BookmarkListController extends ShaarliVisitorController
         $this->executePageHooks('render_linklist', $data, TemplatePage::LINKLIST);
         $this->assignAllView($data);
 
-        return $response->write($this->render(TemplatePage::LINKLIST));
+        return $this->respondWithTemplate($response, TemplatePage::LINKLIST);
     }
 
     /**
@@ -160,7 +160,7 @@ class BookmarkListController extends ShaarliVisitorController
      */
     protected function updateThumbnail(Bookmark $bookmark, bool $writeDatastore = true): bool
     {
-        if (false === $this->container->loginManager->isLoggedIn()) {
+        if (false === $this->container->get('loginManager')->isLoggedIn()) {
             return false;
         }
 
@@ -171,11 +171,11 @@ class BookmarkListController extends ShaarliVisitorController
             // Requires an update, not async retrieval, thumbnails enabled
             if (
                 $bookmark->shouldUpdateThumbnail()
-                && true !== $this->container->conf->get('general.enable_async_metadata', true)
-                && $this->container->conf->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
+                && true !== $this->container->get('conf')->get('general.enable_async_metadata', true)
+                && $this->container->get('conf')->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
             ) {
-                $bookmark->setThumbnail($this->container->thumbnailer->get($bookmark->getUrl()));
-                $this->container->bookmarkService->set($bookmark, $writeDatastore);
+                $bookmark->setThumbnail($this->container->get('thumbnailer')->get($bookmark->getUrl()));
+                $this->container->get('bookmarkService')->set($bookmark, $writeDatastore);
 
                 return true;
             }
@@ -195,7 +195,7 @@ class BookmarkListController extends ShaarliVisitorController
             'page_max' => '',
             'search_tags' => '',
             'result_count' => '',
-            'async_metadata' => $this->container->conf->get('general.enable_async_metadata', true)
+            'async_metadata' => $this->container->get('conf')->get('general.enable_async_metadata', true)
         ];
     }
 
@@ -206,17 +206,17 @@ class BookmarkListController extends ShaarliVisitorController
     protected function processLegacyController(Request $request, Response $response): ?Response
     {
         // Legacy smallhash filter
-        $queryString = $this->container->environment['QUERY_STRING'] ?? null;
+        $queryString = $request->getServerParams()['QUERY_STRING'] ?? null;
         if (null !== $queryString && 1 === preg_match('/^([a-zA-Z0-9-_@]{6})($|&|#)/', $queryString, $match)) {
             return $this->redirect($response, '/shaare/' . $match[1]);
         }
 
         // Legacy controllers (mostly used for redirections)
-        if (null !== $request->getQueryParam('do')) {
+        if (null !== ($request->getQueryParams()['do'] ?? null)) {
             $legacyController = new LegacyController($this->container);
 
             try {
-                return $legacyController->process($request, $response, $request->getQueryParam('do'));
+                return $legacyController->process($request, $response, $request->getQueryParams()['do'] ?? null);
             } catch (UnknowLegacyRouteException $e) {
                 // We ignore legacy 404
                 return null;

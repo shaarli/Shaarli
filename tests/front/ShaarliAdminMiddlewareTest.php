@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Shaarli\Front;
 
+use DI\Container as DIContainer;
 use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliContainer;
 use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
+use Shaarli\Tests\Utils\FakeRequestHandler;
 use Shaarli\Updater\Updater;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use Slim\Http\Uri;
+use Slim\Psr7\Response as SlimResponse;
 
 class ShaarliAdminMiddlewareTest extends TestCase
 {
     protected const TMP_MOCK_FILE = '.tmp';
 
-    /** @var ShaarliContainer */
+    /** @var Container */
     protected $container;
 
     /** @var ShaarliMiddleware  */
@@ -25,17 +26,16 @@ class ShaarliAdminMiddlewareTest extends TestCase
 
     public function setUp(): void
     {
-        $this->container = $this->createMock(ShaarliContainer::class);
+        $this->container = new DIContainer();
 
         touch(static::TMP_MOCK_FILE);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('getConfigFileExt')->willReturn(static::TMP_MOCK_FILE);
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->updater = $this->createMock(Updater::class);
-
-        $this->container->environment = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->set('updater', $this->createMock(Updater::class));
+        $this->container->set('basePath', '/subfolder');
 
         $this->middleware = new ShaarliAdminMiddleware($this->container);
     }
@@ -50,21 +50,19 @@ class ShaarliAdminMiddlewareTest extends TestCase
      */
     public function testMiddlewareWhileLoggedOut(): void
     {
-        $this->container->loginManager->expects(static::once())->method('isLoggedIn')->willReturn(false);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $this->container->get('loginManager')->expects(static::once())->method('isLoggedIn')->willReturn(false);
 
-            return $uri;
-        });
+        $request = new FakeRequest(
+            'GET',
+            (new \Slim\Psr7\Uri('http', 'shaarli'))->withPath('/subfolder/path'),
+            null,
+            [],
+            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        );
 
-        $response = new Response();
-
-        /** @var Response $result */
-        $result = $this->middleware->__invoke($request, $response, function () {
-        });
+        $fakeResponse = new SlimResponse();
+        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(
@@ -78,23 +76,19 @@ class ShaarliAdminMiddlewareTest extends TestCase
      */
     public function testMiddlewareWhileLoggedIn(): void
     {
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getUri')->willReturnCallback(function (): Uri {
-            $uri = $this->createMock(Uri::class);
-            $uri->method('getBasePath')->willReturn('/subfolder');
+        $request = new FakeRequest(
+            'GET',
+            (new \Slim\Psr7\Uri('http', 'shaarli'))->withPath('/subfolder/path'),
+            null,
+            [],
+            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        );
 
-            return $uri;
-        });
+        $fakeResponse = (new SlimResponse())->withStatus(418);
+        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
 
-        $response = new Response();
-        $controller = function (Request $request, Response $response): Response {
-            return $response->withStatus(418); // I'm a tea pot
-        };
-
-        /** @var Response $result */
-        $result = $this->middleware->__invoke($request, $response, $controller);
 
         static::assertSame(418, $result->getStatusCode());
     }

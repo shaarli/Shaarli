@@ -11,8 +11,8 @@ use Shaarli\Front\Controller\Admin\ShaarePublishController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 class DisplayEditFormTest extends TestCase
 {
@@ -25,7 +25,7 @@ class DisplayEditFormTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaarePublishController($this->container);
     }
 
@@ -40,13 +40,13 @@ class DisplayEditFormTest extends TestCase
 
         $id = 11;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->httpAccess->expects(static::never())->method('getHttpResponse');
-        $this->container->httpAccess->expects(static::never())->method('getCurlDownloadCallback');
+        $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
+        $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->with($id)
@@ -87,10 +87,10 @@ class DisplayEditFormTest extends TestCase
     {
         $id = 'invalid';
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier invalid could not be found.'])
@@ -108,10 +108,10 @@ class DisplayEditFormTest extends TestCase
      */
     public function testDisplayEditFormIdNotProvided(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier  could not be found.'])
@@ -131,17 +131,17 @@ class DisplayEditFormTest extends TestCase
     {
         $id = 123;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->with($id)
             ->willThrowException(new BookmarkNotFoundException())
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier 123 could not be found.'])

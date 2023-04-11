@@ -12,7 +12,7 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\TestCase;
-use Slim\Http\UploadedFile;
+use Slim\Psr7\UploadedFile;
 
 /**
  * Utility function to load a file's metadata in a $_FILES-like array
@@ -40,7 +40,7 @@ class BookmarkImportTest extends TestCase
     /**
      * @var string datastore to test write operations
      */
-    protected static $testDatastore = 'sandbox/datastore.php';
+    protected static $testDatastore = __DIR__ . '/../../sandbox/datastore.php';
 
     /**
      * @var string History file path
@@ -92,7 +92,10 @@ class BookmarkImportTest extends TestCase
      */
     protected function setUp(): void
     {
+
         $mutex = new NoMutex();
+        $folder = dirname(self::$testDatastore);
+        file_exists($folder) || mkdir($folder, 0755, true);
         if (file_exists(self::$testDatastore)) {
             unlink(self::$testDatastore);
         }

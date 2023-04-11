@@ -2,20 +2,24 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
+use Shaarli\Tests\Utils\FakeRouteCollector;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 use Slim\Router;
+use Slim\Routing\RouteContext;
 
 /**
  * Class PostLinkTest
@@ -52,9 +56,15 @@ class PostLinkTest extends TestCase
     protected $bookmarkService;
 
     /**
-     * @var HistoryController instance.
+     * @var History instance.
      */
     protected $history;
+
+
+    /**
+     * @var RouteParser instance.
+     */
+    protected $routeParser;
 
     /**
      * @var Container instance.
@@ -92,27 +102,15 @@ class PostLinkTest extends TestCase
             $mutex,
             true
         );
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = $this->history;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', $this->history);
 
         $this->controller = new Links($this->container);
-
-        $mock = $this->createMock(Router::class);
-        $mock->expects($this->any())
-             ->method('pathFor')
-             ->willReturn('/api/v1/bookmarks/1');
-
-        // affect @property-read... seems to work
-        $this->controller->getCi()->router = $mock;
-
-        // Used by index_url().
-        $this->controller->getCi()['environment'] = [
-            'SERVER_NAME' => 'domain.tld',
-            'SERVER_PORT' => 80,
-            'SCRIPT_NAME' => '/',
-        ];
+        $this->routeParser = (new FakeRouteCollector())
+            ->addRoute('POST', '/api/v1/bookmarks/{id:[\d]+}', 'getLink')
+            ->getRouteParser();
     }
 
     /**
@@ -129,15 +127,15 @@ class PostLinkTest extends TestCase
      */
     public function testPostLinkMinimal()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'POST',
-        ]);
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
 
-        $request = Request::createFromEnvironment($env);
-
-        $response = $this->controller->postLink($request, new Response());
+        $response = $this->controller->postLink($request, new SlimResponse());
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('/api/v1/bookmarks/1', $response->getHeader('Location')[0]);
+        $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
         $this->assertEquals(43, $data['id']);
@@ -147,8 +145,9 @@ class PostLinkTest extends TestCase
         $this->assertEquals('', $data['description']);
         $this->assertEquals([], $data['tags']);
         $this->assertEquals(true, $data['private']);
+        $dt = new \DateTime('5 seconds ago');
         $this->assertTrue(
-            new \DateTime('5 seconds ago') < \DateTime::createFromFormat(\DateTime::ATOM, $data['created'])
+            $dt < \DateTime::createFromFormat(\DateTime::ATOM, $data['created'])
         );
         $this->assertEquals('', $data['updated']);
 
@@ -174,17 +173,17 @@ class PostLinkTest extends TestCase
             'created' => '2015-05-05T12:30:00+03:00',
             'updated' => '2016-06-05T14:32:10+03:00',
         ];
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'POST',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
 
-        $request = Request::createFromEnvironment($env);
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withServerParams(['SERVER_NAME' => 'website.tld', 'SERVER_PORT' => 80])
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new Response());
+        $response = $this->controller->postLink($request, new SlimResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('/api/v1/bookmarks/1', $response->getHeader('Location')[0]);
+        $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
         $this->assertEquals(43, $data['id']);
@@ -210,14 +209,14 @@ class PostLinkTest extends TestCase
             'tags' => ['one', 'two'],
             'private' => true,
         ];
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'POST',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
 
-        $request = Request::createFromEnvironment($env);
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new Response());
+        $response = $this->controller->postLink($request, new SlimResponse());
 
         $this->assertEquals(409, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
@@ -247,17 +246,16 @@ class PostLinkTest extends TestCase
         $link = [
             'tags' => 'one two',
         ];
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'POST',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
-
-        $request = Request::createFromEnvironment($env);
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '')
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new Response());
+        $response = $this->controller->postLink($request, new SlimResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('/api/v1/bookmarks/1', $response->getHeader('Location')[0]);
+        $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
         $this->assertEquals(['one', 'two'], $data['tags']);
@@ -271,17 +269,16 @@ class PostLinkTest extends TestCase
         $link = [
             'tags' => ['one two'],
         ];
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'POST',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
-
-        $request = Request::createFromEnvironment($env);
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', ''),
+        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
+        ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new Response());
+        $response = $this->controller->postLink($request, new SlimResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals('/api/v1/bookmarks/1', $response->getHeader('Location')[0]);
+        $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
         $this->assertEquals(['one', 'two'], $data['tags']);

@@ -2,17 +2,19 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 /**
  * Class GetTagsTest
@@ -80,10 +82,10 @@ class GetTagsTest extends \Shaarli\TestCase
             $mutex,
             true
         );
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = null;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', null);
 
         $this->controller = new Tags($this->container);
     }
@@ -102,12 +104,11 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = (new FakeRequest(
+            'GET'
+        ));
 
-        $response = $this->controller->getTags($request, new Response());
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -135,12 +136,11 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetLimit()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=1&limit=1'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'offset=1&limit=1')
+        ));
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -155,12 +155,11 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsLimitAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'limit=all'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'limit=all')
+        ));
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -172,12 +171,11 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetTooHigh()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=100'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'offset=100')
+        ));
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEmpty(count($data));
@@ -189,12 +187,11 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsVisibilityPrivate()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'private');
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'visibility=private'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'visibility=private')
+        ));
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -209,14 +206,12 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsVisibilityPublic()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'public');
-        $env = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'QUERY_STRING' => 'visibility=public'
-            ]
-        );
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+
+        $request = (new FakeRequest(
+            'GET',
+            new Uri('', '', 80, '', 'visibility=public')
+        ));
+        $response = $this->controller->getTags($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals(count($tags), count($data));

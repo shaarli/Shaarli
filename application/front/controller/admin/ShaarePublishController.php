@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
 use Shaarli\Formatter\BookmarkFormatter;
 use Shaarli\Formatter\BookmarkMarkdownFormatter;
 use Shaarli\Render\TemplatePage;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class ShaarePublishController extends ShaarliAdminController
 {
@@ -31,10 +31,11 @@ class ShaarePublishController extends ShaarliAdminController
      */
     public function displayCreateForm(Request $request, Response $response): Response
     {
-        $url = cleanup_url($request->getParam('post'));
-        $link = $this->buildLinkDataFromUrl($request, $url);
+        $url = cleanup_url($request->getQueryParams()['post'] ?? null);
+        $link = $this->buildLinkDataFromUrl($request->getQueryParams(), $url);
+        $soureParam = $request->getQueryParams()['source'] ?? null;
 
-        return $this->displayForm($link, $link['linkIsNew'], $request, $response);
+        return $this->displayForm($link, $link['linkIsNew'], $soureParam, $request, $response);
     }
 
     /**
@@ -42,16 +43,21 @@ class ShaarePublishController extends ShaarliAdminController
      */
     public function displayCreateBatchForms(Request $request, Response $response): Response
     {
-        $urls = array_map('cleanup_url', explode(PHP_EOL, $request->getParam('urls')));
+        $urls = array_map('cleanup_url', explode(PHP_EOL, $request->getParsedBody()['urls'] ?? null));
 
         $links = [];
         foreach ($urls as $url) {
             if (empty($url)) {
                 continue;
             }
-            $link = $this->buildLinkDataFromUrl($request, $url);
-            $data = $this->buildFormData($link, $link['linkIsNew'], $request);
-            $data['token'] = $this->container->sessionManager->generateToken();
+            $link = $this->buildLinkDataFromUrl($request->getParsedBody(), $url);
+            $data = $this->buildFormData(
+                $link,
+                $link['linkIsNew'] ?? null,
+                $request->getParsedBody()['source'] ?? null,
+                $request
+            );
+            $data['token'] = $this->container->get('sessionManager')->generateToken();
             $data['source'] = 'batch';
 
             $this->executePageHooks('render_editlink', $data, TemplatePage::EDIT_LINK);
@@ -61,9 +67,9 @@ class ShaarePublishController extends ShaarliAdminController
 
         $this->assignView('links', $links);
         $this->assignView('batch_mode', true);
-        $this->assignView('async_metadata', $this->container->conf->get('general.enable_async_metadata', true));
+        $this->assignView('async_metadata', $this->container->get('conf')->get('general.enable_async_metadata', true));
 
-        return $response->write($this->render(TemplatePage::EDIT_LINK_BATCH));
+        return $this->respondWithTemplate($response, TemplatePage::EDIT_LINK_BATCH);
     }
 
     /**
@@ -76,7 +82,7 @@ class ShaarePublishController extends ShaarliAdminController
             if (false === ctype_digit($id)) {
                 throw new BookmarkNotFoundException();
             }
-            $bookmark = $this->container->bookmarkService->get((int) $id);  // Read database
+            $bookmark = $this->container->get('bookmarkService')->get((int) $id);  // Read database
         } catch (BookmarkNotFoundException $e) {
             $this->saveErrorMessage(sprintf(
                 t('Bookmark with identifier %s could not be found.'),
@@ -88,8 +94,9 @@ class ShaarePublishController extends ShaarliAdminController
 
         $formatter = $this->getFormatter('raw');
         $link = $formatter->format($bookmark);
+        $soureParam = $request->getParsedBody()['source'] ?? '';
 
-        return $this->displayForm($link, false, $request, $response);
+        return $this->displayForm($link, false, $soureParam, $request, $response);
     }
 
     /**
@@ -100,50 +107,53 @@ class ShaarePublishController extends ShaarliAdminController
         $this->checkToken($request);
 
         // lf_id should only be present if the link exists.
-        $id = $request->getParam('lf_id') !== null ? intval(escape($request->getParam('lf_id'))) : null;
-        if (null !== $id && true === $this->container->bookmarkService->exists($id)) {
+        $id = ($request->getParsedBody()['lf_id'] ?? null) !== null ?
+            intval(escape($request->getParsedBody()['lf_id'] ?? null)) : null;
+        if (null !== $id && true === $this->container->get('bookmarkService')->exists($id)) {
             // Edit
-            $bookmark = $this->container->bookmarkService->get($id);
+            $bookmark = $this->container->get('bookmarkService')->get($id);
         } else {
             // New link
             $bookmark = new Bookmark();
         }
 
-        $bookmark->setTitle($request->getParam('lf_title'));
-        $bookmark->setDescription($request->getParam('lf_description'));
-        $bookmark->setUrl($request->getParam('lf_url'), $this->container->conf->get('security.allowed_protocols', []));
-        $bookmark->setPrivate(filter_var($request->getParam('lf_private'), FILTER_VALIDATE_BOOLEAN));
+        $bookmark->setTitle($request->getParsedBody()['lf_title'] ?? null);
+        $bookmark->setDescription($request->getParsedBody()['lf_description'] ?? null);
+        $bookmark->setUrl($request->getParsedBody()['lf_url'] ?? null, $this->container->get('conf')
+            ->get('security.allowed_protocols', []));
+        $bookmark->setPrivate(filter_var($request->getParsedBody()['lf_private'] ?? null, FILTER_VALIDATE_BOOLEAN));
         $bookmark->setTagsString(
-            $request->getParam('lf_tags'),
-            $this->container->conf->get('general.tags_separator', ' ')
+            $request->getParsedBody()['lf_tags'] ?? null,
+            $this->container->get('conf')->get('general.tags_separator', ' ')
         );
 
         if (
-            $this->container->conf->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
-            && true !== $this->container->conf->get('general.enable_async_metadata', true)
+            $this->container->get('conf')->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
+            && true !== $this->container->get('conf')->get('general.enable_async_metadata', true)
             && $bookmark->shouldUpdateThumbnail()
         ) {
-            $bookmark->setThumbnail($this->container->thumbnailer->get($bookmark->getUrl()));
+            $bookmark->setThumbnail($this->container->get('thumbnailer')->get($bookmark->getUrl()));
         }
-        $this->container->bookmarkService->addOrSet($bookmark, false);
+        $this->container->get('bookmarkService')->addOrSet($bookmark, false);
 
         // To preserve backward compatibility with 3rd parties, plugins still use arrays
         $formatter = $this->getFormatter('raw');
         $data = $formatter->format($bookmark);
         $this->executePageHooks('save_link', $data);
 
-        $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
-        $this->container->bookmarkService->set($bookmark);
+        $bookmark->fromArray($data, $this->container->get('conf')->get('general.tags_separator', ' '));
+        $this->container->get('bookmarkService')->set($bookmark);
 
         // If we are called from the bookmarklet, we must close the popup:
-        if ($request->getParam('source') === 'bookmarklet') {
-            return $response->write('<script>self.close();</script>');
-        } elseif ($request->getParam('source') === 'batch') {
+        if (($request->getParsedBody()['source'] ?? null) === 'bookmarklet') {
+            return $this->respondWithBody($response, '<script>self.close();</script>');
+        } elseif (($request->getParsedBody()['source'] ?? null) === 'batch') {
             return $response;
         }
 
-        if (!empty($request->getParam('returnurl'))) {
-            $this->container->environment['HTTP_REFERER'] = $request->getParam('returnurl');
+        $referer = null;
+        if (!empty($request->getParsedBody()['returnurl'] ?? null)) {
+            $referer = $request->getParsedBody()['returnurl'] ?? null;
         }
 
         return $this->redirectFromReferer(
@@ -151,7 +161,8 @@ class ShaarePublishController extends ShaarliAdminController
             $response,
             ['/admin/add-shaare', '/admin/shaare'],
             ['addlink', 'post', 'edit_link'],
-            $bookmark->getShortUrl()
+            $bookmark->getShortUrl(),
+            $referer
         );
     }
 
@@ -160,9 +171,14 @@ class ShaarePublishController extends ShaarliAdminController
      *
      * @param array $link data used in template, either from parameters or from the data store
      */
-    protected function displayForm(array $link, bool $isNew, Request $request, Response $response): Response
-    {
-        $data = $this->buildFormData($link, $isNew, $request);
+    protected function displayForm(
+        array $link,
+        bool $isNew,
+        ?string $sourceParam,
+        Request $request,
+        Response $response
+    ): Response {
+        $data = $this->buildFormData($link, $isNew, $sourceParam, $request);
 
         $this->executePageHooks('render_editlink', $data, TemplatePage::EDIT_LINK);
 
@@ -173,39 +189,39 @@ class ShaarePublishController extends ShaarliAdminController
         $editLabel = false === $isNew ? t('Edit') . ' ' : '';
         $this->assignView(
             'pagetitle',
-            $editLabel . t('Shaare') . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            $editLabel . t('Shaare') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render(TemplatePage::EDIT_LINK));
+        return $this->respondWithTemplate($response, TemplatePage::EDIT_LINK);
     }
 
-    protected function buildLinkDataFromUrl(Request $request, string $url): array
+    protected function buildLinkDataFromUrl(array $params, string $url): array
     {
         // Check if URL is not already in database (in this case, we will edit the existing link)
-        $bookmark = $this->container->bookmarkService->findByUrl($url);
+        $bookmark = $this->container->get('bookmarkService')->findByUrl($url);
         if (null === $bookmark) {
             // Get shaare data if it was provided in URL (e.g.: by the bookmarklet).
-            $title = $request->getParam('title');
-            $description = $request->getParam('description');
-            $tags = $request->getParam('tags');
-            if ($request->getParam('private') !== null) {
-                $private = filter_var($request->getParam('private'), FILTER_VALIDATE_BOOLEAN);
+            $title = $params['title'] ?? null;
+            $description = $params['description'] ?? null;
+            $tags = $params['tags'] ?? null;
+            if (($params['private'] ?? null) !== null) {
+                $private = filter_var($params['private'], FILTER_VALIDATE_BOOLEAN);
             } else {
-                $private = $this->container->conf->get('privacy.default_private_links', false);
+                $private = $this->container->get('conf')->get('privacy.default_private_links', false);
             }
 
             // If this is an HTTP(S) link, we try go get the page to extract
             // the title (otherwise we will to straight to the edit form.)
             if (
-                true !== $this->container->conf->get('general.enable_async_metadata', true)
+                true !== $this->container->get('conf')->get('general.enable_async_metadata', true)
                 && empty($title)
                 && strpos(get_url_scheme($url) ?: '', 'http') !== false
             ) {
-                $metadata = $this->container->metadataRetriever->retrieve($url);
+                $metadata = $this->container->get('metadataRetriever')->retrieve($url);
             }
 
             if (empty($url)) {
-                $metadata['title'] = $this->container->conf->get('general.default_note_title', t('Note: '));
+                $metadata['title'] = $this->container->get('conf')->get('general.default_note_title', t('Note: '));
             }
 
             return [
@@ -225,22 +241,22 @@ class ShaarePublishController extends ShaarliAdminController
         return $link;
     }
 
-    protected function buildFormData(array $link, bool $isNew, Request $request): array
+    protected function buildFormData(array $link, bool $isNew, ?string $sourceParam, Request $request): array
     {
         $link['tags'] = $link['tags'] !== null && strlen($link['tags']) > 0
-            ? $link['tags'] . $this->container->conf->get('general.tags_separator', ' ')
+            ? $link['tags'] . $this->container->get('conf')->get('general.tags_separator', ' ')
             : $link['tags']
         ;
 
         return escape([
             'link' => $link,
             'link_is_new' => $isNew,
-            'http_referer' => $this->container->environment['HTTP_REFERER'] ?? '',
-            'source' => $request->getParam('source') ?? '',
+            'http_referer' => $request->getServerParams()['HTTP_REFERER'] ?? '',
+            'source' => $sourceParam ?? '',
             'tags' => $this->getTags(),
-            'default_private_links' => $this->container->conf->get('privacy.default_private_links', false),
-            'async_metadata' => $this->container->conf->get('general.enable_async_metadata', true),
-            'retrieve_description' => $this->container->conf->get('general.retrieve_description', false),
+            'default_private_links' => $this->container->get('conf')->get('privacy.default_private_links', false),
+            'async_metadata' => $this->container->get('conf')->get('general.enable_async_metadata', true),
+            'retrieve_description' => $this->container->get('conf')->get('general.retrieve_description', false),
         ]);
     }
 
@@ -250,7 +266,7 @@ class ShaarePublishController extends ShaarliAdminController
     protected function getFormatter(string $type): BookmarkFormatter
     {
         if (!array_key_exists($type, $this->formatters) || $this->formatters[$type] === null) {
-            $this->formatters[$type] = $this->container->formatterFactory->getFormatter($type);
+            $this->formatters[$type] = $this->container->get('formatterFactory')->getFormatter($type);
         }
 
         return $this->formatters[$type];
@@ -262,9 +278,9 @@ class ShaarePublishController extends ShaarliAdminController
     protected function getTags(): array
     {
         if ($this->tags === null) {
-            $this->tags = $this->container->bookmarkService->bookmarksCountPerTag();
+            $this->tags = $this->container->get('bookmarkService')->bookmarksCountPerTag();
 
-            if ($this->container->conf->get('formatter') === 'markdown') {
+            if ($this->container->get('conf')->get('formatter') === 'markdown') {
                 $this->tags[BookmarkMarkdownFormatter::NO_MD_TAG] = 1;
             }
         }

@@ -2,17 +2,18 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Response as SlimResponse;
 
 /**
  * Class InfoTest
@@ -48,6 +49,11 @@ class InfoTest extends TestCase
      */
     protected $controller;
 
+        /**
+     * @var PluginManager plugin Manager
+     */
+    protected $pluginManager;
+
     /**
      * Before every test, instantiate a new Api with its config, plugins and bookmarks.
      */
@@ -61,16 +67,16 @@ class InfoTest extends TestCase
         $this->pluginManager = new PluginManager($this->conf);
         $history = new History('sandbox/history.php');
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = new BookmarkFileService(
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', new BookmarkFileService(
             $this->conf,
             $this->pluginManager,
             $history,
             $mutex,
             true
-        );
-        $this->container['history'] = null;
+        ));
+        $this->container->set('history', null);
 
         $this->controller = new Info($this->container);
     }
@@ -88,12 +94,11 @@ class InfoTest extends TestCase
      */
     public function testGetInfo()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = new FakeRequest(
+            'GET'
+        );
 
-        $response = $this->controller->getInfo($request, new Response());
+        $response = $this->controller->getInfo($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -116,7 +121,7 @@ class InfoTest extends TestCase
         $this->conf->set('general.enabled_plugins', $enabledPlugins);
         $this->conf->set('privacy.default_private_links', $defaultPrivateLinks);
 
-        $response = $this->controller->getInfo($request, new Response());
+        $response = $this->controller->getInfo($request, new SlimResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 

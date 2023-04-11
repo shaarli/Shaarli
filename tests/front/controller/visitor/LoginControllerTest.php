@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\LoginBannedException;
 use Shaarli\Front\Exception\WrongTokenException;
@@ -11,8 +12,9 @@ use Shaarli\Render\TemplatePage;
 use Shaarli\Security\CookieManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class LoginControllerTest extends TestCase
 {
@@ -25,8 +27,8 @@ class LoginControllerTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->cookieManager = $this->createMock(CookieManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(true);
+        $this->container->set('cookieManager', $this->createMock(CookieManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(true);
 
         $this->controller = new LoginController($this->container);
     }
@@ -36,18 +38,16 @@ class LoginControllerTest extends TestCase
      */
     public function testValidControllerInvoke(): void
     {
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) {
-                return 'returnurl' === $key ? '> referer' : null;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(
+                ['returnurl' => '> referer']
+            ))
+        ));
+        $response = new SlimResponse();
 
         $assignedVariables = [];
-        $this->container->pageBuilder
+        $this->container->get('pageBuilder')
             ->method('assign')
             ->willReturnCallback(function ($key, $value) use (&$assignedVariables) {
                 $assignedVariables[$key] = $value;
@@ -56,7 +56,7 @@ class LoginControllerTest extends TestCase
             })
         ;
 
-        $this->container->loginManager->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->method('canLogin')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 
@@ -74,24 +74,18 @@ class LoginControllerTest extends TestCase
      */
     public function testValidControllerInvokeWithUserName(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => '> referer'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key, $default) {
-                if ('login' === $key) {
-                    return 'myUser>';
-                }
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery(http_build_query(
+                ['login' => 'myUser>']
+            ))
+        ))->withServerParams(['HTTP_REFERER' => '> referer']);
 
-                return $default;
-            })
-        ;
-        $response = new Response();
+        $response = new SlimResponse();
 
         $assignedVariables = [];
-        $this->container->pageBuilder
+        $this->container->get('pageBuilder')
             ->method('assign')
             ->willReturnCallback(function ($key, $value) use (&$assignedVariables) {
                 $assignedVariables[$key] = $value;
@@ -100,7 +94,7 @@ class LoginControllerTest extends TestCase
             })
         ;
 
-        $this->container->loginManager->expects(static::once())->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('canLogin')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 
@@ -119,10 +113,10 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerWhileLoggedIn(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->loginManager->expects(static::once())->method('isLoggedIn')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('isLoggedIn')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 
@@ -136,8 +130,8 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerOpenShaarli(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $conf = $this->createMock(ConfigManager::class);
         $conf->method('get')->willReturnCallback(function (string $parameter, $default) {
@@ -146,7 +140,7 @@ class LoginControllerTest extends TestCase
             }
             return $default;
         });
-        $this->container->conf = $conf;
+        $this->container->set('conf', $conf);
 
         $result = $this->controller->index($request, $response);
 
@@ -160,11 +154,11 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerWhileBanned(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(false);
-        $this->container->loginManager->method('canLogin')->willReturn(false);
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(false);
+        $this->container->get('loginManager')->method('canLogin')->willReturn(false);
 
         $this->expectException(LoginBannedException::class);
 
@@ -180,35 +174,36 @@ class LoginControllerTest extends TestCase
             'login' => 'bob',
             'password' => 'pass',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters) {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest())->withParsedBody($parameters)
+            ->withServerParams([
+                'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                'REQUEST_URI' => '/subfolder/daily-rss',
+                'REMOTE_ADDR' => '1.2.3.4',
+                'SCRIPT_NAME' => '/subfolder/index.php',
+            ]);
 
-        $this->container->loginManager->method('canLogin')->willReturn(true);
-        $this->container->loginManager->expects(static::once())->method('handleSuccessfulLogin');
-        $this->container->loginManager
+        $response = new SlimResponse();
+
+        $this->container->get('loginManager')->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')
             ->expects(static::once())
             ->method('checkCredentials')
             ->with('1.2.3.4', 'bob', 'pass')
             ->willReturn(true)
         ;
-        $this->container->loginManager->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
+        $this->container->get('loginManager')->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
 
-        $this->container->sessionManager->expects(static::never())->method('extendSession');
-        $this->container->sessionManager->expects(static::once())->method('destroy');
-        $this->container->sessionManager
+        $this->container->get('sessionManager')->expects(static::never())->method('extendSession');
+        $this->container->get('sessionManager')->expects(static::once())->method('destroy');
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('cookieParameters')
             ->with(0, '/subfolder/', 'shaarli')
         ;
-        $this->container->sessionManager->expects(static::once())->method('start');
-        $this->container->sessionManager->expects(static::once())->method('regenerateId')->with(true);
+        $this->container->get('sessionManager')->expects(static::once())->method('start');
+        $this->container->get('sessionManager')->expects(static::once())->method('regenerateId')->with(true);
 
         $result = $this->controller->login($request, $response);
 
@@ -224,20 +219,20 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'returnurl' => 'http://shaarli/subfolder/admin/shaare',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters) {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest())->withParsedBody($parameters)
+            ->withServerParams([
+                'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                'REQUEST_URI' => '/subfolder/daily-rss',
+                'REMOTE_ADDR' => '1.2.3.4',
+                'SCRIPT_NAME' => '/subfolder/index.php',
+            ]);
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('canLogin')->willReturn(true);
-        $this->container->loginManager->expects(static::once())->method('handleSuccessfulLogin');
-        $this->container->loginManager->expects(static::once())->method('checkCredentials')->willReturn(true);
-        $this->container->loginManager->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
+        $this->container->get('loginManager')->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')->expects(static::once())->method('checkCredentials')->willReturn(true);
+        $this->container->get('loginManager')->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
 
         $result = $this->controller->login($request, $response);
 
@@ -253,39 +248,39 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'longlastingsession' => true,
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters) {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest())->withParsedBody($parameters)
+            ->withServerParams([
+                'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                'REQUEST_URI' => '/subfolder/daily-rss',
+                'REMOTE_ADDR' => '1.2.3.4',
+                'SCRIPT_NAME' => '/subfolder/index.php',
+            ]);
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('canLogin')->willReturn(true);
-        $this->container->loginManager->expects(static::once())->method('handleSuccessfulLogin');
-        $this->container->loginManager->expects(static::once())->method('checkCredentials')->willReturn(true);
-        $this->container->loginManager->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
+        $this->container->get('loginManager')->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')->expects(static::once())->method('checkCredentials')->willReturn(true);
+        $this->container->get('loginManager')->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
 
-        $this->container->sessionManager->expects(static::once())->method('destroy');
-        $this->container->sessionManager
+        $this->container->get('sessionManager')->expects(static::once())->method('destroy');
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('cookieParameters')
             ->with(42, '/subfolder/', 'shaarli')
         ;
-        $this->container->sessionManager->expects(static::once())->method('start');
-        $this->container->sessionManager->expects(static::once())->method('regenerateId')->with(true);
-        $this->container->sessionManager->expects(static::once())->method('extendSession')->willReturn(42);
+        $this->container->get('sessionManager')->expects(static::once())->method('start');
+        $this->container->get('sessionManager')->expects(static::once())->method('regenerateId')->with(true);
+        $this->container->get('sessionManager')->expects(static::once())->method('extendSession')->willReturn(42);
 
-        $this->container->cookieManager = $this->createMock(CookieManager::class);
-        $this->container->cookieManager
+        $this->container->set('cookieManager', $this->createMock(CookieManager::class));
+        $this->container->get('cookieManager')
             ->expects(static::once())
             ->method('setCookieParameter')
             ->willReturnCallback(function (string $name): CookieManager {
                 static::assertSame(CookieManager::STAY_SIGNED_IN, $name);
 
-                return $this->container->cookieManager;
+                return $this->container->get('cookieManager');
             })
         ;
 
@@ -303,21 +298,21 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'returnurl' => 'http://shaarli/subfolder/admin/shaare',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters) {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = (new FakeRequest())->withParsedBody($parameters)
+            ->withServerParams([
+                'SERVER_NAME' => 'shaarli',
+                'SERVER_PORT' => '80',
+                'REQUEST_URI' => '/subfolder/daily-rss',
+                'REMOTE_ADDR' => '1.2.3.4',
+                'SCRIPT_NAME' => '/subfolder/index.php',
+            ]);
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('canLogin')->willReturn(true);
-        $this->container->loginManager->expects(static::once())->method('handleFailedLogin');
-        $this->container->loginManager->expects(static::once())->method('checkCredentials')->willReturn(false);
+        $this->container->get('loginManager')->method('canLogin')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::once())->method('handleFailedLogin');
+        $this->container->get('loginManager')->expects(static::once())->method('checkCredentials')->willReturn(false);
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Wrong login/password.'])
@@ -334,11 +329,11 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginWrongToken(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
         $this->expectException(WrongTokenException::class);
 
@@ -350,12 +345,12 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginAlreadyLoggedIn(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->loginManager->expects(static::never())->method('handleSuccessfulLogin');
-        $this->container->loginManager->expects(static::never())->method('handleFailedLogin');
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('loginManager')->expects(static::never())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')->expects(static::never())->method('handleFailedLogin');
 
         $result = $this->controller->login($request, $response);
 
@@ -368,16 +363,16 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginInOpenShaarli(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $value) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $value) {
             return 'security.open_shaarli' === $key ? true : $value;
         });
 
-        $this->container->loginManager->expects(static::never())->method('handleSuccessfulLogin');
-        $this->container->loginManager->expects(static::never())->method('handleFailedLogin');
+        $this->container->get('loginManager')->expects(static::never())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')->expects(static::never())->method('handleFailedLogin');
 
         $result = $this->controller->login($request, $response);
 
@@ -390,12 +385,12 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginWhileBanned(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->loginManager->method('canLogin')->willReturn(false);
-        $this->container->loginManager->expects(static::never())->method('handleSuccessfulLogin');
-        $this->container->loginManager->expects(static::never())->method('handleFailedLogin');
+        $this->container->get('loginManager')->method('canLogin')->willReturn(false);
+        $this->container->get('loginManager')->expects(static::never())->method('handleSuccessfulLogin');
+        $this->container->get('loginManager')->expects(static::never())->method('handleFailedLogin');
 
         $this->expectException(LoginBannedException::class);
 

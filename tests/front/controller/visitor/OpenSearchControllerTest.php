@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 class OpenSearchControllerTest extends TestCase
 {
@@ -24,8 +24,12 @@ class OpenSearchControllerTest extends TestCase
 
     public function testOpenSearchController(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => '80',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+        ]);
+        $response = new SlimResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];

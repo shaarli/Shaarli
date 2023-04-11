@@ -9,8 +9,8 @@ use Shaarli\Front\Controller\Admin\FrontAdminControllerMockHelper;
 use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 /**
  * Test GET /admin/shaare/private/{hash}
@@ -26,7 +26,7 @@ class SharePrivateTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareManageController($this->container);
     }
 
@@ -36,8 +36,8 @@ class SharePrivateTest extends TestCase
     public function testSharePrivateWithNewPrivateBookmark(): void
     {
         $hash = 'abcdcef';
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -46,13 +46,13 @@ class SharePrivateTest extends TestCase
             ->setPrivate(true)
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash)
             ->willReturn($bookmark)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('set')
             ->with($bookmark, true)
@@ -76,8 +76,8 @@ class SharePrivateTest extends TestCase
     {
         $hash = 'abcdcef';
         $existingKey = 'this is a private key';
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -87,13 +87,13 @@ class SharePrivateTest extends TestCase
             ->setAdditionalContentEntry('private_key', $existingKey)
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash)
             ->willReturn($bookmark)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::never())
             ->method('set')
         ;
@@ -110,8 +110,8 @@ class SharePrivateTest extends TestCase
     public function testSharePrivateWithPublicBookmark(): void
     {
         $hash = 'abcdcef';
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -120,13 +120,13 @@ class SharePrivateTest extends TestCase
             ->setPrivate(false)
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash)
             ->willReturn($bookmark)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::never())
             ->method('set')
         ;

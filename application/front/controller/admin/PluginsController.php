@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Admin;
 
 use Exception;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class PluginsController
@@ -21,13 +21,14 @@ class PluginsController extends ShaarliAdminController
      */
     public function index(Request $request, Response $response): Response
     {
-        $pluginMeta = $this->container->pluginManager->getPluginsMeta();
+        $pluginMeta = $this->container->get('pluginManager')->getPluginsMeta();
 
         // Split plugins into 2 arrays: ordered enabled plugins and disabled.
         $enabledPlugins = array_filter($pluginMeta, function ($v) {
             return ($v['order'] ?? false) !== false;
         });
-        $enabledPlugins = load_plugin_parameter_values($enabledPlugins, $this->container->conf->get('plugins', []));
+        $enabledPlugins = load_plugin_parameter_values($enabledPlugins, $this->container->get('conf')
+            ->get('plugins', []));
         uasort(
             $enabledPlugins,
             function ($a, $b) {
@@ -42,10 +43,10 @@ class PluginsController extends ShaarliAdminController
         $this->assignView('disabledPlugins', $disabledPlugins);
         $this->assignView(
             'pagetitle',
-            t('Plugin Administration') . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            t('Plugin Administration') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render(TemplatePage::PLUGINS_ADMIN));
+        return $this->respondWithTemplate($response, TemplatePage::PLUGINS_ADMIN);
     }
 
     /**
@@ -56,7 +57,7 @@ class PluginsController extends ShaarliAdminController
         $this->checkToken($request);
 
         try {
-            $parameters = $request->getParams() ?? [];
+            $parameters = $request->getParsedBody() ?? [];
 
             $this->executePageHooks('save_plugin_parameters', $parameters);
 
@@ -64,14 +65,14 @@ class PluginsController extends ShaarliAdminController
                 unset($parameters['parameters_form']);
                 unset($parameters['token']);
                 foreach ($parameters as $param => $value) {
-                    $this->container->conf->set('plugins.' . $param, escape($value));
+                    $this->container->get('conf')->set('plugins.' . $param, escape($value));
                 }
             } else {
-                $this->container->conf->set('general.enabled_plugins', save_plugin_config($parameters));
+                $this->container->get('conf')->set('general.enabled_plugins', save_plugin_config($parameters));
             }
 
-            $this->container->conf->write($this->container->loginManager->isLoggedIn());
-            $this->container->history->updateSettings();
+            $this->container->get('conf')->write($this->container->get('loginManager')->isLoggedIn());
+            $this->container->get('history')->updateSettings();
 
             $this->saveSuccessMessage(t('Setting successfully saved.'));
         } catch (Exception $e) {

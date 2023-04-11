@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Shaarli\Container;
 
+use DI\Container;
 use malkusch\lock\mutex\FlockMutex;
 use Psr\Log\LoggerInterface;
 use Shaarli\Bookmark\BookmarkFileService;
@@ -75,101 +76,95 @@ class ContainerBuilder
         $this->logger = $logger;
     }
 
-    public function build(): ShaarliContainer
+    public function build(): Container
     {
-        $container = new ShaarliContainer();
+        $container = new Container();
 
-        $container['conf'] = $this->conf;
-        $container['sessionManager'] = $this->session;
-        $container['cookieManager'] = $this->cookieManager;
-        $container['loginManager'] = $this->login;
-        $container['pluginManager'] = $this->pluginManager;
-        $container['logger'] = $this->logger;
-        $container['basePath'] = $this->basePath;
+        $container->set('conf', $this->conf);
+        $container->set('sessionManager', $this->session);
+        $container->set('cookieManager', $this->cookieManager);
+        $container->set('loginManager', $this->login);
+        $container->set('pluginManager', $this->pluginManager);
+        $container->set('logger', $this->logger);
+        $container->set('basePath', $this->basePath);
 
 
-        $container['history'] = function (ShaarliContainer $container): History {
-            return new History($container->conf->get('resource.history'));
-        };
+        $container->set('history', function (Container $container): History {
+            return new History($container->get('conf')->get('resource.history'));
+        });
 
-        $container['bookmarkService'] = function (ShaarliContainer $container): BookmarkServiceInterface {
+        $container->set('bookmarkService', function (Container $container): BookmarkServiceInterface {
             return new BookmarkFileService(
-                $container->conf,
-                $container->pluginManager,
-                $container->history,
+                $container->get('conf'),
+                $container->get('pluginManager'),
+                $container->get('history'),
                 new FlockMutex(fopen(SHAARLI_MUTEX_FILE, 'r'), 2),
-                $container->loginManager->isLoggedIn()
+                $container->get('loginManager')->isLoggedIn()
             );
-        };
+        });
 
-        $container['metadataRetriever'] = function (ShaarliContainer $container): MetadataRetriever {
-            return new MetadataRetriever($container->conf, $container->httpAccess);
-        };
+        $container->set('metadataRetriever', function (Container $container): MetadataRetriever {
+            return new MetadataRetriever($container->get('conf'), $container->get('httpAccess'));
+        });
 
-        $container['pageBuilder'] = function (ShaarliContainer $container): PageBuilder {
+        $container->set('pageBuilder', function (Container $container): PageBuilder {
+            $conf = $container->get('conf');
             return new PageBuilder(
-                $container->conf,
-                $container->sessionManager->getSession(),
-                $container->logger,
-                $container->bookmarkService,
-                $container->sessionManager->generateToken(),
-                $container->loginManager->isLoggedIn()
+                $conf,
+                $container->get('sessionManager')->getSession(),
+                $container->get('logger'),
+                $container->get('bookmarkService'),
+                $container->get('sessionManager')->generateToken(),
+                $container->get('loginManager')->isLoggedIn()
             );
-        };
+        });
 
-        $container['formatterFactory'] = function (ShaarliContainer $container): FormatterFactory {
+        $container->set('formatterFactory', function (Container $container): FormatterFactory {
             return new FormatterFactory(
-                $container->conf,
-                $container->loginManager->isLoggedIn()
+                $container->get('conf'),
+                $container->get('loginManager')->isLoggedIn()
             );
-        };
+        });
 
-        $container['pageCacheManager'] = function (ShaarliContainer $container): PageCacheManager {
+        $container->set('pageCacheManager', function (Container $container): PageCacheManager {
             return new PageCacheManager(
-                $container->conf->get('resource.page_cache'),
-                $container->loginManager->isLoggedIn()
+                $container->get('conf')->get('resource.page_cache'),
+                $container->get('loginManager')->isLoggedIn()
             );
-        };
+        });
 
-        $container['feedBuilder'] = function (ShaarliContainer $container): FeedBuilder {
+        $container->set('feedBuilder', function (Container $container): FeedBuilder {
             return new FeedBuilder(
-                $container->bookmarkService,
-                $container->formatterFactory->getFormatter(),
-                $container->environment,
-                $container->loginManager->isLoggedIn()
+                $container->get('bookmarkService'),
+                $container->get('formatterFactory')->getFormatter(),
+                $container->get('loginManager')->isLoggedIn()
             );
-        };
+        });
 
-        $container['thumbnailer'] = function (ShaarliContainer $container): Thumbnailer {
-            return new Thumbnailer($container->conf);
-        };
+        $container->set('thumbnailer', function (Container $container): Thumbnailer {
+            return new Thumbnailer($container->get('conf'));
+        });
 
-        $container['httpAccess'] = function (): HttpAccess {
+        $container->set('httpAccess', function (): HttpAccess {
             return new HttpAccess();
-        };
+        });
 
-        $container['netscapeBookmarkUtils'] = function (ShaarliContainer $container): NetscapeBookmarkUtils {
-            return new NetscapeBookmarkUtils($container->bookmarkService, $container->conf, $container->history);
-        };
-
-        $container['updater'] = function (ShaarliContainer $container): Updater {
-            return new Updater(
-                UpdaterUtils::readUpdatesFile($container->conf->get('resource.updates')),
-                $container->bookmarkService,
-                $container->conf,
-                $container->loginManager->isLoggedIn()
+        $container->set('netscapeBookmarkUtils', function (Container $container): NetscapeBookmarkUtils {
+            return new NetscapeBookmarkUtils(
+                $container->get('bookmarkService'),
+                $container->get('conf'),
+                $container->get('history')
             );
-        };
+        });
 
-        $container['notFoundHandler'] = function (ShaarliContainer $container): ErrorNotFoundController {
-            return new ErrorNotFoundController($container);
-        };
-        $container['errorHandler'] = function (ShaarliContainer $container): ErrorController {
-            return new ErrorController($container);
-        };
-        $container['phpErrorHandler'] = function (ShaarliContainer $container): ErrorController {
-            return new ErrorController($container);
-        };
+        $container->set('updater', function (Container $container): Updater {
+            return new Updater(
+                UpdaterUtils::readUpdatesFile($container->get('conf')->get('resource.updates')),
+                $container->get('bookmarkService'),
+                $container->get('conf'),
+                $container->get('loginManager')->isLoggedIn()
+            );
+        });
 
         return $container;
     }

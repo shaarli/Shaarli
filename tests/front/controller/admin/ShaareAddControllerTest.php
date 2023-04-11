@@ -8,8 +8,8 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Formatter\BookmarkMarkdownFormatter;
 use Shaarli\Http\HttpAccess;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
 
 class ShaareAddControllerTest extends TestCase
 {
@@ -22,7 +22,7 @@ class ShaareAddControllerTest extends TestCase
     {
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareAddController($this->container);
     }
 
@@ -34,23 +34,23 @@ class ShaareAddControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $expectedTags = [
             'tag1' => 32,
             'tag2' => 24,
             'tag3' => 1,
         ];
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->willReturn($expectedTags)
         ;
         $expectedTags = array_merge($expectedTags, [BookmarkMarkdownFormatter::NO_MD_TAG => 1]);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             return $key === 'formatter' ? 'markdown' : $default;
         });
 
@@ -73,15 +73,15 @@ class ShaareAddControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $expectedTags = [
             'tag1' => 32,
             'tag2' => 24,
             'tag3' => 1,
         ];
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->willReturn($expectedTags)

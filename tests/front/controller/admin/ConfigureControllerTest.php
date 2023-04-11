@@ -8,9 +8,10 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 class ConfigureControllerTest extends TestCase
 {
@@ -34,11 +35,11 @@ class ConfigureControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key) {
             return $key;
         });
 
@@ -113,21 +114,15 @@ class ConfigureControllerTest extends TestCase
             'thumbnails.mode' => $parameters['enableThumbnails'],
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')->willReturnCallback(function (string $key) use ($parameters) {
-                if (false === array_key_exists($key, $parameters)) {
-                    static::fail('unknown key: ' . $key);
-                }
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '', 80, '')
+        ))->withParsedBody($parameters);
 
-                return $parameters[$key];
-            });
+        $response = new SlimResponse();
 
-        $response = new Response();
-
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->expects(static::atLeastOnce())
             ->method('set')
             ->willReturnCallback(function (string $key, $value) use ($parametersConfigMapping): void {
@@ -153,14 +148,14 @@ class ConfigureControllerTest extends TestCase
      */
     public function testSaveNewConfigWrongToken(): void
     {
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $this->container->conf->expects(static::never())->method('set');
-        $this->container->conf->expects(static::never())->method('write');
+        $this->container->get('conf')->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = new FakeRequest();
+        $response = new SlimResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -175,18 +170,12 @@ class ConfigureControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')->willReturnCallback(function (string $key) {
-                if ('enableThumbnails' === $key) {
-                    return Thumbnailer::MODE_ALL;
-                }
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '', 80, '')
+        ))->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
 
-                return $key;
-            })
-        ;
-        $response = new Response();
+        $response = new SlimResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -211,21 +200,14 @@ class ConfigureControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')->willReturnCallback(function (string $key) {
-                if ('enableThumbnails' === $key) {
-                    return Thumbnailer::MODE_ALL;
-                }
+        $request = (new FakeRequest(
+            'POST',
+            new Uri('', '', 80, '')
+        ))->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
+        $response = new SlimResponse();
 
-                return $key;
-            })
-        ;
-        $response = new Response();
-
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->expects(static::atLeastOnce())
             ->method('get')
             ->willReturnCallback(function (string $key): string {

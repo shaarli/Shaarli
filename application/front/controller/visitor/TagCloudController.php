@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Class TagCloud
@@ -47,16 +47,16 @@ class TagCloudController extends ShaarliVisitorController
      */
     protected function processRequest(string $type, Request $request, Response $response): Response
     {
-        $tagsSeparator = $this->container->conf->get('general.tags_separator', ' ');
-        if ($this->container->loginManager->isLoggedIn() === true) {
-            $visibility = $this->container->sessionManager->getSessionParameter('visibility');
+        $tagsSeparator = $this->container->get('conf')->get('general.tags_separator', ' ');
+        if ($this->container->get('loginManager')->isLoggedIn() === true) {
+            $visibility = $this->container->get('sessionManager')->getSessionParameter('visibility');
         }
 
-        $sort = $request->getQueryParam('sort');
-        $searchTags = $request->getQueryParam('searchtags');
+        $sort = $request->getQueryParams()['sort'] ?? null;
+        $searchTags = $request->getQueryParams()['searchtags'] ?? null;
         $filteringTags = $searchTags !== null ? explode($tagsSeparator, $searchTags) : [];
 
-        $tags = $this->container->bookmarkService->bookmarksCountPerTag($filteringTags, $visibility ?? null);
+        $tags = $this->container->get('bookmarkService')->bookmarksCountPerTag($filteringTags, $visibility ?? null);
 
         if (static::TYPE_CLOUD === $type || 'alpha' === $sort) {
             // TODO: the sorting should be handled by bookmarkService instead of the controller
@@ -87,10 +87,10 @@ class TagCloudController extends ShaarliVisitorController
         $searchTags = !empty($searchTags) ? trim(str_replace($tagsSeparator, ' ', $searchTags)) . ' - ' : '';
         $this->assignView(
             'pagetitle',
-            $searchTags . t('Tag ' . $type) . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            $searchTags . t('Tag ' . $type) . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render('tag.' . $type));
+        return $this->respondWithTemplate($response, 'tag.' . $type);
     }
 
     /**

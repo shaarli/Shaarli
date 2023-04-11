@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Exception\ShaarliFrontException;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Render\TemplatePage;
 
 /**
  * Controller used to render the error page, with a provided exception.
@@ -17,7 +18,7 @@ class ErrorController extends ShaarliVisitorController
     public function __invoke(Request $request, Response $response, \Throwable $throwable): Response
     {
         // Unknown error encountered
-        $this->container->pageBuilder->reset();
+        $this->container->get('pageBuilder')->reset();
 
         if ($throwable instanceof ShaarliFrontException) {
             // Functional error
@@ -26,7 +27,10 @@ class ErrorController extends ShaarliVisitorController
             $response = $response->withStatus($throwable->getCode());
         } else {
             // Internal error (any other Throwable)
-            if ($this->container->conf->get('dev.debug', false) || $this->container->loginManager->isLoggedIn()) {
+            if (
+                $this->container->get('conf')->get('dev.debug', false) ||
+                $this->container->get('loginManager')->isLoggedIn()
+            ) {
                 $this->assignView('message', t('Error: ') . $throwable->getMessage());
                 $this->assignView(
                     'text',
@@ -42,6 +46,6 @@ class ErrorController extends ShaarliVisitorController
             $response = $response->withStatus(500);
         }
 
-        return $response->write($this->render('error'));
+        return $this->respondWithTemplate($response, TemplatePage::ERROR);
     }
 }

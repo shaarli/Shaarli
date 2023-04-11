@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use DI\Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\BookmarkFilter;
-use Shaarli\Container\ShaarliContainer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ShaarliVisitorController
@@ -19,11 +19,11 @@ use Slim\Http\Response;
  */
 abstract class ShaarliVisitorController
 {
-    /** @var ShaarliContainer */
+    /** @var Container */
     protected $container;
 
-    /** @param ShaarliContainer $container Slim container (extended for attribute completion). */
-    public function __construct(ShaarliContainer $container)
+    /** @param Container $container Slim container (extended for attribute completion). */
+    public function __construct(Container $container)
     {
         $this->container = $container;
     }
@@ -35,7 +35,7 @@ abstract class ShaarliVisitorController
      */
     protected function assignView(string $name, $value): self
     {
-        $this->container->pageBuilder->assign($name, $value);
+        $this->container->get('pageBuilder')->assign($name, $value);
 
         return $this;
     }
@@ -60,14 +60,15 @@ abstract class ShaarliVisitorController
         $this->assignView('_PAGE_', $template);
         $this->assignView('template', $template);
 
-        $this->assignView('linkcount', $this->container->bookmarkService->count(BookmarkFilter::$ALL));
-        $this->assignView('privateLinkcount', $this->container->bookmarkService->count(BookmarkFilter::$PRIVATE));
+        $this->assignView('linkcount', $this->container->get('bookmarkService')->count(BookmarkFilter::$ALL));
+        $this->assignView('privateLinkcount', $this->container->get('bookmarkService')
+            ->count(BookmarkFilter::$PRIVATE));
 
         $this->executeDefaultHooks($template);
 
-        $this->assignView('plugin_errors', $this->container->pluginManager->getErrors());
+        $this->assignView('plugin_errors', $this->container->get('pluginManager')->getErrors());
 
-        return $this->container->pageBuilder->render($template, $this->container->basePath);
+        return $this->container->get('pageBuilder')->render($template, $this->container->get('basePath'));
     }
 
     /**
@@ -86,7 +87,7 @@ abstract class ShaarliVisitorController
 
         foreach ($common_hooks as $name) {
             $pluginData = [];
-            $this->container->pluginManager->executeHooks(
+            $this->container->get('pluginManager')->executeHooks(
                 'render_' . $name,
                 $pluginData,
                 $parameters
@@ -97,7 +98,7 @@ abstract class ShaarliVisitorController
 
     protected function executePageHooks(string $hook, array &$data, string $template = null): void
     {
-        $this->container->pluginManager->executeHooks(
+        $this->container->get('pluginManager')->executeHooks(
             $hook,
             $data,
             $this->buildPluginParameters($template)
@@ -108,10 +109,10 @@ abstract class ShaarliVisitorController
     {
         return [
             'target' => $template,
-            'loggedin' => $this->container->loginManager->isLoggedIn(),
-            'basePath' => $this->container->basePath,
-            'rootPath' => preg_replace('#/index\.php$#', '', $this->container->basePath),
-            'bookmarkService' => $this->container->bookmarkService
+            'loggedin' => $this->container->get('loginManager')->isLoggedIn(),
+            'basePath' => $this->container->get('basePath'),
+            'rootPath' => preg_replace('#/index\.php$#', '', $this->container->get('basePath')),
+            'bookmarkService' => $this->container->get('bookmarkService')
         ];
     }
 
@@ -123,9 +124,12 @@ abstract class ShaarliVisitorController
      *
      * @return Response updated
      */
-    protected function redirect(Response $response, string $path): Response
+    protected function redirect(Response $response, string $path, bool $addBasePath = true): Response
     {
-        return $response->withRedirect($this->container->basePath . $path);
+        $basePath = $addBasePath ? $this->container->get('basePath') : '';
+        return $response
+            ->withHeader('Location', $basePath . $path)
+            ->withStatus(302);
     }
 
     /**
@@ -140,19 +144,20 @@ abstract class ShaarliVisitorController
         Response $response,
         array $loopTerms = [],
         array $clearParams = [],
-        string $anchor = null
+        string $anchor = null,
+        string $referer = null
     ): Response {
-        $defaultPath = $this->container->basePath . '/';
-        $referer = $this->container->environment['HTTP_REFERER'] ?? null;
+        $defaultPath = $this->container->get('basePath') . '/';
+        $referer = $referer ?? $request->getServerParams()['HTTP_REFERER'] ?? null;
 
         if (null !== $referer) {
             $currentUrl = parse_url($referer);
             // If the referer is not related to Shaarli instance, redirect to default
             if (
                 isset($currentUrl['host'])
-                && strpos(index_url($this->container->environment), $currentUrl['host']) === false
+                && strpos(index_url($request->getServerParams() ?? null), $currentUrl['host']) === false
             ) {
-                return $response->withRedirect($defaultPath);
+                return $this->redirect($response, $defaultPath, false);
             }
 
             parse_str($currentUrl['query'] ?? '', $params);
@@ -181,6 +186,46 @@ abstract class ShaarliVisitorController
         $queryString = count($params) > 0 ? '?' . http_build_query($params) : '';
         $anchor = $anchor ? '#' . $anchor : '';
 
-        return $response->withRedirect($path . $queryString . $anchor);
+        return $this->redirect($response, $path . $queryString . $anchor, false);
+    }
+
+    /**
+     * Simple helper, which writes data as JSON to the body
+     *
+     * @param Response $response
+     * @param mixed $data
+     * @param int $jsonStyle
+     * @return Response
+     */
+    protected function respondWithJson(Response $response, mixed $data, int $jsonStyle = 0): Response
+    {
+        $response->getBody()->write(json_encode($data, $jsonStyle));
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Simple helper, which writes data to the body
+     *
+     * @param Response $response
+     * @param string $data
+     * @return Response
+     */
+    protected function respondWithBody(Response $response, string $data): Response
+    {
+        $response->getBody()->write($data);
+        return $response;
+    }
+
+    /**
+     * Simple helper, which uses a template
+     *
+     * @param Response $response
+     * @param string $template
+     * @return Response
+     */
+    protected function respondWithTemplate(Response $response, string $template): Response
+    {
+        $response->getBody()->write($this->render($template));
+        return $response;
     }
 }

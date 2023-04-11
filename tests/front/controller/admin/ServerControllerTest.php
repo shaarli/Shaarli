@@ -7,8 +7,9 @@ namespace Shaarli\Front\Controller\Admin;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Uri;
 
 /**
  * Test Server administration controller.
@@ -51,8 +52,12 @@ class ServerControllerTest extends TestCase
      */
     public function testIndex(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = (new FakeRequest())->withServerParams([
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'REMOTE_ADDR' => '1.2.3.4',
+        ]);
+        $response = new SlimResponse();
 
        // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -88,8 +93,8 @@ class ServerControllerTest extends TestCase
      */
     public function testClearMainCache(): void
     {
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ($key === 'resource.page_cache') {
                 return 'sandbox/pagecache';
             } elseif ($key === 'resource.raintpl_tmp') {
@@ -101,15 +106,17 @@ class ServerControllerTest extends TestCase
             }
         });
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, ['Shaarli\'s cache folder has been cleared!'])
         ;
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->with('type')->willReturn('main');
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery('type=main')
+        ));
+        $response = new SlimResponse();
 
         $result = $this->controller->clearCache($request, $response);
 
@@ -134,8 +141,8 @@ class ServerControllerTest extends TestCase
      */
     public function testClearThumbnailsCache(): void
     {
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ($key === 'resource.page_cache') {
                 return 'sandbox/pagecache';
             } elseif ($key === 'resource.raintpl_tmp') {
@@ -147,7 +154,7 @@ class ServerControllerTest extends TestCase
             }
         });
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->willReturnCallback(function (string $key, array $value): SessionManager {
@@ -155,13 +162,15 @@ class ServerControllerTest extends TestCase
                 static::assertCount(1, $value);
                 static::assertStringStartsWith('Thumbnails cache has been cleared.', $value[0]);
 
-                return $this->container->sessionManager;
+                return $this->container->get('sessionManager');
             });
         ;
 
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->with('type')->willReturn('thumbnails');
-        $response = new Response();
+        $request = (new FakeRequest(
+            'GET',
+            (new Uri('', ''))->withQuery('type=thumbnails')
+        ));
+        $response = new SlimResponse();
 
         $result = $this->controller->clearCache($request, $response);
 

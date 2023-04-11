@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Controller\Visitor\ShaarliVisitorController;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
-use Slim\Http\Request;
 
 /**
  * Class ShaarliAdminController
@@ -25,7 +25,8 @@ abstract class ShaarliAdminController extends ShaarliVisitorController
      */
     protected function checkToken(Request $request): bool
     {
-        if (!$this->container->sessionManager->checkToken($request->getParam('token'))) {
+        $token = $request->getParsedBody()['token'] ?? $request->getQueryParams()['token'] ?? null;
+        if (!$this->container->get('sessionManager')->checkToken($token)) {
             throw new WrongTokenException();
         }
 
@@ -63,9 +64,9 @@ abstract class ShaarliAdminController extends ShaarliVisitorController
      */
     protected function saveMessage(string $type, string $message): void
     {
-        $messages = $this->container->sessionManager->getSessionParameter($type) ?? [];
+        $messages = $this->container->get('sessionManager')->getSessionParameter($type) ?? [];
         $messages[] = $message;
 
-        $this->container->sessionManager->setSessionParameter($type, $messages);
+        $this->container->get('sessionManager')->setSessionParameter($type, $messages);
     }
 }

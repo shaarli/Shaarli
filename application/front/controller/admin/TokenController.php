@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Class TokenController
@@ -21,6 +21,6 @@ class TokenController extends ShaarliAdminController
     {
         $response = $response->withHeader('Content-Type', 'text/plain');
 
-        return $response->write($this->container->sessionManager->generateToken());
+        return $this->respondWithBody($response, $this->container->get('sessionManager')->generateToken());
     }
 }
