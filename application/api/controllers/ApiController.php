@@ -77,10 +77,10 @@ abstract class ApiController
      *
      * @param Response $response
      * @param array $data
-     * @param int $jsonStyle
+     * @param ?int $jsonStyle
      * @return Response
      */
-    protected function respondWithJson(Response $response, array $data, int $jsonStyle): Response
+    protected function respondWithJson(Response $response, array $data, ?int $jsonStyle): Response
     {
         $jsonStyle = $jsonStyle ?? 0;
         $response->getBody()->write(json_encode($data, $jsonStyle));

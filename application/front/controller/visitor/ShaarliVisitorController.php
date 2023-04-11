@@ -194,10 +194,10 @@ abstract class ShaarliVisitorController
      *
      * @param Response $response
      * @param array $data
-     * @param int $jsonStyle
+     * @param ?int $jsonStyle
      * @return Response
      */
-    protected function respondWithJson(Response $response, array $data, int $jsonStyle = 0): Response
+    protected function respondWithJson(Response $response, array $data, ?int $jsonStyle = 0): Response
     {
         $response->getBody()->write(json_encode($data, $jsonStyle));
         return $response->withHeader('Content-Type', 'application/json');
