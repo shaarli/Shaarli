@@ -76,11 +76,11 @@ abstract class ApiController
      * Simple helper, which writes data as JSON to the body
      *
      * @param Response $response
-     * @param mixed $data
-     * @param mixed $jsonStyle
+     * @param array $data
+     * @param int $jsonStyle
      * @return Response
      */
-    protected function respondWithJson(Response $response, mixed $data, mixed $jsonStyle): Response
+    protected function respondWithJson(Response $response, array $data, int $jsonStyle): Response
     {
         $jsonStyle = $jsonStyle ?? 0;
         $response->getBody()->write(json_encode($data, $jsonStyle));

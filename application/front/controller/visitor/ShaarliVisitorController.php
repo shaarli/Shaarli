@@ -193,11 +193,11 @@ abstract class ShaarliVisitorController
      * Simple helper, which writes data as JSON to the body
      *
      * @param Response $response
-     * @param mixed $data
+     * @param array $data
      * @param int $jsonStyle
      * @return Response
      */
-    protected function respondWithJson(Response $response, mixed $data, int $jsonStyle = 0): Response
+    protected function respondWithJson(Response $response, array $data, int $jsonStyle = 0): Response
     {
         $response->getBody()->write(json_encode($data, $jsonStyle));
         return $response->withHeader('Content-Type', 'application/json');
