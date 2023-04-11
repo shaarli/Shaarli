@@ -44,7 +44,8 @@ class InstallController extends ShaarliVisitorController
             static::SESSION_TEST_VALUE
             !== $this->container->get('sessionManager')->getSessionParameter(static::SESSION_TEST_KEY)
         ) {
-            $this->container->get('sessionManager')->setSessionParameter(static::SESSION_TEST_KEY, static::SESSION_TEST_VALUE);
+            $this->container->get('sessionManager')
+                ->setSessionParameter(static::SESSION_TEST_KEY, static::SESSION_TEST_VALUE);
 
             return $this->redirect($response, '/install/session-test');
         }

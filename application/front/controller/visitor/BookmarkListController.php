@@ -112,7 +112,8 @@ class BookmarkListController extends ShaarliVisitorController
             $data['pagetitle'] .= '- ';
         }
 
-        $data['pagetitle'] = ($data['pagetitle'] ?? '') . $this->container->get('conf')->get('general.title', 'Shaarli');
+        $data['pagetitle'] = ($data['pagetitle'] ?? '') . $this->container->get('conf')
+                ->get('general.title', 'Shaarli');
 
         $this->executePageHooks('render_linklist', $data, TemplatePage::LINKLIST);
         $this->assignAllView($data);
@@ -144,7 +145,8 @@ class BookmarkListController extends ShaarliVisitorController
         $data = array_merge(
             $this->initializeTemplateVars(),
             [
-                'pagetitle' => $bookmark->getTitle() . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli'),
+                'pagetitle' => $bookmark->getTitle() . ' - ' . $this->container->get('conf')
+                        ->get('general.title', 'Shaarli'),
                 'links' => [$formatter->format($bookmark)],
             ]
         );
@@ -172,7 +174,8 @@ class BookmarkListController extends ShaarliVisitorController
             if (
                 $bookmark->shouldUpdateThumbnail()
                 && true !== $this->container->get('conf')->get('general.enable_async_metadata', true)
-                && $this->container->get('conf')->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
+                && $this->container->get('conf')
+                    ->get('thumbnails.mode', Thumbnailer::MODE_NONE) !== Thumbnailer::MODE_NONE
             ) {
                 $bookmark->setThumbnail($this->container->get('thumbnailer')->get($bookmark->getUrl()));
                 $this->container->get('bookmarkService')->set($bookmark, $writeDatastore);

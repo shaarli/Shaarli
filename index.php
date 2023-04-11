@@ -118,12 +118,6 @@ AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 // Main Shaarli routes
-$app->get('/hello', function (Request $request, Response $response, $args) {
-    throw new Exception('abc');
-    $response->getBody()->write("Hello world!");
-    return $response;
-});
-
 $app->group('', function (RouteCollectorProxy $group) {
     $group->get('/install', Controller\Visitor\InstallController::class . ':index')->setName('displayInstall');
     $group->get('/install/session-test', Controller\Visitor\InstallController::class . ':sessionTest');

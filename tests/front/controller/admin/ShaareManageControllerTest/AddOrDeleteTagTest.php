@@ -153,7 +153,8 @@ class AddOrDeleteTagTest extends TestCase
 
         static::assertSame(['first', 'second', 'third'], $bookmark->getTags());
 
-        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
         $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
         $this->container->get('bookmarkService')->expects(static::once())->method('save');
         $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));

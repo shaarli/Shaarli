@@ -105,7 +105,8 @@ class TagCloudControllerTest extends TestCase
         $this->assignTemplateVars($assignedVariables);
 
         $this->container->get('loginManager')->method('isLoggedin')->willReturn(true);
-        $this->container->get('sessionManager')->expects(static::once())->method('getSessionParameter')->willReturn('private');
+        $this->container->get('sessionManager')->expects(static::once())->method('getSessionParameter')
+            ->willReturn('private');
 
         $this->container->get('bookmarkService')
             ->expects(static::once())

@@ -52,7 +52,7 @@ class UpdaterTest extends TestCase
         $this->refDB = new ReferenceLinkDB();
         $this->refDB->write(self::$testDatastore);
 
-        copy(__DIR__.'/../../tests/utils/config/configJson.json.php', self::$configFile . '.json.php');
+        copy(__DIR__ . '/../../tests/utils/config/configJson.json.php', self::$configFile . '.json.php');
         $this->conf = new ConfigManager(self::$configFile);
         $this->bookmarkService = new BookmarkFileService(
             $this->conf,

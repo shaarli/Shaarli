@@ -267,7 +267,8 @@ class SaveBookmarkTest extends TestCase
         $response = new SlimResponse();
 
         $this->container->get('bookmarkService')->expects(static::once())->method('exists')->with(0)->willReturn(true);
-        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(0)->willReturn(new Bookmark());
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(0)
+            ->willReturn(new Bookmark());
 
         $result = $this->controller->save($request, $response);
 

@@ -48,11 +48,13 @@ class ChangeVisibilityBookmarkTest extends TestCase
         ));
         $response = new SlimResponse();
 
-        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(false);
+        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
+            ->setPrivate(false);
 
         static::assertFalse($bookmark->isPrivate());
 
-        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
         $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
         $this->container->get('bookmarkService')->expects(static::once())->method('save');
         $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
@@ -99,7 +101,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
 
         static::assertTrue($bookmark->isPrivate());
 
-        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
         $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
         $this->container->get('bookmarkService')->expects(static::once())->method('save');
         $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
@@ -140,11 +143,13 @@ class ChangeVisibilityBookmarkTest extends TestCase
         ));
         $response = new SlimResponse();
 
-        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true);
+        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
+            ->setPrivate(true);
 
         static::assertTrue($bookmark->isPrivate());
 
-        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
         $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
         $this->container->get('bookmarkService')->expects(static::once())->method('save');
         $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));

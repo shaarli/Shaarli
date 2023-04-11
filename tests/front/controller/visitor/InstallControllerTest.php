@@ -202,7 +202,7 @@ class InstallControllerTest extends TestCase
         ];
 
         $request = (new FakeRequest('POST'))->withParsedBody(($providedParameters));
-        $response = new SlimResponse;
+        $response = new SlimResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')

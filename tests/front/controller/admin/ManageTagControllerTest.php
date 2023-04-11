@@ -15,7 +15,6 @@ use Shaarli\Tests\Utils\FakeRequest;
 use Slim\Psr7\Response as SlimResponse;
 use Slim\Psr7\Uri;
 
-
 class ManageTagControllerTest extends TestCase
 {
     use FrontAdminControllerMockHelper;

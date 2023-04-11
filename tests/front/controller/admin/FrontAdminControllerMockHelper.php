@@ -30,7 +30,6 @@ trait FrontAdminControllerMockHelper
         $this->container->set('history', $this->createMock(History::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
         $this->container->get('sessionManager')->method('checkToken')->willReturn(true);
-
     }
 
 
