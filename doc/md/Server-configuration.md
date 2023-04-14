@@ -223,6 +223,10 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
         Header set Cache-Control "max-age=2628000, public, must-revalidate, proxy-revalidate"
     </FilesMatch>
 
+    <FilesMatch "robots\.txt">
+        Require all granted
+    </FilesMatch>
+
     # serve the Shaarli favicon from its custom location
     Alias favicon.ico /var/www/shaarli.mydomain.org/images/favicon.ico
 </VirtualHost>
