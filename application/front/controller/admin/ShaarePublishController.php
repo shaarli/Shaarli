@@ -205,7 +205,7 @@ class ShaarePublishController extends ShaarliAdminController
             $description = $params['description'] ?? null;
             $tags = $params['tags'] ?? null;
             if (($params['private'] ?? null) !== null) {
-                $private = filter_var($params['private'], FILTER_VALIDATE_BOOLEAN);
+                $private = filter_var($params['private'] ?? null, FILTER_VALIDATE_BOOLEAN);
             } else {
                 $private = $this->container->get('conf')->get('privacy.default_private_links', false);
             }

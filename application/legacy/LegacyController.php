@@ -107,7 +107,7 @@ class LegacyController extends ShaarliVisitorController
     protected function daily(Request $request, Response $response): Response
     {
         $dayParam = !empty($request->getQueryParams()['day'] ?? null) ?
-            '?day=' . escape($request->getQueryParams()['day']) : '';
+            '?day=' . escape($request->getQueryParams()['day'] ?? null) : '';
 
         return $this->redirect($response, '/daily' . $dayParam);
     }

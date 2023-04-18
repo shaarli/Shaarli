@@ -35,11 +35,11 @@ class Tags extends ApiController
      */
     public function getTags($request, $response)
     {
-        $visibility = $request->getQueryParams()['visibility'] ?? '';
+        $visibility = $request->getQueryParams()['visibility'] ?? null;
         $tags = $this->bookmarkService->bookmarksCountPerTag([], $visibility);
 
         // Return tags from the {offset}th tag, starting from 0.
-        $offset = $request->getQueryParams()['offset'] ?? '';
+        $offset = $request->getQueryParams()['offset'] ?? null;
         if (! empty($offset) && ! ctype_digit($offset)) {
             throw new ApiBadParametersException('Invalid offset');
         }

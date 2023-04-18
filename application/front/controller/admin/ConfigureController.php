@@ -113,7 +113,7 @@ class ConfigureController extends ShaarliAdminController
         }
 
         $thumbnailsMode = extension_loaded('gd') ?
-            $request->getParsedBody()['enableThumbnails'] ?? null : Thumbnailer::MODE_NONE;
+            ($request->getParsedBody()['enableThumbnails'] ?? null) : Thumbnailer::MODE_NONE;
         if (
             $thumbnailsMode !== Thumbnailer::MODE_NONE
             && $thumbnailsMode !== $this->container->get('conf')->get('thumbnails.mode', Thumbnailer::MODE_NONE)

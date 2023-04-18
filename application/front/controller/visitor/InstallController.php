@@ -121,7 +121,8 @@ class InstallController extends ShaarliVisitorController
                 $request->getParsedBody()['city'] ?? null
             )
         ) {
-            $timezone = $request->getParsedBody()['continent'] . '/' . $request->getParsedBody()['city'];
+            $timezone = ($request->getParsedBody()['continent'] ?? null) . '/' .
+                ($request->getParsedBody()['city'] ?? null);
         }
         $this->container->get('conf')->set('general.timezone', $timezone);
 
