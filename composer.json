@@ -58,6 +58,7 @@
             "Shaarli\\Feed\\": "application/feed",
             "Shaarli\\Formatter\\": "application/formatter",
             "Shaarli\\Front\\": "application/front",
+            "Shaarli\\Front\\Controller\\": "application/front/controller",
             "Shaarli\\Front\\Controller\\Admin\\": "application/front/controller/admin",
             "Shaarli\\Front\\Controller\\Visitor\\": "application/front/controller/visitor",
             "Shaarli\\Front\\Exception\\": "application/front/exceptions",

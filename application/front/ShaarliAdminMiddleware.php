@@ -18,7 +18,7 @@ class ShaarliAdminMiddleware extends ShaarliMiddleware
         $this->initBasePath($request);
 
         if (true !== $this->container->get('loginManager')->isLoggedIn()) {
-            $returnUrl = urlencode($request->getServerParams()['REQUEST_URI'] ?? null);
+            $returnUrl = urlencode($request->getServerParams()['REQUEST_URI']);
 
             return $this->redirect($this->container->get('basePath') . '/login?returnurl=' . $returnUrl);
         }

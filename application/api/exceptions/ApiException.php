@@ -2,7 +2,6 @@
 
 namespace Shaarli\Api\Exceptions;
 
-use Slim\Http\Response;
 use Slim\Psr7\Response as SlimResponse;
 
 /**

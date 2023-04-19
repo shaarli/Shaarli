@@ -7,7 +7,7 @@ namespace Shaarli\Front\Controller\Visitor;
 use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Shaarli\Bookmark\BookmarkFilter;
+use Shaarli\Front\Controller\PageTrait;
 
 /**
  * Class ShaarliVisitorController
@@ -19,6 +19,8 @@ use Shaarli\Bookmark\BookmarkFilter;
  */
 abstract class ShaarliVisitorController
 {
+    use PageTrait;
+
     /** @var Container */
     protected $container;
 
@@ -26,18 +28,6 @@ abstract class ShaarliVisitorController
     public function __construct(Container $container)
     {
         $this->container = $container;
-    }
-
-    /**
-     * Assign variables to RainTPL template through the PageBuilder.
-     *
-     * @param mixed $value Value to assign to the template
-     */
-    protected function assignView(string $name, $value): self
-    {
-        $this->container->get('pageBuilder')->assign($name, $value);
-
-        return $this;
     }
 
     /**
@@ -54,48 +44,6 @@ abstract class ShaarliVisitorController
         return $this;
     }
 
-    protected function render(string $template): string
-    {
-        // Legacy key that used to be injected by PluginManager
-        $this->assignView('_PAGE_', $template);
-        $this->assignView('template', $template);
-
-        $this->assignView('linkcount', $this->container->get('bookmarkService')->count(BookmarkFilter::$ALL));
-        $this->assignView('privateLinkcount', $this->container->get('bookmarkService')
-            ->count(BookmarkFilter::$PRIVATE));
-
-        $this->executeDefaultHooks($template);
-
-        $this->assignView('plugin_errors', $this->container->get('pluginManager')->getErrors());
-
-        return $this->container->get('pageBuilder')->render($template, $this->container->get('basePath'));
-    }
-
-    /**
-     * Call plugin hooks for header, footer and includes, specifying which page will be rendered.
-     * Then assign generated data to RainTPL.
-     */
-    protected function executeDefaultHooks(string $template): void
-    {
-        $common_hooks = [
-            'includes',
-            'header',
-            'footer',
-        ];
-
-        $parameters = $this->buildPluginParameters($template);
-
-        foreach ($common_hooks as $name) {
-            $pluginData = [];
-            $this->container->get('pluginManager')->executeHooks(
-                'render_' . $name,
-                $pluginData,
-                $parameters
-            );
-            $this->assignView('plugins_' . $name, $pluginData);
-        }
-    }
-
     protected function executePageHooks(string $hook, array &$data, string $template = null): void
     {
         $this->container->get('pluginManager')->executeHooks(
@@ -103,17 +51,6 @@ abstract class ShaarliVisitorController
             $data,
             $this->buildPluginParameters($template)
         );
-    }
-
-    protected function buildPluginParameters(?string $template): array
-    {
-        return [
-            'target' => $template,
-            'loggedin' => $this->container->get('loginManager')->isLoggedIn(),
-            'basePath' => $this->container->get('basePath'),
-            'rootPath' => preg_replace('#/index\.php$#', '', $this->container->get('basePath')),
-            'bookmarkService' => $this->container->get('bookmarkService')
-        ];
     }
 
     /**

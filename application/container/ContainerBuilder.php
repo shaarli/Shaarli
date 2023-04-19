@@ -6,14 +6,13 @@ namespace Shaarli\Container;
 
 use DI\Container;
 use malkusch\lock\mutex\FlockMutex;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\Formatter\FormatterFactory;
-use Shaarli\Front\Controller\Visitor\ErrorController;
-use Shaarli\Front\Controller\Visitor\ErrorNotFoundController;
 use Shaarli\History;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Http\MetadataRetriever;
@@ -76,7 +75,7 @@ class ContainerBuilder
         $this->logger = $logger;
     }
 
-    public function build(): Container
+    public function build(): ContainerInterface
     {
         $container = new Container();
 

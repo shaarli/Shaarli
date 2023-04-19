@@ -27,8 +27,6 @@ require_once 'application/Utils.php';
 require_once __DIR__ . '/init.php';
 
 use Katzgrau\KLogger\Logger;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LogLevel;
 use Shaarli\Api\Controllers as ApiControllers;
 use Shaarli\Config\ConfigManager;
@@ -49,20 +47,14 @@ $conf = new ConfigManager();
 // Manually override root URL for complex server configurations
 define('SHAARLI_ROOT_URL', $conf->get('general.root_url', null));
 
-// In dev mode, throw exception on any warning
-$displayErrorDetails = $conf->get('dev.debug', false); // // See all errors (for debugging only)
+$displayErrorDetails = $conf->get('dev.debug', false);
 
 // In dev mode, throw exception on any warning
-if ($conf->get('dev.debug', false)) {
+if ($displayErrorDetails) {
     // See all errors (for debugging only)
     error_reporting(-1);
 
     set_error_handler(function ($errno, $errstr, $errfile, $errline, array $errcontext = []) {
-        // Skip PHP 8 deprecation warning with Pimple.
-        if (strpos($errfile, 'src/Pimple/Container.php') !== -1 && strpos($errstr, 'ArrayAccess::') !== -1) {
-            return error_log($errstr);
-        }
-
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     });
 }

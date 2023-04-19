@@ -56,7 +56,7 @@ class ShaarliMiddleware
 
             return $handler->handle($request);
         } catch (UnauthorizedException $e) {
-            $returnUrl = urlencode($request->getServerParams()['REQUEST_URI'] ?? null);
+            $returnUrl = urlencode($request->getServerParams()['REQUEST_URI']);
 
             return $this->redirect($this->container->get('basePath') . '/login?returnurl=' . $returnUrl);
         }

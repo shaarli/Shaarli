@@ -2,7 +2,6 @@
 
 namespace Shaarli\Api\Controllers;
 
-use DI\Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Api\ApiUtils;
@@ -24,11 +23,6 @@ class Links extends ApiController
      * @var int Number of bookmarks returned if no limit is provided.
      */
     public static $DEFAULT_LIMIT = 20;
-
-    public function __construct(Container $ci)
-    {
-        parent::__construct($ci);
-    }
 
     /**
      * Retrieve a list of bookmarks, allowing different filters.

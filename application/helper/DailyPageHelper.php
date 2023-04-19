@@ -21,7 +21,7 @@ class DailyPageHelper
      *
      * @param Request $request HTTP request
      *
-     * @return string|null month/week/day
+     * @return string month/week/day
      */
     public static function extractRequestedType(Request $request): string
     {

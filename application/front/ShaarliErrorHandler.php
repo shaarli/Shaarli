@@ -9,19 +9,20 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Shaarli\Bookmark\BookmarkFilter;
+use Shaarli\Front\Controller\PageTrait;
 use Shaarli\Front\Exception\ShaarliFrontException;
 use Shaarli\Render\TemplatePage;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Handlers\ErrorHandler;
 use Slim\Interfaces\CallableResolverInterface;
-use Slim\Psr7\Response;
 use Slim\Psr7\Response as SlimResponse;
 use Slim\Routing\RouteContext;
 use Throwable;
 
 class ShaarliErrorHandler extends ErrorHandler
 {
+    use PageTrait;
+
     private ?Container $container;
 
     public function __construct(
@@ -41,8 +42,8 @@ class ShaarliErrorHandler extends ErrorHandler
         bool $logErrors,
         bool $logErrorDetails
     ): ResponseInterface {
-        $resp = parent::__invoke($request, $exception, $displayErrorDetails, $logErrors, $logErrorDetails);
-        $response = new Response();
+        parent::__invoke($request, $exception, $displayErrorDetails, $logErrors, $logErrorDetails);
+        $response = new SlimResponse();
         // Unknown error encountered
         $this->container->get('pageBuilder')->reset();
         if ($exception instanceof HttpNotFoundException) {
@@ -72,74 +73,11 @@ class ShaarliErrorHandler extends ErrorHandler
 
             $response = $response->withStatus(500);
         }
-
         $response->getBody()->write($this->render(TemplatePage::ERROR));
         return $response;
     }
 
-    protected function assignView(string $name, $value): self
-    {
-        $this->container->get('pageBuilder')->assign($name, $value);
-
-        return $this;
-    }
-
-    /**
-     * Call plugin hooks for header, footer and includes, specifying which page will be rendered.
-     * Then assign generated data to RainTPL.
-     */
-    protected function executeDefaultHooks(string $template): void
-    {
-        $common_hooks = [
-            'includes',
-            'header',
-            'footer',
-        ];
-
-        $parameters = $this->buildPluginParameters($template);
-
-        foreach ($common_hooks as $name) {
-            $pluginData = [];
-            $this->container->get('pluginManager')->executeHooks(
-                'render_' . $name,
-                $pluginData,
-                $parameters
-            );
-            $this->assignView('plugins_' . $name, $pluginData);
-        }
-    }
-
-    protected function buildPluginParameters(?string $template): array
-    {
-        $basePath = $this->container->get('basePath') ?? '';
-        return [
-            'target' => $template,
-            'loggedin' => $this->container->get('loginManager')->isLoggedIn(),
-            'basePath' => $this->container->get('basePath'),
-            'rootPath' => preg_replace('#/index\.php$#', '', $basePath),
-            'bookmarkService' => $this->container->get('bookmarkService')
-        ];
-    }
-
-    protected function render(string $template): string
-    {
-        // Legacy key that used to be injected by PluginManager
-        $this->assignView('_PAGE_', $template);
-        $this->assignView('template', $template);
-
-        $this->assignView('linkcount', $this->container->get('bookmarkService')->count(BookmarkFilter::$ALL));
-        $this->assignView('privateLinkcount', $this->container->get('bookmarkService')
-            ->count(BookmarkFilter::$PRIVATE));
-
-        $this->executeDefaultHooks($template);
-
-        $this->assignView('plugin_errors', $this->container->get('pluginManager')->getErrors());
-
-        $basePath = $this->container->get('basePath') ?? '';
-        return $this->container->get('pageBuilder')->render($template, $basePath);
-    }
-
-    protected function showError404($request): Response
+    protected function showError404($request): ResponseInterface
     {
         $response = new SlimResponse();
         // Request from the API
