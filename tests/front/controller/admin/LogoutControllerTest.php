@@ -9,7 +9,6 @@ use Shaarli\Security\CookieManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class LogoutControllerTest extends TestCase
 {
@@ -20,6 +19,7 @@ class LogoutControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new LogoutController($this->container);
@@ -27,8 +27,8 @@ class LogoutControllerTest extends TestCase
 
     public function testValidControllerInvoke(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('pageCacheManager')->expects(static::once())->method('invalidateCaches');
 

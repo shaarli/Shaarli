@@ -11,7 +11,6 @@ use Shaarli\Front\Exception\ThumbnailsDisabledException;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Psr7\Response as SlimResponse;
 
 class PictureWallControllerTest extends TestCase
 {
@@ -22,6 +21,7 @@ class PictureWallControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new PictureWallController($this->container);
@@ -29,8 +29,8 @@ class PictureWallControllerTest extends TestCase
 
     public function testValidControllerInvokeDefault(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // ConfigManager: thumbnails are enabled
         $this->container->set('conf', $this->createMock(ConfigManager::class));
@@ -106,8 +106,8 @@ class PictureWallControllerTest extends TestCase
     {
         $this->expectException(ThumbnailsDisabledException::class);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // ConfigManager: thumbnails are disabled
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $parameter, $default) {

@@ -12,7 +12,8 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\TestCase;
-use Slim\Psr7\UploadedFile;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Factory\UploadedFileFactory;
 
 /**
  * Utility function to load a file's metadata in a $_FILES-like array
@@ -23,11 +24,15 @@ use Slim\Psr7\UploadedFile;
  */
 function file2array($filename)
 {
-    return new UploadedFile(
-        __DIR__ . '/input/' . $filename,
-        $filename,
-        null,
-        filesize(__DIR__ . '/input/' . $filename)
+    $uploadedFileFactory = new UploadedFileFactory();
+    $streamFactory = new StreamFactory();
+    $streamFile = $streamFactory->createStreamFromFile(__DIR__ . '/input/' . $filename);
+
+    return $uploadedFileFactory->createUploadedFile(
+        $streamFile,
+        $streamFile->getSize(),
+        UPLOAD_ERR_OK,
+        $filename
     );
 }
 

@@ -10,7 +10,6 @@ use Shaarli\Bookmark\SearchResult;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Psr7\Response as SlimResponse;
 
 class ThumbnailsControllerTest extends TestCase
 {
@@ -21,6 +20,7 @@ class ThumbnailsControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ThumbnailsController($this->container);
@@ -35,8 +35,8 @@ class ThumbnailsControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -63,8 +63,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateValid(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId($id = 123)
@@ -113,8 +113,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateInvalidId(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->ajaxUpdate($request, $response, ['id' => 'nope']);
 
@@ -126,8 +126,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateNoId(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->ajaxUpdate($request, $response, []);
 
@@ -140,8 +140,8 @@ class ThumbnailsControllerTest extends TestCase
     public function testAjaxUpdateBookmarkNotFound(): void
     {
         $id = 123;
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())

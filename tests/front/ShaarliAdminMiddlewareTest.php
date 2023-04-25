@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Shaarli\Front;
 
 use DI\Container as DIContainer;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Shaarli\Tests\Utils\FakeRequestHandler;
+use Shaarli\Tests\Utils\RequestHandlerFactory;
 use Shaarli\Updater\Updater;
 use Slim\Http\Uri;
-use Slim\Psr7\Response as SlimResponse;
 
 class ShaarliAdminMiddlewareTest extends TestCase
 {
@@ -26,6 +27,7 @@ class ShaarliAdminMiddlewareTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->container = new DIContainer();
 
         touch(static::TMP_MOCK_FILE);
@@ -38,6 +40,7 @@ class ShaarliAdminMiddlewareTest extends TestCase
         $this->container->set('basePath', '/subfolder');
 
         $this->middleware = new ShaarliAdminMiddleware($this->container);
+        $this->requestHandlerFactory = new RequestHandlerFactory();
     }
 
     public function tearDown(): void
@@ -53,16 +56,12 @@ class ShaarliAdminMiddlewareTest extends TestCase
 
         $this->container->get('loginManager')->expects(static::once())->method('isLoggedIn')->willReturn(false);
 
-        $request = new FakeRequest(
-            'GET',
-            (new \Slim\Psr7\Uri('http', 'shaarli'))->withPath('/subfolder/path'),
-            null,
-            [],
-            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
-        );
+        $serverParams = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $request = $this->serverRequestFactory
+            ->createServerRequest('GET', 'http://shaarli/subfolder/path', $serverParams);
 
-        $fakeResponse = new SlimResponse();
-        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $result = ($this->middleware)($request, $requestHandler);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(
@@ -78,16 +77,17 @@ class ShaarliAdminMiddlewareTest extends TestCase
     {
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $request = new FakeRequest(
-            'GET',
-            (new \Slim\Psr7\Uri('http', 'shaarli'))->withPath('/subfolder/path'),
-            null,
-            [],
-            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
-        );
+        $serverParams = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $request = $this->serverRequestFactory
+            ->createServerRequest('GET', 'http://shaarli/subfolder/path', $serverParams);
 
-        $fakeResponse = (new SlimResponse())->withStatus(418);
-        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
+        $responseFactory = $this->responseFactory;
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+                return $responseFactory->createResponse()->withStatus(418);
+            }
+        );
+        $result = ($this->middleware)($request, $requestHandler);
 
 
         static::assertSame(418, $result->getStatusCode());

@@ -7,8 +7,6 @@ namespace Shaarli\Front\Controller\Visitor;
 use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class TagControllerTest extends TestCase
 {
@@ -18,6 +16,7 @@ class TagControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new TagController($this->container);
@@ -25,12 +24,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithReferer(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -43,12 +43,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndExistingSearch(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -61,11 +62,12 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutRefererAndExistingSearch(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
-        ]);
-        $response = new SlimResponse();
+            'SERVER_PORT' => 80
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -78,12 +80,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagRemoveLegacyQueryParam(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&addtag=abc'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -96,12 +99,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagResetPagination(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&page=12'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -114,12 +118,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndEmptySearch(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags='
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -132,12 +137,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithReferer(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->addTag($request, $response, []);
 
@@ -148,8 +154,8 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithoutReferer(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->addTag($request, $response, []);
 
@@ -160,12 +166,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutMatchingTag(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -178,12 +185,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagsearch(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -196,8 +204,8 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutReferer(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -210,12 +218,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTag(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/controller/?searchtag=abc'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->removeTag($request, $response, []);
 
@@ -226,8 +235,8 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagWithoutReferer(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->removeTag($request, $response, []);
 

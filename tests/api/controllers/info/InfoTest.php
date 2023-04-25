@@ -13,7 +13,6 @@ use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
 
 /**
  * Class InfoTest
@@ -59,6 +58,7 @@ class InfoTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -94,11 +94,9 @@ class InfoTest extends TestCase
      */
     public function testGetInfo()
     {
-        $request = new FakeRequest(
-            'GET'
-        );
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $response = $this->controller->getInfo($request, new SlimResponse());
+        $response = $this->controller->getInfo($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -121,7 +119,7 @@ class InfoTest extends TestCase
         $this->conf->set('general.enabled_plugins', $enabledPlugins);
         $this->conf->set('privacy.default_private_links', $defaultPrivateLinks);
 
-        $response = $this->controller->getInfo($request, new SlimResponse());
+        $response = $this->controller->getInfo($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 

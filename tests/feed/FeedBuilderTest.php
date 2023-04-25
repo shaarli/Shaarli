@@ -69,7 +69,7 @@ class FeedBuilderTest extends TestCase
         self::$serverInfo = [
             'HTTPS' => 'Off',
             'SERVER_NAME' => 'host.tld',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'SCRIPT_NAME' => '/index.php',
             'REQUEST_URI' => '/feed/atom',
         ];

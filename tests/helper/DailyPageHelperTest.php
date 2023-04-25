@@ -15,6 +15,7 @@ class DailyPageHelperTest extends TestCase
 {
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         setlocale(LC_TIME, 'en_US.UTF-8');
     }
 
@@ -24,7 +25,8 @@ class DailyPageHelperTest extends TestCase
      */
     public function testExtractRequestedType(array $queryParams, string $expectedType): void
     {
-        $request = (new FakeRequest())->withQueryParams($queryParams);
+        $query = http_build_query($queryParams);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
         $type = DailyPageHelper::extractRequestedType($request);
 

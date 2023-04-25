@@ -15,10 +15,11 @@ use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\FakeRouteCollector;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
+use Slim\CallableResolver;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
 use Slim\Router;
+use Slim\Routing\RouteCollector;
 use Slim\Routing\RouteContext;
 
 /**
@@ -86,6 +87,7 @@ class PostLinkTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -108,9 +110,12 @@ class PostLinkTest extends TestCase
         $this->container->set('history', $this->history);
 
         $this->controller = new Links($this->container);
-        $this->routeParser = (new FakeRouteCollector())
-            ->addRoute('POST', '/api/v1/bookmarks/{id:[\d]+}', 'getLink')
-            ->getRouteParser();
+
+        $routeCollector = new RouteCollector($this->responseFactory, new CallableResolver(), $this->container);
+        $routeCollector->map(['POST'], '/api/v1/bookmarks/{id:[\d]+}', function () {
+        })->setName('getLink');
+
+        $this->routeParser = $routeCollector->getRouteParser();
     }
 
     /**
@@ -127,13 +132,10 @@ class PostLinkTest extends TestCase
      */
     public function testPostLinkMinimal()
     {
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
             ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
-
-        $response = $this->controller->postLink($request, new SlimResponse());
+        $response = $this->controller->postLink($request, $this->responseFactory->createResponse());
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
         $data = json_decode((string) $response->getBody(), true);
@@ -174,13 +176,11 @@ class PostLinkTest extends TestCase
             'updated' => '2016-06-05T14:32:10+03:00',
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'website.tld', 'SERVER_PORT' => 80])
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
             ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new SlimResponse());
+        $response = $this->controller->postLink($request, $this->responseFactory->createResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
@@ -210,13 +210,11 @@ class PostLinkTest extends TestCase
             'private' => true,
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
-            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->postLink($request, $this->responseFactory->createResponse());
 
         $this->assertEquals(409, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
@@ -246,13 +244,11 @@ class PostLinkTest extends TestCase
         $link = [
             'tags' => 'one two',
         ];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
-            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->postLink($request, $this->responseFactory->createResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);
@@ -269,13 +265,11 @@ class PostLinkTest extends TestCase
         $link = [
             'tags' => ['one two'],
         ];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', ''),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80])
-        ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->postLink($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->postLink($request, $this->responseFactory->createResponse());
 
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('/api/v1/bookmarks/43', $response->getHeader('Location')[0]);

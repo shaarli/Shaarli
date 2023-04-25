@@ -14,8 +14,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class DeleteBookmarkTest extends TestCase
 {
@@ -26,6 +24,7 @@ class DeleteBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -40,12 +39,8 @@ class DeleteBookmarkTest extends TestCase
         $parameters = ['id' => '123'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123');
 
@@ -92,17 +87,14 @@ class DeleteBookmarkTest extends TestCase
         $parameters = ['id' => '123 456 789'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli', 80, '/subfolder', ''))
-                ->withQuery($query)
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'HTTP_REFERER' => 'http://shaarli/subfolder/?searchtags=abcdef',
             'SCRIPT_NAME' => '/subfolder/index.php',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123'),
@@ -168,12 +160,8 @@ class DeleteBookmarkTest extends TestCase
         $parameters = ['id' => '123'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -216,12 +204,8 @@ class DeleteBookmarkTest extends TestCase
         $parameters = ['id' => '123 456 789'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123'),
@@ -300,12 +284,8 @@ class DeleteBookmarkTest extends TestCase
         $parameters = ['id' => 'nope not an ID'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -324,8 +304,8 @@ class DeleteBookmarkTest extends TestCase
      */
     public function testDeleteEmptyId(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -350,12 +330,8 @@ class DeleteBookmarkTest extends TestCase
         ];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->method('get')->with('123')->willReturn(
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
@@ -391,12 +367,8 @@ class DeleteBookmarkTest extends TestCase
         ];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->method('get')->with('123')->willReturn(
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')

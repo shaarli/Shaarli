@@ -4,12 +4,27 @@ declare(strict_types=1);
 
 namespace Shaarli;
 
+use Slim\Psr7\Factory\RequestFactory;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
+
 /**
  * Helper class extending \PHPUnit\Framework\TestCase.
  * Used to make Shaarli UT run on multiple versions of PHPUnit.
  */
 class TestCase extends \PHPUnit\Framework\TestCase
 {
+    protected ServerRequestFactory $serverRequestFactory;
+    protected RequestFactory $requestFactory;
+    protected ResponseFactory $responseFactory;
+
+    protected function initRequestResponseFactories(): void
+    {
+        $this->requestFactory = new RequestFactory();
+        $this->serverRequestFactory = new ServerRequestFactory();
+        $this->responseFactory = new ResponseFactory();
+    }
+
     /**
      * expectExceptionMessageRegExp has been removed and replaced by expectExceptionMessageMatches in PHPUnit 9.
      */

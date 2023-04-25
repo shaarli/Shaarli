@@ -9,8 +9,7 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\FakeRequestHandler;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Psr7\Headers;
-use Slim\Psr7\Uri;
+use Shaarli\Tests\Utils\RequestHandlerFactory;
 
 /**
  * Class ApiMiddlewareTest
@@ -45,10 +44,18 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     protected $container;
 
     /**
+     * @var RequestHandlerFactory instance
+     */
+    private $requestHandlerFactory;
+
+    /**
      * Before every test, instantiate a new Api with its config, plugins and bookmarks.
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
+        $this->requestHandlerFactory = new RequestHandlerFactory();
+
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('api.secret', 'NapoleonWasALizard');
 
@@ -77,14 +84,12 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     public function testInvokeMiddlewareWithValidToken(): void
     {
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $token = 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -97,16 +102,11 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
     {
         $token = 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([]),
-            [],
-            [
-                'REDIRECT_HTTP_AUTHORIZATION' => $token,
-            ]
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $serverParams = ['REDIRECT_HTTP_AUTHORIZATION' => $token];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli/hello', $serverParams);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -121,14 +121,11 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->container->set('conf', $this->conf);
 
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $token = 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -146,14 +143,11 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->container->set('conf', $this->conf);
 
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $token = 'Bearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -171,11 +165,9 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->container->set('conf', $this->conf);
 
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello')
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello');
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -194,14 +186,12 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->container->set('conf', $this->conf);
 
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'Bearer jwt'
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $token = 'Bearer jwt';
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -217,15 +207,12 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->conf->set('dev.debug', true);
         $this->container->set('conf', $this->conf);
 
+        $token = 'PolarBearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard');
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'PolarBearer ' . ApiUtilsTest::generateValidJwtToken('NapoleonWasALizard')
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());
@@ -244,15 +231,12 @@ class ApiMiddlewareTest extends \Shaarli\TestCase
         $this->conf->set('dev.debug', true);
         $this->container->set('conf', $this->conf);
 
+        $token = 'Bearer jwt';
         $mw = new ApiMiddleware($this->container);
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withPath('/hello'),
-            new Headers([
-                'HTTP_AUTHORIZATION' => 'Bearer jwt'
-            ])
-        );
-        $response = $mw($request, new FakeRequestHandler());
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/hello')
+            ->withHeader('HTTP_AUTHORIZATION', $token);
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler();
+        $response = $mw($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $body = json_decode((string) $response->getBody());

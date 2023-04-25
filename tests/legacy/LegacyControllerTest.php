@@ -7,8 +7,6 @@ namespace Shaarli\Legacy;
 use Shaarli\Front\Controller\Visitor\FrontControllerMockHelper;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class LegacyControllerTest extends TestCase
 {
@@ -19,6 +17,7 @@ class LegacyControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new LegacyController($this->container);
@@ -29,11 +28,9 @@ class LegacyControllerTest extends TestCase
      */
     public function testProcess(string $legacyRoute, array $queryParameters, string $slimRoute, bool $isLoggedIn): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query($queryParameters))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query($queryParameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn($isLoggedIn);
 
@@ -44,10 +41,8 @@ class LegacyControllerTest extends TestCase
 
     public function testProcessNotFound(): void
     {
-        $request = (new FakeRequest(
-            'GET'
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(UnknowLegacyRouteException::class);
 

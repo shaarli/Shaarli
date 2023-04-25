@@ -7,8 +7,6 @@ namespace Shaarli\Front\Controller\Visitor;
 use Shaarli\Feed\FeedBuilder;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class FeedControllerTest extends TestCase
 {
@@ -19,6 +17,7 @@ class FeedControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('feedBuilder', $this->createMock(FeedBuilder::class));
@@ -31,11 +30,12 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultRssController(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => 80,
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('feedBuilder')->expects(static::once())->method('setLocale');
         $this->container->get('feedBuilder')->expects(static::once())->method('setHideDates')->with(false);
@@ -75,11 +75,12 @@ class FeedControllerTest extends TestCase
      */
     public function testDefaultAtomController(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => 80,
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('feedBuilder')->expects(static::once())->method('setLocale');
         $this->container->get('feedBuilder')->expects(static::once())->method('setHideDates')->with(false);
@@ -119,15 +120,13 @@ class FeedControllerTest extends TestCase
      */
     public function testAtomControllerWithParameters(): void
     {
-        $request = new FakeRequest();
-        $request = (new FakeRequest('GET', (new Uri('', ''))
-            ->withQuery(http_build_query(['parameter' => 'value']))))
-            ->withServerParams([
-                'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
-                ]);
-        $response = new SlimResponse();
-
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+        ];
+        $query = http_build_query(['parameter' => 'value']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);

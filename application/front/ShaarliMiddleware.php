@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Shaarli\Front\Exception\UnauthorizedException;
-use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteContext;
 
 /**
@@ -123,7 +123,7 @@ class ShaarliMiddleware
      */
     protected function redirect(string $url): Response
     {
-        $response = new SlimResponse();
-        return $response->withHeader('Location', $url)->withStatus(302);
+        return (new ResponseFactory())->createResponse(302)
+            ->withHeader('Location', $url);
     }
 }

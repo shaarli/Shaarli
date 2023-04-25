@@ -12,8 +12,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Http\MetadataRetriever;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class DisplayCreateFormTest extends TestCase
 {
@@ -24,6 +22,7 @@ class DisplayCreateFormTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -47,18 +46,14 @@ class DisplayCreateFormTest extends TestCase
         $remoteTags = 'abc def';
         $referer = 'http://shaarli/subfolder/controller/?searchtag=abc';
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery('post=' . urlencode($url))
-        ))->withServerParams([
-            'HTTP_REFERER' => $referer
-        ]);
+        $query = http_build_query(['post' => $url]);
+        $serverParams = ['HTTP_REFERER' => $referer];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
         /*$request->method('getParam')->willReturnCallback(function (string $key) use ($url): ?string {
             return $key === 'post' ? $url : null;
         });*/
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $param, $default) {
@@ -131,15 +126,11 @@ class DisplayCreateFormTest extends TestCase
         $referer = 'http://shaarli/subfolder/controller/?searchtag=abc';
         $expectedUrl = str_replace('&utm_ad=pay', '', $url);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery('post=' . urlencode($url))
-        ))->withServerParams([
-            'HTTP_REFERER' => $referer
-        ]);
+        $query = http_build_query(['post' => $url]);
+        $serverParams = ['HTTP_REFERER' => $referer];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('metadataRetriever')->expects(static::never())->method('retrieve');
 
@@ -206,12 +197,8 @@ class DisplayCreateFormTest extends TestCase
         $expectedUrl = str_replace('&utm_ad=pay', '', $parameters['post']);
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -238,8 +225,8 @@ class DisplayCreateFormTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
         $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
@@ -266,13 +253,9 @@ class DisplayCreateFormTest extends TestCase
         $this->assignTemplateVars($assignedVariables);
 
         $url = 'magnet://kubuntu.torrent';
-        $request = new FakeRequest();
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery('post=' . urlencode($url))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['post' => $url]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
         $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
@@ -306,8 +289,8 @@ class DisplayCreateFormTest extends TestCase
             })
         ;
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -328,12 +311,9 @@ class DisplayCreateFormTest extends TestCase
         $url = 'http://url.tld/other?part=3&utm_ad=pay#hash';
         $expectedUrl = str_replace('&utm_ad=pay', '', $url);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery('post=' . urlencode($url))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['post' => $url]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
         $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');

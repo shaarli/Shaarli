@@ -9,7 +9,6 @@ use Shaarli\Security\LoginManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class SessionFilterControllerTest extends TestCase
 {
@@ -20,6 +19,7 @@ class SessionFilterControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new SessionFilterController($this->container);
@@ -39,12 +39,13 @@ class SessionFilterControllerTest extends TestCase
             ->with(SessionManager::KEY_VISIBILITY, 'private')
         ;
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -76,13 +77,13 @@ class SessionFilterControllerTest extends TestCase
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
-
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
         $result = $this->controller->visibility($request, $response, $arg);
 
         static::assertInstanceOf(Response::class, $result);
@@ -109,8 +110,8 @@ class SessionFilterControllerTest extends TestCase
             ->with(SessionManager::KEY_VISIBILITY, 'private')
         ;
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -137,12 +138,13 @@ class SessionFilterControllerTest extends TestCase
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 
@@ -170,12 +172,13 @@ class SessionFilterControllerTest extends TestCase
             ->with(SessionManager::KEY_VISIBILITY)
         ;
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->visibility($request, $response, $arg);
 

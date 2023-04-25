@@ -13,8 +13,6 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 /**
  * Class GetTagsTest
@@ -68,6 +66,7 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -104,11 +103,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $request = (new FakeRequest(
-            'GET'
-        ));
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -136,11 +133,9 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetLimit()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'offset=1&limit=1')
-        ));
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $query = http_build_query(['offset' => 1, 'limit' => 1]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -155,11 +150,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsLimitAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'limit=all')
-        ));
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $query = http_build_query(['limit' => 'all']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -171,11 +164,9 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetTooHigh()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'offset=100')
-        ));
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $query = http_build_query(['offset' => 100]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEmpty(count($data));
@@ -187,11 +178,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsVisibilityPrivate()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'private');
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'visibility=private')
-        ));
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $query = http_build_query(['visibility' => 'private']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -207,11 +196,9 @@ class GetTagsTest extends \Shaarli\TestCase
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'public');
 
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'visibility=public')
-        ));
-        $response = $this->controller->getTags($request, new SlimResponse());
+        $query = http_build_query(['visibility' => 'public']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals(count($tags), count($data));

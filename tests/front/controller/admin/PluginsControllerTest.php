@@ -10,8 +10,6 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class PluginsControllerTest extends TestCase
 {
@@ -24,6 +22,7 @@ class PluginsControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new PluginsController($this->container);
@@ -52,8 +51,8 @@ class PluginsControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $data = [
             'plugin1' => ['order' => 2, 'other' => 'field'],
@@ -94,11 +93,9 @@ class PluginsControllerTest extends TestCase
             'plugin2' => 'on',
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('pluginManager')
             ->expects(static::once())
@@ -129,11 +126,9 @@ class PluginsControllerTest extends TestCase
             'token' => 'this parameter should not be saved'
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('pluginManager')
             ->expects(static::once())
@@ -157,8 +152,8 @@ class PluginsControllerTest extends TestCase
      */
     public function testSaveWithError(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')
@@ -192,8 +187,8 @@ class PluginsControllerTest extends TestCase
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 

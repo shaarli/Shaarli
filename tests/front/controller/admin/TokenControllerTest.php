@@ -6,7 +6,6 @@ namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class TokenControllerTest extends TestCase
 {
@@ -17,6 +16,7 @@ class TokenControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new TokenController($this->container);
@@ -24,8 +24,8 @@ class TokenControllerTest extends TestCase
 
     public function testGetToken(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())

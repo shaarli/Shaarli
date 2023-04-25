@@ -14,8 +14,6 @@ use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class SaveBookmarkTest extends TestCase
 {
@@ -26,6 +24,7 @@ class SaveBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -47,12 +46,10 @@ class SaveBookmarkTest extends TestCase
             'returnurl' => 'http://shaarli/subfolder/admin/add-shaare'
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-            ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
-        $response = new SlimResponse();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters) {
             static::assertSame($parameters['lf_url'], $bookmark->getUrl());
@@ -131,12 +128,10 @@ class SaveBookmarkTest extends TestCase
             'returnurl' => 'http://shaarli/subfolder/?page=2'
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-        ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
-        $response = new SlimResponse();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters, $id) {
             static::assertSame($id, $bookmark->getId());
@@ -210,13 +205,11 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_url' => 'http://url.tld/other?part=3#hash'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-            ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
@@ -259,12 +252,10 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_id' => '0'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-            ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
-        $response = new SlimResponse();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->expects(static::once())->method('exists')->with(0)->willReturn(true);
         $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(0)
@@ -282,12 +273,10 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_url' => 'http://url.tld/other?part=3#hash'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-            ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
-        $response = new SlimResponse();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
@@ -325,12 +314,10 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['source' => 'bookmarklet'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)
-            ->withServerParams(['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli']);
-        $response = new SlimResponse();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -349,8 +336,8 @@ class SaveBookmarkTest extends TestCase
         $this->container->get('bookmarkService')->expects(static::never())->method('addOrSet');
         $this->container->get('bookmarkService')->expects(static::never())->method('set');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 

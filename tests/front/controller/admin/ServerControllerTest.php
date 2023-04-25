@@ -8,8 +8,6 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 /**
  * Test Server administration controller.
@@ -23,6 +21,7 @@ class ServerControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ServerController($this->container);
@@ -52,12 +51,13 @@ class ServerControllerTest extends TestCase
      */
     public function testIndex(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'REMOTE_ADDR' => '1.2.3.4',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
        // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -112,11 +112,9 @@ class ServerControllerTest extends TestCase
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, ['Shaarli\'s cache folder has been cleared!'])
         ;
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery('type=main')
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['type' => 'main']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->clearCache($request, $response);
 
@@ -166,11 +164,9 @@ class ServerControllerTest extends TestCase
             });
         ;
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery('type=thumbnails')
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['type' => 'thumbnails']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->clearCache($request, $response);
 

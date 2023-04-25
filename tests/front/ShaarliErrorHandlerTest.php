@@ -11,7 +11,6 @@ use Shaarli\Tests\Utils\FakeRequest;
 use Slim\CallableResolver;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Factory\ResponseFactory;
-use Slim\Psr7\Uri;
 use Slim\Routing\RouteContext;
 
 class ShaarliErrorHandlerTest extends TestCase
@@ -23,6 +22,7 @@ class ShaarliErrorHandlerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
         $this->errorHandler = new ShaarliErrorHandler(
             new CallableResolver(),
@@ -37,10 +37,8 @@ class ShaarliErrorHandlerTest extends TestCase
      */
     public function testDisplayFrontExceptionError(): void
     {
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams);
 
         $message = 'error message';
         $errorCode = 418;
@@ -66,7 +64,7 @@ class ShaarliErrorHandlerTest extends TestCase
      */
     public function testDisplayAnyExceptionErrorNoDebugLoggedIn(): void
     {
-        $request = new FakeRequest();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
         $exception = new \Exception('abc');
 
         // Save RainTPL assigned variables
@@ -90,7 +88,7 @@ class ShaarliErrorHandlerTest extends TestCase
      */
     public function testDisplayAnyExceptionErrorNoDebug(): void
     {
-        $request = new FakeRequest();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
         $exception = new \Exception('abc');
 
         // Save RainTPL assigned variables
@@ -113,7 +111,8 @@ class ShaarliErrorHandlerTest extends TestCase
      */
     public function testDisplayNotFoundError(): void
     {
-        $request = (new FakeRequest())->withAttribute(RouteContext::BASE_PATH, '/subfolder');
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli')
+            ->withAttribute(RouteContext::BASE_PATH, '/subfolder');
         $exception = new HttpNotFoundException($request);
 
         // Save RainTPL assigned variables
@@ -132,7 +131,8 @@ class ShaarliErrorHandlerTest extends TestCase
      */
     public function testDisplayNotFoundErrorFromAPI(): void
     {
-        $request = (new FakeRequest())->withAttribute(RouteContext::BASE_PATH, '/subfolder');
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli')
+            ->withAttribute(RouteContext::BASE_PATH, '/subfolder');
         $exception = new HttpNotFoundException($request);
 
         // Save RainTPL assigned variables

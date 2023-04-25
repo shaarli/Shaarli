@@ -9,9 +9,8 @@ use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\UploadedFile;
-use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Factory\UploadedFileFactory;
 
 class ImportControllerTest extends TestCase
 {
@@ -22,6 +21,7 @@ class ImportControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ImportController($this->container);
@@ -35,8 +35,8 @@ class ImportControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -53,19 +53,21 @@ class ImportControllerTest extends TestCase
      */
     public function testImportDefault(): void
     {
+        $uploadedFileFactory = new UploadedFileFactory();
+        $streamFactory = new StreamFactory();
+
         $parameters = [
             'abc' => 'def',
             'other' => 'param',
         ];
 
-        $requestFile = new UploadedFile('file', 'name', 'type', 123);
+        $requestFile = $uploadedFileFactory->createUploadedFile($streamFactory->createStream(), 123);
 
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($parameters)->withUploadedFiles(['filetoupload' => $requestFile]);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters)
+            ->withUploadedFiles(['filetoupload' => $requestFile]);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
         $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
         $this->container->get('netscapeBookmarkUtils')
             ->expects(static::once())
@@ -103,8 +105,8 @@ class ImportControllerTest extends TestCase
      */
     public function testImportFileMissing(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -123,13 +125,16 @@ class ImportControllerTest extends TestCase
      */
     public function testImportEmptyFile(): void
     {
-        $requestFile = new UploadedFile('file', 'name', 'type', 0);
+        $uploadedFileFactory = new UploadedFileFactory();
+        $streamFactory = new StreamFactory();
 
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withUploadedFiles(['filetoupload' => $requestFile]);
-        $response = new SlimResponse();
+        $requestFile = $uploadedFileFactory->createUploadedFile(
+            $streamFactory->createStream('')
+        );
+
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withUploadedFiles(['filetoupload' => $requestFile]);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
         $this->container->get('netscapeBookmarkUtils')->expects(static::never())->method('filterAndFormat');

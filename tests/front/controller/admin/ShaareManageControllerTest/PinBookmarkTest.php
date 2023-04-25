@@ -12,7 +12,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class PinBookmarkTest extends TestCase
 {
@@ -23,6 +22,7 @@ class PinBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -38,8 +38,8 @@ class PinBookmarkTest extends TestCase
     {
         $id = 123;
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -80,8 +80,8 @@ class PinBookmarkTest extends TestCase
     {
         $id = 'invalid';
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -100,8 +100,8 @@ class PinBookmarkTest extends TestCase
      */
     public function testDisplayEditFormIdNotProvided(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -122,8 +122,8 @@ class PinBookmarkTest extends TestCase
     {
         $id = 123;
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())

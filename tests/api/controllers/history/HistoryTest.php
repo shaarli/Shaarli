@@ -10,7 +10,6 @@ use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
 
 class HistoryTest extends TestCase
 {
@@ -44,6 +43,7 @@ class HistoryTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->refHistory = new ReferenceHistory();
         $this->refHistory->write(self::$testHistory);
@@ -68,11 +68,9 @@ class HistoryTest extends TestCase
      */
     public function testGetHistory()
     {
-        $request = new FakeRequest(
-            'GET'
-        );
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $response = $this->controller->getHistory($request, new SlimResponse());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -119,11 +117,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistoryLimit()
     {
-        $request = (new FakeRequest(
-            'GET'
-        ))->withQueryParams(['limit' => '1']);
+        $query = http_build_query(['limit' => 1]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new SlimResponse());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -142,11 +139,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistoryOffset()
     {
-        $request = (new FakeRequest(
-            'GET'
-        ))->withQueryParams(['offset' => '4']);
+        $query = http_build_query(['offset' => 4]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new SlimResponse());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -165,11 +161,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistorySince()
     {
-        $request = (new FakeRequest(
-            'GET'
-        ))->withQueryParams(['since' => '2017-03-03T00:00:00+00:00']);
+        $query = http_build_query(['since' => '2017-03-03T00:00:00+00:00']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new SlimResponse());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -188,11 +183,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistorySinceOffsetLimit()
     {
-        $request = (new FakeRequest(
-            'GET'
-        ))->withQueryParams(['since' => '2017-02-01T00:00:00%2B00:00', 'offset' => '1', 'limit' => '1']);
+        $query = http_build_query(['since' => '2017-02-01T00:00:00%2B00:00', 'offset' => '1', 'limit' => '1']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new SlimResponse());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 

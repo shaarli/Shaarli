@@ -12,8 +12,6 @@ use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class ManageTagControllerTest extends TestCase
 {
@@ -24,6 +22,7 @@ class ManageTagControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ManageTagController($this->container);
@@ -37,12 +36,9 @@ class ManageTagControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery('fromtag=fromtag')
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['fromtag' => 'fromtag']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -67,8 +63,8 @@ class ManageTagControllerTest extends TestCase
             return $key === 'general.tags_separator' ? ' ' : $key;
         });
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->controller->index($request, $response);
 
@@ -89,11 +85,9 @@ class ManageTagControllerTest extends TestCase
             'fromtag' => 'old-tag',
             'totag' => 'new-tag',
         ];
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($requestParameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark1 = $this->createMock(Bookmark::class);
         $bookmark2 = $this->createMock(Bookmark::class);
@@ -139,11 +133,9 @@ class ManageTagControllerTest extends TestCase
             'deletetag' => 'delete',
             'fromtag' => 'old-tag',
         ];
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($requestParameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark1 = $this->createMock(Bookmark::class);
         $bookmark2 = $this->createMock(Bookmark::class);
@@ -187,8 +179,8 @@ class ManageTagControllerTest extends TestCase
         $this->container->get('conf')->expects(static::never())->method('set');
         $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -206,11 +198,9 @@ class ManageTagControllerTest extends TestCase
         $requestParameters = [
             'renametag' => 'rename',
         ];
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($requestParameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -234,11 +224,9 @@ class ManageTagControllerTest extends TestCase
         $requestParameters = [
             'deletetag' => 'delete',
         ];
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($requestParameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -263,11 +251,9 @@ class ManageTagControllerTest extends TestCase
             'renametag' => 'rename',
             'fromtag' => 'old-tag'
         ];
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody($requestParameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -290,12 +276,10 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody(['separator' => $toSeparator]);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('conf')
             ->expects(static::once())
@@ -327,11 +311,9 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody(['separator' => $toSeparator]);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('conf')->expects(static::never())->method('set');
 
@@ -359,11 +341,9 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = (new FakeRequest(
-            'POST',
-            (new Uri('', ''))
-        ))->withParsedBody(['separator' => $toSeparator]);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('conf')->expects(static::never())->method('set');
 

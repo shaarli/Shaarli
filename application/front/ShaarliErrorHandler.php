@@ -15,7 +15,7 @@ use Shaarli\Render\TemplatePage;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Handlers\ErrorHandler;
 use Slim\Interfaces\CallableResolverInterface;
-use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteContext;
 use Throwable;
 
@@ -43,7 +43,7 @@ class ShaarliErrorHandler extends ErrorHandler
         bool $logErrorDetails
     ): ResponseInterface {
         parent::__invoke($request, $exception, $displayErrorDetails, $logErrors, $logErrorDetails);
-        $response = new SlimResponse();
+        $response = (new ResponseFactory())->createResponse();
         // Unknown error encountered
         $this->container->get('pageBuilder')->reset();
         if ($exception instanceof HttpNotFoundException) {
@@ -79,7 +79,7 @@ class ShaarliErrorHandler extends ErrorHandler
 
     protected function showError404($request): ResponseInterface
     {
-        $response = new SlimResponse();
+        $response = (new ResponseFactory())->createResponse();
         // Request from the API
         if (false !== strpos($request->getRequestTarget(), '/api/v1')) {
             return $response->withStatus(404);

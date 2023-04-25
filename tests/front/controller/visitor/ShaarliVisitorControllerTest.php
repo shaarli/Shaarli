@@ -9,8 +9,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 /**
  * Class ShaarliControllerTest
@@ -33,6 +31,7 @@ class ShaarliVisitorControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new class ($this->container) extends ShaarliVisitorController
@@ -115,13 +114,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererDefault(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response);
 
@@ -134,13 +134,13 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithUnmatchedLoopTerm(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
-
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['nope']);
 
@@ -153,13 +153,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInPath(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'controller']);
 
@@ -172,13 +173,13 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryParam(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
-
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'other']);
 
@@ -192,13 +193,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryValue(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'param']);
 
@@ -212,13 +214,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithLoopTermInDomain(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['shaarli']);
 
@@ -232,13 +235,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingClearedParam(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 
@@ -251,13 +255,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectExternalReferer(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://other.domain.tld/controller?query=param&other=2'
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 
@@ -270,13 +275,14 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectExternalRefererExplicitDomainName(): void
     {
-        $request = (new FakeRequest('GET', new Uri('', '')))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'my.shaarli.tld',
-            'SERVER_PORT' => '80',
-            'HTTP_REFERER' => 'http://your.shaarli.tld/controller?query=param&other=2'
-        ]);
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://your.shaarli.tld/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 

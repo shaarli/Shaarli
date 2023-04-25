@@ -9,7 +9,6 @@ use Shaarli\Front\Exception\AlreadyInstalledException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class InstallControllerTest extends TestCase
 {
@@ -22,6 +21,8 @@ class InstallControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
@@ -52,8 +53,8 @@ class InstallControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')
@@ -107,8 +108,8 @@ class InstallControllerTest extends TestCase
      */
     public function testInstallRedirectToSessionTest(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')
@@ -128,8 +129,8 @@ class InstallControllerTest extends TestCase
      */
     public function testInstallSessionTestValid(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')
@@ -152,8 +153,8 @@ class InstallControllerTest extends TestCase
         $assignedVars = [];
         $this->assignTemplateVars($assignedVars);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')
@@ -201,8 +202,10 @@ class InstallControllerTest extends TestCase
             'general.header_link' => '/subfolder',
         ];
 
-        $request = (new FakeRequest('POST'))->withParsedBody(($providedParameters));
-        $response = new SlimResponse();
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli')
+            ->withParsedBody(($providedParameters));
+
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')
@@ -250,8 +253,8 @@ class InstallControllerTest extends TestCase
     {
         $confSettings = [];
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('conf')->method('set')
             ->willReturnCallback(function (string $key, $value) use (&$confSettings) {
@@ -276,7 +279,7 @@ class InstallControllerTest extends TestCase
 
         $this->container->set('environment', [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'REQUEST_URI' => '/install',
             'REMOTE_ADDR' => '1.2.3.4',
             'SCRIPT_NAME' => '/index.php',
@@ -284,8 +287,8 @@ class InstallControllerTest extends TestCase
 
         $this->container->set('basePath', '');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('conf')->method('set')
             ->willReturnCallback(function (string $key, $value) use (&$confSettings) {

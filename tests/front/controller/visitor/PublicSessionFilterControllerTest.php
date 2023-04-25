@@ -8,8 +8,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class PublicSessionFilterControllerTest extends TestCase
 {
@@ -20,6 +18,8 @@ class PublicSessionFilterControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new PublicSessionFilterController($this->container);
@@ -30,16 +30,15 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPage(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery('nb=8')
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
-                'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
-        ]);
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
+        ];
+        $query = http_build_query(['nb' => 8]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -59,11 +58,9 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testLinksPerPageNotValid(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery('nb=test')
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['nb' => 'test']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -83,15 +80,13 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnly(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -111,15 +106,13 @@ class PublicSessionFilterControllerTest extends TestCase
      */
     public function testUntaggedOnlyToggleOff(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', '', 80, 'shaarli'))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
+            'SERVER_PORT' => 80,
             'HTTP_REFERER' => 'http://shaarli/subfolder/controller/?searchtag=abc'
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->method('getSessionParameter')

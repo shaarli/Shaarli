@@ -9,8 +9,6 @@ use Shaarli\Bookmark\SearchResult;
 use Shaarli\Feed\CachedPage;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class DailyControllerTest extends TestCase
 {
@@ -21,6 +19,7 @@ class DailyControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         setlocale(LC_TIME, 'en_US.UTF-8');
         $this->createContainer();
 
@@ -34,13 +33,9 @@ class DailyControllerTest extends TestCase
         $previousDate = new \DateTime('2 days ago 00:00:00');
         $nextDate = new \DateTime('today 00:00:00');
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(
-                ['day' => $currentDay->format('Ymd')]
-            ))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['day' => $currentDay->format('Ymd')]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -179,13 +174,9 @@ class DailyControllerTest extends TestCase
     {
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(
-                ['day' => $currentDay->format('Ymd')]
-            ))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['day' => $currentDay->format('Ymd')]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -247,8 +238,8 @@ class DailyControllerTest extends TestCase
     {
         $currentDay = new \DateTimeImmutable('2020-05-13');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -306,8 +297,8 @@ class DailyControllerTest extends TestCase
      */
     public function testValidIndexControllerInvokeNoBookmark(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -353,13 +344,14 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('+1 month'),
         ];
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([
@@ -442,13 +434,14 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeTriggerCache(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('pageCacheManager')->method('getCachePage')->willReturnCallback(function (): CachedPage {
             $cachedPage = $this->createMock(CachedPage::class);
@@ -471,13 +464,14 @@ class DailyControllerTest extends TestCase
      */
     public function testValidRssControllerInvokeNoBookmark(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())->method('search')
@@ -507,16 +501,15 @@ class DailyControllerTest extends TestCase
         $currentDay = new \DateTimeImmutable('2020-05-13');
         $expectedDay = new \DateTimeImmutable('2020-05-11');
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['week' => $currentDay->format('YW')]))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $query  = http_build_query(['week' =>  $currentDay->format('YW')]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -572,16 +565,15 @@ class DailyControllerTest extends TestCase
         $currentDay = new \DateTimeImmutable('2020-05-13');
         $expectedDay = new \DateTimeImmutable('2020-05-01');
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['month' => $currentDay->format('Ym')]))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $query  = http_build_query(['month' =>  $currentDay->format('Ym')]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -643,17 +635,16 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('2020-05-17 23:59:59'),
         ];
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['week' => '']))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
             'QUERY_STRING' => 'week',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $query  = http_build_query(['week' =>  '']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([
@@ -711,17 +702,16 @@ class DailyControllerTest extends TestCase
             new \DateTimeImmutable('2020-04-30 23:59:59'),
         ];
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['month' => '']))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
             'REQUEST_URI' => '/subfolder/daily-rss',
             'QUERY_STRING' => 'month',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $query  = http_build_query(['month' =>  '']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')->expects(static::once())->method('search')->willReturn(
             SearchResult::getSearchResult([

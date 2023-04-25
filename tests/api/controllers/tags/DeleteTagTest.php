@@ -14,8 +14,7 @@ use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
 
 class DeleteTagTest extends \Shaarli\TestCase
 {
@@ -70,6 +69,7 @@ class DeleteTagTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -112,12 +112,14 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'gnu';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertTrue($tags[$tagName] > 0);
-        $request = (new FakeRequest(
-            'DELETE',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->deleteTag($request, new SlimResponse(), ['tagName' => $tagName]);
+        $response = $this->controller->deleteTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
 
@@ -152,12 +154,14 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'sTuff';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertTrue($tags[$tagName] > 0);
-        $request = (new FakeRequest(
-            'DELETE',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->deleteTag($request, new SlimResponse(), ['tagName' => $tagName]);
+        $response = $this->controller->deleteTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
 
@@ -190,11 +194,9 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'nopenope';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertFalse(isset($tags[$tagName]));
-        $request = (new FakeRequest(
-            'DELETE',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $this->controller->deleteTag($request, new SlimResponse(), ['tagName' => $tagName]);
+        $this->controller->deleteTag($request, $this->responseFactory->createResponse(), ['tagName' => $tagName]);
     }
 }

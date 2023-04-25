@@ -14,8 +14,7 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
 
 /**
  * Class GetLinksTest
@@ -63,6 +62,7 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -98,11 +98,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinks()
     {
-        $request = (new FakeRequest(
-            'GET'
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -149,12 +148,11 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksOffsetLimit()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'offset=3&limit=1'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['offset' => 3, 'limit' => 1]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -167,11 +165,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksLimitAll()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'limit=all'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['limit' => 'all']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -190,11 +187,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksOffsetTooHigh()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'offset=100'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['offset' => '100']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEmpty(count($data));
@@ -205,11 +201,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityAll()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'visibility=all'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['visibility' => 'all']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countLinks(), count($data));
@@ -223,11 +218,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityPrivate()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'visibility=private'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['visibility' => 'private']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals($this->refDB->countPrivateLinks(), count($data));
@@ -240,11 +234,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksVisibilityPublic()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'visibility=public'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['visibility' => 'public']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals($this->refDB->countPublicLinks(), count($data));
@@ -260,14 +253,10 @@ class GetLinksTest extends \Shaarli\TestCase
     public function testGetLinksSearchTerm()
     {
         // Only in description - 1 result
-        $request = new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=Tropical'),
-            null,
-            [],
-            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
-        );
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'Tropical']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -275,11 +264,10 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // Only in tags - 1 result
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=tag3'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'tag3']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -287,14 +275,11 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // Multiple results (2)
-        $request = new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=stallman'),
-            null,
-            [],
-            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
-        );
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'stallman']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -304,11 +289,10 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // Multiword - 2 results
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=stallman+software'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'stallman software']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -318,11 +302,10 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // URL encoding
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=' . urlencode('@web')),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => '@web']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -334,11 +317,10 @@ class GetLinksTest extends \Shaarli\TestCase
 
     public function testGetLinksSearchTermNoResult()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=nope'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'nope']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(0, count($data));
@@ -347,11 +329,10 @@ class GetLinksTest extends \Shaarli\TestCase
     public function testGetLinksSearchTags()
     {
         // Single tag
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=dev'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => 'dev']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
@@ -361,11 +342,10 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[1]));
 
         // Multitag + exclude
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=stuff+-gnu')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => 'stuff -gnu']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -373,50 +353,40 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(self::NB_FIELDS_LINK, count($data[0]));
 
         // wildcard: placeholder at the start
-        $request = new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=*Tuff'),
-            null,
-            [],
-            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
-        );
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => '*Tuff']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
         $this->assertEquals(41, $data[0]['id']);
 
         // wildcard: placeholder at the end
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=c*')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => 'c*']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(5, count($data));
         $this->assertEquals(6, $data[0]['id']);
 
         // wildcard: placeholder at the middle
-        $request = new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=w*b'),
-            null,
-            [],
-            ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]
-        );
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => 'w*b']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(4, count($data));
         $this->assertEquals(6, $data[0]['id']);
 
         // wildcard: match all
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=*')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => '*']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(ReferenceLinkDB::$NB_LINKS_TOTAL, count($data));
@@ -424,33 +394,30 @@ class GetLinksTest extends \Shaarli\TestCase
         $this->assertEquals(41, $data[2]['id']);
 
         // wildcard: optional ('*' does not need to expand)
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=*stuff*')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => '*stuff*']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(2, count($data));
         $this->assertEquals(41, $data[0]['id']);
 
         // wildcard: exclusions
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=*a*+-*e*')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => '*a* -*e*']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
         $this->assertEquals(41, $data[0]['id']); // finds '#hashtag' in descr.
 
         // wildcard: exclude all
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchtags=-*'),
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchtags' => '-*']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(0, count($data));
@@ -461,11 +428,10 @@ class GetLinksTest extends \Shaarli\TestCase
      */
     public function testGetLinksSearchTermsAndTags()
     {
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '', 80, '', 'searchterm=poke&searchtags=dev')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
-        $response = $this->controller->getLinks($request, new SlimResponse());
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $query = http_build_query(['searchterm' => 'poke', 'searchtags' => 'dev']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->controller->getLinks($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));

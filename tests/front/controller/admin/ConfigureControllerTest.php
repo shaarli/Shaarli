@@ -10,8 +10,6 @@ use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class ConfigureControllerTest extends TestCase
 {
@@ -22,6 +20,7 @@ class ConfigureControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ConfigureController($this->container);
@@ -35,8 +34,8 @@ class ConfigureControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key) {
@@ -114,12 +113,10 @@ class ConfigureControllerTest extends TestCase
             'thumbnails.mode' => $parameters['enableThumbnails'],
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')
@@ -154,8 +151,8 @@ class ConfigureControllerTest extends TestCase
         $this->container->get('conf')->expects(static::never())->method('set');
         $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -170,12 +167,10 @@ class ConfigureControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -200,11 +195,9 @@ class ConfigureControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['enableThumbnails' => Thumbnailer::MODE_ALL]);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')

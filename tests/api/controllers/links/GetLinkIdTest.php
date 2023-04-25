@@ -13,7 +13,6 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
 
 /**
  * Class GetLinkIdTest
@@ -61,6 +60,7 @@ class GetLinkIdTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -96,17 +96,11 @@ class GetLinkIdTest extends \Shaarli\TestCase
      */
     public function testGetLinkId()
     {
-        // Used by index_url().
-        $_SERVER['SERVER_NAME'] = 'domain.tld';
-        $_SERVER['SERVER_PORT'] = 80;
-        $_SERVER['SCRIPT_NAME'] = '/';
-
         $id = 41;
-        $request = (new FakeRequest(
-            'GET'
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => '80']);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->getLink($request, new SlimResponse(), ['id' => $id]);
+        $response = $this->controller->getLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
@@ -137,8 +131,8 @@ class GetLinkIdTest extends \Shaarli\TestCase
         $this->expectException(\Shaarli\Api\Exceptions\ApiLinkNotFoundException::class);
         $this->expectExceptionMessage('Link not found');
 
-        $request = new FakeRequest();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $this->controller->getLink($request, new SlimResponse(), ['id' => -1]);
+        $this->controller->getLink($request, $this->responseFactory->createResponse(), ['id' => -1]);
     }
 }

@@ -9,7 +9,6 @@ use Shaarli\Formatter\BookmarkMarkdownFormatter;
 use Shaarli\Http\HttpAccess;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class ShaareAddControllerTest extends TestCase
 {
@@ -20,6 +19,7 @@ class ShaareAddControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -34,8 +34,8 @@ class ShaareAddControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $expectedTags = [
             'tag1' => 32,
@@ -73,8 +73,8 @@ class ShaareAddControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $expectedTags = [
             'tag1' => 32,

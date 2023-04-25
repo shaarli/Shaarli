@@ -13,8 +13,7 @@ use Shaarli\Plugin\PluginManager;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
 use Slim\Http\Environment;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
 
 /**
  * Class GetTagNameTest
@@ -63,6 +62,7 @@ class GetTagNameTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -99,12 +99,14 @@ class GetTagNameTest extends \Shaarli\TestCase
     public function testGetTag()
     {
         $tagName = 'gnu';
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->getTag($request, new SlimResponse(), ['tagName' => $tagName]);
+        $response = $this->controller->getTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_TAG, count($data));
@@ -118,12 +120,14 @@ class GetTagNameTest extends \Shaarli\TestCase
     public function testGetTagNotCaseSensitive()
     {
         $tagName = 'sTuff';
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->getTag($request, new SlimResponse(), ['tagName' => $tagName]);
+        $response = $this->controller->getTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_TAG, count($data));
@@ -139,11 +143,9 @@ class GetTagNameTest extends \Shaarli\TestCase
         $this->expectException(\Shaarli\Api\Exceptions\ApiTagNotFoundException::class);
         $this->expectExceptionMessage('Tag not found');
 
-        $request = (new FakeRequest(
-            'GET',
-            new Uri('', '')
-        ))->withServerParams(['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $this->controller->getTag($request, new SlimResponse(), ['tagName' => 'nopenope']);
+        $this->controller->getTag($request, $this->responseFactory->createResponse(), ['tagName' => 'nopenope']);
     }
 }

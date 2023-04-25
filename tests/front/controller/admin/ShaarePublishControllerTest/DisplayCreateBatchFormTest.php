@@ -10,8 +10,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Http\MetadataRetriever;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class DisplayCreateBatchFormTest extends TestCase
 {
@@ -22,6 +20,7 @@ class DisplayCreateBatchFormTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -41,11 +40,9 @@ class DisplayCreateBatchFormTest extends TestCase
             'https://domain3.tld/url3',
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody(['urls' => implode(PHP_EOL, $urls)]);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['urls' => implode(PHP_EOL, $urls)]);
+        $response = $this->responseFactory->createResponse();
 
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);

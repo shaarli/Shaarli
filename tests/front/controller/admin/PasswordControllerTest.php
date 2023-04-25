@@ -10,8 +10,6 @@ use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class PasswordControllerTest extends TestCase
 {
@@ -25,6 +23,7 @@ class PasswordControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
         $this->assignTemplateVars($this->assignedVariables);
 
@@ -36,8 +35,8 @@ class PasswordControllerTest extends TestCase
      */
     public function testGetPage(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -51,11 +50,9 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordDefault(): void
     {
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withParsedBody(['oldpassword' => 'old', 'setpassword' => 'new']);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'old', 'setpassword' => 'new']);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
@@ -88,11 +85,9 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordWrongOldPassword(): void
     {
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withParsedBody(['oldpassword' => 'wrong', 'setpassword' => 'new']);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'wrong', 'setpassword' => 'new']);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
@@ -130,8 +125,8 @@ class PasswordControllerTest extends TestCase
         $this->container->get('conf')->expects(static::never())->method('set');
         $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -152,11 +147,10 @@ class PasswordControllerTest extends TestCase
         $this->container->get('conf')->expects(static::never())->method('set');
         $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '')
-        ))->withParsedBody(['oldpassword' => 'old', 'setpassword' => '']);
-        $response = new SlimResponse();
+
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'old', 'setpassword' => '']);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->change($request, $response);
 
@@ -173,8 +167,8 @@ class PasswordControllerTest extends TestCase
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->with('security.open_shaarli')->willReturn(true);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(OpenShaarliPasswordException::class);
 

@@ -10,7 +10,6 @@ use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 /**
  * Test GET /admin/shaare/private/{hash}
@@ -24,6 +23,7 @@ class SharePrivateTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -36,8 +36,8 @@ class SharePrivateTest extends TestCase
     public function testSharePrivateWithNewPrivateBookmark(): void
     {
         $hash = 'abcdcef';
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -76,8 +76,8 @@ class SharePrivateTest extends TestCase
     {
         $hash = 'abcdcef';
         $existingKey = 'this is a private key';
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -110,8 +110,8 @@ class SharePrivateTest extends TestCase
     public function testSharePrivateWithPublicBookmark(): void
     {
         $hash = 'abcdcef';
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)

@@ -13,8 +13,6 @@ use Shaarli\Security\CookieManager;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class LoginControllerTest extends TestCase
 {
@@ -25,6 +23,7 @@ class LoginControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('cookieManager', $this->createMock(CookieManager::class));
@@ -38,13 +37,9 @@ class LoginControllerTest extends TestCase
      */
     public function testValidControllerInvoke(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(
-                ['returnurl' => '> referer']
-            ))
-        ));
-        $response = new SlimResponse();
+        $query = http_build_query(['returnurl' => '> referer']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $assignedVariables = [];
         $this->container->get('pageBuilder')
@@ -75,14 +70,11 @@ class LoginControllerTest extends TestCase
     public function testValidControllerInvokeWithUserName(): void
     {
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(
-                ['login' => 'myUser>']
-            ))
-        ))->withServerParams(['HTTP_REFERER' => '> referer']);
+        $serverParams = ['HTTP_REFERER' => '> referer'];
+        $query = http_build_query(['login' => 'myUser>']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $assignedVariables = [];
         $this->container->get('pageBuilder')
@@ -113,8 +105,8 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerWhileLoggedIn(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->expects(static::once())->method('isLoggedIn')->willReturn(true);
 
@@ -130,8 +122,8 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerOpenShaarli(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $conf = $this->createMock(ConfigManager::class);
         $conf->method('get')->willReturnCallback(function (string $parameter, $default) {
@@ -154,8 +146,8 @@ class LoginControllerTest extends TestCase
      */
     public function testLoginControllerWhileBanned(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(false);
         $this->container->get('loginManager')->method('canLogin')->willReturn(false);
@@ -174,16 +166,17 @@ class LoginControllerTest extends TestCase
             'login' => 'bob',
             'password' => 'pass',
         ];
-        $request = (new FakeRequest())->withParsedBody($parameters)
-            ->withServerParams([
+        $serverParams = [
                 'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
+                'SERVER_PORT' => 80,
                 'REQUEST_URI' => '/subfolder/daily-rss',
                 'REMOTE_ADDR' => '1.2.3.4',
                 'SCRIPT_NAME' => '/subfolder/index.php',
-            ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('canLogin')->willReturn(true);
         $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
@@ -219,15 +212,17 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'returnurl' => 'http://shaarli/subfolder/admin/shaare',
         ];
-        $request = (new FakeRequest())->withParsedBody($parameters)
-            ->withServerParams([
+        $serverParams = [
                 'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
+                'SERVER_PORT' => 80,
                 'REQUEST_URI' => '/subfolder/daily-rss',
                 'REMOTE_ADDR' => '1.2.3.4',
                 'SCRIPT_NAME' => '/subfolder/index.php',
-            ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('canLogin')->willReturn(true);
         $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
@@ -248,15 +243,17 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'longlastingsession' => true,
         ];
-        $request = (new FakeRequest())->withParsedBody($parameters)
-            ->withServerParams([
+        $serverParams = [
                 'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
+                'SERVER_PORT' => 80,
                 'REQUEST_URI' => '/subfolder/daily-rss',
                 'REMOTE_ADDR' => '1.2.3.4',
                 'SCRIPT_NAME' => '/subfolder/index.php',
-            ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('canLogin')->willReturn(true);
         $this->container->get('loginManager')->expects(static::once())->method('handleSuccessfulLogin');
@@ -298,15 +295,16 @@ class LoginControllerTest extends TestCase
         $parameters = [
             'returnurl' => 'http://shaarli/subfolder/admin/shaare',
         ];
-        $request = (new FakeRequest())->withParsedBody($parameters)
-            ->withServerParams([
+        $serverParams = [
                 'SERVER_NAME' => 'shaarli',
-                'SERVER_PORT' => '80',
+                'SERVER_PORT' => 80,
                 'REQUEST_URI' => '/subfolder/daily-rss',
                 'REMOTE_ADDR' => '1.2.3.4',
                 'SCRIPT_NAME' => '/subfolder/index.php',
-            ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('canLogin')->willReturn(true);
         $this->container->get('loginManager')->expects(static::once())->method('handleFailedLogin');
@@ -329,8 +327,8 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginWrongToken(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
@@ -345,8 +343,8 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginAlreadyLoggedIn(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
         $this->container->get('loginManager')->expects(static::never())->method('handleSuccessfulLogin');
@@ -363,8 +361,8 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginInOpenShaarli(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('conf', $this->createMock(ConfigManager::class));
         $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $value) {
@@ -385,8 +383,8 @@ class LoginControllerTest extends TestCase
      */
     public function testProcessLoginWhileBanned(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('loginManager')->method('canLogin')->willReturn(false);
         $this->container->get('loginManager')->expects(static::never())->method('handleSuccessfulLogin');

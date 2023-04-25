@@ -15,8 +15,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class ChangeVisibilityBookmarkTest extends TestCase
 {
@@ -27,6 +25,7 @@ class ChangeVisibilityBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -41,12 +40,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setPrivate(false);
@@ -90,12 +85,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123', 'newVisibility' => 'public'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true);
 
@@ -136,12 +127,11 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query)
+
+
+        ;
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setPrivate(true);
@@ -183,12 +173,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123 456 789', 'newVisibility' => 'private'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(false),
@@ -243,12 +229,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -286,12 +268,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123 456 789', 'newVisibility' => 'public'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true),
@@ -348,12 +326,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => 'nope not an ID', 'newVisibility' => 'private'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -372,8 +346,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
      */
     public function testChangeVisibilityEmptyId(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -395,12 +369,8 @@ class ChangeVisibilityBookmarkTest extends TestCase
         $parameters = ['id' => '123', 'newVisibility' => 'invalid'];
 
         $query = http_build_query($parameters);
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-                ->withQuery($query)
-        ));
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())

@@ -6,7 +6,6 @@ namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
 
 class ToolsControllerTest extends TestCase
 {
@@ -17,6 +16,7 @@ class ToolsControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ToolsController($this->container);
@@ -24,12 +24,13 @@ class ToolsControllerTest extends TestCase
 
     public function testDefaultInvokeWithHttps(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => 443,
             'HTTPS' => 'on',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -45,11 +46,12 @@ class ToolsControllerTest extends TestCase
 
     public function testDefaultInvokeWithoutHttps(): void
     {
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => 80
-        ]);
-        $response = new SlimResponse();
+            'SERVER_PORT' => 80,
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];

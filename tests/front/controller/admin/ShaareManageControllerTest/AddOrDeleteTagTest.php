@@ -14,8 +14,6 @@ use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class AddOrDeleteTagTest extends TestCase
 {
@@ -26,6 +24,7 @@ class AddOrDeleteTagTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
@@ -39,12 +38,10 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123', 'tag' => 'newtag', 'action' => 'add'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
         $bookmark = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second');
@@ -88,12 +85,10 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123 456', 'tag' => 'newtag@othertag', 'action' => 'add'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
         $bookmark1 = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second');
@@ -142,11 +137,9 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123', 'tag' => 'second', 'action' => 'delete'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
         $bookmark = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second third');
@@ -189,11 +182,9 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123 456', 'tag' => 'second@first', 'action' => 'delete'];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
         $bookmark1 = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second third other');
@@ -242,11 +233,9 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutId(): void
     {
         $parameters = ['tag' => 'newtag', 'action' => 'add'];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -266,11 +255,9 @@ class AddOrDeleteTagTest extends TestCase
     public function testDeleteTagWithoutId(): void
     {
         $parameters = ['tag' => 'newtag', 'action' => 'delete'];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -290,11 +277,9 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutAction(): void
     {
         $parameters = ['id' => '123', 'tag' => 'newtag'];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -314,11 +299,9 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutValue(): void
     {
         $parameters = ['id' => '123', 'tag' => '', 'action' => 'add'];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -338,11 +321,9 @@ class AddOrDeleteTagTest extends TestCase
     public function testDeleteTagWithoutValue(): void
     {
         $parameters = ['id' => '123', 'tag' => '', 'action' => 'delete'];
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters);
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())

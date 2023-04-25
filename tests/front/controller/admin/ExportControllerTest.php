@@ -11,8 +11,6 @@ use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class ExportControllerTest extends TestCase
 {
@@ -23,6 +21,7 @@ class ExportControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ExportController($this->container);
@@ -36,8 +35,8 @@ class ExportControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -60,15 +59,14 @@ class ExportControllerTest extends TestCase
             'prepend_note_url' => 'on',
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setUrl('http://link1.tld')->setTitle('Title 1'),
@@ -120,8 +118,8 @@ class ExportControllerTest extends TestCase
      */
     public function testExportSelectionMissing(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->expects(static::once())
@@ -144,15 +142,14 @@ class ExportControllerTest extends TestCase
             'selection' => 'all',
         ];
 
-        $request = (new FakeRequest(
-            'POST',
-            new Uri('', '', 80, '')
-        ))->withParsedBody($parameters)->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
             'SCRIPT_NAME' => '/subfolder/index.php',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
         $this->container->get('netscapeBookmarkUtils')

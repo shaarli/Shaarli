@@ -7,8 +7,6 @@ namespace Shaarli\Front\Controller\Visitor;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class TagCloudControllerTest extends TestCase
 {
@@ -19,6 +17,7 @@ class TagCloudControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new TagCloudController($this->container);
@@ -36,8 +35,8 @@ class TagCloudControllerTest extends TestCase
         ];
         $expectedOrder = ['abc', 'def', 'ghi'];
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -95,10 +94,9 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidCloudControllerInvokeWithParameters(): void
     {
-        $request = new FakeRequest();
-        $request = new FakeRequest('GET', (new Uri('', ''))
-            ->withQuery(http_build_query(['searchtags' => 'ghi@def'])));
-        $response = new SlimResponse();
+        $query = http_build_query(['searchtags' => 'ghi@def']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -154,8 +152,8 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyCloud(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -208,8 +206,8 @@ class TagCloudControllerTest extends TestCase
             'ghi' => 1,
         ];
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -264,10 +262,10 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidListControllerInvokeWithParameters(): void
     {
-        $request = new FakeRequest('GET', (new Uri('', ''))
-            ->withQuery(http_build_query(['searchtags' => 'ghi@def', 'sort' => 'alpha'])));
+        $query = http_build_query(['searchtags' => 'ghi@def', 'sort' => 'alpha']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -319,8 +317,8 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyList(): void
     {
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];

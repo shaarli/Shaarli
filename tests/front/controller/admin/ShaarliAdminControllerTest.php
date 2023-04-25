@@ -25,6 +25,7 @@ class ShaarliAdminControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new class ($this->container) extends ShaarliAdminController
@@ -58,9 +59,8 @@ class ShaarliAdminControllerTest extends TestCase
     {
         $token = '12345';
 
-        $request = (new FakeRequest())->withParsedBody([
-            'token' => $token
-        ]);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['token' => $token]);
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')->method('checkToken')->with($token)->willReturn(true);
@@ -75,9 +75,8 @@ class ShaarliAdminControllerTest extends TestCase
     {
         $token = '12345';
 
-        $request = (new FakeRequest())->withParsedBody([
-            'token' => $token
-        ]);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['token' => $token]);
 
         $this->container->set('sessionManager', $this->createMock(SessionManager::class));
         $this->container->get('sessionManager')->method('checkToken')->with($token)->willReturn(false);

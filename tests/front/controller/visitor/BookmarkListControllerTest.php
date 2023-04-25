@@ -12,8 +12,6 @@ use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class BookmarkListControllerTest extends TestCase
 {
@@ -24,6 +22,7 @@ class BookmarkListControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new BookmarkListController($this->container);
@@ -37,11 +36,12 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest())->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -108,14 +108,13 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery('page=2')
-        ))->withServerParams([
+        $query = http_build_query(['page' => 2]);
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -177,17 +176,14 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(
-                http_build_query(['searchtags' => 'abc@def', 'searchterm' => 'ghi jkl'])
-            )
-        ))->withServerParams([
+        $query = http_build_query(['searchtags' => 'abc@def', 'searchterm' => 'ghi jkl']);
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $response = new SlimResponse();
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('sessionManager')
             ->method('getSessionParameter')
@@ -243,14 +239,12 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -284,8 +278,8 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = new FakeRequest();
-        $response = new SlimResponse();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -316,14 +310,13 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['key' => $privateKey]))
-        ))->withServerParams([
+        $query = http_build_query(['key' => $privateKey]);
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->get('bookmarkService')
             ->expects(static::once())
@@ -345,14 +338,12 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromLinkList(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('loginManager', $this->createMock(LoginManager::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
@@ -407,14 +398,12 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromPermalink(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('loginManager', $this->createMock(LoginManager::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
@@ -456,14 +445,12 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromPermalinkAsync(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
             'SERVER_NAME' => 'shaarli',
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('loginManager', $this->createMock(LoginManager::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
@@ -504,15 +491,11 @@ class BookmarkListControllerTest extends TestCase
     public function testLegacyControllerPermalink(): void
     {
         $hash = 'abcdef';
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))
-        ))->withServerParams([
-            'SERVER_PORT' => 80,
-            'SERVER_NAME' => 'shaarli',
+        $serverParams = [
             'QUERY_STRING' => $hash,
-        ]);
-        $response = new SlimResponse();
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -525,14 +508,13 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testLegacyControllerDoPage(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['do' => 'picwall']))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
-            'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['do' => 'picwall']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -545,14 +527,13 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testLegacyControllerUnknownDoPage(): void
     {
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['do' => 'nope']))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
-            'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['do' => 'nope']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -566,14 +547,13 @@ class BookmarkListControllerTest extends TestCase
     public function testLegacyControllerGetParameter(): void
     {
         $url = 'http://url.tld';
-        $request = (new FakeRequest(
-            'GET',
-            (new Uri('', ''))->withQuery(http_build_query(['post' => $url]))
-        ))->withServerParams([
+        $serverParams = [
             'SERVER_PORT' => 80,
-            'SERVER_NAME' => 'shaarli'
-        ]);
-        $response = new SlimResponse();
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['post' => $url]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $this->container->set('loginManager', $this->createMock(LoginManager::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);

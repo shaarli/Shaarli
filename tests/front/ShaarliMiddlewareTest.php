@@ -6,6 +6,8 @@ namespace Shaarli\Front;
 
 use DI\Container as DIContainer;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\LoginBannedException;
 use Shaarli\Front\Exception\UnauthorizedException;
@@ -14,10 +16,8 @@ use Shaarli\Render\PageCacheManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
-use Shaarli\Tests\Utils\FakeRequestHandler;
+use Shaarli\Tests\Utils\RequestHandlerFactory;
 use Shaarli\Updater\Updater;
-use Slim\Psr7\Response as SlimResponse;
-use Slim\Psr7\Uri;
 
 class ShaarliMiddlewareTest extends TestCase
 {
@@ -29,8 +29,11 @@ class ShaarliMiddlewareTest extends TestCase
     /** @var ShaarliMiddleware  */
     protected $middleware;
 
+    /** @var RequestHandlerFactory */
+    private $requestHandlerFactory;
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->container = new DIContainer();
 
         touch(static::TMP_MOCK_FILE);
@@ -44,6 +47,7 @@ class ShaarliMiddlewareTest extends TestCase
         $this->container->set('basePath', '/subfolder');
 
         $this->middleware = new ShaarliMiddleware($this->container);
+        $this->requestHandlerFactory = new RequestHandlerFactory();
     }
 
     public function tearDown(): void
@@ -56,13 +60,16 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecution(): void
     {
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli'))->withPath('/subfolder/path')
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/subfolder/path');
+
+        $responseFactory = $this->responseFactory;
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+                return $responseFactory->createResponse()->withStatus(418); // I'm a tea pot
+            }
         );
 
-        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot
-        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
+        $result = ($this->middleware)($request, $requestHandler);
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(418, $result->getStatusCode());
@@ -74,17 +81,14 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithFrontException(): void
     {
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli'))->withPath('/subfolder/path')
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli/subfolder/path');
+
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) {
+                $exception = new LoginBannedException();
+                throw new $exception();
+            }
         );
-
-        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot
-        $callback = function ($request) {
-            $exception = new LoginBannedException();
-
-            throw new $exception();
-        };
 
         $pageBuilder = $this->createMock(PageBuilder::class);
         $pageBuilder->method('render')->willReturnCallback(function (string $message): string {
@@ -93,7 +97,7 @@ class ShaarliMiddlewareTest extends TestCase
         $this->container->set('pageBuilder', $pageBuilder);
 
         $this->expectException(LoginBannedException::class);
-        ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
+        ($this->middleware)($request, $requestHandler);
     }
 
     /**
@@ -102,20 +106,17 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithUnauthorizedException(): void
     {
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
-            null,
-            [],
-            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
+        $serverParams = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $request = $this->serverRequestFactory
+            ->createServerRequest('GET', 'http://shaarli/subfolder/path', $serverParams);
+
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) {
+                throw new UnauthorizedException();
+            }
         );
 
-        $fakeResponse = new SlimResponse();
-        $callback = function ($request) {
-            throw new UnauthorizedException();
-        };
-
-        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
+        $result = ($this->middleware)($request, $requestHandler);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(
@@ -130,20 +131,17 @@ class ShaarliMiddlewareTest extends TestCase
      */
     public function testMiddlewareExecutionWithServerException(): void
     {
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
-            null,
-            [],
-            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
-        );
+        $serverParams = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $request = $this->serverRequestFactory
+            ->createServerRequest('GET', 'http://shaarli/subfolder/path', $serverParams);
 
-        $fakeResponse = new SlimResponse();
         $dummyException = new class () extends \Exception {
         };
-        $callback = function ($request) use ($dummyException) {
-            throw $dummyException;
-        };
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($dummyException) {
+                throw $dummyException;
+            }
+        );
 
         $pageBuilder = $this->createMock(PageBuilder::class);
         $pageBuilder->method('render')->willReturnCallback(function (string $message): string {
@@ -159,20 +157,21 @@ class ShaarliMiddlewareTest extends TestCase
         $this->container->set('pageBuilder', $pageBuilder);
 
         $this->expectException(get_class($dummyException));
-        ($this->middleware)($request, new FakeRequestHandler($fakeResponse, $callback));
+        ($this->middleware)($request, $requestHandler);
     }
 
     public function testMiddlewareExecutionWithUpdates(): void
     {
-        $request = new FakeRequest(
-            'GET',
-            (new Uri('http', 'shaarli'))->withPath('/subfolder/path'),
-            null,
-            [],
-            ['REQUEST_URI' => 'http://shaarli/subfolder/path']
-        );
+        $serverParams = ['REQUEST_URI' => 'http://shaarli/subfolder/path'];
+        $request = $this->serverRequestFactory
+            ->createServerRequest('GET', 'http://shaarli/subfolder/path', $serverParams);
 
-        $fakeResponse = (new SlimResponse())->withStatus(418); // I'm a tea pot;
+        $responseFactory = $this->responseFactory;
+        $requestHandler = $this->requestHandlerFactory->createRequestHandler(
+            function (ServerRequestInterface $request, RequestHandlerInterface $next) use ($responseFactory) {
+                return $responseFactory->createResponse()->withStatus(418); // I'm a tea pot;
+            }
+        );
 
         $this->container->set('loginManager', $this->createMock(LoginManager::class));
         $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
@@ -199,7 +198,7 @@ class ShaarliMiddlewareTest extends TestCase
             ->with('resource.updates', $updates)
         ;
 
-        $result = ($this->middleware)($request, new FakeRequestHandler($fakeResponse));
+        $result = ($this->middleware)($request, $requestHandler);
 
         static::assertInstanceOf(Response::class, $result);
         static::assertSame(418, $result->getStatusCode());
