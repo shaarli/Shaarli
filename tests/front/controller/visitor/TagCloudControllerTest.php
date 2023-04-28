@@ -263,7 +263,7 @@ class TagCloudControllerTest extends TestCase
     public function testValidListControllerInvokeWithParameters(): void
     {
         $query = http_build_query(['searchtags' => 'ghi@def', 'sort' => 'alpha']);
-        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
         $response = $this->responseFactory->createResponse();
 
