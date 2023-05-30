@@ -99,9 +99,10 @@ class Languages
         $this->translator->loadDomain(self::DEFAULT_DOMAIN, 'inc/languages');
 
         // Default extension translation from the current theme
-        $themeTransFolder = rtrim($this->conf->get('raintpl_tpl'), '/') . '/' . $this->conf->get('theme') . '/language';
+        $theme = $this->conf->get('resource.theme');
+        $themeTransFolder = rtrim($this->conf->get('resource.raintpl_tpl'), '/') . '/' . $theme . '/language';
         if (is_dir($themeTransFolder)) {
-            $this->translator->loadDomain($this->conf->get('theme'), $themeTransFolder, false);
+            $this->translator->loadDomain($theme, $themeTransFolder, false);
         }
 
         foreach ($this->conf->get('translation.extensions', []) as $domain => $translationPath) {
@@ -131,8 +132,8 @@ class Languages
         }
 
         // Default extension translation from the current theme
-        $theme = $this->conf->get('theme');
-        $themeTransFolder = rtrim($this->conf->get('raintpl_tpl'), '/') . '/' . $theme . '/language';
+        $theme = $this->conf->get('resource.theme');
+        $themeTransFolder = rtrim($this->conf->get('resource.raintpl_tpl'), '/') . '/' . $theme . '/language';
         if (is_dir($themeTransFolder)) {
             try {
                 $translations = Translations::fromPoFile(
