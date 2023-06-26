@@ -35,6 +35,7 @@ class Info extends ApiController
                 'timezone' => $this->conf->get('general.timezone', 'UTC'),
                 'enabled_plugins' => $this->conf->get('general.enabled_plugins', []),
                 'default_private_links' => $this->conf->get('privacy.default_private_links', false),
+                'tags_separator' => $this->conf->get('general.tags_separator', ' '),
             ],
         ];
 
