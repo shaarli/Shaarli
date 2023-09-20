@@ -32,22 +32,22 @@ LABEL maintainer="Shaarli Community"
 RUN apk --update --no-cache add \
         ca-certificates \
         nginx \
-        php8 \
-        php8-ctype \
-        php8-curl \
-        php8-fpm \
-        php8-gd \
-        php8-gettext \
-        php8-iconv \
-        php8-intl \
-        php8-json \
-        php8-ldap \
-        php8-mbstring \
-        php8-openssl \
-        php8-session \
-        php8-xml \
-        php8-simplexml \
-        php8-zlib \
+        php82 \
+        php82-ctype \
+        php82-curl \
+        php82-fpm \
+        php82-gd \
+        php82-gettext \
+        php82-iconv \
+        php82-intl \
+        php82-json \
+        php82-ldap \
+        php82-mbstring \
+        php82-openssl \
+        php82-session \
+        php82-xml \
+        php82-simplexml \
+        php82-zlib \
         s6
 
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
