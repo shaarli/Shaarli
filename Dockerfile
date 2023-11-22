@@ -4,9 +4,8 @@
 FROM python:3-alpine as docs
 ADD . /usr/src/app/shaarli
 RUN cd /usr/src/app/shaarli \
-    && apk add --no-cache gcc musl-dev \
-    && pip install --no-cache-dir mkdocs \
-    && mkdocs build --clean
+    && apk add --no-cache gcc musl-dev make bash \
+    && make htmldoc
 
 # Stage 2:
 # - Resolve PHP dependencies with Composer
@@ -26,7 +25,7 @@ RUN cd shaarli \
 
 # Stage 4:
 # - Shaarli image
-FROM alpine:3.16
+FROM alpine:3.16.7
 LABEL maintainer="Shaarli Community"
 
 RUN apk --update --no-cache add \

@@ -168,6 +168,10 @@ class BookmarkIO
      */
     public function checkDiskSpace(string $data): bool
     {
+        if (function_exists('disk_free_space') === false) {
+            return true;
+        }
+
         return disk_free_space(dirname($this->datastore)) > (strlen($data) + 1024 * 500);
     }
 }

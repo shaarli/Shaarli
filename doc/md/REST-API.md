@@ -2,9 +2,9 @@
 
 ## Server requirements
 
-See the **[REST API documentation](http://shaarli.github.io/api-documentation/)** for a list of available endpoints and parameters.
+See the **[REST API documentation](https://shaarli.github.io/api-documentation/)** for a list of available endpoints and parameters.
 
-Please ensure that your server meets the requirements and is properly [configured](Server-configuration):
+Please ensure that your server meets the requirements and is properly [configured](Server-configuration.md):
 
 - URL rewriting is enabled (see specific Apache and Nginx sections)
 - the server's timezone is properly defined
@@ -15,12 +15,12 @@ The host where the API client is invoked should also be synchronized with NTP, s
 
 ## Clients and examples
 
-- **[python-shaarli-client](https://github.com/shaarli/python-shaarli-client)** - the reference API client ([Documentation](http://python-shaarli-client.readthedocs.io/en/latest/))
+- **[python-shaarli-client](https://github.com/shaarli/python-shaarli-client)** - the reference API client ([Documentation](https://python-shaarli-client.readthedocs.io/en/latest/))
 - [shaarli-client](https://www.npmjs.com/package/shaarli-client) - NodeJs client ([source code](https://github.com/laBecasse/shaarli-client)) by [laBecasse](https://github.com/laBecasse)
-- [Android client example with Kotlin](https://gitlab.com/snippets/1665808) by [Braincoke](https://github.com/Braincoke)
+- [Android client example with Kotlin](https://gitlab.com/-/snippets/1665808) by [Braincoke](https://github.com/Braincoke)
 
 
-This example uses the [PHP cURL](http://php.net/manual/en/book.curl.php) library.
+This example uses the [PHP cURL](https://www.php.net/manual/en/book.curl.php) library.
 
 ```php
 <?php
@@ -99,7 +99,7 @@ ewogICAgICAgICJ0eXAiOiAiSldUIiwKICAgICAgICAiYWxnIjogIkhTNTEyIgogICAgfQ==
 
 ##### Payload
 
-Token expiration: To avoid infinite token validity, JWT tokens must include their creation date in UNIX timestamp format (timezone independent - UTC) under the key `iat` (issued at) field ([1](https://tools.ietf.org/html/rfc7519#section-4.1.6)). This token will be valid during **9 minutes**.
+Token expiration: To avoid infinite token validity, JWT tokens must include their creation date in UNIX timestamp format (timezone independent - UTC) under the key `iat` (issued at) field ([1](https://datatracker.ietf.org/doc/html/rfc7519)). This token will be valid during **9 minutes**.
 
 ```json
 {
@@ -142,7 +142,7 @@ to get the actual error message in the HTTP response body with:
 ## References
 
 - [jwt.io](https://jwt.io) (including a list of client per language).
-- [RFC - JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519)
+- [RFC - JSON Web Token (JWT)](https://datatracker.ietf.org/doc/html/rfc7519)
 - [JSON Web Tokens (JWT) vs Sessions](https://float-middle.com/json-web-tokens-jwt-vs-sessions/), [HackerNews thread](https://news.ycombinator.com/item?id=11929267)
 
 

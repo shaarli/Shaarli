@@ -1,8 +1,8 @@
-  1206	ArthurHoaro <arthur@hoa.ro>
+  1216	ArthurHoaro <arthur@hoa.ro>
+   456	nodiscc <nodiscc@gmail.com>
    405	VirtualTam <virtualtam@flibidi.net>
-   384	nodiscc <nodiscc@gmail.com>
     56	Sébastien Sauvage <sebsauvage@sebsauvage.net>
-    23	dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+    27	dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
     19	Keith Carangelo <mail@kcaran.com>
     16	Luce Carević <lcarevic@access42.net>
     15	Florian Eula <eula.florian@gmail.com>
@@ -11,53 +11,49 @@
      9	Lucas Cimon <lucas.cimon@gmail.com>
      9	Willi Eggeling <thewilli@gmail.com>
      8	Christophe HENRY <christophe.henry@sbgodin.fr>
+     6	B. van Berkum <dev@dotmpe.com>
      6	Immánuel Fodor <immanuelfactor+github@gmail.com>
      6	YFdyh000 <yfdyh000@gmail.com>
      6	kalvn <kalvnthereal@gmail.com>
-     6	B. van Berkum <dev@dotmpe.com>
      6	llune <llune@users.noreply.github.com>
      5	Mark Schmitz <kramred@gmail.com>
      5	Sébastien NOBILI <code@pipoprods.org>
      4	Alexandre Alapetite <alexandre@alapetite.fr>
-     4	yude <yudesleepy@gmail.com>
      4	David Sferruzza <david.sferruzza@gmail.com>
+     4	yude <yudesleepy@gmail.com>
+     3	Agurato <mail.vmonot@gmail.com>
+     3	Christoph Stoettner <christoph.stoettner@stoeps.de>
+     3	Olivier <bourreauolivier@gmail.com>
      3	Teromene <teromene@teromene.fr>
      3	yudete <yu@yude.moe>
-     3	Agurato <mail.vmonot@gmail.com>
-     3	Olivier <bourreauolivier@gmail.com>
-     3	Christoph Stoettner <christoph.stoettner@stoeps.de>
+     2	Alexander Railean <alexandr.railean@arculus.de>
+     2	Alexandre G.-Raymond <alex@ndre.gr>
+     2	Chris Kuethe <chris.kuethe@gmail.com>
+     2	Doug Breaux <25640850+dougbreaux@users.noreply.github.com>
      2	Felix Bartels <felix@host-consultants.de>
+     2	Ganesh Kandu <kanduganesh@gmail.com>
+     2	Gregory <gregory@nosheep.fr>
+     2	Guillaume Virlet <github@virlet.org>
+     2	Knah Tsaeb <Knah-Tsaeb@knah-tsaeb.org>
      2	Mathieu Chabanon <git@matchab.fr>
      2	Miloš Jovanović <mjovanovic@gmail.com>
      2	Neros <contact@neros.fr>
-     2	Alexandre G.-Raymond <alex@ndre.gr>
      2	Qwerty <champlywood@free.fr>
-     2	Guillaume Virlet <github@virlet.org>
      2	Sebastien Wains <sebw@users.noreply.github.com>
      2	Stephen Muth <smuth4@gmail.com>
      2	Timo Van Neerden <fire@lehollandaisvolant.net>
-     2	Alexander Railean <alexandr.railean@arculus.de>
-     2	Doug Breaux <25640850+dougbreaux@users.noreply.github.com>
      2	flow.gunso <flow.gunso@gmail.com>
-     2	Chris Kuethe <chris.kuethe@gmail.com>
-     2	Ganesh Kandu <kanduganesh@gmail.com>
      2	julienCXX <software@chmodplusx.eu>
-     2	Knah Tsaeb <Knah-Tsaeb@knah-tsaeb.org>
      2	philipp-r <philipp-r@users.noreply.github.com>
      2	pips <pips@e5150.fr>
      2	prog-it <pash.vld@gmail.com>
      2	trailjeep <trailjeep@gmail.com>
-     1	leyrer <gitlab@leyrer.priv.at>
-     1	locness3 <37651007+locness3@users.noreply.github.com>
-     1	owen bell <66233223+xfnw@users.noreply.github.com>
-     1	philipp <philipp@philipp.PC.Ubuntu>
-     1	rfolo9li <50079896+rfolo9li@users.noreply.github.com>
-     1	sprak3000 <sprak3000+github@gmail.com>
-     1	yudejp <i@yude.jp>
-     1	Rajat Hans <rajathans9@gmail.com>
+     1	Adrien Oliva <adrien.oliva@yapbreak.fr>
      1	Adrien le Maire <adrien@alemaire.be>
      1	Ajabep <ajabep@users.noreply.github.com>
      1	Alexis J <alexis@effingo.be>
+     1	Alistair Young <avatar@arkane-systems.net>
+     1	Amadeous <amadeous@users.noreply.github.com>
      1	Angristan <angristan@users.noreply.github.com>
      1	Bish Erbas <42714627+bisherbas@users.noreply.github.com>
      1	BoboTiG <bobotig@gmail.com>
@@ -66,6 +62,7 @@
      1	Buster One <37770318+buster-one@users.noreply.github.com>
      1	D Low <daniellowtw@gmail.com>
      1	Daniel Jakots <vigdis@chown.me>
+     1	David <dajare@gmail.com>
      1	David Foucher <dev@tyjak.net>
      1	Denis Renning <denis@devtty.de>
      1	Dennis Verspuij <dennisverspuij@users.noreply.github.com>
@@ -75,7 +72,6 @@
      1	Florian Voigt <flvoigt@me.com>
      1	Franck Kerbiriou <FranckKe@users.noreply.github.com>
      1	Gary Marigliano <gmarigliano93@gmail.com>
-     1	Gregory <gregory@nosheep.fr>
      1	Hazhar Galeh <78073762+hazhargaleh@users.noreply.github.com>
      1	Hg <dev@indigo.re>
      1	Jens Kubieziel <github@kubieziel.de>
@@ -90,16 +86,26 @@
      1	Mark Gerarts <mark.gerarts@gmail.com>
      1	Marsup <marsup@gmail.com>
      1	Nicolas Friedli <nicolas@theologique.ch>
+     1	Nicolas Le Gaillart <nicolas@legaillart.fr>
      1	Paul van den Burg <github@paulvandenburg.nl>
-     1	Adrien Oliva <adrien.oliva@yapbreak.fr>
+     1	Rajat Hans <rajathans9@gmail.com>
      1	Sbgodin <Sbgodin@users.noreply.github.com>
      1	ToM <tom@leloop.org>
      1	TsT <tst2005@gmail.com>
      1	agentcobra <agentcobra@free.fr>
      1	aguy <aguytech@users.noreply.github.com>
+     1	bschwede <bschwede@users.noreply.github.com>
      1	bschwede <gummibando@gmx.net>
+     1	clach04 <clach04@gmail.com>
      1	dimtion <zizou.xena@gmail.com>
      1	durcheinandr <jochen@durcheinandr.de>
      1	heimpogo <hypertexthome@googlemail.com>
      1	jalr <mail@jalr.de>
      1	lapineige <lapineige@users.noreply.github.com>
+     1	leyrer <gitlab@leyrer.priv.at>
+     1	locness3 <37651007+locness3@users.noreply.github.com>
+     1	owen bell <66233223+xfnw@users.noreply.github.com>
+     1	philipp <philipp@philipp.PC.Ubuntu>
+     1	rfolo9li <50079896+rfolo9li@users.noreply.github.com>
+     1	sprak3000 <sprak3000+github@gmail.com>
+     1	yudejp <i@yude.jp>

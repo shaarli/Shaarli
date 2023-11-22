@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+        php-versions: ['7.4', '8.0', '8.1', '8.2']
     name: PHP ${{ matrix.php-versions }}
     steps:
       - name: Set locales
@@ -93,8 +93,14 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install dependencies
-        run: pip install mkdocs
-
       - name: Build documentation
-        run: mkdocs build --clean
+        run: make htmldoc
+
+  trivy-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run trivy scanner on repository (non-blocking)
+        run: make test_trivy_repo TRIVY_EXIT_CODE=0

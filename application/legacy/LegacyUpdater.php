@@ -438,7 +438,7 @@ class LegacyUpdater
 
         // Get latest branch major version digit
         $latestVersion = ApplicationUtils::getLatestGitVersionCode(
-            'https://raw.githubusercontent.com/shaarli/Shaarli/latest/shaarli_version.php',
+            'https://raw.githubusercontent.com/shaarli/Shaarli/release/shaarli_version.php',
             5
         );
         if (preg_match('/(\d+)\.\d+$/', $latestVersion, $matches) === false) {

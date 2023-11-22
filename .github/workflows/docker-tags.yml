@@ -35,8 +35,9 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          platforms: linux/amd64,linux/arm/v7
           tags: |
-            shaarli/shaarli:${{ env.REF }}
-            ghcr.io/shaarli/shaarli:${{ env.REF }}
+            ${{ secrets.DOCKER_IMAGE }}:${{ env.REF }}
+            ghcr.io/${{ secrets.DOCKER_IMAGE }}:${{ env.REF }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

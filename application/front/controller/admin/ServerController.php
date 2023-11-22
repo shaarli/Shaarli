@@ -28,7 +28,7 @@ class ServerController extends ShaarliAdminController
         $releaseUrl = ApplicationUtils::$GITHUB_URL . '/releases/';
         if ($this->container->conf->get('updates.check_updates', true)) {
             $latestVersion = 'v' . ApplicationUtils::getVersion(
-                ApplicationUtils::$GIT_RAW_URL . '/latest/' . ApplicationUtils::$VERSION_FILE
+                ApplicationUtils::$GIT_RAW_URL . '/release/' . ApplicationUtils::$VERSION_FILE
             );
             $releaseUrl .= 'tag/' . $latestVersion;
         } else {

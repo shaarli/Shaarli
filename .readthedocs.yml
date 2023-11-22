@@ -5,11 +5,19 @@
 # Required
 version: 2
 
-# Build documentation with MkDocs
-mkdocs:
-  configuration: mkdocs.yml
+# Build documentation in the "docs/" directory with Sphinx
+sphinx:
+  configuration: doc/conf.py
+  builder: html
 
-# Optionally set the version of Python and requirements required to build your docs
-# https://github.com/rtfd/readthedocs.org/issues/5250
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  commands:
+    - pip install sphinx==7.1.0 furo==2023.7.26 myst-parser sphinx-design
+    - sphinx-build -b html -c doc/ doc/md/ _readthedocs/html/
+
 python:
-  version: 3.5
+  install:
+    - requirements: doc/requirements.txt

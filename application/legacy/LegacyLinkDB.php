@@ -246,7 +246,7 @@ class LegacyLinkDB implements Iterator, Countable, ArrayAccess
         $this->links = [];
         $link = [
             'id' => 1,
-            'title' => t('The personal, minimalist, super-fast, database free, bookmarking service'),
+            'title' => t('The personal, minimalist, super fast, database-free, bookmarking service'),
             'url' => 'https://shaarli.readthedocs.io',
             'description' => t(
                 'Welcome to Shaarli! This is your first public bookmark. '

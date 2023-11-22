@@ -1,4 +1,4 @@
-# The personal, minimalist, super-fast, database free, bookmarking service.
+# The personal, minimalist, super fast, database-free, bookmarking service.
 # Makefile for PHP code analysis & testing, documentation and release generation
 
 BIN = vendor/bin
@@ -23,6 +23,13 @@ docker_%:
 # - http://pear.php.net/manual/en/package.php.php-codesniffer.reporting.php
 ##
 PHPCS := $(BIN)/phpcs
+
+# Use GNU Tar where available
+ifneq (, $(shell which gtar))
+TAR := gtar
+else
+TAR := tar
+endif
 
 code_sniffer:
 	@$(PHPCS)
@@ -115,9 +122,9 @@ build_frontend: frontend_dependencies
 ### generate a release tarball and include 3rd-party dependencies and translations
 release_tar: composer_dependencies htmldoc translate build_frontend
 	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).tar HEAD
-	tar rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/
-	tar rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/
-	tar rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/
 	gzip $(ARCHIVE_VERSION).tar
 
 ### generate a release zip and include 3rd-party dependencies and translations
@@ -140,7 +147,7 @@ release_zip: composer_dependencies htmldoc translate build_frontend
 ### remove all unversioned files
 clean:
 	@git clean -df
-	@rm -rf sandbox
+	@rm -rf sandbox trivy*
 
 ### generate the AUTHORS file from Git commit information
 generate_authors:
@@ -152,16 +159,15 @@ generate_authors:
 phpdoc: clean
 	@docker run --rm -v $(PWD):/data -u `id -u`:`id -g` phpdoc/phpdoc
 
-### generate HTML documentation from Markdown pages with MkDocs
+### generate HTML documentation from Markdown pages with Sphinx
 htmldoc:
 	python3 -m venv venv/
 	bash -c 'source venv/bin/activate; \
 	pip install wheel; \
-	pip install mkdocs; \
-	mkdocs build --clean'
+	pip install sphinx==7.1.0 furo==2023.7.26 myst-parser sphinx-design; \
+	sphinx-build -b html -c doc/ doc/md/ doc/html/'
 	find doc/html/ -type f -exec chmod a-x '{}' \;
 	rm -r venv
-
 
 ### Generate Shaarli's translation compiled file (.mo)
 translate:
@@ -182,3 +188,28 @@ eslint:
 ### Run CSSLint check against Shaarli's SCSS files
 sasslint:
 	@yarnpkg run stylelint --config .dev/.stylelintrc.js 'assets/default/scss/*.scss'
+
+##
+# Security scans
+##
+
+# trivy version (https://github.com/aquasecurity/trivy/releases)
+TRIVY_VERSION=0.44.0
+# default trivy exit code when vulnerabilities are found
+TRIVY_EXIT_CODE=1
+# default docker image to scan with trivy
+TRIVY_TARGET_DOCKER_IMAGE=ghcr.io/shaarli/shaarli:latest
+
+### download trivy vulneravbility scanner
+download_trivy:
+	wget --quiet --continue -O trivy_$(TRIVY_VERSION)_Linux-64bit.tar.gz https://github.com/aquasecurity/trivy/releases/download/v$(TRIVY_VERSION)/trivy_$(TRIVY_VERSION)_Linux-64bit.tar.gz
+	tar -z -x trivy -f trivy_$(TRIVY_VERSION)_Linux-64bit.tar.gz
+
+### run trivy vulnerability scanner on docker image
+test_trivy_docker: download_trivy
+	./trivy --exit-code $(TRIVY_EXIT_CODE) image $(TRIVY_TARGET_DOCKER_IMAGE)
+
+### run trivy vulnerability scanner on composer/yarn dependency trees
+test_trivy_repo: download_trivy
+	./trivy --exit-code $(TRIVY_EXIT_CODE) fs composer.lock
+	./trivy --exit-code $(TRIVY_EXIT_CODE) fs yarn.lock

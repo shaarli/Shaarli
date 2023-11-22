@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Shaarli - The personal, minimalist, super-fast, database free, bookmarking service.
+ * Shaarli - The personal, minimalist, super fast, database-free, bookmarking service.
  *
  * Friendly fork by the Shaarli community:
  *  - https://github.com/shaarli/Shaarli

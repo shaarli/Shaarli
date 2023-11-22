@@ -164,7 +164,7 @@ $ make translate
 
 If you use translations in gettext mode, reload your web server.
 
-Shaarli >= `v0.10.0` manages its front-end dependencies with nodejs. You need to install [yarn](https://yarnpkg.com/lang/en/docs/install/):
+Shaarli >= `v0.10.0` manages its front-end dependencies with nodejs. You need to install [yarn](https://classic.yarnpkg.com/en/docs/install/):
 
 ```bash
 $ make build_frontend

@@ -2,17 +2,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Shaarli\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-23 23:57+0100\n"
-"PO-Revision-Date: 2021-01-24 00:37+0100\n"
+"POT-Creation-Date: 2023-04-05 08:38+0200\n"
+"PO-Revision-Date: 2023-04-05 08:39+0200\n"
 "Last-Translator: \n"
 "Language-Team: Shaarli\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
-"X-Poedit-Basepath: ../../../..\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.2.2\n"
+"X-Poedit-Basepath: ../../../..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: t:1,2;t\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -51,6 +51,10 @@ msgstr "Japanisch"
 msgid "Russian"
 msgstr "Russisch"
 
+#: application/Languages.php:190
+msgid "Chinese (Simplified)"
+msgstr "Chinesisch (vereinfacht)"
+
 #: application/Thumbnailer.php:62
 msgid ""
 "php-gd extension must be loaded to use thumbnails. Thumbnails are now "
@@ -60,41 +64,41 @@ msgstr ""
 "(Thumbnails) verwenden zu können. Thumbnails sind jetzt deaktiviert. Bitte "
 "lade die Seite neu."
 
-#: application/Utils.php:405 tests/UtilsTest.php:327
+#: application/Utils.php:409 tests/UtilsTest.php:329
 msgid "Setting not set"
 msgstr "Einstellung nicht gesetzt"
 
-#: application/Utils.php:412 tests/UtilsTest.php:325 tests/UtilsTest.php:326
+#: application/Utils.php:416 tests/UtilsTest.php:327 tests/UtilsTest.php:328
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: application/Utils.php:415 tests/UtilsTest.php:322 tests/UtilsTest.php:323
-#: tests/UtilsTest.php:337
+#: application/Utils.php:419 tests/UtilsTest.php:324 tests/UtilsTest.php:325
+#: tests/UtilsTest.php:339
 msgid "B"
 msgstr "B"
 
-#: application/Utils.php:415 tests/UtilsTest.php:316 tests/UtilsTest.php:317
-#: tests/UtilsTest.php:324
+#: application/Utils.php:419 tests/UtilsTest.php:318 tests/UtilsTest.php:319
+#: tests/UtilsTest.php:326
 msgid "kiB"
 msgstr "kiB"
 
-#: application/Utils.php:415 tests/UtilsTest.php:318 tests/UtilsTest.php:319
-#: tests/UtilsTest.php:335 tests/UtilsTest.php:336
+#: application/Utils.php:419 tests/UtilsTest.php:320 tests/UtilsTest.php:321
+#: tests/UtilsTest.php:337 tests/UtilsTest.php:338
 msgid "MiB"
 msgstr "MiB"
 
-#: application/Utils.php:415 tests/UtilsTest.php:320 tests/UtilsTest.php:321
+#: application/Utils.php:419 tests/UtilsTest.php:322 tests/UtilsTest.php:323
 msgid "GiB"
 msgstr "GiB"
 
-#: application/bookmark/BookmarkFileService.php:185
-#: application/bookmark/BookmarkFileService.php:207
-#: application/bookmark/BookmarkFileService.php:229
-#: application/bookmark/BookmarkFileService.php:243
+#: application/bookmark/BookmarkFileService.php:203
+#: application/bookmark/BookmarkFileService.php:225
+#: application/bookmark/BookmarkFileService.php:247
+#: application/bookmark/BookmarkFileService.php:261
 msgid "You're not authorized to alter the datastore"
 msgstr "Du bist nicht berechtigt, den Datenspeicher zu ändern"
 
-#: application/bookmark/BookmarkFileService.php:210
+#: application/bookmark/BookmarkFileService.php:228
 msgid "This bookmarks already exists"
 msgstr "Diese Lesezeichen sind bereits vorhanden"
 
@@ -194,13 +198,13 @@ msgstr ""
 "| Karotte  | Gemüse | rot    | 14    |\n"
 
 #: application/bookmark/BookmarkInitializer.php:94
-#: application/legacy/LegacyLinkDB.php:246
+#: application/legacy/LegacyLinkDB.php:249
 #: tmp/page.footer.b91ef64efc3688266305ea9b42e5017e.rtpl.php:15
 #: tmp/page.footer.b91ef64efc3688266305ea9b42e5017e.rtpl.php:48
 #: tmp/page.footer.cedf684561d925457130839629000a81.rtpl.php:15
 #: tmp/page.footer.cedf684561d925457130839629000a81.rtpl.php:48
 msgid ""
-"The personal, minimalist, super-fast, database free, bookmarking service"
+"The personal, minimalist, super fast, database-free, bookmarking service"
 msgstr ""
 "Der persönliche, minimalistische, superschnelle, datenbankfreie "
 "Lesezeichenservice"
@@ -293,11 +297,11 @@ msgstr "Du bist nicht berechtigt, die Konfiguration zu ändern."
 msgid "Error accessing"
 msgstr "Fehler beim Zugriff"
 
-#: application/feed/FeedBuilder.php:180
+#: application/feed/FeedBuilder.php:174
 msgid "Direct link"
 msgstr "Direct Link"
 
-#: application/feed/FeedBuilder.php:182
+#: application/feed/FeedBuilder.php:176
 #: tmp/daily.b91ef64efc3688266305ea9b42e5017e.rtpl.php:103
 #: tmp/dailyrss.b91ef64efc3688266305ea9b42e5017e.rtpl.php:26
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:179
@@ -372,25 +376,25 @@ msgstr "Tags verwalten"
 msgid "Invalid tags provided."
 msgstr "Ungültige Tags übergeben."
 
-#: application/front/controller/admin/ManageTagController.php:78
+#: application/front/controller/admin/ManageTagController.php:81
 #, php-format
 msgid "The tag was removed from %d bookmark."
 msgid_plural "The tag was removed from %d bookmarks."
 msgstr[0] "Der Tag wurde aus dem Lesezeichen %d entfernt."
 msgstr[1] "Der Tag wurde aus den Lesezeichen %d entfernt."
 
-#: application/front/controller/admin/ManageTagController.php:83
+#: application/front/controller/admin/ManageTagController.php:86
 #, php-format
 msgid "The tag was renamed in %d bookmark."
 msgid_plural "The tag was renamed in %d bookmarks."
 msgstr[0] "Der Tag wurde im Lesezeichen %d umbenannt."
 msgstr[1] "Der Tag wurde in den Lesezeichen %d umbenannt."
 
-#: application/front/controller/admin/ManageTagController.php:105
+#: application/front/controller/admin/ManageTagController.php:108
 msgid "Tags separator must be a single character."
 msgstr "Tags müssen durch ein einzelnen Zeichen getrennt werden."
 
-#: application/front/controller/admin/ManageTagController.php:111
+#: application/front/controller/admin/ManageTagController.php:114
 msgid "These characters are reserved and can't be used as tags separator: "
 msgstr ""
 "Diese Zeichen sind reserviert und können nicht als Tag-Trennzeichen genutzt "
@@ -450,21 +454,31 @@ msgid "Shaare a new link"
 msgstr "Teile einen neuen Link"
 
 #: application/front/controller/admin/ShaareManageController.php:35
-#: application/front/controller/admin/ShaareManageController.php:93
+#: application/front/controller/admin/ShaareManageController.php:97
+#: application/front/controller/admin/ShaareManageController.php:227
 msgid "Invalid bookmark ID provided."
 msgstr "Ungültige Lesezeichen-ID bereitgestellt."
 
 #: application/front/controller/admin/ShaareManageController.php:47
-#: application/front/controller/admin/ShaareManageController.php:116
-#: application/front/controller/admin/ShaareManageController.php:156
+#: application/front/controller/admin/ShaareManageController.php:120
+#: application/front/controller/admin/ShaareManageController.php:160
+#: application/front/controller/admin/ShaareManageController.php:257
 #: application/front/controller/admin/ShaarePublishController.php:82
 #, php-format
 msgid "Bookmark with identifier %s could not be found."
 msgstr "Lesezeichen mit der ID %s konnte nicht gefunden werden."
 
-#: application/front/controller/admin/ShaareManageController.php:101
+#: application/front/controller/admin/ShaareManageController.php:105
 msgid "Invalid visibility provided."
 msgstr "Ungültige Sichtbarkeit angegeben."
+
+#: application/front/controller/admin/ShaareManageController.php:235
+msgid "Invalid action provided."
+msgstr "Ungültige Aktion übergeben."
+
+#: application/front/controller/admin/ShaareManageController.php:243
+msgid "Invalid tag name provided."
+msgstr "Ungültiger Tag-Name übergeben."
 
 #: application/front/controller/admin/ShaarePublishController.php:173
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:171
@@ -492,7 +506,7 @@ msgstr "Thumbnail-Aktualisierung"
 msgid "Tools"
 msgstr "Tools"
 
-#: application/front/controller/visitor/BookmarkListController.php:121
+#: application/front/controller/visitor/BookmarkListController.php:103
 msgid "Search: "
 msgstr "Suche: "
 
@@ -565,6 +579,10 @@ msgstr ""
 "beliebigen benutzerdefinierten Hostnamen ohne Punkt dazu, dass der Cookie-"
 "Speicher fehlschlägt. Wir empfehlen den Zugriff auf deinen Server über die "
 "IP-Adresse oder den Fully Qualified Domain Namen.<br>"
+
+#: application/front/controller/visitor/InstallController.php:134
+msgid "Shared Bookmarks"
+msgstr "Geteilte Lesezeichen "
 
 #: application/front/controller/visitor/InstallController.php:162
 msgid ""
@@ -694,15 +712,15 @@ msgstr "Verwende das Übersetzungssystem im gettext-Modus"
 msgid "Login using LDAP server"
 msgstr "Anmeldung mittels LDAP-Server"
 
-#: application/helper/DailyPageHelper.php:179
+#: application/helper/DailyPageHelper.php:184
 msgid "Week"
 msgstr "Woche"
 
-#: application/helper/DailyPageHelper.php:183
+#: application/helper/DailyPageHelper.php:188
 msgid "Today"
 msgstr "Heute"
 
-#: application/helper/DailyPageHelper.php:185
+#: application/helper/DailyPageHelper.php:190
 msgid "Yesterday"
 msgstr "Gestern"
 
@@ -730,7 +748,7 @@ msgstr "Du musst eine Ganzzahl als Schlüssel angeben."
 msgid "Array offset and link ID must be equal."
 msgstr "Array-Offset und Link-ID müssen gleich sein."
 
-#: application/legacy/LegacyLinkDB.php:249
+#: application/legacy/LegacyLinkDB.php:252
 msgid ""
 "Welcome to Shaarli! This is your first public bookmark. To edit or delete "
 "me, you must first login.\n"
@@ -750,11 +768,11 @@ msgstr ""
 "Du verwendest die von der Community unterstützte Version des ursprünglichen "
 "Shaarli-Projekts von Sebastien Sauvage."
 
-#: application/legacy/LegacyLinkDB.php:266
+#: application/legacy/LegacyLinkDB.php:269
 msgid "My secret stuff... - Pastebin.com"
 msgstr "Meine geheimen Sachen... - Pastebin.com"
 
-#: application/legacy/LegacyLinkDB.php:268
+#: application/legacy/LegacyLinkDB.php:271
 msgid "Shhhh! I'm a private link only YOU can see. You can delete me too."
 msgstr ""
 "Pssst Ich bin ein privater Link, den nur du sehen kannst. Du kannst mich "
@@ -772,16 +790,16 @@ msgstr "<a href=\"./admin/thumbnails\">"
 msgid "Invalid export selection:"
 msgstr "Ungültige Exportauswahl:"
 
-#: application/netscape/NetscapeBookmarkUtils.php:215
+#: application/netscape/NetscapeBookmarkUtils.php:213
 #, php-format
 msgid "File %s (%d bytes) "
 msgstr "Datei %s (%d bytes) "
 
-#: application/netscape/NetscapeBookmarkUtils.php:217
+#: application/netscape/NetscapeBookmarkUtils.php:215
 msgid "has an unknown file format. Nothing was imported."
 msgstr "hat ein unbekanntes Dateiformat. Es wurde nichts importiert."
 
-#: application/netscape/NetscapeBookmarkUtils.php:221
+#: application/netscape/NetscapeBookmarkUtils.php:219
 #, php-format
 msgid ""
 "was successfully processed in %d seconds: %d bookmarks imported, %d "
@@ -790,8 +808,8 @@ msgstr ""
 "wurde erfolgreich in %d Sekunden verarbeitet: %d Lesezeichen importiert, %d "
 "Lesezeichen überschrieben, %d Lesezeichen übersprungen."
 
-#: application/plugin/PluginManager.php:99
-#: application/plugin/PluginManager.php:137
+#: application/plugin/PluginManager.php:103
+#: application/plugin/PluginManager.php:141
 msgid " [plugin incompatibility]: "
 msgstr " [Plugin-Inkompatibiliät]: "
 
@@ -809,7 +827,7 @@ msgstr "Kann nicht löschen, %s ist kein Verzeichnis"
 msgid "An error occurred while running the update "
 msgstr "Beim Ausführen des Updates ist ein Fehler aufgetreten "
 
-#: index.php:82
+#: index.php:87
 msgid "Shared bookmarks on "
 msgstr "Geteilte Lesezeichen auf "
 
@@ -858,7 +876,7 @@ msgstr "Hintergrund-Farbe (hellgrau)"
 msgid "Dark main color (e.g. visited links)"
 msgstr "Dunkle Haupt-Farbe (z. B. besuchte Links)"
 
-#: plugins/demo_plugin/demo_plugin.php:495
+#: plugins/demo_plugin/demo_plugin.php:528
 msgid ""
 "A demo plugin covering all use cases for template designers and plugin "
 "developers."
@@ -866,12 +884,12 @@ msgstr ""
 "Ein Demo-Plugin, das alle Anwendungsfälle für Template-Designer und Plugin-"
 "Entwickler abdeckt."
 
-#: plugins/demo_plugin/demo_plugin.php:496
+#: plugins/demo_plugin/demo_plugin.php:529
 msgid "This is a parameter dedicated to the demo plugin. It'll be suffixed."
 msgstr ""
 "Dies ist ein Parameter, der dem Demo-Plugin gewidmet ist. Es wird angehängt."
 
-#: plugins/demo_plugin/demo_plugin.php:497
+#: plugins/demo_plugin/demo_plugin.php:530
 msgid "Other demo parameter"
 msgstr "Andere Demo-Parameter"
 
@@ -885,9 +903,7 @@ msgstr ""
 
 #: plugins/isso/isso.php:92
 msgid "Let visitor comment your shaares on permalinks with Isso."
-msgstr ""
-"Lassen Sie Besucher Ihre Shaares auf Permalinks mit Isso "
-"kommentieren."
+msgstr "Lassen Sie Besucher Ihre Shaares auf Permalinks mit Isso kommentieren."
 
 #: plugins/isso/isso.php:93
 msgid "Isso server URL (without 'http://')"
@@ -932,28 +948,40 @@ msgstr ""
 msgid "plugins/playvideos/jquery-1.11.2.min.js"
 msgstr "plugins/playvideos/jquery-1.11.2.min.js"
 
-#: plugins/pubsubhubbub/pubsubhubbub.php:72
+#: plugins/pubsubhubbub/pubsubhubbub.php:80
 #, php-format
 msgid "Could not publish to PubSubHubbub: %s"
 msgstr "Veröffentlichung auf PubSubHubbub nicht möglich: %s"
 
-#: plugins/pubsubhubbub/pubsubhubbub.php:99
+#: plugins/pubsubhubbub/pubsubhubbub.php:107
 #, php-format
 msgid "Could not post to %s"
 msgstr "Kann nicht posten auf %s"
 
-#: plugins/pubsubhubbub/pubsubhubbub.php:103
+#: plugins/pubsubhubbub/pubsubhubbub.php:111
 #, php-format
 msgid "Bad response from the hub %s"
 msgstr "Ungültige Antwort vom Hub %s"
 
-#: plugins/pubsubhubbub/pubsubhubbub.php:114
+#: plugins/pubsubhubbub/pubsubhubbub.php:122
 msgid "Enable PubSubHubbub feed publishing."
 msgstr "Aktiviere PubSubHubbub Feed Veröffentlichung."
 
-#: plugins/qrcode/qrcode.php:74 plugins/wallabag/wallabag.php:72
+#: plugins/qrcode/qrcode.php:74
 msgid "For each link, add a QRCode icon."
 msgstr "Für jeden Link, füge eine QRCode Icon hinzu."
+
+#: plugins/readitlater/readitlater.php:118
+msgid "Mark as Read"
+msgstr "Als gelesen markieren"
+
+#: plugins/readitlater/readitlater.php:118
+msgid "Read it later"
+msgstr "Später lesen"
+
+#: plugins/readitlater/readitlater.php:130
+msgid "Filter ReadItLater bookmarks"
+msgstr "ReadItLater-Lesezeichen filtern"
 
 #: plugins/wallabag/wallabag.php:22
 msgid ""
@@ -967,6 +995,12 @@ msgstr ""
 msgid "Save to wallabag"
 msgstr "Auf Wallabag speichern"
 
+#: plugins/wallabag/wallabag.php:72
+msgid "For each link, add a Wallabag icon to save it in your instance."
+msgstr ""
+"Für jeden Link ein Wallabag-Symbol hinzufügen, um es in Deiner Instanz zu "
+"speichern."
+
 #: plugins/wallabag/wallabag.php:73
 msgid "Wallabag API URL"
 msgstr "Wallabag API URL"
@@ -976,8 +1010,8 @@ msgid "Wallabag API version (1 or 2)"
 msgstr "Wallabag API version (1 oder 2)"
 
 #: tests/LanguagesTest.php:214 tests/LanguagesTest.php:227
-#: tests/languages/fr/LanguagesFrTest.php:159
-#: tests/languages/fr/LanguagesFrTest.php:172
+#: tests/languages/fr/LanguagesFrTest.php:160
+#: tests/languages/fr/LanguagesFrTest.php:173
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:46
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:87
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:139
@@ -1071,6 +1105,7 @@ msgid "Rename tag"
 msgstr "Tag umbenennen"
 
 #: tmp/changetag.b91ef64efc3688266305ea9b42e5017e.rtpl.php:35
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:195
 msgid "Delete tag"
 msgstr "Lösche Tag"
 
@@ -1108,6 +1143,38 @@ msgstr ""
 "Beachten Sie, dass Hashtags nicht vollständig mit einem Nicht-"
 "Leerraumtrennzeichen funktionieren."
 
+#: tmp/configure.90100d2eaf5d3705e14b9b4f78ecddc9.rtpl.php:167
+#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:339
+#: tmp/export.b91ef64efc3688266305ea9b42e5017e.rtpl.php:30
+#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:102
+msgid "All"
+msgstr "Alle"
+
+#: tmp/configure.90100d2eaf5d3705e14b9b4f78ecddc9.rtpl.php:171
+#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:343
+#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:106
+msgid "Only common media hosts"
+msgstr "Nur gängige Medienhosts"
+
+#: tmp/configure.90100d2eaf5d3705e14b9b4f78ecddc9.rtpl.php:175
+#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:347
+#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:110
+msgid "None"
+msgstr "Keine"
+
+#: tmp/configure.90100d2eaf5d3705e14b9b4f78ecddc9.rtpl.php:182
+#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:324
+msgid "You need to enable the extension <code>php-gd</code> to use thumbnails."
+msgstr ""
+"Sie müssen die Erweiterung <code>php-gd</code> aktivieren, um "
+"Miniaturansichten zu verwenden."
+
+#: tmp/configure.90100d2eaf5d3705e14b9b4f78ecddc9.rtpl.php:186
+#, fuzzy
+#| msgid "Synchronize thumbnails"
+msgid "Synchonize thumbnails"
+msgstr "Thumbnails synchronisieren"
+
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:29
 msgid "title"
 msgstr "Titel"
@@ -1121,17 +1188,16 @@ msgid "Default value"
 msgstr "Standardwert"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:58
-msgid "Theme"
-msgstr "Thema"
+msgid "Themes"
+msgstr "Themen"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:85
 msgid "Description formatter"
 msgstr "Beschreibungsformatierer"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:114
-#: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:77
-msgid "Language"
-msgstr "Sprache"
+msgid "Languages"
+msgstr "Sprachen"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:143
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:101
@@ -1185,8 +1251,9 @@ msgid "Do not show any links if the user is not logged in"
 msgstr "Zeige keine Links, wenn der Benutzer nicht angemeldet ist"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:258
-#: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:149
-msgid "Check updates"
+#, fuzzy
+#| msgid "Check updates"
+msgid "Check for updates"
 msgstr "Auf Updates prüfen"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:259
@@ -1215,39 +1282,17 @@ msgstr ""
 "Anwendung"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:306
-msgid "API secret"
-msgstr "API-Geheimnis"
+msgid "REST API secret"
+msgstr "REST API-Geheimnis"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:320
 msgid "Enable thumbnails"
-msgstr "Aktivierte Thunbnails"
-
-#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:324
-msgid "You need to enable the extension <code>php-gd</code> to use thumbnails."
-msgstr ""
-"Sie müssen die Erweiterung <code>php-gd</code> aktivieren, um "
-"Miniaturansichten zu verwenden."
+msgstr "Aktivierte Thumbnails"
 
 #: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:328
 #: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:122
 msgid "Synchronize thumbnails"
 msgstr "Thumbnails synchronisieren"
-
-#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:339
-#: tmp/export.b91ef64efc3688266305ea9b42e5017e.rtpl.php:30
-#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:102
-msgid "All"
-msgstr "Alle"
-
-#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:343
-#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:106
-msgid "Only common media hosts"
-msgstr "Nur gängige Medienhosts"
-
-#: tmp/configure.b91ef64efc3688266305ea9b42e5017e.rtpl.php:347
-#: tmp/server.b91ef64efc3688266305ea9b42e5017e.rtpl.php:110
-msgid "None"
-msgstr "Keine"
 
 #: tmp/daily.b91ef64efc3688266305ea9b42e5017e.rtpl.php:26
 msgid "1 RSS entry per :type"
@@ -1315,6 +1360,7 @@ msgid "Markdown syntax"
 msgstr "Markdown-Syntax"
 
 #: tmp/editlink.b91ef64efc3688266305ea9b42e5017e.rtpl.php:115
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:198
 msgid "Cancel"
 msgstr "Abbruch"
 
@@ -1400,14 +1446,14 @@ msgstr ""
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:32
 #: tmp/loginform.b91ef64efc3688266305ea9b42e5017e.rtpl.php:16
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:167
-#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:167
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:209
 msgid "Username"
 msgstr "Benutzername"
 
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:47
 #: tmp/loginform.b91ef64efc3688266305ea9b42e5017e.rtpl.php:20
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:168
-#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:168
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:210
 msgid "Password"
 msgstr "Passwort"
 
@@ -1418,6 +1464,14 @@ msgstr "Shaarli Titel"
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:68
 msgid "My links"
 msgstr "Meine Links"
+
+#: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:77
+msgid "Language"
+msgstr "Sprache"
+
+#: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:149
+msgid "Check updates"
+msgstr "Auf Updates prüfen"
 
 #: tmp/install.b91ef64efc3688266305ea9b42e5017e.rtpl.php:181
 msgid "Install"
@@ -1504,6 +1558,7 @@ msgid "permalink"
 msgstr "Permalink"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:183
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:195
 msgid "Add tag"
 msgstr "Tag hinzufügen"
 
@@ -1560,7 +1615,7 @@ msgstr "Links pro Seite"
 
 #: tmp/loginform.b91ef64efc3688266305ea9b42e5017e.rtpl.php:25
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:171
-#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:171
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:213
 msgid "Remember me"
 msgstr "Erinnere dich an mich"
 
@@ -1632,14 +1687,32 @@ msgid "Set private"
 msgstr "Setze Status auf Privat"
 
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:189
-#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:189
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:231
 msgid "is available"
 msgstr "ist verfügbar"
 
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:196
-#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:196
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:238
 msgid "Error"
 msgstr "Fehler"
+
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:162
+msgid "Add tags"
+msgstr "Tags hinzufügen"
+
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:167
+msgid "Delete tags"
+msgstr "Lösche Tags"
+
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:184
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:185
+msgid "Tag to add"
+msgstr "Tag hinzufügen"
+
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:184
+#: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:185
+msgid "Tag to delete"
+msgstr "Tag zur Löschung"
 
 #: tmp/picwall.b91ef64efc3688266305ea9b42e5017e.rtpl.php:15
 msgid "There is no cached thumbnail."
@@ -1658,7 +1731,9 @@ msgid "pics"
 msgstr "Bilder"
 
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:15
-msgid "You need to enable Javascript to change plugin loading order."
+#, fuzzy
+#| msgid "You need to enable Javascript to change plugin loading order."
+msgid "You have to enable JavaScript to change plugin loading order."
 msgstr ""
 "Du musst Javascript aktivieren um die Ladereihenfolge der Plugins zu ändern."
 
@@ -1678,8 +1753,10 @@ msgstr "Kein Plugin aktiviert."
 
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:40
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:73
-msgid "Disable"
-msgstr "Deaktivieren"
+#: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:97
+#: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:122
+msgid "Enabled"
+msgstr "Aktiviert"
 
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:41
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:74
@@ -1700,11 +1777,6 @@ msgstr "Deaktivierte Plugins"
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:91
 msgid "No plugin disabled."
 msgstr "Kein Plugin deaktiviert."
-
-#: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:97
-#: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:122
-msgid "Enable"
-msgstr "Aktiviere"
 
 #: tmp/pluginsadmin.b91ef64efc3688266305ea9b42e5017e.rtpl.php:134
 msgid "More plugins available"
@@ -1934,6 +2006,10 @@ msgstr ""
 msgid "Export database"
 msgstr "Exportiere Datenbank"
 
+#: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:75
+msgid "Bookmarklets"
+msgstr "Lesezeichen (Bookmarklets)"
+
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:77
 msgid ""
 "Drag one of these button to your bookmarks toolbar or right-click it and "
@@ -1985,21 +2061,29 @@ msgid "Add Note"
 msgstr "Notiz hinzufügen"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:132
-msgid "3rd party"
-msgstr "Von Dritten"
+msgid "Third-party resources"
+msgstr "Ressourcen von Dritt-Anbietern"
 
 #: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:135
-#: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:140
-msgid "plugin"
-msgstr "Plugin"
+msgid "Community and related software"
+msgstr "Gemeinschaft und zugehörige Software"
 
-#: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:165
+#: tmp/tools.b91ef64efc3688266305ea9b42e5017e.rtpl.php:144
 msgid ""
 "Drag this link to your bookmarks toolbar, or right-click it and choose "
 "Bookmark This Link"
 msgstr ""
 "Ziehe diesen Link in deine Lesezeichen-Symbolleiste oder klicke mit der "
 "rechten Maustaste darauf und wähle \"Speichere diesen Link als Lesezeichen\""
+
+#~ msgid "Disable"
+#~ msgstr "Deaktivieren"
+
+#~ msgid "3rd party"
+#~ msgstr "Von Dritten"
+
+#~ msgid "plugin"
+#~ msgstr "Plugin"
 
 #~ msgid "Rename"
 #~ msgstr "Umbenennen"

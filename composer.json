@@ -1,6 +1,6 @@
 {
     "name": "shaarli/shaarli",
-    "description": "The personal, minimalist, super-fast, database-free bookmarking service",
+    "description": "The personal, minimalist, super fast, database-free bookmarking service",
     "type": "project",
     "license": "MIT",
     "homepage": "https://github.com/shaarli/Shaarli",
@@ -12,11 +12,11 @@
     "config": {
         "sort-packages": true,
         "platform": {
-            "php": "7.1.29"
+            "php": "7.4.33"
         }
     },
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.4",
         "ext-json": "*",
         "ext-zlib": "*",
         "arthurhoaro/web-thumbnailer": "^2.0",
@@ -31,8 +31,8 @@
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
-        "squizlabs/php_codesniffer": "3.*",
-        "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0"
+        "squizlabs/php_codesniffer": "^3.0",
+        "phpunit/phpunit": "^9.0"
     },
     "suggest": {
         "ext-curl": "Allows fetching web pages and thumbnails in a more robust way",

@@ -17,8 +17,8 @@ sudo rsync -avP Shaarli/ /var/www/shaarli.mydomain.org/
 These components are required to build Shaarli:
 
 - [Composer](dev/Development.md#install-composer) to manage third-party [PHP dependencies](dev/Development#third-party-libraries).
-- [yarn](https://yarnpkg.com/lang/en/docs/install/) to build frontend dependencies.
-- [python3-virtualenv](https://pypi.python.org/pypi/virtualenv) to build local HTML documentation.
+- [yarn](https://classic.yarnpkg.com/en/docs/install/) to build frontend dependencies.
+- [python3-virtualenv](https://pypi.org/project/virtualenv/) to build local HTML documentation.
 
 ```bash
 # example from a Debian-based build machine
