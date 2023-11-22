@@ -172,6 +172,15 @@ class Updater
         return true;
     }
 
+    public function updateMethodRemoveSettingRemoteBranch(): bool
+    {
+        if ($this->conf->exists('updates.check_updates_branch')) {
+            $this->conf->remove('updates.check_updates_branch', true, true);
+        }
+
+        return true;
+    }
+
     public function setBasePath(string $basePath): self
     {
         $this->basePath = $basePath;
