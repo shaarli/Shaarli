@@ -82,6 +82,9 @@ class BookmarkListController extends ShaarliVisitorController
         $searchTagsUrlEncoded = array_map('urlencode', tags_str2array($searchTags, $tagsSeparator));
         $searchTags = !empty($searchTags) ? trim($searchTags, $tagsSeparator) . $tagsSeparator : '';
 
+        $searchTags = !empty($searchTags) ? escape($searchTags) : '';
+        $searchTerm = !empty($searchTerm) ? escape($searchTerm) : '';
+
         // Fill all template fields.
         $data = array_merge(
             $this->initializeTemplateVars(),
@@ -91,8 +94,8 @@ class BookmarkListController extends ShaarliVisitorController
                 'page_current' => $page,
                 'page_max' => $searchResult->getLastPage(),
                 'result_count' => $searchResult->getTotalCount(),
-                'search_term' => escape($searchTerm),
-                'search_tags' => escape($searchTags),
+                'search_term' => $searchTerm,
+                'search_tags' => $searchTags,
                 'search_tags_url' => $searchTagsUrlEncoded,
                 'visibility' => $visibility,
                 'links' => $links,
