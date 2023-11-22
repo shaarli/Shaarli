@@ -10,7 +10,7 @@ You need write access to the Shaarli installation directory - you should have re
 
 Examples in this documentation are given for [Debian](https://www.debian.org/), a GNU/Linux distribution widely used in server environments. Please adapt them to your specific Linux distribution.
 
-A $5/month VPS (1 CPU, 1 GiB RAM and 25 GiB SSD) will run any Shaarli installation without problems. Some hosting providers: [DigitalOcean](https://www.digitalocean.com/) ([1](https://www.digitalocean.com/docs/droplets/overview/), [2](https://www.digitalocean.com/pricing/), [3](https://www.digitalocean.com/docs/droplets/how-to/create/), [4](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/), [5](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-debian-8), [6](https://www.digitalocean.com/community/tutorials/an-introduction-to-securing-your-linux-vps)), [Gandi](https://www.gandi.net/en), [OVH](https://www.ovh.co.uk/), [RackSpace](https://www.rackspace.com/), etc.
+A $5/month VPS (1 CPU, 1 GiB RAM and 25 GiB SSD) will run any Shaarli installation without problems. Some hosting providers: [DigitalOcean](https://www.digitalocean.com/) ([1](https://docs.digitalocean.com/products/droplets/), [2](https://www.digitalocean.com/pricing/), [3](https://docs.digitalocean.com/products/droplets/how-to/create/), [4](https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/), [5](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-debian-8), [6](https://www.digitalocean.com/community/tutorials/an-introduction-to-securing-your-linux-vps)), [Gandi](https://www.gandi.net/en), [OVH](https://www.ovhcloud.com/en-gb/), [RackSpace](https://www.rackspace.com/), etc.
 
 
 ### Network and domain name
@@ -19,18 +19,11 @@ Try to host the server in a region that is geographically close to your users.
 
 A **domain name** ([DNS record](https://opensource.com/article/17/4/introduction-domain-name-system-dns)) pointing to the server's public IP address is required to obtain a SSL/TLS certificate and setup HTTPS to secure client traffic to your Shaarli instance.
 
-You can obtain a domain name from a [registrar](https://en.wikipedia.org/wiki/Domain_name_registrar) ([1](https://www.ovh.co.uk/domains), [2](https://www.gandi.net/en/domain)), or from free subdomain providers ([1](https://freedns.afraid.org/)). If you don't have a domain name, please set up a private domain name ([FQDN](ttps://en.wikipedia.org/wiki/Fully_qualified_domain_name)) in your clients' [hosts files](https://en.wikipedia.org/wiki/Hosts_(file)) to access the server (direct access by IP address can result in unexpected behavior).
+You can obtain a domain name from a [registrar](https://en.wikipedia.org/wiki/Domain_name_registrar) ([1](https://www.ovhcloud.com/en-gb/domains), [2](https://www.gandi.net/en/domain)), or from free subdomain providers ([1](https://freedns.afraid.org/)). If you don't have a domain name, please set up a private domain name ([FQDN](ttps://en.wikipedia.org/wiki/Fully_qualified_domain_name)) in your clients' [hosts files](https://en.wikipedia.org/wiki/Hosts_(file)) to access the server (direct access by IP address can result in unexpected behavior).
 
-Setup a **firewall** (using `iptables`, [ufw](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-debian-10), [fireHOL](https://firehol.org/) or any frontend of your choice) to deny all incoming traffic except `tcp/80` and `tcp/443`, which are needed to access the web server (and any other posrts you might need, like SSH). If the server is in a private network behind a NAT, ensure these **ports are forwarded** to the server.
+Setup a **firewall** (using `iptables`, [ufw](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-firewall-with-ufw-on-debian-10), [firewalld](https://firewalld.org/) or any frontend of your choice) to deny all incoming traffic except `tcp/80` and `tcp/443`, which are needed to access the web server (and any other posrts you might need, like SSH). If the server is in a private network behind a NAT, ensure these **ports are forwarded** to the server.
 
 Shaarli makes outbound HTTP/HTTPS connections to websites you bookmark to fetch page information (title, thumbnails), the server must then have access to the Internet as well, and a working DNS resolver.
-
-
-### Screencast
-
-Here is a screencast of the installation procedure
-
-[![asciicast](https://asciinema.org/a/z3RXxcJIRgWk0jM2ws6EnUFgO.svg)](https://asciinema.org/a/z3RXxcJIRgWk0jM2ws6EnUFgO)
 
 --------------------------------------------------------------------------------
 
@@ -40,6 +33,7 @@ Supported PHP versions:
 
 Version | Status | Shaarli compatibility
 :---:|:---:|:---:
+8.2 | Supported | Yes
 8.1 | Supported | Yes
 8.0 | EOL: 2023-11-26| Yes
 7.4 | EOL: 2022-11-28 | Yes
@@ -56,26 +50,26 @@ Required PHP extensions:
 
 Extension | Required? | Usage
 ---|:---:|---
-[`openssl`](http://php.net/manual/en/book.openssl.php) | required | OpenSSL, HTTPS
-[`php-json`](http://php.net/manual/en/book.json.php) | required | configuration parsing
+[`openssl`](https://www.php.net/manual/en/book.openssl.php) | required | OpenSSL, HTTPS
+[`php-json`](https://www.php.net/manual/en/book.json.php) | required | configuration parsing
 [`php-simplexml`](https://www.php.net/manual/en/book.simplexml.php) | required | REST API (Slim framework)
-[`php-mbstring`](http://php.net/manual/en/book.mbstring.php) | CentOS, Fedora, RHEL, Windows, some hosting providers | multibyte (Unicode) string support
+[`php-mbstring`](https://www.php.net/manual/en/book.mbstring.php) | CentOS, Fedora, RHEL, Windows, some hosting providers | multibyte (Unicode) string support
 [`php-ctype`](https://www.php.net/manual/en/book.ctype.php) | required (bundled with most PHP installation) | Type checking
 [`php-iconv`](https://www.php.net/manual/en/book.iconv.php) | required (bundled with most PHP installation) | Character encoding used in translations
 [`php-session`](https://www.php.net/manual/en/book.session.php) | required (bundled with most PHP installation) | User session
 [`php-zlib`](https://www.php.net/manual/en/book.zlib.php) | required (bundled with most PHP installation) | Datastore I/O compression
-[`php-gd`](http://php.net/manual/en/book.image.php) | optional | required to use thumbnails
-[`php-intl`](http://php.net/manual/en/book.intl.php) | optional | localized text sorting (e.g. `e->è->f`)
-[`php-curl`](http://php.net/manual/en/book.curl.php) | optional | using cURL for fetching webpages and thumbnails in a more robust way
-[`php-gettext`](http://php.net/manual/en/book.gettext.php) | optional | Use the translation system in gettext mode (faster)
+[`php-gd`](https://www.php.net/manual/en/book.image.php) | optional | required to use thumbnails
+[`php-intl`](https://www.php.net/manual/en/book.intl.php) | optional | localized text sorting (e.g. `e->è->f`)
+[`php-curl`](https://www.php.net/manual/en/book.curl.php) | optional | using cURL for fetching webpages and thumbnails in a more robust way
+[`php-gettext`](https://www.php.net/manual/en/book.gettext.php) | optional | Use the translation system in gettext mode (faster)
 [`php-ldap`](https://www.php.net/manual/en/book.ldap.php) | optional | LDAP login support
 
 Some [plugins](Plugins.md) may require additional configuration.
 
-- [PHP: Supported versions](http://php.net/supported-versions.php)
-- [PHP: Unsupported versions (EOL/End-of-life)](http://php.net/eol.php)
-- [PHP 7 Changelog](http://php.net/ChangeLog-7.php)
-- [PHP 5 Changelog](http://php.net/ChangeLog-5.php)
+- [PHP: Supported versions](https://www.php.net/supported-versions.php)
+- [PHP: Unsupported versions (EOL/End-of-life)](https://www.php.net/eol.php)
+- [PHP 7 Changelog](https://www.php.net/ChangeLog-7.php)
+- [PHP 5 Changelog](https://www.php.net/ChangeLog-5.php)
 - [PHP: Bugs](https://bugs.php.net/)
 
 
@@ -118,31 +112,35 @@ On apache `2.4.43+`, you can also delegate LE certificate management to [mod_md]
 
 If you don't want to rely on a certificate authority, or the server can only be accessed from your own network, you can also generate self-signed certificates. Not that this will generate security warnings in web browsers/clients trying to access Shaarli:
 
-- [How To Create a Self-Signed SSL Certificate for Apache](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-on-debian-10)
+- [How To Create a Self-Signed SSL Certificate for Apache](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-debian-10)
 - [How To Create a Self-Signed SSL Certificate for Nginx](https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-nginx-on-debian-10)
-- [How to Create Self-Signed SSL Certificates with OpenSSL](http://www.xenocafe.com/tutorials/linux/centos/openssl/self_signed_certificates/index.php)
 - [How do I create my own Certificate Authority?](https://workaround.org/certificate-authority)
 
 --------------------------------------------------------------------------------
 
 ## Examples
 
-The following examples assume a Debian-based operating system is installed. On other distributions you may have to adapt details such as package installation procedures, configuration file locations, and webserver username/group (`www-data` or `httpd` are common values). In these examples we assume the document root for your web server/virtualhost is at `/var/www/shaarli.mydomain.org/`:
+The following examples assume a Debian-based operating system is installed. On other distributions you may have to adapt details such as package installation procedures, configuration file locations, and webserver username/group (`www-data` or `httpd` are common values). In these examples we assume that the web server and the `php-fpm` PHP interpreter are running as the same user, and the document root for your web server/virtualhost is at `/var/www/shaarli.mydomain.org/`,:
 
 ```bash
 # create the document root (replace with your own domain name)
 sudo mkdir -p /var/www/shaarli.mydomain.org/
 ```
 
-You can install Shaarli at the root of your virtualhost, or in a subdirectory as well. See [Directory structure](Directory-structure)
+You can install Shaarli at the root of your virtualhost, or in a subdirectory as well. See [Directory structure](dev/Development.md#directory-structure)
 
 
 ### Apache
 
 ```bash
-# Install apache + mod_php and PHP modules
+# Install apache + php-fpm
 sudo apt update
-sudo apt install apache2 libapache2-mod-php php-json php-mbstring php-gd php-intl php-curl php-gettext
+sudo apt install apache2 libapache2-mod-md libapache2-mod-fcgid php8.2-fpm php8.2-mbstring php8.2-gd php8.2-intl php8.2-curl php8.2-gettext php8.2-ldap
+
+# Enable required modules
+sudo a2enmod ssl # SSL/TLS certificates https://httpd.apache.org/docs/current/mod/mod_ssl.html
+sudo a2enmod rewrite # REST API support https://httpd.apache.org/docs/current/mod/mod_rewrite.html
+sudo a2enmod headers # custom HTTP headers
 
 # Edit the virtualhost configuration file with your favorite editor (replace the example domain name)
 sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
@@ -153,7 +151,7 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
     ServerName shaarli.mydomain.org
     DocumentRoot /var/www/shaarli.mydomain.org/
 
-    # For SSL/TLS certificates acquired with certbot or self-signed certificates
+    # If using certbot or self-signed certificates:
     # Redirect HTTP requests to HTTPS, except Let's Encrypt ACME challenge requests
     RewriteEngine on
     RewriteRule ^.well-known/acme-challenge/ - [L]
@@ -161,37 +159,35 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
     RewriteRule  ^ https://shaarli.mydomain.org%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 
-# SSL/TLS configuration for Let's Encrypt certificates managed with mod_md
-#MDomain shaarli.mydomain.org
-#MDCertificateAgreement accepted
-#MDContactEmail admin@shaarli.mydomain.org
-#MDPrivateKeys RSA 4096
+# If using mod_md:
+MDomain shaarli.mydomain.org
+MDCertificateAgreement accepted
+MDContactEmail admin@shaarli.mydomain.org
+MDPrivateKeys RSA 4096
 
 <VirtualHost *:443>
     ServerName   shaarli.mydomain.org
     DocumentRoot /var/www/shaarli.mydomain.org/
-
-    # SSL/TLS configuration for Let's Encrypt certificates acquired with certbot standalone
     SSLEngine             on
+
+    # If using certbot:
     SSLCertificateFile    /etc/letsencrypt/live/shaarli.mydomain.org/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/shaarli.mydomain.org/privkey.pem
-    # Let's Encrypt settings from https://github.com/certbot/certbot/blob/master/certbot-apache/certbot_apache/_internal/tls_configs/current-options-ssl-apache.conf
-    SSLProtocol             all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
-    SSLCipherSuite          ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
-    SSLHonorCipherOrder     off
-    SSLSessionTickets       off
-    SSLOptions +StrictRequire
 
-    # SSL/TLS configuration for self-signed certificates
-    #SSLEngine             on
-    #SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
-    #SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    # If using self-signed certificates:
+    SSLEngine             on
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 
     # Optional, log PHP errors, useful for debugging
     #php_flag  log_errors on
     #php_flag  display_errors on
     #php_value error_reporting 2147483647
     #php_value error_log /var/log/apache2/shaarli-php-error.log
+
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php/php8.2-fpm.sock|fcgi://localhost"
+    </FilesMatch>
 
     <Directory /var/www/shaarli.mydomain.org/>
         # Required for .htaccess support
@@ -206,8 +202,6 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
         </FilesMatch>
     </Directory>
     
-    # BE CAREFUL: directives order matter!
-
     <FilesMatch ".*\.(?!(ico|css|js|gif|jpe?g|png|ttf|oet|woff2?)$)[^\.]*$">
         Require all denied
     </FilesMatch>
@@ -223,6 +217,10 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
         Header set Cache-Control "max-age=2628000, public, must-revalidate, proxy-revalidate"
     </FilesMatch>
 
+    <FilesMatch "robots\.txt">
+        Require all granted
+    </FilesMatch>
+
     # serve the Shaarli favicon from its custom location
     Alias favicon.ico /var/www/shaarli.mydomain.org/images/favicon.ico
 </VirtualHost>
@@ -232,29 +230,14 @@ sudo nano /etc/apache2/sites-available/shaarli.mydomain.org.conf
 # Enable the virtualhost
 sudo a2ensite shaarli.mydomain.org
 
-# mod_ssl must be enabled to use TLS/SSL certificates
-# https://httpd.apache.org/docs/current/mod/mod_ssl.html
-sudo a2enmod ssl
-
-# mod_rewrite must be enabled to use the REST API
-# https://httpd.apache.org/docs/current/mod/mod_rewrite.html
-sudo a2enmod rewrite
-
-# mod_headers must be enabled to set custom headers from the server config
-sudo a2enmod headers
-
-# mod_version must only be enabled if you use Apache 2.2 or lower
-# https://httpd.apache.org/docs/current/mod/mod_version.html
-# sudo a2enmod version
-
-# restart the apache service
+# Restart the apache service
 sudo systemctl restart apache2
 ```
 
 - [How to install the Apache web server](https://www.digitalocean.com/community/tutorials/how-to-install-the-apache-web-server-on-debian-10)
-- [Apache/PHP - error log per VirtualHost - StackOverflow](http://stackoverflow.com/q/176)
+- [Apache/PHP - error log per VirtualHost - StackOverflow](https://stackoverflow.com/questions/176/error-log-per-virtual-host)
 - [Apache - PHP: php_value vs php_admin_value and the use of php_flag explained](https://ma.ttias.be/php-php_value-vs-php_admin_value-and-the-use-of-php_flag-explained/)
-- [Server-side TLS (Apache) - Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS#Apache)
+- [Server-side TLS (Apache) - Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS)
 - [Apache 2.4 documentation](https://httpd.apache.org/docs/2.4/)
 - [Apache mod_proxy](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html)
 - [Apache Reverse Proxy Request Headers](https://httpd.apache.org/docs/2.4/mod/mod_proxy.html#x-headers)
@@ -262,12 +245,8 @@ sudo systemctl restart apache2
 
 ### Nginx
 
-This examples uses nginx and the [PHP-FPM](https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mariadb-php-lemp-stack-on-debian-10#step-3-%E2%80%94-installing-php-for-processing) PHP interpreter. Nginx and PHP-FPM must be running using the same user and group, here we assume the user/group to be `www-data:www-data`.
-
-
 ```bash
-# install nginx and php-fpm
-sudo apt update
+# Install nginx and php-fpm
 sudo apt install nginx php-fpm
 
 # Edit the virtualhost configuration file with your favorite editor
@@ -357,36 +336,30 @@ sudo systemctl reload nginx
 ```
 
 - [How to install the Nginx web server](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-debian-10)
-- [Nginx Beginner's guide](http://nginx.org/en/docs/beginners_guide.html)
+- [Nginx Beginner's guide](https://nginx.org/en/docs/beginners_guide.html)
 - [Nginx documentation](https://nginx.org/en/docs/)
-- [Nginx ngx_http_fastcgi_module](http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html)
-- [Nginx Pitfalls](http://wiki.nginx.org/Pitfalls)
-- [Nginx PHP configuration examples - Karl Blessing](http://kbeezie.com/nginx-configuration-examples/)
-- [Server-side TLS (Nginx) - Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS#Nginx)
-
+- [Nginx ngx_http_fastcgi_module](https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html)
+- [Nginx Pitfalls](https://www.nginx.com/resources/wiki/start/topics/tutorials/config_pitfalls/)
+- [Server-side TLS (Nginx) - Mozilla](https://wiki.mozilla.org/Security/Server_Side_TLS)
 
 
 ## Reverse proxies
 
 If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) (i.e. there is a proxy server between clients and the web server hosting Shaarli), configure it accordingly. See [Reverse proxy](Reverse-proxy.md) configuration.
 
+
 ## Using Shaarli without URL rewriting
 
-By default, Shaarli uses Slim framework's URL, which requires
-URL rewriting.
+By default, Shaarli uses Slim framework's URL, which requires URL rewriting.
 
-If you can't use URL rewriting for any reason (not supported by
-your web server, shared hosting, etc.), you *can* use Shaarli
-without URL rewriting.
+If you can't use URL rewriting for any reason (not supported by your web server, shared hosting, etc.), you *can* use Shaarli without URL rewriting.
 
-You just need to prefix your URL by `/index.php/`.
-Example: instead of accessing `https://shaarli.mydomain.org/`,
-use `https://shaarli.mydomain.org/index.php/`.
+You just need to prefix your URL by `/index.php/`. Example: instead of accessing `https://shaarli.mydomain.org/`, use `https://shaarli.mydomain.org/index.php/`.
 
 **Recommended:**
-  * after installation, in the configuration page, set your header link to `/index.php/`.
-  * in your configuration file `config.json.php` set `general.root_url` to
-    `https://shaarli.mydomain.org/index.php/`.
+* after installation, in the configuration page, set your header link to `/index.php/`.
+* in your configuration file `config.json.php` set `general.root_url` to `https://shaarli.mydomain.org/index.php/`.
+
 
 ## Allow import of large browser bookmarks export
 
@@ -431,15 +404,15 @@ Disallow: /
 By default Shaarli already disallows indexing of your local copy of the documentation by default, using `<meta name="robots">` HTML tags. Your Shaarli instance may still be indexed by various robots on the public Internet, that do not respect this header or the robots standard.
 
 - [Robots exclusion standard](https://en.wikipedia.org/wiki/Robots_exclusion_standard)
-- [Introduction to robots.txt](https://support.google.com/webmasters/answer/6062608?hl=en)
-- [Robots meta tag, data-nosnippet, and X-Robots-Tag specifications](https://developers.google.com/search/reference/robots_meta_tag)
-- [About robots.txt](http://www.robotstxt.org)
+- [Introduction to robots.txt](https://developers.google.com/search/docs/crawling-indexing/robots/intro?hl=en)
+- [Robots meta tag, data-nosnippet, and X-Robots-Tag specifications](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag)
+- [About robots.txt](https://www.robotstxt.org)
 - [About the robots META tag](https://www.robotstxt.org/meta.html)
 
 
 ## Fail2ban
 
-[fail2ban](http://www.fail2ban.org/wiki/index.php/Main_Page) is an intrusion prevention framework that reads server (Apache, SSH, etc.) and uses `iptables` profiles to block brute-force attempts. You need to create a filter to detect shaarli login failures in logs, and a jail configuation to configure the behavior when failed login attempts are detected:
+[fail2ban](https://github.com/fail2ban/fail2ban) is an intrusion prevention framework that reads server (Apache, SSH, etc.) and uses `iptables` profiles to block brute-force attempts. You need to create a filter to detect shaarli login failures in logs, and a jail configuation to configure the behavior when failed login attempts are detected:
 
 ```ini
 # /etc/fail2ban/filter.d/shaarli-auth.conf

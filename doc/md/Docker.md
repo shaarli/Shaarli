@@ -49,10 +49,10 @@ Shaarli images are available on [GitHub Container Registry](https://github.com/s
 These images are built automatically on Github Actions and rely on:
 
 - [Alpine Linux](https://www.alpinelinux.org/)
-- [PHP7-FPM](http://php-fpm.org/)
-- [Nginx](http://nginx.org/)
+- [PHP7-FPM](https://php-fpm.org/)
+- [Nginx](https://nginx.org/)
 
-Additional Dockerfiles are provided for the `arm32v7` platform, relying on [Linuxserver.io Alpine armhf images](https://hub.docker.com/r/lsiobase/alpine.armhf/). These images must be built using [`docker build`](https://docs.docker.com/engine/reference/commandline/build/) on an `arm32v7` machine or using an emulator such as [qemu](https://resin.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/).
+Additional Dockerfiles are provided for the `arm32v7` platform, relying on [Linuxserver.io Alpine armhf images](https://hub.docker.com/r/lsiobase/alpine.armhf/). These images must be built using [`docker build`](https://docs.docker.com/engine/reference/commandline/build/) on an `arm32v7` machine or using an emulator such as [qemu](https://blog.balena.io/building-arm-containers-on-any-x86-machine-even-dockerhub/).
 
 Here is an example of how to run Shaarli latest image using Docker:
 
@@ -98,7 +98,7 @@ A [Compose file](https://docs.docker.com/compose/compose-file/) is a common form
 
 A `docker-compose.yml` file can be used to run a persistent/autostarted shaarli service using [Docker Compose](https://docs.docker.com/compose/) or in a [Docker stack](https://docs.docker.com/engine/reference/commandline/stack_deploy/).
 
-Shaarli provides configuration file for Docker Compose, that will setup a Shaarli instance, a [Træfik](https://containo.us/traefik/) instance (reverse proxy) with [Let's Encrypt](https://letsencrypt.org/) certificates, a Docker network, and volumes for Shaarli data and Træfik TLS configuration and certificates.
+Shaarli provides configuration file for Docker Compose, that will setup a Shaarli instance, a [Træfik](https://traefik.io/traefik/) instance (reverse proxy) with [Let's Encrypt](https://letsencrypt.org/) certificates, a Docker network, and volumes for Shaarli data and Træfik TLS configuration and certificates.
 
 Download docker-compose from the [release page](https://docs.docker.com/compose/install/):
 
@@ -204,27 +204,24 @@ $ docker system prune
 ## References
 
 - [Docker: using volumes](https://docs.docker.com/storage/volumes/)
-- [Dockerfile best practices](https://docs.docker.com/articles/dockerfile_best-practices/)
-- [Dockerfile reference](https://docs.docker.com/reference/builder/)
+- [Dockerfile best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
+- [Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 - [GitHub Container Registry](https://github.com/features/packages)
 - [GithHub Packages documentation](https://docs.github.com/en/packages)
 - [DockerHub: Teams and organizations](https://docs.docker.com/docker-hub/orgs/), [End of Docker free teams](https://www.docker.com/blog/we-apologize-we-did-a-terrible-job-announcing-the-end-of-docker-free-teams/)
-- [Get Docker CE for Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
+- [Get Docker CE for Debian](https://docs.docker.com/engine/install/debian/)
 - [Install Docker Compose](https://docs.docker.com/compose/install/)
-- [Interactive Docker training portal](https://www.katacoda.com/courses/docker/) on [Katakoda](https://www.katacoda.com/)
-- [Service management: Nginx in the foreground](http://nginx.org/en/docs/ngx_core_module.html#daemon)
-- [Service management: Using supervisord](https://docs.docker.com/articles/using_supervisord/)
+- [Service management: Nginx in the foreground](https://nginx.org/en/docs/ngx_core_module.html#daemon)
+- [Service management: Run multiple services in a container](https://docs.docker.com/config/containers/multi-service_container/)
 - [Volumes](https://docs.docker.com/storage/volumes/)
-- [Where are Docker images stored?](http://blog.thoward37.me/articles/where-are-docker-images-stored/)
+- [Where are Docker images stored?](https://blog.thoward37.me/articles/where-are-docker-images-stored/)
 - [docker create](https://docs.docker.com/engine/reference/commandline/create/)
 - [Docker Documentation](https://docs.docker.com/)
 - [docker exec](https://docs.docker.com/engine/reference/commandline/exec/)
 - [docker images](https://docs.docker.com/engine/reference/commandline/images/)
 - [docker logs](https://docs.docker.com/engine/reference/commandline/logs/)
-- [docker logs](https://docs.docker.com/engine/reference/commandline/logs/)
-- [Docker Overview](https://docs.docker.com/engine/docker-overview/)
+- [Docker Overview](https://docs.docker.com/get-started/overview/)
 - [docker ps](https://docs.docker.com/engine/reference/commandline/ps/)
 - [docker pull](https://docs.docker.com/engine/reference/commandline/pull/)
 - [docker run](https://docs.docker.com/engine/reference/commandline/run/)
-- [docker-compose logs](https://docs.docker.com/compose/reference/logs/)
-- Træfik: [Getting Started](https://docs.traefik.io/), [Docker backend](https://docs.traefik.io/configuration/backends/docker/), [Let's Encrypt](https://docs.traefik.io/user-guide/docker-and-lets-encrypt/), [Docker image](https://hub.docker.com/_/traefik/)
+- Træfik: [Documentation](https://doc.traefik.io/traefik/), [Docker image](https://hub.docker.com/_/traefik/)

@@ -117,59 +117,62 @@
       <button type="submit" class="search-button" aria-label="{'Search'|t}"><i class="fa fa-search" aria-hidden="true"></i></button>
     </form>
   </div>
-  <div id="actions" class="subheader-form">
-    <div class="pure-g">
-      <div class="pure-u-1">
-        <a href="" id="actions-delete" class="button">
-          <i class="fa fa-trash" aria-hidden="true"></i>
-          {'Delete'|t}
-        </a>&nbsp;
-        <a href="" class="actions-change-visibility button" data-visibility="public">
-          <i class="fa fa-globe" aria-hidden="true"></i>
-          {'Set public'|t}
-        </a>&nbsp;
-        <a href="" class="actions-change-visibility button" data-visibility="private">
-          <i class="fa fa-user-secret" aria-hidden="true"></i>
-          {'Set private'|t}
-        </a>&nbsp;
-        <a href="" class="subheader-opener button" data-open-id="bulk-tag-action-add">
-          <i class="fa fa-tag" aria-hidden="true"></i>
-          {'Add tags'|t}
-        </a>&nbsp;
-        <a href="" class="subheader-opener button" data-open-id="bulk-tag-action-delete">
-          <i class="fa fa-window-close" aria-hidden="true"></i>
-          {'Delete tags'|t}
-        </a>
+
+  {if="$is_logged_in && $template === 'linklist'"}
+    <div id="actions" class="subheader-form">
+      <div class="pure-g">
+        <div class="pure-u-1">
+          <a href="" id="actions-delete" class="button">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+            {'Delete'|t}
+          </a>&nbsp;
+          <a href="" class="actions-change-visibility button" data-visibility="public">
+            <i class="fa fa-globe" aria-hidden="true"></i>
+            {'Set public'|t}
+          </a>&nbsp;
+          <a href="" class="actions-change-visibility button" data-visibility="private">
+            <i class="fa fa-user-secret" aria-hidden="true"></i>
+            {'Set private'|t}
+          </a>&nbsp;
+          <a href="" class="subheader-opener button" data-open-id="bulk-tag-action-add">
+            <i class="fa fa-tag" aria-hidden="true"></i>
+            {'Add tags'|t}
+          </a>&nbsp;
+          <a href="" class="subheader-opener button" data-open-id="bulk-tag-action-delete">
+            <i class="fa fa-window-close" aria-hidden="true"></i>
+            {'Delete tags'|t}
+          </a>
+        </div>
       </div>
     </div>
-  </div>
 
-  {$addDelete=['add', 'delete']}
-  {loop="$addDelete"}
-    <div id="bulk-tag-action-{$value}" class="subheader-form">
-      <form class="pure-g" action="{$base_path}/admin/shaare/update-tags" method="post">
-        <div class="pure-u-1">
-          <span>
-            <input
-              type="text" name="tag" class="autofocus"
-              aria-label="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
-              placeholder="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
-              autocomplete="off" data-multiple data-autofirst data-minChars="1"
-              data-list="{loop="$tags"}{$key}, {/loop}"
-            >
-            <input type="hidden" name="action" value="{$value}" />
-            <input type="hidden" name="id" value="" />
-            <input type="hidden" name="token" value="{$token}" />
-          </span>&nbsp;
-          <a href="" class="button action">
-            <i class="fa fa-tag" aria-hidden="true"></i>
-            {$value === 'add' ? t('Add tag') : t('Delete tag')}
-          </a>&nbsp;
-          <a href="" class="subheader-opener button cancel" data-open-id="actions">{'Cancel'|t}</a>
-        </div>
-      </form>
-    </div>
-  {/loop}
+    {$addDelete=['add', 'delete']}
+    {loop="$addDelete"}
+      <div id="bulk-tag-action-{$value}" class="subheader-form">
+        <form class="pure-g" action="{$base_path}/admin/shaare/update-tags" method="post">
+          <div class="pure-u-1">
+            <span>
+              <input
+                type="text" name="tag" class="autofocus"
+                aria-label="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
+                placeholder="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
+                autocomplete="off" data-multiple data-autofirst data-minChars="1"
+                data-list="{loop="$tags"}{$key}, {/loop}"
+              >
+              <input type="hidden" name="action" value="{$value}" />
+              <input type="hidden" name="id" value="" />
+              <input type="hidden" name="token" value="{$token}" />
+            </span>&nbsp;
+            <a href="" class="button action">
+              <i class="fa fa-tag" aria-hidden="true"></i>
+              {$value === 'add' ? t('Add tag') : t('Delete tag')}
+            </a>&nbsp;
+            <a href="" class="subheader-opener button cancel" data-open-id="actions">{'Cancel'|t}</a>
+          </div>
+        </form>
+      </div>
+    {/loop}
+  {/if}
 
   {if="!$is_logged_in"}
     <form method="post" name="loginform">

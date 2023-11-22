@@ -1,3 +1,5 @@
+# Usage
+
 ## Features
 
 For any item posted to Shaarli (called a _Shaare_), you can customize the following aspects:
@@ -53,7 +55,7 @@ Shaarli can be used as a minimal blog, notepad, pastebin...: While adding or edi
 - **Tags search:** `Filter by tags` allow only displaying Shaares tagged with one or multiple tags (use space to separate tags). A plus sign `+` is optional and will restrict suggested tags to only those starting with the string (example: `pr` will hint `apron` and `printer` but `+pr` will only hint printer).
 - **Hidden tags:** tags starting with a dot `.` (example `.secret`) are private. They can only be seen and searched when logged in.
 - **Exclude text/tags:** Use the `-` operator before a word or tag to exclude Shaares matching this word from search results (`NOT` operator).
-- **Optional tags:** Use the `~` operator before multiple tags to search for any one of them (`OR` operator).
+- **Optional tags:** Use the `~` operator before multiple tags to search for any one of them (`OR` operator). Note that the OR operator only works if there are multiple tags with a tilde. A search for `webdesign ~ai ~youtube` search would match `webdesign AND (ai OR youtube)`. A search for `webdesign ~youtube` is equivalent to `+webdesign +youtube`.
 - **Wildcard tag search:** An asterisk (`*`) can be used as a wildcard and will match any number of characters. Wildcards can appear in the middle of a search term or at the end (example: pro\*in\* will match programming and protein).
 - **Untagged links:** Shaares without tags can be searched by clicking the `untagged` toggle button top left of the Shaares list (only when logged in).
 

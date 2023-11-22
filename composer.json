@@ -1,6 +1,6 @@
 {
     "name": "shaarli/shaarli",
-    "description": "The personal, minimalist, super-fast, database-free bookmarking service",
+    "description": "The personal, minimalist, super fast, database-free bookmarking service",
     "type": "project",
     "license": "MIT",
     "homepage": "https://github.com/shaarli/Shaarli",

@@ -194,7 +194,7 @@ msgstr ""
 #: application/bookmark/BookmarkInitializer.php:94
 #: application/legacy/LegacyLinkDB.php:246
 msgid ""
-"The personal, minimalist, super-fast, database free, bookmarking service"
+"The personal, minimalist, super fast, database-free, bookmarking service"
 msgstr ""
 "個人向けの、ミニマムで高速でかつデータベースのいらないブックマークサービス"
 

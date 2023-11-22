@@ -22,7 +22,7 @@ Some settings can be configured directly from a web browser by accesing the `Too
 
 ## Configuration file example
 
-```json
+```
 <?php /*
 {
     "credentials": {
@@ -61,6 +61,9 @@ Some settings can be configured directly from a web browser by accesing the `Too
         "rss_permalinks": true,
         "links_per_page": 20,
         "default_private_links": true,
+        "check_updates_interval": 86400,
+        "download_max_size": 4194304,
+        "download_timeout": 30,
         "enabled_plugins": [
             "markdown",
             "wallabag",
@@ -102,7 +105,7 @@ Some settings can be configured directly from a web browser by accesing the `Too
         "mode": "common"
     },
     "plugins": {
-        "WALLABAG_URL": "http://demo.wallabag.org",
+        "WALLABAG_URL": "https://demo.wallabag.org",
         "WALLABAG_VERSION": "1"
     },
     "translation": {
@@ -134,9 +137,11 @@ _These settings should not be edited_
 - **title**: Shaarli's instance title.
 - **header_link**: Link to the homepage.
 - **links_per_page**: Number of Shaares displayed per page.
-- **timezone**: See [the list of supported timezones](http://php.net/manual/en/timezones.php).
+- **timezone**: See [the list of supported timezones](https://www.php.net/manual/en/timezones.php).
 - **enabled_plugins**: List of enabled plugins.
 - **default_note_title**: Default title of a new note.
+- **download_max_size:**: Maximum number of bytes to download when retrieveing page content/metadata.
+- **download_timeout:**: Network timeout (in seconds) when retrieveing page content/metadata.
 - **enable_async_metadata** (boolean): Retrieve external bookmark metadata asynchronously to prevent bookmark creation slowdown.
 - **retrieve_description** (boolean): If set to true, for every new Shaare Shaarli will try to retrieve the description and keywords from the HTML meta tags.
 - **root_url**: Overrides automatic discovery of Shaarli instance's URL (e.g.) `https://sub.domain.tld/shaarli-folder/`.
@@ -184,7 +189,7 @@ Additional settings applied to formatters.
 
 ### Translation
 
-- **language**: translation language (also see [Translations](Translations))
+- **language**: translation language (also see [Translations](dev/Development.md#translations))
     - **auto** (default): The translation language is chosen from the browser locale.
     It means that the language can be different for 2 different visitors depending on their locale.
     - **en**: Use the English translation.

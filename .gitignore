@@ -26,6 +26,7 @@ sandbox
 phpmd.html
 phpdoc.xml
 .phpunit.result.cache
+trivy
 
 # User plugin configuration
 plugins/*

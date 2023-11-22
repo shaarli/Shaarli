@@ -7,7 +7,7 @@ If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.o
 - Shaarli's Fully Qualified Domain Name (FQDN) is `shaarli.mydomain.org`.
 - No HTTPS is setup on the application server, SSL termination is done at the reverse proxy.
 
-In your [Shaarli configuration](Shaarli-configuration) `data/config.json.php`, add the public IP of your proxy under `security.trusted_proxies`.
+In your [Shaarli configuration](Shaarli-configuration.md) `data/config.json.php`, add the public IP of your proxy under `security.trusted_proxies`.
 
 See also [proxy-related](https://github.com/shaarli/Shaarli/issues?utf8=%E2%9C%93&q=label%3Aproxy+) issues.
 
@@ -68,7 +68,7 @@ See also [proxy-related](https://github.com/shaarli/Shaarli/issues?utf8=%E2%9C%9
 ## HAProxy
 
 
-```conf
+```
 global
     [...]
 
