@@ -28,8 +28,8 @@ require_once __DIR__ . '/init.php';
 
 use Katzgrau\KLogger\Logger;
 use Psr\Log\LogLevel;
-use Selective\BasePath\BasePathMiddleware;
 use Shaarli\Api\Controllers as ApiControllers;
+use Shaarli\BasePathMiddleware;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Container\ContainerBuilder;
 use Shaarli\Front\Controller;
