@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.13.0](https://github.com/shaarli/Shaarli/releases/tag/v0.12.3) - 2023-11-22
+
+> Major changes:
+>  - Security: Fix XSS vulnerability in tag search
+>  - Drop support for PHP 7.1, 7.2 and 7.3
+
+### Added
+* Docker build: add ARM64 platform and bump Github action version by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1965
+* github actions: build OCI images that contain both amd64 and armv7 by @nodiscc in https://github.com/shaarli/Shaarli/pull/1962
+* Expose tags_separator config through /info API by @amadeous in https://github.com/shaarli/Shaarli/pull/1997
+* tools: github actions: build docker images on pull requests by @nodiscc in https://github.com/shaarli/Shaarli/pull/2014
+* doc: server configuration: add PHP 8.2 to PHP compatibility table by @nodiscc in https://github.com/shaarli/Shaarli/pull/2021
+* Add shaarli-stack theme to Community-and-related-software.md by @dajare in https://github.com/shaarli/Shaarli/pull/2028
+* doc: document general.download_max_size/timeout configuration settings by @nodiscc in https://github.com/shaarli/Shaarli/pull/2036
+* doc: troubleshooting: automatic title retrieval fails when it is set by javascript by @nodiscc in https://github.com/shaarli/Shaarli/pull/2037
+
+### Changed
+* doc: update release procedure (merge the latest release to the release branch) + use the release branch for latest release version detection by @nodiscc in https://github.com/shaarli/Shaarli/pull/1960
+* Update german translation by @bschwede in https://github.com/shaarli/Shaarli/pull/1969
+* Update Server-configuration.md by @reinboldg in https://github.com/shaarli/Shaarli/pull/1973
+* Update Community-and-related-software.md by @nlegaillart in https://github.com/shaarli/Shaarli/pull/1984
+* doc: improve docs on usage of OR operator in tags search by @nodiscc in https://github.com/shaarli/Shaarli/pull/1987
+* docker: nginx: listen on IPv6 in addition to IPv4 by @cerebrate in https://github.com/shaarli/Shaarli/pull/1983
+* Doc update, WebSub (formerly PubSubHubbub) plugin by @clach04 in https://github.com/shaarli/Shaarli/pull/2008
+* doc: community/related software/integration with other platforms: add link to shaarli debian package by @nodiscc in https://github.com/shaarli/Shaarli/pull/2018
+* replace mkdocs with sphinx/myst-parser for HTML documentation generation, documentation improvements by @nodiscc in https://github.com/shaarli/Shaarli/pull/2025
+
+### Fixed
+* Makefile: Use GNU tar if available by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1957
+* Support: ignore disk_free_space if the function is unavailable by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1970
+* Documentation: fix broken link to 3rd party plugins by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1975
+* Fix autofocus: load bulk action input on linklist only by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1976
+* doc: fix mkdocs build warnings/relative links by @nodiscc in https://github.com/shaarli/Shaarli/pull/2015
+* correct usage of hyphens in all occurences of 'super fast, database-free' by @nodiscc in https://github.com/shaarli/Shaarli/pull/2003
+
+
+### Removed
+* Drop support for PHP 7.1, 7.2 and 7.3 by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/1958
+* doc: themes: remove unmaintained themes by @nodiscc in https://github.com/shaarli/Shaarli/pull/2030
+* doc: remove bountysource badge by @nodiscc in https://github.com/shaarli/Shaarli/pull/2035
+
+### Security
+* Fix XSS vulnerability in tag search by @ArthurHoaro in https://github.com/shaarli/Shaarli/pull/2039
+* tools: run trivy vulnerability scanner on the 'latest' docker image by @nodiscc in https://github.com/shaarli/Shaarli/pull/1980
+* github actions: fix value of TRIVY_TARGET_DOCKER_IMAGE by @nodiscc in https://github.com/shaarli/Shaarli/pull/1989
+* tools/CI: scan repository with trivy security scanner (yarn.lock, composer.lock) by @nodiscc in https://github.com/shaarli/Shaarli/pull/1998
+* tools/tests: update trivy to v0.44.0 by @nodiscc in https://github.com/shaarli/Shaarli/pull/2012
+* docker: update base alpine docker image to 3.16.7 by @nodiscc in https://github.com/shaarli/Shaarli/pull/2024
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.12.2...v0.12.3
+
 ## [v0.12.2](https://github.com/shaarli/Shaarli/releases/tag/v0.12.2) - 2023-03-18
 
 > Docker: use `ghcr.io/shaarli/shaarli` as Docker image instead of `shaarli/shaarli`.

@@ -1,0 +1,4 @@
+sphinx==7.1.0
+furo==2023.7.26
+myst-parser
+sphinx-design

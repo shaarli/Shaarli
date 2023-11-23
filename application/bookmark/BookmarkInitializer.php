@@ -91,7 +91,7 @@ Markdown also supports tables:
 
         $bookmark = new Bookmark();
         $bookmark->setTitle(
-            'Shaarli - ' . t('The personal, minimalist, super-fast, database free, bookmarking service')
+            'Shaarli - ' . t('The personal, minimalist, super fast, database-free, bookmarking service')
         );
         $bookmark->setDescription(t(
             'Welcome to Shaarli!

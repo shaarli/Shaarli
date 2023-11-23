@@ -196,7 +196,7 @@ msgstr ""
 #: tmp/page.footer.cedf684561d925457130839629000a81.rtpl.php:15
 #: tmp/page.footer.cedf684561d925457130839629000a81.rtpl.php:48
 msgid ""
-"The personal, minimalist, super-fast, database free, bookmarking service"
+"The personal, minimalist, super fast, database-free, bookmarking service"
 msgstr "Личный, минималистичный, сверхбыстрый сервис закладок без баз данных"
 
 #: application/bookmark/BookmarkInitializer.php:97

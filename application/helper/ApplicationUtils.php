@@ -19,7 +19,7 @@ class ApplicationUtils
 
     public static $GITHUB_URL = 'https://github.com/shaarli/Shaarli';
     public static $GIT_RAW_URL = 'https://raw.githubusercontent.com/shaarli/Shaarli';
-    public static $GIT_BRANCHES = ['latest', 'stable'];
+    public static $RELEASE_BRANCH = 'release';
     private static $VERSION_START_TAG = '<?php /* ';
     private static $VERSION_END_TAG = ' */ ?>';
 
@@ -89,7 +89,6 @@ class ApplicationUtils
      * @param int    $checkInterval  the minimum interval between update checks (in seconds
      * @param bool   $enableCheck    whether to check for new versions
      * @param bool   $isLoggedIn     whether the user is logged in
-     * @param string $branch         check update for the given branch
      *
      * @throws Exception an invalid branch has been set for update checks
      *
@@ -100,13 +99,12 @@ class ApplicationUtils
         $updateFile,
         $checkInterval,
         $enableCheck,
-        $isLoggedIn,
-        $branch = 'stable'
+        $isLoggedIn
     ) {
         // Do not check versions for visitors
         // Do not check if the user doesn't want to
         // Do not check with dev version
-        if (!$isLoggedIn || empty($enableCheck) || $currentVersion === 'dev') {
+        if (!$isLoggedIn || empty($enableCheck) || self::isDevVersion($currentVersion)) {
             return false;
         }
 
@@ -120,16 +118,10 @@ class ApplicationUtils
             return false;
         }
 
-        if (!in_array($branch, self::$GIT_BRANCHES)) {
-            throw new Exception(
-                'Invalid branch selected for updates: "' . $branch . '"'
-            );
-        }
-
         // Late Static Binding allows overriding within tests
         // See http://php.net/manual/en/language.oop5.late-static-bindings.php
         $latestVersion = static::getVersion(
-            self::$GIT_RAW_URL . '/' . $branch . '/' . self::$VERSION_FILE
+            self::$GIT_RAW_URL . '/' . self::$RELEASE_BRANCH . '/' . self::$VERSION_FILE
         );
 
         if (!$latestVersion) {
@@ -189,11 +181,11 @@ class ApplicationUtils
         // Check script and template directories are readable
         foreach (
             [
-            'application',
-            'inc',
-            'plugins',
-            $rainTplDir,
-            $rainTplDir . '/' . $conf->get('resource.theme'),
+                'application',
+                'inc',
+                'plugins',
+                $rainTplDir,
+                $rainTplDir . '/' . $conf->get('resource.theme'),
             ] as $path
         ) {
             if (!is_readable(realpath($path))) {
@@ -208,10 +200,10 @@ class ApplicationUtils
             ];
         } else {
             $folders = [
-            $conf->get('resource.thumbnails_cache'),
-            $conf->get('resource.data_dir'),
-            $conf->get('resource.page_cache'),
-            $conf->get('resource.raintpl_tmp'),
+                $conf->get('resource.thumbnails_cache'),
+                $conf->get('resource.data_dir'),
+                $conf->get('resource.page_cache'),
+                $conf->get('resource.raintpl_tmp'),
             ];
         }
 
@@ -231,12 +223,12 @@ class ApplicationUtils
         // Check configuration files are readable and writable
         foreach (
             [
-                 $conf->getConfigFileExt(),
-                 $conf->get('resource.datastore'),
-                 $conf->get('resource.ban_file'),
-                 $conf->get('resource.log'),
-                 $conf->get('resource.update_check'),
-             ] as $path
+                $conf->getConfigFileExt(),
+                $conf->get('resource.datastore'),
+                $conf->get('resource.ban_file'),
+                $conf->get('resource.log'),
+                $conf->get('resource.update_check'),
+            ] as $path
         ) {
             if (!is_string($path) || !is_file(realpath($path))) {
                 # the file may not exist yet
@@ -333,5 +325,12 @@ class ApplicationUtils
             '8.1' => '2024-11-25',
             '8.2' => '2025-12-08',
         ][$matches[1]] ?? (new \DateTime('+2 year'))->format('Y-m-d');
+    }
+
+    public static function isDevVersion(string $version): bool
+    {
+        return strpos($version, 'dev') !== false
+            || preg_match('/[a-f0-9]{7}/', $version) === 1
+        ;
     }
 }

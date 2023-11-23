@@ -103,8 +103,7 @@ class PageBuilder
                 $this->conf->get('resource.update_check'),
                 $this->conf->get('updates.check_updates_interval'),
                 $this->conf->get('updates.check_updates'),
-                $this->isLoggedIn,
-                $this->conf->get('updates.check_updates_branch')
+                $this->isLoggedIn
             );
             $this->tpl->assign('newVersion', escape($version));
             $this->tpl->assign('versionError', '');
