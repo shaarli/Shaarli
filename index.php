@@ -28,6 +28,7 @@ require_once __DIR__ . '/init.php';
 
 use Katzgrau\KLogger\Logger;
 use Psr\Log\LogLevel;
+use Selective\BasePath\BasePathMiddleware;
 use Shaarli\Api\Controllers as ApiControllers;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Container\ContainerBuilder;
@@ -108,6 +109,7 @@ $containerBuilder = new ContainerBuilder(
 $container = $containerBuilder->build();
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+$app->add(new BasePathMiddleware($app));
 
 // Main Shaarli routes
 $app->group('', function (RouteCollectorProxy $group) {
@@ -202,7 +204,7 @@ $app->group('/api/v1', function (RouteCollectorProxy $group) {
 
 $errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, true, true);
 $errorMiddleware->setDefaultErrorHandler(
-    new ShaarliErrorHandler($app->getCallableResolver(), $app->getResponseFactory(), $logger, $container)
+    new ShaarliErrorHandler($app, $logger, $container)
 );
 
 

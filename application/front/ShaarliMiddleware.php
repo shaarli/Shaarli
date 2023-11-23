@@ -113,7 +113,7 @@ class ShaarliMiddleware
     protected function initBasePath(Request $request): void
     {
         if (null === $this->container->get('basePath')) {
-            $this->container->set('basePath', rtrim($request->getAttribute('basePath'), '/'));
+            $this->container->set('basePath', rtrim($request->getAttribute(RouteContext::BASE_PATH), '/'));
         }
     }
 

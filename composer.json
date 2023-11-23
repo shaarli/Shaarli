@@ -27,6 +27,7 @@
         "malkusch/lock": "^2.1",
         "php-di/php-di": "^6.4",
         "pubsubhubbub/publisher": "dev-master",
+        "selective/basepath": "^2.1",
         "shaarli/netscape-bookmark-parser": "^4.0",
         "slim/psr7": "^1.6",
         "slim/slim": "4.*"

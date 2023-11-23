@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Shaarli\Front\Controller\PageTrait;
 use Shaarli\Front\Exception\ShaarliFrontException;
 use Shaarli\Render\TemplatePage;
+use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Handlers\ErrorHandler;
 use Slim\Interfaces\CallableResolverInterface;
@@ -23,15 +24,17 @@ class ShaarliErrorHandler extends ErrorHandler
 {
     use PageTrait;
 
+    private App $app;
+
     private ?Container $container;
 
     public function __construct(
-        CallableResolverInterface $callableResolver,
-        ResponseFactoryInterface $responseFactory,
+        App $app,
         ?LoggerInterface $logger = null,
-        ?Container $container = null
+        ?Container $container = null,
     ) {
-        parent::__construct($callableResolver, $responseFactory, $logger);
+        parent::__construct($app->getCallableResolver(), $app->getResponseFactory(), $logger);
+        $this->app = $app;
         $this->container = $container;
     }
 
@@ -84,10 +87,9 @@ class ShaarliErrorHandler extends ErrorHandler
         if (false !== strpos($request->getRequestTarget(), '/api/v1')) {
             return $response->withStatus(404);
         }
-        $basePathFromRequest = $request->getAttribute(RouteContext::BASE_PATH) ?? '';
 
-        // This is required because the middleware is ignored if the route is not found.
-        $this->container->set('basePath', rtrim($basePathFromRequest, '/'));
+        // This is required because the request handler throw the error before setting the base path.
+        $this->container->set('basePath', rtrim($this->app->getBasePath(), '/'));
 
         $this->assignView('error_message', t('Requested page could not be found.'));
 
