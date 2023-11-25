@@ -38,7 +38,7 @@ class FeedController extends ShaarliVisitorController
         }
 
         // Generate data.
-        $this->container->get('feedBuilder')->setLocale(strtolower(setlocale(LC_COLLATE, 0)));
+        $this->container->get('feedBuilder')->setLocale(strtolower(get_locale(LC_COLLATE)));
         $this->container->get('feedBuilder')->setHideDates($this->container->get('conf')
             ->get('privacy.hide_timestamps', false));
         $this->container->get('feedBuilder')->setUsePermalinks(

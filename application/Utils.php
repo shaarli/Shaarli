@@ -322,7 +322,7 @@ function format_date($date, $time = true, $intl = true)
         return $date->format($format);
     }
     $formatter = new IntlDateFormatter(
-        setlocale(LC_TIME, 0),
+        get_locale(LC_TIME),
         IntlDateFormatter::LONG,
         $time ? IntlDateFormatter::LONG : IntlDateFormatter::NONE
     );
@@ -502,4 +502,24 @@ function t($text, $nText = '', $nb = 1, $domain = 'shaarli', $variables = [], $f
 function exception2text(Throwable $e): string
 {
     return $e->getMessage() . PHP_EOL . $e->getFile() . $e->getLine() . PHP_EOL . $e->getTraceAsString();
+}
+
+/**
+ * Get the current locale, overrides 'C' locale which is no longer compatible with PHP-intl
+ *
+ * @param int $category Category of the locale (LC_CTYPE, LC_NUMERIC, LC_TIME, LC_COLLATE, LC_MONETARY, LC_ALL)
+ *
+ * @return string|false The locale, or false if not found.
+ *
+ * @see https://github.com/php/php-src/issues/12561
+ */
+function get_locale(int $category = LC_CTYPE)
+{
+    $locale = setlocale($category, 0);
+
+    if ($locale === 'C' || startsWith($locale, 'C.')) {
+        $locale = 'en_US.utf8'; // failback
+    }
+
+    return $locale;
 }
