@@ -15,7 +15,8 @@ use Slim\App;
  * This is a hack that to make BasePathMiddleware Selective's library without a public subdirectory,
  * and without re-implementing the dectector.
  */
-class BasePathMiddleware implements MiddlewareInterface {
+class BasePathMiddleware implements MiddlewareInterface
+{
     /**
      * @var App The slim app
      */
@@ -37,13 +38,13 @@ class BasePathMiddleware implements MiddlewareInterface {
         $this->app = $app;
         $this->phpSapi = $phpSapi;
     }
-    
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $params = $request->getServerParams();
         $pathParts = pathinfo($params['SCRIPT_NAME']);
         $params['SCRIPT_NAME'] = $pathParts['dirname'] . '/public/' . $pathParts['basename'];
-        
+
         $detector = new BasePathDetector($params, $this->phpSapi);
 
         $this->app->setBasePath($detector->getBasePath());

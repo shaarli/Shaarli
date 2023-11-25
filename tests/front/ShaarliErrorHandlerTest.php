@@ -8,8 +8,10 @@ use Shaarli\Front\Controller\Visitor\FrontControllerMockHelper;
 use Shaarli\Front\Exception\ShaarliFrontException;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\FakeRequest;
+use Slim\App;
 use Slim\CallableResolver;
 use Slim\Exception\HttpNotFoundException;
+use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteContext;
 
@@ -25,8 +27,7 @@ class ShaarliErrorHandlerTest extends TestCase
         $this->initRequestResponseFactories();
         $this->createContainer();
         $this->errorHandler = new ShaarliErrorHandler(
-            new CallableResolver(),
-            new ResponseFactory(),
+            AppFactory::create(),
             null,
             $this->container
         );

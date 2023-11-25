@@ -31,7 +31,7 @@ class ShaarliErrorHandler extends ErrorHandler
     public function __construct(
         App $app,
         ?LoggerInterface $logger = null,
-        ?Container $container = null,
+        ?Container $container = null
     ) {
         parent::__construct($app->getCallableResolver(), $app->getResponseFactory(), $logger);
         $this->app = $app;

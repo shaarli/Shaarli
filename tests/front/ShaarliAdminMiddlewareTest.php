@@ -25,6 +25,9 @@ class ShaarliAdminMiddlewareTest extends TestCase
     /** @var ShaarliMiddleware  */
     protected $middleware;
 
+    /** @var RequestHandlerFactory */
+    protected $requestHandlerFactory;
+
     public function setUp(): void
     {
         $this->initRequestResponseFactories();
