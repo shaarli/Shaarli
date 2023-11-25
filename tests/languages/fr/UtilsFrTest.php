@@ -20,7 +20,7 @@ class UtilsFrTest extends UtilsTest
      */
     public function testDateFormat()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         autoLocale('fr-fr');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
         $this->assertRegExp('/2 janvier 2017 (à )?20:11:12 UTC\+0?3(:00)?/', format_date($date));
@@ -32,7 +32,7 @@ class UtilsFrTest extends UtilsTest
      */
     public function testDateFormatNoTime()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         autoLocale('fr-fr');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
         $this->assertRegExp('/2 janvier 2017/', format_date($date, false, true));
@@ -62,10 +62,10 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleValid()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         $header = 'de-de';
         autoLocale($header);
-        $this->assertEquals('de_DE.utf8', setlocale(LC_ALL, 0));
+        $this->assertEquals('de_DE.utf8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
@@ -75,10 +75,10 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleValidAlternative()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         $header = 'de_de.UTF8';
         autoLocale($header);
-        $this->assertEquals('de_DE.utf8', setlocale(LC_ALL, 0));
+        $this->assertEquals('de_DE.utf8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
@@ -88,10 +88,10 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleMultipleFirstValid()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         $header = 'de-de;en-us';
         autoLocale($header);
-        $this->assertEquals('de_DE.utf8', setlocale(LC_ALL, 0));
+        $this->assertEquals('de_DE.utf8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
@@ -101,10 +101,10 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleMultipleSecondAvailable()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         $header = 'mgg_IN,de-de';
         autoLocale($header);
-        $this->assertEquals('de_DE.utf8', setlocale(LC_ALL, 0));
+        $this->assertEquals('de_DE.utf8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
@@ -114,9 +114,9 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleBlank()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         autoLocale('');
-        $this->assertEquals('en_US.UTF-8', setlocale(LC_ALL, 0));
+        $this->assertEquals('en_US.UTF-8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
@@ -126,9 +126,9 @@ class UtilsFrTest extends UtilsTest
      */
     public function testAutoLocaleUnavailable()
     {
-        $current = setlocale(LC_ALL, 0);
+        $current = get_locale(LC_ALL);
         autoLocale('mgg_IN');
-        $this->assertEquals('en_US.UTF-8', setlocale(LC_ALL, 0));
+        $this->assertEquals('en_US.UTF-8', get_locale(LC_ALL));
 
         setlocale(LC_ALL, $current);
     }
