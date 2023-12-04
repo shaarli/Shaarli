@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 
-// Replicates https://github.com/shaarli/Shaarli/blob/master/application/bookmark/BookmarkIO.php#L72 :
+// Replicates BookmarkIO.read() at https://github.com/shaarli/Shaarli/blob/master/application/bookmark/BookmarkIO.php#L72 :
 
 use Shaarli\Bookmark\BookmarkArray;
 
