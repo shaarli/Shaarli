@@ -98,7 +98,7 @@
       <div class="pure-u-lg-{$ratioInput} pure-u-1">
         <div class="form-input">
           <div class="timezone">
-            <select id="continent" name="continent">
+            <select id="continent" name="continent" title="{'Continent'|t}">
               {loop="$continents"}
                 {if="$key !== 'selected'"}
                   <option value="{$value}" {if="$continents.selected === $value"}selected{/if}>
@@ -107,7 +107,7 @@
                 {/if}
               {/loop}
             </select>
-            <select id="city" name="city">
+            <select id="city" name="city" title="{'City'|t}">
               {loop="$cities"}
                 {if="$key !== 'selected'"}
                   <option value="{$value.city}"
@@ -118,6 +118,7 @@
                 {/if}
               {/loop}
             </select>
+            <button type="button" class="button" onclick="autofillTimeZone_alert()">{'Auto detect'|t}</button>
           </div>
         </div>
       </div>
