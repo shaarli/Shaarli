@@ -25,7 +25,7 @@ RUN cd shaarli \
 
 # Stage 4:
 # - Shaarli image
-FROM docker.io/alpine:3.18.6
+FROM docker.io/alpine:3.19.1
 LABEL maintainer="Shaarli Community"
 
 RUN apk --update --no-cache add \
