@@ -26,7 +26,7 @@ module.exports = [
       shaarli: [
         './assets/default/js/base.js',
         './assets/default/scss/shaarli.scss',
-      ].concat(glob.sync('./assets/default/img/*')),
+      ].concat(glob.sync('./assets/default/img/*', { dotRelative: true })),
       markdown: './assets/common/css/markdown.css',
     },
     output: {
@@ -98,7 +98,7 @@ module.exports = [
         './assets/vintage/js/base.js',
         './assets/vintage/css/reset.css',
         './assets/vintage/css/shaarli.css',
-      ].concat(glob.sync('./assets/vintage/img/*')),
+      ].concat(glob.sync('./assets/vintage/img/*', { dotRelative: true })),
       markdown: './assets/common/css/markdown.css',
       thumbnails: './assets/common/js/thumbnails.js',
       metadata: './assets/common/js/metadata.js',

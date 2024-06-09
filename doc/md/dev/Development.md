@@ -277,7 +277,7 @@ Unit tests can be run inside [Docker](../Docker.md) containers.
 
 Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under commonLinux environments. Dockerfiles are provided for the following environments:
 
-- [`alpine318`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine318/Dockerfile) - [Alpine Linux 3.18](https://www.alpinelinux.org/downloads/)
+- [`alpine319`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine319/Dockerfile) - [Alpine Linux 3.18](https://www.alpinelinux.org/downloads/)
 - [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
 - [`debian9`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian9/Dockerfile) - [Debian 9 Stretch](https://wiki.debian.org/DebianStretch) (oldstable)
 - [`ubuntu16`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/ubuntu16/Dockerfile) - [Ubuntu 16.04 Xenial Xerus](https://releases.ubuntu.com/16.04/) (old LTS)

@@ -13,9 +13,9 @@ jobs:
       - name: Get the tag name
         run: echo "REF=${GITHUB_REF##*/}" >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to DockerHub
         if: github.repository == 'shaarli/Shaarli'
@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: ${{ github.repository == 'shaarli/Shaarli' }}
           platforms: linux/amd64,linux/arm/v7
