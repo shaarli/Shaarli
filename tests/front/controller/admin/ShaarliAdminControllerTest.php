@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
+use Shaarli\Tests\Utils\FakeRequest;
 
 /**
  * Class ShaarliControllerTest
@@ -24,6 +25,7 @@ class ShaarliAdminControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new class ($this->container) extends ShaarliAdminController
@@ -55,11 +57,13 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testCheckTokenWithValidToken(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->with('token')->willReturn($token = '12345');
+        $token = '12345';
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->with($token)->willReturn(true);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['token' => $token]);
+
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->with($token)->willReturn(true);
 
         static::assertTrue($this->controller->checkToken($request));
     }
@@ -69,11 +73,13 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testCheckTokenWithNotValidToken(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->with('token')->willReturn($token = '12345');
+        $token = '12345';
 
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->with($token)->willReturn(false);
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['token' => $token]);
+
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->with($token)->willReturn(false);
 
         $this->expectException(WrongTokenException::class);
 
@@ -85,7 +91,7 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveSuccessMessage(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, [$message = 'bravo!'])
@@ -99,13 +105,13 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveSuccessMessageWithExistingMessages(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES)
             ->willReturn(['success1', 'success2'])
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, ['success1', 'success2', $message = 'bravo!'])
@@ -119,7 +125,7 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveWarningMessage(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_WARNING_MESSAGES, [$message = 'warning!'])
@@ -133,13 +139,13 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveWarningMessageWithExistingMessages(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_WARNING_MESSAGES)
             ->willReturn(['warning1', 'warning2'])
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_WARNING_MESSAGES, ['warning1', 'warning2', $message = 'warning!'])
@@ -153,7 +159,7 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveErrorMessage(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, [$message = 'error!'])
@@ -167,13 +173,13 @@ class ShaarliAdminControllerTest extends TestCase
      */
     public function testSaveErrorMessageWithExistingMessages(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('getSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES)
             ->willReturn(['error1', 'error2'])
         ;
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['error1', 'error2', $message = 'error!'])

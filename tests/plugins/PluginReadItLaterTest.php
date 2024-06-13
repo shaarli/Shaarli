@@ -13,7 +13,7 @@ require_once 'plugins/readitlater/readitlater.php';
  * Class PluginQrcodeTest
  * Unit test for the ReadItLater plugin
  */
-class PluginQrcodeTest extends TestCase
+class PluginReadItLaterTest extends TestCase
 {
     /** @var ConfigManager */
     protected $confDefaultTheme;

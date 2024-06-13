@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\Security\SessionManager;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class SessionFilterController
@@ -21,7 +21,7 @@ class SessionFilterController extends ShaarliAdminController
      */
     public function visibility(Request $request, Response $response, array $args): Response
     {
-        if (false === $this->container->loginManager->isLoggedIn()) {
+        if (false === $this->container->get('loginManager')->isLoggedIn()) {
             return $this->redirectFromReferer($request, $response, ['visibility']);
         }
 
@@ -30,17 +30,18 @@ class SessionFilterController extends ShaarliAdminController
             $newVisibility = null;
         }
 
-        $currentVisibility = $this->container->sessionManager->getSessionParameter(SessionManager::KEY_VISIBILITY);
+        $currentVisibility = $this->container->get('sessionManager')
+            ->getSessionParameter(SessionManager::KEY_VISIBILITY);
 
         // Visibility not set or not already expected value, set expected value, otherwise reset it
         if ($newVisibility !== null && (null === $currentVisibility || $currentVisibility !== $newVisibility)) {
             // See only public bookmarks
-            $this->container->sessionManager->setSessionParameter(
+            $this->container->get('sessionManager')->setSessionParameter(
                 SessionManager::KEY_VISIBILITY,
                 $newVisibility
             );
         } else {
-            $this->container->sessionManager->deleteSessionParameter(SessionManager::KEY_VISIBILITY);
+            $this->container->get('sessionManager')->deleteSessionParameter(SessionManager::KEY_VISIBILITY);
         }
 
         return $this->redirectFromReferer($request, $response, ['visibility']);

@@ -2,18 +2,19 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
 
 class DeleteTagTest extends \Shaarli\TestCase
 {
@@ -43,7 +44,7 @@ class DeleteTagTest extends \Shaarli\TestCase
     protected $bookmarkService;
 
     /**
-     * @var HistoryController instance.
+     * @var History instance.
      */
     protected $history;
 
@@ -68,6 +69,7 @@ class DeleteTagTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -85,10 +87,10 @@ class DeleteTagTest extends \Shaarli\TestCase
             true
         );
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = $this->history;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', $this->history);
 
         $this->controller = new Tags($this->container);
     }
@@ -110,12 +112,14 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'gnu';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertTrue($tags[$tagName] > 0);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'DELETE',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->deleteTag($request, new Response(), ['tagName' => $tagName]);
+        $response = $this->controller->deleteTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
 
@@ -150,12 +154,14 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'sTuff';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertTrue($tags[$tagName] > 0);
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'DELETE',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $response = $this->controller->deleteTag($request, new Response(), ['tagName' => $tagName]);
+        $response = $this->controller->deleteTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
 
@@ -188,11 +194,9 @@ class DeleteTagTest extends \Shaarli\TestCase
         $tagName = 'nopenope';
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertFalse(isset($tags[$tagName]));
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'DELETE',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams);
 
-        $this->controller->deleteTag($request, new Response(), ['tagName' => $tagName]);
+        $this->controller->deleteTag($request, $this->responseFactory->createResponse(), ['tagName' => $tagName]);
     }
 }

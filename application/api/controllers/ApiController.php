@@ -2,10 +2,11 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container;
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
-use Slim\Container;
 
 /**
  * Abstract Class ApiController
@@ -69,5 +70,20 @@ abstract class ApiController
     public function getCi()
     {
         return $this->ci;
+    }
+
+    /**
+     * Simple helper, which writes data as JSON to the body
+     *
+     * @param Response $response
+     * @param array $data
+     * @param ?int $jsonStyle
+     * @return Response
+     */
+    protected function respondWithJson(Response $response, array $data, ?int $jsonStyle): Response
+    {
+        $jsonStyle = $jsonStyle ?? 0;
+        $response->getBody()->write(json_encode($data, $jsonStyle));
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

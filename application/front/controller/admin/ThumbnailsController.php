@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ToolsController
@@ -22,7 +22,7 @@ class ThumbnailsController extends ShaarliAdminController
     public function index(Request $request, Response $response): Response
     {
         $ids = [];
-        foreach ($this->container->bookmarkService->search()->getBookmarks() as $bookmark) {
+        foreach ($this->container->get('bookmarkService')->search()->getBookmarks() as $bookmark) {
             // A note or not HTTP(S)
             if ($bookmark->isNote() || !startsWith(strtolower($bookmark->getUrl()), 'http')) {
                 continue;
@@ -34,10 +34,10 @@ class ThumbnailsController extends ShaarliAdminController
         $this->assignView('ids', $ids);
         $this->assignView(
             'pagetitle',
-            t('Thumbnails update') . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            t('Thumbnails update') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render(TemplatePage::THUMBNAILS));
+        return $this->respondWithTemplate($response, TemplatePage::THUMBNAILS);
     }
 
     /**
@@ -52,14 +52,17 @@ class ThumbnailsController extends ShaarliAdminController
         }
 
         try {
-            $bookmark = $this->container->bookmarkService->get((int) $id);
+            $bookmark = $this->container->get('bookmarkService')->get((int) $id);
         } catch (BookmarkNotFoundException $e) {
             return $response->withStatus(404);
         }
 
-        $bookmark->setThumbnail($this->container->thumbnailer->get($bookmark->getUrl()));
-        $this->container->bookmarkService->set($bookmark);
+        $bookmark->setThumbnail($this->container->get('thumbnailer')->get($bookmark->getUrl()));
+        $this->container->get('bookmarkService')->set($bookmark);
 
-        return $response->withJson($this->container->formatterFactory->getFormatter('raw')->format($bookmark));
+        return $this->respondWithJson(
+            $response,
+            $this->container->get('formatterFactory')->getFormatter('raw')->format($bookmark)
+        );
     }
 }

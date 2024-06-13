@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 /**
  * Class ShaarliControllerTest
@@ -30,6 +31,7 @@ class ShaarliVisitorControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new class ($this->container) extends ShaarliVisitorController
@@ -49,14 +51,13 @@ class ShaarliVisitorControllerTest extends TestCase
                 Response $response,
                 array $loopTerms = [],
                 array $clearParams = [],
-                string $anchor = null
+                string $anchor = null,
+                ?string $referer = null
             ): Response {
-                return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams, $anchor);
+                return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams, $anchor, $referer);
             }
         };
         $this->assignedValues = [];
-
-        $this->request = $this->createMock(Request::class);
     }
 
     public function testAssignView(): void
@@ -73,21 +74,21 @@ class ShaarliVisitorControllerTest extends TestCase
     {
         $this->assignTemplateVars($this->assignedValues);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->method('count')
             ->willReturnCallback(function (string $visibility): int {
                 return $visibility === BookmarkFilter::$PRIVATE ? 5 : 10;
             })
         ;
 
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->method('executeHooks')
             ->willReturnCallback(function (string $hook, array &$data, array $params): array {
                 return $data[$hook] = $params;
             });
-        $this->container->pluginManager->method('getErrors')->willReturn(['error']);
+        $this->container->get('pluginManager')->method('getErrors')->willReturn(['error']);
 
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
         $render = $this->controller->render('templateName');
 
@@ -113,11 +114,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererDefault(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response);
+        $result = $this->controller->redirectFromReferer($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -128,11 +134,15 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithUnmatchedLoopTerm(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $response = new Response();
-
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['nope']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -143,11 +153,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInPath(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'controller']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'controller']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/'], $result->getHeader('location'));
@@ -158,11 +173,15 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryParam(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $response = new Response();
-
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'other']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'other']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/'], $result->getHeader('location'));
@@ -174,11 +193,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingLoopTermInQueryValue(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['nope', 'param']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['nope', 'param']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -190,11 +214,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithLoopTermInDomain(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['shaarli']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['shaarli']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?query=param&other=2'], $result->getHeader('location'));
@@ -206,11 +235,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectFromRefererWithMatchingClearedParam(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['query'], ['query']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/controller?other=2'], $result->getHeader('location'));
@@ -221,11 +255,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectExternalReferer(): void
     {
-        $this->container->environment['HTTP_REFERER'] = 'http://other.domain.tld/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://other.domain.tld/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['query'], ['query']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/'], $result->getHeader('location'));
@@ -236,12 +275,16 @@ class ShaarliVisitorControllerTest extends TestCase
      */
     public function testRedirectExternalRefererExplicitDomainName(): void
     {
-        $this->container->environment['SERVER_NAME'] = 'my.shaarli.tld';
-        $this->container->environment['HTTP_REFERER'] = 'http://your.shaarli.tld/controller?query=param&other=2';
+        $serverParams = [
+            'SERVER_NAME' => 'my.shaarli.tld',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://your.shaarli.tld/subfolder/controller?query=param&other=2'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
 
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $result = $this->controller->redirectFromReferer($this->request, $response, ['query'], ['query']);
+        $result = $this->controller->redirectFromReferer($request, $response, ['query'], ['query']);
 
         static::assertSame(302, $result->getStatusCode());
         static::assertSame(['/subfolder/'], $result->getHeader('location'));

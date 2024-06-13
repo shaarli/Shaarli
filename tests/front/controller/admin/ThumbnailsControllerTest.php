@@ -8,9 +8,8 @@ use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
 use Shaarli\Bookmark\SearchResult;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class ThumbnailsControllerTest extends TestCase
 {
@@ -21,6 +20,7 @@ class ThumbnailsControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ThumbnailsController($this->container);
@@ -35,10 +35,10 @@ class ThumbnailsControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->willReturn(SearchResult::getSearchResult([
@@ -63,8 +63,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateValid(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId($id = 123)
@@ -73,21 +73,21 @@ class ThumbnailsControllerTest extends TestCase
             ->setThumbnail(false)
         ;
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')
             ->expects(static::once())
             ->method('get')
             ->with($url)
             ->willReturn($thumb = 'http://img.tld/pic.png')
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->with($id)
             ->willReturn($bookmark)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('set')
             ->willReturnCallback(function (Bookmark $bookmark) use ($thumb): Bookmark {
@@ -113,8 +113,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateInvalidId(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->ajaxUpdate($request, $response, ['id' => 'nope']);
 
@@ -126,8 +126,8 @@ class ThumbnailsControllerTest extends TestCase
      */
     public function testAjaxUpdateNoId(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->ajaxUpdate($request, $response, []);
 
@@ -140,10 +140,10 @@ class ThumbnailsControllerTest extends TestCase
     public function testAjaxUpdateBookmarkNotFound(): void
     {
         $id = 123;
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->with($id)

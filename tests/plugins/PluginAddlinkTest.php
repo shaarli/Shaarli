@@ -5,7 +5,7 @@ namespace Shaarli\Plugin\Addlink;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\Render\TemplatePage;
 
-require_once 'plugins/addlink_toolbar/addlink_toolbar.php';
+require_once __DIR__ . '/../../plugins/addlink_toolbar/addlink_toolbar.php';
 
 /**
  * Unit test for the Addlink toolbar plugin

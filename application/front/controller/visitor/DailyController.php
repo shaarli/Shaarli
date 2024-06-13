@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Visitor;
 
 use DateTime;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Helper\DailyPageHelper;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class DailyController
@@ -27,22 +27,27 @@ class DailyController extends ShaarliVisitorController
     public function index(Request $request, Response $response): Response
     {
         $type = DailyPageHelper::extractRequestedType($request);
+
         $format = DailyPageHelper::getFormatByType($type);
-        $latestBookmark = $this->container->bookmarkService->getLatest();
-        $dateTime = DailyPageHelper::extractRequestedDateTime($type, $request->getQueryParam($type), $latestBookmark);
+        $latestBookmark = $this->container->get('bookmarkService')->getLatest();
+        $dateTime = DailyPageHelper::extractRequestedDateTime(
+            $type,
+            $request->getQueryParams()[$type] ?? null,
+            $latestBookmark
+        );
         $start = DailyPageHelper::getStartDateTimeByType($type, $dateTime);
         $end = DailyPageHelper::getEndDateTimeByType($type, $dateTime);
         $dailyDesc = DailyPageHelper::getDescriptionByType($type, $dateTime);
 
-        $linksToDisplay = $this->container->bookmarkService->findByDate(
+        $linksToDisplay = $this->container->get('bookmarkService')->findByDate(
             $start,
             $end,
             $previousDay,
             $nextDay
         );
 
-        $formatter = $this->container->formatterFactory->getFormatter();
-        $formatter->addContextData('base_path', $this->container->basePath);
+        $formatter = $this->container->get('formatterFactory')->getFormatter();
+        $formatter->addContextData('base_path', $this->container->get('basePath'));
         // We pre-format some fields for proper output.
         foreach ($linksToDisplay as $key => $bookmark) {
             $linksToDisplay[$key] = $formatter->format($bookmark);
@@ -69,13 +74,13 @@ class DailyController extends ShaarliVisitorController
 
         $this->assignAllView($data);
 
-        $mainTitle = $this->container->conf->get('general.title', 'Shaarli');
+        $mainTitle = $this->container->get('conf')->get('general.title', 'Shaarli');
         $this->assignView(
             'pagetitle',
             $data['localizedType'] . ' - ' . $data['dayDesc'] . ' - ' . $mainTitle
         );
 
-        return $response->write($this->render(TemplatePage::DAILY));
+        return $this->respondWithTemplate($response, TemplatePage::DAILY);
     }
 
     /**
@@ -89,18 +94,18 @@ class DailyController extends ShaarliVisitorController
         $type = DailyPageHelper::extractRequestedType($request);
         $cacheDuration = DailyPageHelper::getCacheDatePeriodByType($type);
 
-        $pageUrl = page_url($this->container->environment);
-        $cache = $this->container->pageCacheManager->getCachePage($pageUrl, $cacheDuration);
+        $pageUrl = page_url($request->getServerParams());
+        $cache = $this->container->get('pageCacheManager')->getCachePage($pageUrl, $cacheDuration);
 
         $cached = $cache->cachedVersion();
         if (!empty($cached)) {
-            return $response->write($cached);
+            return $this->respondWithBody($response, $cached);
         }
 
         $days = [];
         $format = DailyPageHelper::getFormatByType($type);
         $length = DailyPageHelper::getRssLengthByType($type);
-        foreach ($this->container->bookmarkService->search()->getBookmarks() as $bookmark) {
+        foreach ($this->container->get('bookmarkService')->search()->getBookmarks() as $bookmark) {
             $day = $bookmark->getCreated()->format($format);
 
             // Stop iterating after DAILY_RSS_NB_DAYS entries
@@ -112,9 +117,9 @@ class DailyController extends ShaarliVisitorController
         }
 
         // Build the RSS feed.
-        $indexUrl = escape(index_url($this->container->environment));
+        $indexUrl = escape(index_url($request->getServerParams()));
 
-        $formatter = $this->container->formatterFactory->getFormatter();
+        $formatter = $this->container->get('formatterFactory')->getFormatter();
         $formatter->addContextData('index_url', $indexUrl);
 
         $dataPerDay = [];
@@ -148,10 +153,10 @@ class DailyController extends ShaarliVisitorController
         }
 
         $this->assignAllView([
-            'title' => $this->container->conf->get('general.title', 'Shaarli'),
+            'title' => $this->container->get('conf')->get('general.title', 'Shaarli'),
             'index_url' => $indexUrl,
             'page_url' => $pageUrl,
-            'hide_timestamps' => $this->container->conf->get('privacy.hide_timestamps', false),
+            'hide_timestamps' => $this->container->get('conf')->get('privacy.hide_timestamps', false),
             'days' => $dataPerDay,
             'type' => $type,
             'localizedType' => $this->translateType($type),
@@ -161,7 +166,7 @@ class DailyController extends ShaarliVisitorController
 
         $cache->cache($rssContent);
 
-        return $response->write($rssContent);
+        return $this->respondWithBody($response, $rssContent);
     }
 
     /**

@@ -9,19 +9,24 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\TestCase;
-use Slim\Http\Request;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class DailyPageHelperTest extends TestCase
 {
+    public function setUp(): void
+    {
+        $this->initRequestResponseFactories();
+        setlocale(LC_TIME, 'en_US.UTF-8');
+    }
+
+
     /**
      * @dataProvider getRequestedTypes
      */
     public function testExtractRequestedType(array $queryParams, string $expectedType): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->willReturnCallback(function ($key) use ($queryParams): ?string {
-            return $queryParams[$key] ?? null;
-        });
+        $query = http_build_query($queryParams);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
         $type = DailyPageHelper::extractRequestedType($request);
 
