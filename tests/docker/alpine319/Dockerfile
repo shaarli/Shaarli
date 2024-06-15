@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.18
+FROM docker.io/alpine:3.19.1
 MAINTAINER Shaarli Community
 
 RUN apk --update --no-cache add \
