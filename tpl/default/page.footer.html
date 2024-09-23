@@ -43,3 +43,49 @@
 <input type="hidden" name="tags_separator" value="{$tags_separator}" id="tags_separator" />
 
 <script src="{$asset_path}/js/shaarli.min.js?v={$version_hash}#"></script>
+<script>
+function autofillTimeZone() {
+  try {
+    curZoneName = Intl.DateTimeFormat().resolvedOptions().timeZone
+    cur = curZoneName.split('/');
+    continent = cur[0];
+    cur.shift()
+    city = cur.join('/');
+    conEl = document.querySelector('#continent');
+    cityEl = document.querySelector('#city');
+    conEl.value = continent;
+    conEl.dispatchEvent(new Event('change')); // set value attribute doesn't trigger the change or input event.
+    cityEl.value = city;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// e.g. old browsers.
+function autofillTimeZone_alert() {
+  if(!autofillTimeZone()) {
+    alert('Automatic detection and filling failed!'); // TODO: i18n
+  }
+}
+
+// Update the select list, otherwise it is old.
+function citiesUpdates() {
+  conEl = document.querySelector('#continent');
+  cityEls = document.querySelectorAll('#city>option');
+  conEl.addEventListener('change', () => {
+    let newConName = conEl.value;
+    let firstSelected = false;
+    for (let el of cityEls) {
+      let show = el.dataset.continent == newConName;
+      el.className = show ? "" : "hidden";
+      if (!firstSelected && show) { // Ensure the selected visible
+        el.selected = true;
+        firstSelected = true;
+      }
+    }
+    cityEl = document.querySelector('#city');
+  });
+}
+document.addEventListener("DOMContentLoaded", citiesUpdates);
+</script>

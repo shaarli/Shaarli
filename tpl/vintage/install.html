@@ -12,7 +12,7 @@
             <tr>
                 <td><b>Timezone:</b></td>
                 <td>
-                    <select id="continent" name="continent">
+                    <select id="continent" name="continent" title="{'Continent'|t}">
                         {loop="$continents"}
                         {if="$key !== 'selected'"}
                         <option value="{$value}" {if="$continents.selected === $value"}selected{/if}>
@@ -21,7 +21,7 @@
                         {/if}
                         {/loop}
                     </select>
-                    <select id="city" name="city">
+                    <select id="city" name="city" title="{'City'|t}">
                         {loop="$cities"}
                         {if="$key !== 'selected'"}
                         <option value="{$value.city}"
@@ -32,6 +32,7 @@
                         {/if}
                         {/loop}
                     </select>
+                    <button type="button" class="button" onclick="autofillTimeZone_alert()">{'Auto detect'|t}</button>
                 </td>
             </tr>
             <tr><td><b>Page title:</b></td><td><input type="text" name="title" size="30"></td></tr>
