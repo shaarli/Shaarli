@@ -71,6 +71,8 @@ Both exclude patterns and exact searches can be combined with normal searches (e
 
 Active search terms are displayed on top of the link list. To remove terms/tags from the current search, click the `x` next to any of them, or simply clear text/tag search fields.
 
+Shaarli's search can be added to your Web browser's search engines by clicking the `+` Shaarli icon in your browser's search engine selector ([example for Firefox](https://support.mozilla.org/en-US/kb/add-or-remove-search-engine-firefox#w_add-a-search-engine-from-the-search-bar)).
+
 
 ### Tag cloud
 
