@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Feed\FeedBuilder;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class FeedController
@@ -29,22 +29,25 @@ class FeedController extends ShaarliVisitorController
     {
         $response = $response->withHeader('Content-Type', 'application/' . $feedType . '+xml; charset=utf-8');
 
-        $pageUrl = page_url($this->container->environment);
-        $cache = $this->container->pageCacheManager->getCachePage($pageUrl);
+        $pageUrl = page_url($request->getServerParams());
+        $cache = $this->container->get('pageCacheManager')->getCachePage($pageUrl);
 
         $cached = $cache->cachedVersion();
         if (!empty($cached)) {
-            return $response->write($cached);
+            return $this->respondWithBody($response, $cached);
         }
 
         // Generate data.
-        $this->container->feedBuilder->setLocale(strtolower(get_locale(LC_COLLATE)));
-        $this->container->feedBuilder->setHideDates($this->container->conf->get('privacy.hide_timestamps', false));
-        $this->container->feedBuilder->setUsePermalinks(
-            null !== $request->getParam('permalinks') || !$this->container->conf->get('feed.rss_permalinks')
+        $this->container->get('feedBuilder')->setLocale(strtolower(get_locale(LC_COLLATE)));
+        $this->container->get('feedBuilder')->setHideDates($this->container->get('conf')
+            ->get('privacy.hide_timestamps', false));
+        $this->container->get('feedBuilder')->setUsePermalinks(
+            null !== ($request->getQueryParams()['permalinks'] ?? null)
+            || !$this->container->get('conf')->get('feed.rss_permalinks')
         );
 
-        $data = $this->container->feedBuilder->buildData($feedType, $request->getParams());
+        $data = $this->container->get('feedBuilder')
+            ->buildData($feedType, $request->getQueryParams(), $request->getServerParams());
 
         $this->executePageHooks('render_feed', $data, 'feed.' . $feedType);
         $this->assignAllView($data);
@@ -53,6 +56,6 @@ class FeedController extends ShaarliVisitorController
 
         $cache->cache($content);
 
-        return $response->write($content);
+        return $this->respondWithBody($response, $content);
     }
 }

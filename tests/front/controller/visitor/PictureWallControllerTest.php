@@ -9,9 +9,8 @@ use Shaarli\Bookmark\SearchResult;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\ThumbnailsDisabledException;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class PictureWallControllerTest extends TestCase
 {
@@ -22,6 +21,7 @@ class PictureWallControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new PictureWallController($this->container);
@@ -29,13 +29,12 @@ class PictureWallControllerTest extends TestCase
 
     public function testValidControllerInvokeDefault(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->expects(static::once())->method('getQueryParams')->willReturn([]);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // ConfigManager: thumbnails are enabled
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $parameter, $default) {
             if ($parameter === 'thumbnails.mode') {
                 return Thumbnailer::MODE_COMMON;
             }
@@ -48,7 +47,7 @@ class PictureWallControllerTest extends TestCase
         $this->assignTemplateVars($assignedVariables);
 
         // Links dataset: 2 links with thumbnails
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->willReturnCallback(function (array $parameters, ?string $visibility): SearchResult {
@@ -67,7 +66,7 @@ class PictureWallControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_picwall'])
@@ -107,11 +106,11 @@ class PictureWallControllerTest extends TestCase
     {
         $this->expectException(ThumbnailsDisabledException::class);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // ConfigManager: thumbnails are disabled
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $parameter, $default) {
             if ($parameter === 'thumbnails.mode') {
                 return Thumbnailer::MODE_NONE;
             }

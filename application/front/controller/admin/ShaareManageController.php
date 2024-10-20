@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class PostBookmarkController
@@ -22,7 +22,7 @@ class ShaareManageController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        $ids = escape(trim($request->getParam('id') ?? ''));
+        $ids = escape(trim($request->getQueryParams()['id'] ?? ''));
         if (empty($ids) || strpos($ids, ' ') !== false) {
             // multiple, space-separated ids provided
             $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
@@ -37,11 +37,11 @@ class ShaareManageController extends ShaarliAdminController
             return $this->redirectFromReferer($request, $response, [], ['delete-shaare']);
         }
 
-        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $formatter = $this->container->get('formatterFactory')->getFormatter('raw');
         $count = 0;
         foreach ($ids as $id) {
             try {
-                $bookmark = $this->container->bookmarkService->get((int) $id);
+                $bookmark = $this->container->get('bookmarkService')->get((int) $id);
             } catch (BookmarkNotFoundException $e) {
                 $this->saveErrorMessage(sprintf(
                     t('Bookmark with identifier %s could not be found.'),
@@ -53,20 +53,20 @@ class ShaareManageController extends ShaarliAdminController
 
             $data = $formatter->format($bookmark);
             $this->executePageHooks('delete_link', $data);
-            $this->container->bookmarkService->remove($bookmark, false);
+            $this->container->get('bookmarkService')->remove($bookmark, false);
             ++$count;
         }
 
         if ($count > 0) {
-            $this->container->bookmarkService->save();
+            $this->container->get('bookmarkService')->save();
         }
 
         // If we are called from the bookmarklet, we must close the popup:
-        if ($request->getParam('source') === 'bookmarklet') {
-            return $response->write('<script>self.close();</script>');
+        if (($request->getQueryParams()['source'] ?? null) === 'bookmarklet') {
+            return $this->respondWithBody($response, '<script>self.close();</script>');
         }
 
-        if ($request->getParam('source') === 'batch') {
+        if (($request->getQueryParams()['source'] ?? null) === 'batch') {
             return $response->withStatus(204);
         }
 
@@ -83,7 +83,7 @@ class ShaareManageController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        $ids = trim(escape($request->getParam('id') ?? ''));
+        $ids = trim(escape($request->getQueryParams()['id'] ?? ''));
         if (empty($ids) || strpos($ids, ' ') !== false) {
             // multiple, space-separated ids provided
             $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
@@ -100,7 +100,7 @@ class ShaareManageController extends ShaarliAdminController
         }
 
         // assert that the visibility is valid
-        $visibility = $request->getParam('newVisibility');
+        $visibility = $request->getQueryParams()['newVisibility'] ?? null;
         if (null === $visibility || false === in_array($visibility, ['public', 'private'], true)) {
             $this->saveErrorMessage(t('Invalid visibility provided.'));
 
@@ -109,12 +109,12 @@ class ShaareManageController extends ShaarliAdminController
             $isPrivate = $visibility === 'private';
         }
 
-        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $formatter = $this->container->get('formatterFactory')->getFormatter('raw');
         $count = 0;
 
         foreach ($ids as $id) {
             try {
-                $bookmark = $this->container->bookmarkService->get((int) $id);
+                $bookmark = $this->container->get('bookmarkService')->get((int) $id);
             } catch (BookmarkNotFoundException $e) {
                 $this->saveErrorMessage(sprintf(
                     t('Bookmark with identifier %s could not be found.'),
@@ -129,14 +129,14 @@ class ShaareManageController extends ShaarliAdminController
             // To preserve backward compatibility with 3rd parties, plugins still use arrays
             $data = $formatter->format($bookmark);
             $this->executePageHooks('save_link', $data);
-            $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
+            $bookmark->fromArray($data, $this->container->get('conf')->get('general.tags_separator', ' '));
 
-            $this->container->bookmarkService->set($bookmark, false);
+            $this->container->get('bookmarkService')->set($bookmark, false);
             ++$count;
         }
 
         if ($count > 0) {
-            $this->container->bookmarkService->save();
+            $this->container->get('bookmarkService')->save();
         }
 
         return $this->redirectFromReferer($request, $response, ['/visibility'], ['change_visibility']);
@@ -154,7 +154,7 @@ class ShaareManageController extends ShaarliAdminController
             if (false === ctype_digit($id)) {
                 throw new BookmarkNotFoundException();
             }
-            $bookmark = $this->container->bookmarkService->get((int) $id);  // Read database
+            $bookmark = $this->container->get('bookmarkService')->get((int) $id);  // Read database
         } catch (BookmarkNotFoundException $e) {
             $this->saveErrorMessage(sprintf(
                 t('Bookmark with identifier %s could not be found.'),
@@ -164,16 +164,16 @@ class ShaareManageController extends ShaarliAdminController
             return $this->redirectFromReferer($request, $response, ['/pin'], ['pin']);
         }
 
-        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $formatter = $this->container->get('formatterFactory')->getFormatter('raw');
 
         $bookmark->setSticky(!$bookmark->isSticky());
 
         // To preserve backward compatibility with 3rd parties, plugins still use arrays
         $data = $formatter->format($bookmark);
         $this->executePageHooks('save_link', $data);
-        $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
+        $bookmark->fromArray($data, $this->container->get('conf')->get('general.tags_separator', ' '));
 
-        $this->container->bookmarkService->set($bookmark);
+        $this->container->get('bookmarkService')->set($bookmark);
 
         return $this->redirectFromReferer($request, $response, ['/pin'], ['pin']);
     }
@@ -186,7 +186,7 @@ class ShaareManageController extends ShaarliAdminController
         $this->checkToken($request);
 
         $hash = $args['hash'] ?? '';
-        $bookmark = $this->container->bookmarkService->findByHash($hash);
+        $bookmark = $this->container->get('bookmarkService')->findByHash($hash);
 
         if ($bookmark->isPrivate() !== true) {
             return $this->redirect($response, '/shaare/' . $hash);
@@ -195,7 +195,7 @@ class ShaareManageController extends ShaarliAdminController
         if (empty($bookmark->getAdditionalContentEntry('private_key'))) {
             $privateKey = bin2hex(random_bytes(16));
             $bookmark->setAdditionalContentEntry('private_key', $privateKey);
-            $this->container->bookmarkService->set($bookmark);
+            $this->container->get('bookmarkService')->set($bookmark);
         }
 
         return $this->redirect(
@@ -213,7 +213,7 @@ class ShaareManageController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        $ids = trim(escape($request->getParam('id') ?? ''));
+        $ids = trim(escape($request->getParsedBody()['id'] ?? ''));
         if (empty($ids) || strpos($ids, ' ') !== false) {
             // multiple, space-separated ids provided
             $ids = array_values(array_filter(preg_split('/\s+/', $ids), 'ctype_digit'));
@@ -230,7 +230,7 @@ class ShaareManageController extends ShaarliAdminController
         }
 
         // assert that the action is valid
-        $action = $request->getParam('action');
+        $action = $request->getParsedBody()['action'] ?? null;
         if (!in_array($action, ['add', 'delete'], true)) {
             $this->saveErrorMessage(t('Invalid action provided.'));
 
@@ -238,20 +238,20 @@ class ShaareManageController extends ShaarliAdminController
         }
 
         // assert that the tag name is valid
-        $tagString = trim($request->getParam('tag'));
+        $tagString = trim($request->getParsedBody()['tag'] ?? null);
         if (empty($tagString)) {
             $this->saveErrorMessage(t('Invalid tag name provided.'));
 
             return $this->redirectFromReferer($request, $response, ['/updateTag'], []);
         }
 
-        $tags = tags_str2array($tagString, $this->container->conf->get('general.tags_separator', ' '));
-        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $tags = tags_str2array($tagString, $this->container->get('conf')->get('general.tags_separator', ' '));
+        $formatter = $this->container->get('formatterFactory')->getFormatter('raw');
         $count = 0;
 
         foreach ($ids as $id) {
             try {
-                $bookmark = $this->container->bookmarkService->get((int) $id);
+                $bookmark = $this->container->get('bookmarkService')->get((int) $id);
             } catch (BookmarkNotFoundException $e) {
                 $this->saveErrorMessage(sprintf(
                     t('Bookmark with identifier %s could not be found.'),
@@ -272,14 +272,14 @@ class ShaareManageController extends ShaarliAdminController
             // To preserve backward compatibility with 3rd parties, plugins still use arrays
             $data = $formatter->format($bookmark);
             $this->executePageHooks('save_link', $data);
-            $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
+            $bookmark->fromArray($data, $this->container->get('conf')->get('general.tags_separator', ' '));
 
-            $this->container->bookmarkService->set($bookmark, false);
+            $this->container->get('bookmarkService')->set($bookmark, false);
             ++$count;
         }
 
         if ($count > 0) {
-            $this->container->bookmarkService->save();
+            $this->container->get('bookmarkService')->save();
         }
 
         return $this->redirectFromReferer($request, $response, ['/updateTag'], []);

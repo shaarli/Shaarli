@@ -9,8 +9,7 @@ use Shaarli\Front\Exception\OpenShaarliPasswordException;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class PasswordControllerTest extends TestCase
 {
@@ -24,6 +23,7 @@ class PasswordControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
         $this->assignTemplateVars($this->assignedVariables);
 
@@ -35,8 +35,8 @@ class PasswordControllerTest extends TestCase
      */
     public function testGetPage(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -50,30 +50,21 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordDefault(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key): string {
-            if ('oldpassword' === $key) {
-                return 'old';
-            }
-            if ('setpassword' === $key) {
-                return 'new';
-            }
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'old', 'setpassword' => 'new']);
+        $response = $this->responseFactory->createResponse();
 
-             return $key;
-        });
-        $response = new Response();
-
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ('credentials.hash' === $key) {
                 return sha1('old' . 'credentials.login' . 'credentials.salt');
             }
 
             return strpos($key, 'credentials') !== false ? $key : $default;
         });
-        $this->container->conf->expects(static::once())->method('write')->with(true);
+        $this->container->get('conf')->expects(static::once())->method('write')->with(true);
 
-        $this->container->conf
+        $this->container->get('conf')
             ->method('set')
             ->willReturnCallback(function (string $key, string $value) {
                 if ('credentials.hash' === $key) {
@@ -94,21 +85,12 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordWrongOldPassword(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key): string {
-            if ('oldpassword' === $key) {
-                return 'wrong';
-            }
-            if ('setpassword' === $key) {
-                return 'new';
-            }
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'wrong', 'setpassword' => 'new']);
+        $response = $this->responseFactory->createResponse();
 
-            return $key;
-        });
-        $response = new Response();
-
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ('credentials.hash' === $key) {
                 return sha1('old' . 'credentials.login' . 'credentials.salt');
             }
@@ -116,10 +98,10 @@ class PasswordControllerTest extends TestCase
             return strpos($key, 'credentials') !== false ? $key : $default;
         });
 
-        $this->container->conf->expects(static::never())->method('set');
-        $this->container->conf->expects(static::never())->method('write');
+        $this->container->get('conf')->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('write');
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['The old password is not correct.'])
@@ -137,14 +119,14 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordWrongToken(): void
     {
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $this->container->conf->expects(static::never())->method('set');
-        $this->container->conf->expects(static::never())->method('write');
+        $this->container->get('conf')->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -156,27 +138,19 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewEmptyPassword(): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['You must provide the current and new password to change it.'])
         ;
 
-        $this->container->conf->expects(static::never())->method('set');
-        $this->container->conf->expects(static::never())->method('write');
+        $this->container->get('conf')->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key): string {
-            if ('oldpassword' === $key) {
-                return 'old';
-            }
-            if ('setpassword' === $key) {
-                return '';
-            }
 
-            return $key;
-        });
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['oldpassword' => 'old', 'setpassword' => '']);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->change($request, $response);
 
@@ -190,11 +164,11 @@ class PasswordControllerTest extends TestCase
      */
     public function testPostNewPasswordOnOpenShaarli(): void
     {
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->with('security.open_shaarli')->willReturn(true);
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->with('security.open_shaarli')->willReturn(true);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(OpenShaarliPasswordException::class);
 

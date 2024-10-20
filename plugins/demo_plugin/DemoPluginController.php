@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\DemoPlugin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Controller\Admin\ShaarliAdminController;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class DemoPluginController extends ShaarliAdminController
 {

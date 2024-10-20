@@ -76,14 +76,12 @@ class FeedBuilder
      *
      * @param BookmarkServiceInterface $linkDB     LinkDB instance.
      * @param BookmarkFormatter        $formatter  instance.
-     * @param array                    $serverInfo $_SERVER.
      * @param boolean                  $isLoggedIn True if the user is currently logged in, false otherwise.
      */
-    public function __construct($linkDB, $formatter, $serverInfo, $isLoggedIn)
+    public function __construct($linkDB, $formatter, $isLoggedIn)
     {
         $this->linkDB = $linkDB;
         $this->formatter = $formatter;
-        $this->serverInfo = $serverInfo;
         $this->isLoggedIn = $isLoggedIn;
     }
 
@@ -91,14 +89,14 @@ class FeedBuilder
      * Build data for feed templates.
      *
      * @param string $feedType   Type of feed (RSS/ATOM).
-     * @param array  $userInput  $_GET.
-     *
+     * @param ?array  $userInput  $_GET.
+     * @param array $serverInfo $serverInfo $_SERVER.
      * @return array Formatted data for feeds templates.
      */
-    public function buildData(string $feedType, ?array $userInput)
+    public function buildData(string $feedType, ?array $userInput, array $serverInfo)
     {
         // Search for untagged bookmarks
-        if (isset($this->userInput['searchtags']) && empty($userInput['searchtags'])) {
+        if (isset($userInput['searchtags']) && empty($userInput['searchtags'])) {
             $userInput['searchtags'] = false;
         }
 
@@ -107,7 +105,7 @@ class FeedBuilder
         // Optionally filter the results:
         $searchResult = $this->linkDB->search($userInput ?? [], null, false, false, true, ['limit' => $limit]);
 
-        $pageaddr = escape(index_url($this->serverInfo));
+        $pageaddr = escape(index_url($serverInfo));
         $this->formatter->addContextData('index_url', $pageaddr);
         $links = [];
         foreach ($searchResult->getBookmarks() as $key => $bookmark) {
@@ -118,7 +116,7 @@ class FeedBuilder
         $data['last_update'] = $this->getLatestDateFormatted($feedType);
         $data['show_dates'] = !$this->hideDates || $this->isLoggedIn;
         // Remove leading path from REQUEST_URI (already contained in $pageaddr).
-        $requestUri = preg_replace('#(.*?/)(feed.*)#', '$2', escape($this->serverInfo['REQUEST_URI']));
+        $requestUri = preg_replace('#(.*?/)(feed.*)#', '$2', escape($serverInfo['REQUEST_URI']));
         $data['self_link'] = $pageaddr . $requestUri;
         $data['index_url'] = $pageaddr;
         $data['usepermalinks'] = $this->usePermalinks === true;

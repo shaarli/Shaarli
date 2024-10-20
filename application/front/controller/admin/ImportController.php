@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ImportController
@@ -38,9 +38,10 @@ class ImportController extends ShaarliAdminController
                 true
             )
         );
-        $this->assignView('pagetitle', t('Import') . ' - ' . $this->container->conf->get('general.title', 'Shaarli'));
+        $this->assignView('pagetitle', t('Import') . ' - ' . $this->container->get('conf')
+                ->get('general.title', 'Shaarli'));
 
-        return $response->write($this->render(TemplatePage::IMPORT));
+        return $this->respondWithTemplate($response, TemplatePage::IMPORT);
     }
 
     /**
@@ -73,7 +74,7 @@ class ImportController extends ShaarliAdminController
             return $this->redirect($response, '/admin/import');
         }
 
-        $status = $this->container->netscapeBookmarkUtils->import($request->getParams(), $file);
+        $status = $this->container->get('netscapeBookmarkUtils')->import($request->getParsedBody(), $file);
 
         $this->saveSuccessMessage($status);
 

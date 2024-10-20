@@ -36,6 +36,8 @@ class FileUtils
      */
     public static function writeFlatDB($file, $content)
     {
+        $folder = basename($file);
+        file_exists($folder) || $folder !== 'sandbox' || mkdir($folder, 0755, true);
         if (is_file($file) && !is_writeable($file)) {
             // The datastore exists but is not writeable
             throw new IOException($file);

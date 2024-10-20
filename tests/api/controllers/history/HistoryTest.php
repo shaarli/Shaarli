@@ -2,14 +2,14 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class HistoryTest extends TestCase
 {
@@ -43,13 +43,14 @@ class HistoryTest extends TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->refHistory = new ReferenceHistory();
         $this->refHistory->write(self::$testHistory);
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = true;
-        $this->container['history'] = new History(self::$testHistory);
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', true);
+        $this->container->set('history', new History(self::$testHistory));
 
         $this->controller = new HistoryController($this->container);
     }
@@ -67,12 +68,9 @@ class HistoryTest extends TestCase
      */
     public function testGetHistory()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $response = $this->controller->getHistory($request, new Response());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -119,13 +117,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistoryLimit()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'limit=1'
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $query = http_build_query(['limit' => 1]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new Response());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -144,13 +139,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistoryOffset()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=4'
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $query = http_build_query(['offset' => 4]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new Response());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -169,13 +161,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistorySince()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'since=2017-03-03T00:00:00%2B00:00'
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $query = http_build_query(['since' => '2017-03-03T00:00:00+00:00']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new Response());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 
@@ -194,13 +183,10 @@ class HistoryTest extends TestCase
      */
     public function testGetHistorySinceOffsetLimit()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'since=2017-02-01T00:00:00%2B00:00&offset=1&limit=1'
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $query = http_build_query(['since' => '2017-02-01T00:00:00%2B00:00', 'offset' => '1', 'limit' => '1']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-        $response = $this->controller->getHistory($request, new Response());
+        $response = $this->controller->getHistory($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
 

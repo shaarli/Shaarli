@@ -6,8 +6,7 @@ namespace Shaarli\Front\Controller\Visitor;
 
 use Shaarli\Bookmark\BookmarkFilter;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class TagCloudControllerTest extends TestCase
 {
@@ -18,6 +17,7 @@ class TagCloudControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new TagCloudController($this->container);
@@ -35,14 +35,14 @@ class TagCloudControllerTest extends TestCase
         ];
         $expectedOrder = ['abc', 'def', 'ghi'];
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with([], null)
@@ -52,7 +52,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_tagcloud'])
@@ -94,28 +94,19 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidCloudControllerInvokeWithParameters(): void
     {
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getQueryParam')
-            ->with()
-            ->willReturnCallback(function (string $key): ?string {
-                if ('searchtags' === $key) {
-                    return 'ghi@def';
-                }
-
-                return null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query(['searchtags' => 'ghi@def']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->loginManager->method('isLoggedin')->willReturn(true);
-        $this->container->sessionManager->expects(static::once())->method('getSessionParameter')->willReturn('private');
+        $this->container->get('loginManager')->method('isLoggedin')->willReturn(true);
+        $this->container->get('sessionManager')->expects(static::once())->method('getSessionParameter')
+            ->willReturn('private');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with(['ghi', 'def'], BookmarkFilter::$PRIVATE)
@@ -125,7 +116,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_tagcloud'])
@@ -161,14 +152,14 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyCloud(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with([], null)
@@ -178,7 +169,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_tagcloud'])
@@ -215,14 +206,14 @@ class TagCloudControllerTest extends TestCase
             'ghi' => 1,
         ];
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with([], null)
@@ -232,7 +223,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_taglist'])
@@ -271,30 +262,20 @@ class TagCloudControllerTest extends TestCase
      */
     public function testValidListControllerInvokeWithParameters(): void
     {
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getQueryParam')
-            ->with()
-            ->willReturnCallback(function (string $key): ?string {
-                if ('searchtags' === $key) {
-                    return 'ghi@def';
-                } elseif ('sort' === $key) {
-                    return 'alpha';
-                }
+        $query = http_build_query(['searchtags' => 'ghi@def', 'sort' => 'alpha']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
 
-                return null;
-            })
-        ;
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->loginManager->method('isLoggedin')->willReturn(true);
-        $this->container->sessionManager->expects(static::once())->method('getSessionParameter')->willReturn('private');
+        $this->container->get('loginManager')->method('isLoggedin')->willReturn(true);
+        $this->container->get('sessionManager')
+            ->expects(static::once())->method('getSessionParameter')->willReturn('private');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with(['ghi', 'def'], BookmarkFilter::$PRIVATE)
@@ -304,7 +285,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_taglist'])
@@ -336,14 +317,14 @@ class TagCloudControllerTest extends TestCase
      */
     public function testEmptyList(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->with([], null)
@@ -353,7 +334,7 @@ class TagCloudControllerTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_taglist'])

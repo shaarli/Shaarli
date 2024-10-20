@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Class TagController
@@ -22,7 +22,7 @@ class TagController extends ShaarliVisitorController
     public function addTag(Request $request, Response $response, array $args): Response
     {
         $newTag = $args['newTag'] ?? null;
-        $referer = $this->container->environment['HTTP_REFERER'] ?? null;
+        $referer = $request->getServerParams()['HTTP_REFERER'] ?? null;
 
         // In case browser does not send HTTP_REFERER, we search a single tag
         if (null === $referer) {
@@ -37,7 +37,7 @@ class TagController extends ShaarliVisitorController
         parse_str($currentUrl['query'] ?? '', $params);
 
         if (null === $newTag) {
-            return $response->withRedirect(($currentUrl['path'] ?? './') . '?' . http_build_query($params));
+            return $this->redirect($response, ($currentUrl['path'] ?? './') . '?' . http_build_query($params), false);
         }
 
         // Prevent redirection loop
@@ -45,7 +45,7 @@ class TagController extends ShaarliVisitorController
             unset($params['addtag']);
         }
 
-        $tagsSeparator = $this->container->conf->get('general.tags_separator', ' ');
+        $tagsSeparator = $this->container->get('conf')->get('general.tags_separator', ' ');
         // Check if this tag is already in the search query and ignore it if it is.
         // Each tag is always separated by a space
         $currentTags = tags_str2array($params['searchtags'] ?? '', $tagsSeparator);
@@ -68,7 +68,7 @@ class TagController extends ShaarliVisitorController
         // We also remove page (keeping the same page has no sense, since the results are different)
         unset($params['page']);
 
-        return $response->withRedirect(($currentUrl['path'] ?? './') . '?' . http_build_query($params));
+        return $this->redirect($response, ($currentUrl['path'] ?? './') . '?' . http_build_query($params), false);
     }
 
     /**
@@ -78,7 +78,7 @@ class TagController extends ShaarliVisitorController
      */
     public function removeTag(Request $request, Response $response, array $args): Response
     {
-        $referer = $this->container->environment['HTTP_REFERER'] ?? null;
+        $referer = $request->getServerParams()['HTTP_REFERER'] ?? null;
 
         // If the referrer is not provided, we can update the search, so we failback on the bookmark list
         if (empty($referer)) {
@@ -90,7 +90,7 @@ class TagController extends ShaarliVisitorController
         parse_str($currentUrl['query'] ?? '', $params);
 
         if (null === $tagToRemove) {
-            return $response->withRedirect(($currentUrl['path'] ?? './') . '?' . http_build_query($params));
+            return $this->redirect($response, ($currentUrl['path'] ?? './') . '?' . http_build_query($params), false);
         }
 
         // Prevent redirection loop
@@ -99,7 +99,7 @@ class TagController extends ShaarliVisitorController
         }
 
         if (isset($params['searchtags'])) {
-            $tagsSeparator = $this->container->conf->get('general.tags_separator', ' ');
+            $tagsSeparator = $this->container->get('conf')->get('general.tags_separator', ' ');
             $tags = tags_str2array($params['searchtags'] ?? '', $tagsSeparator);
             // Remove value from array $tags.
             $tags = array_diff($tags, [$tagToRemove]);
@@ -115,6 +115,6 @@ class TagController extends ShaarliVisitorController
 
         $queryParams = count($params) > 0 ? '?' . http_build_query($params) : '';
 
-        return $response->withRedirect(($currentUrl['path'] ?? './') . $queryParams);
+        return $this->redirect($response, ($currentUrl['path'] ?? './') . $queryParams, false);
     }
 }

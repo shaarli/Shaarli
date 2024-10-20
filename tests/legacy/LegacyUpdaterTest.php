@@ -41,7 +41,7 @@ class LegacyUpdaterTest extends TestCase
      */
     protected function setUp(): void
     {
-        copy('tests/utils/config/configJson.json.php', self::$configFile . '.json.php');
+        copy(__DIR__ . '/../utils/config/configJson.json.php', self::$configFile . '.json.php');
         $this->conf = new ConfigManager(self::$configFile);
     }
 

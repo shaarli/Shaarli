@@ -2,8 +2,9 @@
 
 namespace Shaarli\Front;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 /**
  * Middleware used for controller requiring to be authenticated.
@@ -12,16 +13,16 @@ use Slim\Http\Response;
  */
 class ShaarliAdminMiddleware extends ShaarliMiddleware
 {
-    public function __invoke(Request $request, Response $response, callable $next): Response
+    public function __invoke(Request $request, RequestHandler $handler): Response
     {
         $this->initBasePath($request);
 
-        if (true !== $this->container->loginManager->isLoggedIn()) {
-            $returnUrl = urlencode($this->container->environment['REQUEST_URI']);
+        if (true !== $this->container->get('loginManager')->isLoggedIn()) {
+            $returnUrl = urlencode($request->getServerParams()['REQUEST_URI']);
 
-            return $response->withRedirect($this->container->basePath . '/login?returnurl=' . $returnUrl);
+            return $this->redirect($this->container->get('basePath') . '/login?returnurl=' . $returnUrl);
         }
 
-        return parent::__invoke($request, $response, $next);
+        return parent::__invoke($request, $handler);
     }
 }

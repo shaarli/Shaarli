@@ -2,17 +2,17 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class GetTagsTest
@@ -66,6 +66,7 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -80,10 +81,10 @@ class GetTagsTest extends \Shaarli\TestCase
             $mutex,
             true
         );
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = null;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', null);
 
         $this->controller = new Tags($this->container);
     }
@@ -102,12 +103,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
 
-        $response = $this->controller->getTags($request, new Response());
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -135,12 +133,9 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetLimit()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=1&limit=1'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $query = http_build_query(['offset' => 1, 'limit' => 1]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(1, count($data));
@@ -155,12 +150,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsLimitAll()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag();
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'limit=all'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $query = http_build_query(['limit' => 'all']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -172,12 +164,9 @@ class GetTagsTest extends \Shaarli\TestCase
      */
     public function testGetTagsOffsetTooHigh()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'offset=100'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $query = http_build_query(['offset' => 100]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEmpty(count($data));
@@ -189,12 +178,9 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsVisibilityPrivate()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'private');
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'GET',
-            'QUERY_STRING' => 'visibility=private'
-        ]);
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+        $query = http_build_query(['visibility' => 'private']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(count($tags), count($data));
@@ -209,14 +195,10 @@ class GetTagsTest extends \Shaarli\TestCase
     public function testGetTagsVisibilityPublic()
     {
         $tags = $this->bookmarkService->bookmarksCountPerTag([], 'public');
-        $env = Environment::mock(
-            [
-                'REQUEST_METHOD' => 'GET',
-                'QUERY_STRING' => 'visibility=public'
-            ]
-        );
-        $request = Request::createFromEnvironment($env);
-        $response = $this->controller->getTags($request, new Response());
+
+        $query = http_build_query(['visibility' => 'public']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->controller->getTags($request, $this->responseFactory->createResponse());
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string)$response->getBody(), true);
         $this->assertEquals(count($tags), count($data));

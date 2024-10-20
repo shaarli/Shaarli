@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Admin\ShaareManageControllerTest;
 
 use Shaarli\Bookmark\Bookmark;
-use Shaarli\Bookmark\Exception\BookmarkNotFoundException;
 use Shaarli\Formatter\BookmarkFormatter;
 use Shaarli\Formatter\BookmarkRawFormatter;
 use Shaarli\Formatter\FormatterFactory;
@@ -14,8 +13,7 @@ use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class AddOrDeleteTagTest extends TestCase
 {
@@ -26,9 +24,10 @@ class AddOrDeleteTagTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareManageController($this->container);
     }
 
@@ -39,35 +38,32 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123', 'tag' => 'newtag', 'action' => 'add'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+
+        $response = $this->responseFactory->createResponse();
         $bookmark = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second');
 
         static::assertSame(['first', 'second'], $bookmark->getTags());
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
             ->willReturnCallback(function () use ($bookmark): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -78,6 +74,7 @@ class AddOrDeleteTagTest extends TestCase
         static::assertSame(['first', 'second', 'newtag'], $bookmark->getTags());
 
         static::assertSame(302, $result->getStatusCode());
+        $a = $result->getHeader('location');
         static::assertSame(['/subfolder/'], $result->getHeader('location'));
     }
 
@@ -88,14 +85,10 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123 456', 'tag' => 'newtag@othertag', 'action' => 'add'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+
+        $response = $this->responseFactory->createResponse();
         $bookmark1 = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second');
@@ -105,24 +98,24 @@ class AddOrDeleteTagTest extends TestCase
         static::assertSame(['first', 'second'], $bookmark1->getTags());
         static::assertSame([], $bookmark2->getTags());
 
-        $this->container->bookmarkService->expects(static::exactly(2))->method('get')
+        $this->container->get('bookmarkService')->expects(static::exactly(2))->method('get')
             ->withConsecutive([123], [456])
             ->willReturnOnConsecutiveCalls($bookmark1, $bookmark2);
-        $this->container->bookmarkService->expects(static::exactly(2))->method('set')
+        $this->container->get('bookmarkService')->expects(static::exactly(2))->method('set')
             ->withConsecutive([$bookmark1, false], [$bookmark2, false]);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
             ->willReturnCallback(function (): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(2))
             ->method('executeHooks')
             ->with('save_link')
@@ -144,35 +137,31 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123', 'tag' => 'second', 'action' => 'delete'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
         $bookmark = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second third');
 
         static::assertSame(['first', 'second', 'third'], $bookmark->getTags());
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
             ->willReturnCallback(function () use ($bookmark): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -193,14 +182,9 @@ class AddOrDeleteTagTest extends TestCase
     {
         $parameters = ['id' => '123 456', 'tag' => 'second@first', 'action' => 'delete'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
         $bookmark1 = (new Bookmark())
             ->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
             ->setTagsString('first second third other');
@@ -211,24 +195,24 @@ class AddOrDeleteTagTest extends TestCase
         static::assertSame(['first', 'second', 'third', 'other'], $bookmark1->getTags());
         static::assertSame(['first', 'second'], $bookmark2->getTags());
 
-        $this->container->bookmarkService->expects(static::exactly(2))->method('get')
+        $this->container->get('bookmarkService')->expects(static::exactly(2))->method('get')
             ->withConsecutive([123], [456])
             ->willReturnOnConsecutiveCalls($bookmark1, $bookmark2);
-        $this->container->bookmarkService->expects(static::exactly(2))->method('set')
+        $this->container->get('bookmarkService')->expects(static::exactly(2))->method('set')
             ->withConsecutive([$bookmark1, false], [$bookmark2, false]);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
             ->willReturnCallback(function (): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(2))
             ->method('executeHooks')
             ->with('save_link')
@@ -249,16 +233,11 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutId(): void
     {
         $parameters = ['tag' => 'newtag', 'action' => 'add'];
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -276,16 +255,11 @@ class AddOrDeleteTagTest extends TestCase
     public function testDeleteTagWithoutId(): void
     {
         $parameters = ['tag' => 'newtag', 'action' => 'delete'];
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -303,16 +277,11 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutAction(): void
     {
         $parameters = ['id' => '123', 'tag' => 'newtag'];
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid action provided.'])
@@ -330,16 +299,11 @@ class AddOrDeleteTagTest extends TestCase
     public function testAddTagWithoutValue(): void
     {
         $parameters = ['id' => '123', 'tag' => '', 'action' => 'add'];
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid tag name provided.'])
@@ -357,16 +321,11 @@ class AddOrDeleteTagTest extends TestCase
     public function testDeleteTagWithoutValue(): void
     {
         $parameters = ['id' => '123', 'tag' => '', 'action' => 'delete'];
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid tag name provided.'])
