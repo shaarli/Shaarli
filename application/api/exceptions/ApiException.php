@@ -2,7 +2,7 @@
 
 namespace Shaarli\Api\Exceptions;
 
-use Slim\Http\Response;
+use Slim\Psr7\Factory\ResponseFactory;
 
 /**
  * Abstract class ApiException
@@ -57,7 +57,9 @@ abstract class ApiException extends \Exception
     protected function buildApiResponse($code)
     {
         $style = $this->debug ? JSON_PRETTY_PRINT : null;
-        return $this->response->withJson($this->getApiResponseBody(), $code, $style);
+        $response = $this->response ?? (new ResponseFactory())->createResponse();
+        $response->getBody()->write(json_encode($this->getApiResponseBody(), $style));
+        return $response->withStatus($code);
     }
 
     /**

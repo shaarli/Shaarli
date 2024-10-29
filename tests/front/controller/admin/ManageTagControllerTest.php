@@ -11,8 +11,7 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class ManageTagControllerTest extends TestCase
 {
@@ -23,6 +22,7 @@ class ManageTagControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ManageTagController($this->container);
@@ -36,9 +36,9 @@ class ManageTagControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->with('fromtag')->willReturn('fromtag');
-        $response = new Response();
+        $query = http_build_query(['fromtag' => 'fromtag']);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -58,13 +58,13 @@ class ManageTagControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key) {
             return $key === 'general.tags_separator' ? ' ' : $key;
         });
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->controller->index($request, $response);
 
@@ -85,19 +85,13 @@ class ManageTagControllerTest extends TestCase
             'fromtag' => 'old-tag',
             'totag' => 'new-tag',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($requestParameters): ?string {
-                return $requestParameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark1 = $this->createMock(Bookmark::class);
         $bookmark2 = $this->createMock(Bookmark::class);
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->with(['searchtags' => 'old-tag'], BookmarkFilter::$ALL, true)
@@ -108,16 +102,17 @@ class ManageTagControllerTest extends TestCase
                 return SearchResult::getSearchResult([$bookmark1, $bookmark2]);
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(2))
             ->method('set')
             ->withConsecutive([$bookmark1, false], [$bookmark2, false])
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
 
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
+        $a = $result->getHeader('location');
         static::assertSame(['/subfolder/?searchtags=new-tag'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
@@ -138,19 +133,13 @@ class ManageTagControllerTest extends TestCase
             'deletetag' => 'delete',
             'fromtag' => 'old-tag',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($requestParameters): ?string {
-                return $requestParameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark1 = $this->createMock(Bookmark::class);
         $bookmark2 = $this->createMock(Bookmark::class);
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->with(['searchtags' => 'old-tag'], BookmarkFilter::$ALL, true)
@@ -161,12 +150,12 @@ class ManageTagControllerTest extends TestCase
                 return SearchResult::getSearchResult([$bookmark1, $bookmark2]);
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(2))
             ->method('set')
             ->withConsecutive([$bookmark1, false], [$bookmark2, false])
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
 
         $result = $this->controller->save($request, $response);
 
@@ -184,14 +173,14 @@ class ManageTagControllerTest extends TestCase
      */
     public function testSaveWrongToken(): void
     {
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $this->container->conf->expects(static::never())->method('set');
-        $this->container->conf->expects(static::never())->method('write');
+        $this->container->get('conf')->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('write');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
@@ -209,15 +198,9 @@ class ManageTagControllerTest extends TestCase
         $requestParameters = [
             'renametag' => 'rename',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($requestParameters): ?string {
-                return $requestParameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -241,15 +224,9 @@ class ManageTagControllerTest extends TestCase
         $requestParameters = [
             'deletetag' => 'delete',
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($requestParameters): ?string {
-                return $requestParameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -274,15 +251,9 @@ class ManageTagControllerTest extends TestCase
             'renametag' => 'rename',
             'fromtag' => 'old-tag'
         ];
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($requestParameters): ?string {
-                return $requestParameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($requestParameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -305,17 +276,12 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($toSeparator): ?string {
-                return $key === 'separator' ? $toSeparator : $key;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
 
-        $this->container->conf
+        $response = $this->responseFactory->createResponse();
+
+        $this->container->get('conf')
             ->expects(static::once())
             ->method('set')
             ->with('general.tags_separator', $toSeparator, true, true)
@@ -345,17 +311,11 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($toSeparator): ?string {
-                return $key === 'separator' ? $toSeparator : $key;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->conf->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('set');
 
         $result = $this->controller->changeSeparator($request, $response);
 
@@ -381,17 +341,11 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->expects(static::atLeastOnce())
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($toSeparator): ?string {
-                return $key === 'separator' ? $toSeparator : $key;
-            })
-        ;
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['separator' => $toSeparator]);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->conf->expects(static::never())->method('set');
+        $this->container->get('conf')->expects(static::never())->method('set');
 
         $result = $this->controller->changeSeparator($request, $response);
 

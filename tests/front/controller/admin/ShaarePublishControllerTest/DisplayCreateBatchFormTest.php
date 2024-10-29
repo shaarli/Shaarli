@@ -9,8 +9,7 @@ use Shaarli\Front\Controller\Admin\ShaarePublishController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Http\MetadataRetriever;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class DisplayCreateBatchFormTest extends TestCase
 {
@@ -21,10 +20,11 @@ class DisplayCreateBatchFormTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
-        $this->container->metadataRetriever = $this->createMock(MetadataRetriever::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
+        $this->container->set('metadataRetriever', $this->createMock(MetadataRetriever::class));
         $this->controller = new ShaarePublishController($this->container);
     }
 
@@ -40,11 +40,9 @@ class DisplayCreateBatchFormTest extends TestCase
             'https://domain3.tld/url3',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($urls): ?string {
-            return $key === 'urls' ? implode(PHP_EOL, $urls) : null;
-        });
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody(['urls' => implode(PHP_EOL, $urls)]);
+        $response = $this->responseFactory->createResponse();
 
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);

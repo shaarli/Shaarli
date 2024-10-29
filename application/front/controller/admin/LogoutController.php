@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Security\CookieManager;
-use Shaarli\Security\LoginManager;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class LogoutController
@@ -19,13 +18,13 @@ class LogoutController extends ShaarliAdminController
 {
     public function index(Request $request, Response $response): Response
     {
-        $this->container->pageCacheManager->invalidateCaches();
-        $this->container->sessionManager->logout();
-        $this->container->cookieManager->setCookieParameter(
+        $this->container->get('pageCacheManager')->invalidateCaches();
+        $this->container->get('sessionManager')->logout();
+        $this->container->get('cookieManager')->setCookieParameter(
             CookieManager::STAY_SIGNED_IN,
             'false',
             0,
-            $this->container->basePath . '/'
+            $this->container->get('basePath') . '/'
         );
 
         return $this->redirect($response, '/');

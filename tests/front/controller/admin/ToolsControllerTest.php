@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Admin;
 
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class ToolsControllerTest extends TestCase
 {
@@ -17,6 +16,7 @@ class ToolsControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ToolsController($this->container);
@@ -24,14 +24,13 @@ class ToolsControllerTest extends TestCase
 
     public function testDefaultInvokeWithHttps(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
-
-        $this->container->environment = [
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => 443,
             'HTTPS' => 'on',
         ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];
@@ -47,13 +46,12 @@ class ToolsControllerTest extends TestCase
 
     public function testDefaultInvokeWithoutHttps(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
-
-        $this->container->environment = [
+        $serverParams = [
             'SERVER_NAME' => 'shaarli',
             'SERVER_PORT' => 80,
         ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         // Save RainTPL assigned variables
         $assignedVariables = [];

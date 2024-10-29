@@ -10,8 +10,7 @@ use Shaarli\Formatter\BookmarkRawFormatter;
 use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class ExportControllerTest extends TestCase
 {
@@ -22,6 +21,7 @@ class ExportControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ExportController($this->container);
@@ -35,8 +35,8 @@ class ExportControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -59,19 +59,22 @@ class ExportControllerTest extends TestCase
             'prepend_note_url' => 'on',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($parameters) {
-            return $parameters[$key] ?? null;
-        });
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setUrl('http://link1.tld')->setTitle('Title 1'),
             (new Bookmark())->setUrl('http://link2.tld')->setTitle('Title 2'),
         ];
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')
             ->expects(static::once())
             ->method('filterAndFormat')
             ->willReturnCallback(
@@ -115,10 +118,10 @@ class ExportControllerTest extends TestCase
      */
     public function testExportSelectionMissing(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Please select an export mode.'])
@@ -139,20 +142,23 @@ class ExportControllerTest extends TestCase
             'selection' => 'all',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($parameters) {
-            return $parameters[$key] ?? null;
-        });
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')
             ->expects(static::once())
             ->method('filterAndFormat')
             ->willThrowException(new \Exception($message = 'error message'));
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, [$message])

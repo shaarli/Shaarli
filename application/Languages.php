@@ -96,17 +96,19 @@ class Languages
     {
         $this->translator = new GettextTranslator();
         $this->translator->setLanguage($this->language);
-        $this->translator->loadDomain(self::DEFAULT_DOMAIN, 'inc/languages');
+        $this->translator->loadDomain(self::DEFAULT_DOMAIN, __DIR__ . '/../inc/languages');
 
         // Default extension translation from the current theme
-        $themeTransFolder = rtrim($this->conf->get('raintpl_tpl'), '/') . '/' . $this->conf->get('theme') . '/language';
+        $themeTransFolder = __DIR__ . '/../' . rtrim($this->conf->get('raintpl_tpl'), '/') . '/'
+            . $this->conf->get('theme') . '/language';
         if (is_dir($themeTransFolder)) {
             $this->translator->loadDomain($this->conf->get('theme'), $themeTransFolder, false);
         }
 
         foreach ($this->conf->get('translation.extensions', []) as $domain => $translationPath) {
+            $path = __DIR__ . '/../' . $translationPath;
             if ($domain !== self::DEFAULT_DOMAIN) {
-                $this->translator->loadDomain($domain, $translationPath, false);
+                $this->translator->loadDomain($domain, $path, false);
             }
         }
     }
@@ -123,7 +125,7 @@ class Languages
         // Core translations
         try {
             $translations = $translations->addFromPoFile(
-                'inc/languages/' . $this->language . '/LC_MESSAGES/shaarli.po'
+                __DIR__ . '/../inc/languages/' . $this->language . '/LC_MESSAGES/shaarli.po'
             );
             $translations->setDomain('shaarli');
             $this->translator->loadTranslations($translations);
@@ -132,7 +134,8 @@ class Languages
 
         // Default extension translation from the current theme
         $theme = $this->conf->get('theme');
-        $themeTransFolder = rtrim($this->conf->get('raintpl_tpl'), '/') . '/' . $theme . '/language';
+        $themeTransFolder = __DIR__ . '/../' . rtrim($this->conf->get('raintpl_tpl'), '/') . '/'
+            . $theme . '/language';
         if (is_dir($themeTransFolder)) {
             try {
                 $translations = Translations::fromPoFile(
@@ -152,7 +155,7 @@ class Languages
 
             try {
                 $extension = Translations::fromPoFile(
-                    $translationPath . $this->language . '/LC_MESSAGES/' . $domain . '.po'
+                    __DIR__ . '/../' . $translationPath . $this->language . '/LC_MESSAGES/' . $domain . '.po'
                 );
                 $extension->setDomain($domain);
                 $this->translator->loadTranslations($extension);

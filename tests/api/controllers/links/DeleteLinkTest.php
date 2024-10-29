@@ -2,17 +2,17 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class DeleteLinkTest extends \Shaarli\TestCase
 {
@@ -42,7 +42,7 @@ class DeleteLinkTest extends \Shaarli\TestCase
     protected $bookmarkService;
 
     /**
-     * @var HistoryController instance.
+     * @var History instance.
      */
     protected $history;
 
@@ -67,6 +67,7 @@ class DeleteLinkTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -84,10 +85,10 @@ class DeleteLinkTest extends \Shaarli\TestCase
             true
         );
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = $this->history;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', $this->history);
 
         $this->controller = new Links($this->container);
     }
@@ -108,12 +109,9 @@ class DeleteLinkTest extends \Shaarli\TestCase
     {
         $id = '41';
         $this->assertTrue($this->bookmarkService->exists($id));
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'DELETE',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = $this->requestFactory->createRequest('DELETE', 'http://shaarli');
 
-        $response = $this->controller->deleteLink($request, new Response(), ['id' => $id]);
+        $response = $this->controller->deleteLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty((string) $response->getBody());
 
@@ -143,11 +141,8 @@ class DeleteLinkTest extends \Shaarli\TestCase
 
         $id = -1;
         $this->assertFalse($this->bookmarkService->exists($id));
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'DELETE',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = $this->requestFactory->createRequest('DELETE', 'http://shaarli');
 
-        $this->controller->deleteLink($request, new Response(), ['id' => $id]);
+        $this->controller->deleteLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
     }
 }

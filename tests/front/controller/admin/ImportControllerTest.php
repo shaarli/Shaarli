@@ -8,9 +8,9 @@ use Psr\Http\Message\UploadedFileInterface;
 use Shaarli\Netscape\NetscapeBookmarkUtils;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Http\UploadedFile;
+use Shaarli\Tests\Utils\FakeRequest;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Factory\UploadedFileFactory;
 
 class ImportControllerTest extends TestCase
 {
@@ -21,6 +21,7 @@ class ImportControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new ImportController($this->container);
@@ -34,8 +35,8 @@ class ImportControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -52,22 +53,23 @@ class ImportControllerTest extends TestCase
      */
     public function testImportDefault(): void
     {
+        $uploadedFileFactory = new UploadedFileFactory();
+        $streamFactory = new StreamFactory();
+
         $parameters = [
             'abc' => 'def',
             'other' => 'param',
         ];
 
-        $requestFile = new UploadedFile('file', 'name', 'type', 123);
+        $requestFile = $uploadedFileFactory->createUploadedFile($streamFactory->createStream(), 123);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParams')->willReturnCallback(function () use ($parameters) {
-            return $parameters;
-        });
-        $request->method('getUploadedFiles')->willReturn(['filetoupload' => $requestFile]);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withParsedBody($parameters)
+            ->withUploadedFiles(['filetoupload' => $requestFile]);
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils
+        $response = $this->responseFactory->createResponse();
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')
             ->expects(static::once())
             ->method('import')
             ->willReturnCallback(
@@ -86,7 +88,7 @@ class ImportControllerTest extends TestCase
             )
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_SUCCESS_MESSAGES, ['status'])
@@ -103,10 +105,10 @@ class ImportControllerTest extends TestCase
      */
     public function testImportFileMissing(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['No import file provided.'])
@@ -123,23 +125,28 @@ class ImportControllerTest extends TestCase
      */
     public function testImportEmptyFile(): void
     {
-        $requestFile = new UploadedFile('file', 'name', 'type', 0);
+        $uploadedFileFactory = new UploadedFileFactory();
+        $streamFactory = new StreamFactory();
 
-        $request = $this->createMock(Request::class);
-        $request->method('getUploadedFiles')->willReturn(['filetoupload' => $requestFile]);
-        $response = new Response();
+        $requestFile = $uploadedFileFactory->createUploadedFile(
+            $streamFactory->createStream('')
+        );
 
-        $this->container->netscapeBookmarkUtils = $this->createMock(NetscapeBookmarkUtils::class);
-        $this->container->netscapeBookmarkUtils->expects(static::never())->method('filterAndFormat');
+        $request = $this->requestFactory->createRequest('POST', 'http://shaarli')
+            ->withUploadedFiles(['filetoupload' => $requestFile]);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->set('netscapeBookmarkUtils', $this->createMock(NetscapeBookmarkUtils::class));
+        $this->container->get('netscapeBookmarkUtils')->expects(static::never())->method('filterAndFormat');
+
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->willReturnCallback(function (string $key, array $value): SessionManager {
                 static::assertSame(SessionManager::KEY_ERROR_MESSAGES, $key);
                 static::assertStringStartsWith('The file you are trying to upload is probably bigger', $value[0]);
 
-                return $this->container->sessionManager;
+                return $this->container->get('sessionManager');
             })
         ;
 

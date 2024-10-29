@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
-use Shaarli\Container\ShaarliContainer;
+use DI\Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Front\Exception\OpenShaarliPasswordException;
 use Shaarli\Front\Exception\ShaarliFrontException;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use Throwable;
 
 /**
@@ -19,13 +19,13 @@ use Throwable;
  */
 class PasswordController extends ShaarliAdminController
 {
-    public function __construct(ShaarliContainer $container)
+    public function __construct(Container $container)
     {
         parent::__construct($container);
 
         $this->assignView(
             'pagetitle',
-            t('Change password') . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            t('Change password') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
     }
 
@@ -34,7 +34,7 @@ class PasswordController extends ShaarliAdminController
      */
     public function index(Request $request, Response $response): Response
     {
-        return $response->write($this->render(TemplatePage::CHANGE_PASSWORD));
+        return $this->respondWithTemplate($response, TemplatePage::CHANGE_PASSWORD);
     }
 
     /**
@@ -44,58 +44,55 @@ class PasswordController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        if ($this->container->conf->get('security.open_shaarli', false)) {
+        if ($this->container->get('conf')->get('security.open_shaarli', false)) {
             throw new OpenShaarliPasswordException();
         }
 
-        $oldPassword = $request->getParam('oldpassword');
-        $newPassword = $request->getParam('setpassword');
+        $oldPassword = $request->getParsedBody()['oldpassword'] ?? null;
+        $newPassword = $request->getParsedBody()['setpassword'] ?? null;
 
         if (empty($newPassword) || empty($oldPassword)) {
             $this->saveErrorMessage(t('You must provide the current and new password to change it.'));
 
-            return $response
-                ->withStatus(400)
-                ->write($this->render(TemplatePage::CHANGE_PASSWORD))
-            ;
+            return $this->respondWithTemplate($response, TemplatePage::CHANGE_PASSWORD)
+                ->withStatus(400);
         }
 
         // Make sure old password is correct.
         $oldHash = sha1(
             $oldPassword .
-            $this->container->conf->get('credentials.login') .
-            $this->container->conf->get('credentials.salt')
+            $this->container->get('conf')->get('credentials.login') .
+            $this->container->get('conf')->get('credentials.salt')
         );
 
-        if ($oldHash !== $this->container->conf->get('credentials.hash')) {
+        if ($oldHash !== $this->container->get('conf')->get('credentials.hash')) {
             $this->saveErrorMessage(t('The old password is not correct.'));
 
-            return $response
-                ->withStatus(400)
-                ->write($this->render(TemplatePage::CHANGE_PASSWORD))
+            return $this->respondWithTemplate($response, TemplatePage::CHANGE_PASSWORD)
+                ->withStatus(400);
             ;
         }
 
         // Save new password
         // Salt renders rainbow-tables attacks useless.
-        $this->container->conf->set('credentials.salt', sha1(uniqid('', true) . '_' . mt_rand()));
-        $this->container->conf->set(
+        $this->container->get('conf')->set('credentials.salt', sha1(uniqid('', true) . '_' . mt_rand()));
+        $this->container->get('conf')->set(
             'credentials.hash',
             sha1(
                 $newPassword
-                . $this->container->conf->get('credentials.login')
-                . $this->container->conf->get('credentials.salt')
+                . $this->container->get('conf')->get('credentials.login')
+                . $this->container->get('conf')->get('credentials.salt')
             )
         );
 
         try {
-            $this->container->conf->write($this->container->loginManager->isLoggedIn());
+            $this->container->get('conf')->write($this->container->get('loginManager')->isLoggedIn());
         } catch (Throwable $e) {
             throw new ShaarliFrontException($e->getMessage(), 500, $e);
         }
 
         $this->saveSuccessMessage(t('Your password has been changed'));
 
-        return $response->write($this->render(TemplatePage::CHANGE_PASSWORD));
+        return $this->respondWithTemplate($response, TemplatePage::CHANGE_PASSWORD);
     }
 }

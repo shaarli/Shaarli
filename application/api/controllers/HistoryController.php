@@ -2,9 +2,10 @@
 
 namespace Shaarli\Api\Controllers;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Api\Exceptions\ApiBadParametersException;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\ResponseUtils;
 
 /**
  * Class History
@@ -30,8 +31,8 @@ class HistoryController extends ApiController
         $history = $this->history->getHistory();
 
         // Return history operations from the {offset}th, starting from {since}.
-        $since = \DateTime::createFromFormat(\DateTime::ATOM, $request->getParam('since', ''));
-        $offset = $request->getParam('offset');
+        $since = \DateTime::createFromFormat(\DateTime::ATOM, $request->getQueryParams()['since'] ?? '');
+        $offset = $request->getQueryParams()['offset'] ?? null;
         if (empty($offset)) {
             $offset = 0;
         } elseif (ctype_digit($offset)) {
@@ -41,7 +42,7 @@ class HistoryController extends ApiController
         }
 
         // limit parameter is either a number of bookmarks or 'all' for everything.
-        $limit = $request->getParam('limit');
+        $limit = $request->getQueryParams()['limit'] ?? null;
         if (empty($limit)) {
             $limit = count($history);
         } elseif (ctype_digit($limit)) {
@@ -63,6 +64,6 @@ class HistoryController extends ApiController
         }
         $out = array_values($out);
 
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)->withStatus(200);
     }
 }

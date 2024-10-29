@@ -27,6 +27,8 @@ interface TemplatePage
     public const OPEN_SEARCH = 'opensearch';
     public const PICTURE_WALL = 'picwall';
     public const PLUGINS_ADMIN = 'pluginsadmin';
+    public const PLUGINS_CONTENT = 'pluginscontent';
+    public const SERVER = 'server';
     public const TAG_CLOUD = 'tag.cloud';
     public const TAG_LIST = 'tag.list';
     public const THUMBNAILS = 'thumbnails';

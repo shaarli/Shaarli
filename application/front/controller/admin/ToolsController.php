@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ToolsController
@@ -18,8 +18,8 @@ class ToolsController extends ShaarliAdminController
     public function index(Request $request, Response $response): Response
     {
         $data = [
-            'pageabsaddr' => index_url($this->container->environment),
-            'sslenabled' => is_https($this->container->environment),
+            'pageabsaddr' => index_url($request->getServerParams()),
+            'sslenabled' => is_https($request->getServerParams()),
         ];
 
         $this->executePageHooks('render_tools', $data, TemplatePage::TOOLS);
@@ -28,8 +28,11 @@ class ToolsController extends ShaarliAdminController
             $this->assignView($key, $value);
         }
 
-        $this->assignView('pagetitle', t('Tools') . ' - ' . $this->container->conf->get('general.title', 'Shaarli'));
+        $this->assignView(
+            'pagetitle',
+            t('Tools') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
+        );
 
-        return $response->write($this->render(TemplatePage::TOOLS));
+        return $this->respondWithTemplate($response, TemplatePage::TOOLS);
     }
 }

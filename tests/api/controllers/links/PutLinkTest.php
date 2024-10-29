@@ -2,18 +2,23 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
+use Shaarli\Tests\Utils\FakeRouteCollector;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
+use Slim\CallableResolver;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Factory\ServerserverRequestFactory;
+use Slim\Routing\RouteCollector;
+use Slim\Routing\RouteContext;
 
 class PutLinkTest extends \Shaarli\TestCase
 {
@@ -43,9 +48,14 @@ class PutLinkTest extends \Shaarli\TestCase
     protected $bookmarkService;
 
     /**
-     * @var HistoryController instance.
+     * @var History instance.
      */
     protected $history;
+
+        /**
+     * @var RouteParser instance.
+     */
+    protected $routeParser;
 
     /**
      * @var Container instance.
@@ -67,6 +77,7 @@ class PutLinkTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -83,19 +94,17 @@ class PutLinkTest extends \Shaarli\TestCase
             $mutex,
             true
         );
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = $this->history;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', $this->history);
 
         $this->controller = new Links($this->container);
 
-        // Used by index_url().
-        $this->controller->getCi()['environment'] = [
-            'SERVER_NAME' => 'domain.tld',
-            'SERVER_PORT' => 80,
-            'SCRIPT_NAME' => '/',
-        ];
+        $routeCollector = new RouteCollector($this->responseFactory, new CallableResolver(), $this->container);
+        $routeCollector->map(['POST'], '/api/v1/bookmarks/{id:[\d]+}', function () {
+        })->setName('getLink');
+        $this->routeParser = $routeCollector->getRouteParser();
     }
 
     /**
@@ -112,13 +121,11 @@ class PutLinkTest extends \Shaarli\TestCase
      */
     public function testPutLinkMinimal()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
         $id = '41';
-        $request = Request::createFromEnvironment($env);
-
-        $response = $this->controller->putLink($request, new Response(), ['id' => $id]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('PUT', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
+        $response = $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
@@ -150,10 +157,6 @@ class PutLinkTest extends \Shaarli\TestCase
      */
     public function testPutLinkWithValues()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
         $id = 41;
         $update = [
             'url' => 'http://somewhere.else',
@@ -162,10 +165,12 @@ class PutLinkTest extends \Shaarli\TestCase
             'tags' => ['corneille', 'rodrigue'],
             'private' => true,
         ];
-        $request = Request::createFromEnvironment($env);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('PUT', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
         $request = $request->withParsedBody($update);
 
-        $response = $this->controller->putLink($request, new Response(), ['id' => $id]);
+        $response = $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_LINK, count($data));
@@ -197,14 +202,12 @@ class PutLinkTest extends \Shaarli\TestCase
             'tags' => ['one', 'two'],
             'private' => true,
         ];
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
 
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->putLink($request, new Response(), ['id' => 41]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('PUT', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => 41]);
 
         $this->assertEquals(409, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
@@ -234,12 +237,11 @@ class PutLinkTest extends \Shaarli\TestCase
         $this->expectException(\Shaarli\Api\Exceptions\ApiLinkNotFoundException::class);
         $this->expectExceptionMessage('Link not found');
 
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('PUT', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
 
-        $this->controller->putLink($request, new Response(), ['id' => -1]);
+        $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => -1]);
     }
 
     /**
@@ -251,14 +253,12 @@ class PutLinkTest extends \Shaarli\TestCase
             'tags' => 'one two',
         ];
         $id = '41';
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
 
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->putLink($request, new Response(), ['id' => $id]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('PUT', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
 
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
@@ -275,14 +275,12 @@ class PutLinkTest extends \Shaarli\TestCase
             'tags' => ['one two'],
         ];
         $id = '41';
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-            'CONTENT_TYPE' => 'application/json'
-        ]);
 
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($link);
-        $response = $this->controller->putLink($request, new Response(), ['id' => $id]);
+        $serverParams = ['SERVER_NAME' => 'domain.tld', 'SERVER_PORT' => 80];
+        $request = $this->serverRequestFactory->createServerRequest('DELETE', 'http://shaarli', $serverParams)
+            ->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser)
+            ->withParsedBody($link);
+        $response = $this->controller->putLink($request, $this->responseFactory->createResponse(), ['id' => $id]);
 
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);

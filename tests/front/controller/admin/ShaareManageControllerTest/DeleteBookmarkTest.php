@@ -13,8 +13,7 @@ use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class DeleteBookmarkTest extends TestCase
 {
@@ -25,9 +24,10 @@ class DeleteBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareManageController($this->container);
     }
 
@@ -38,24 +38,18 @@ class DeleteBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/shaare/abcdef';
-
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123');
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('remove')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('remove')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
@@ -73,7 +67,7 @@ class DeleteBookmarkTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('delete_link', ['formatted' => $bookmark])
@@ -92,16 +86,15 @@ class DeleteBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123 456 789'];
 
-        $this->container->environment['HTTP_REFERER'] = 'http://shaarli/subfolder/?searchtags=abcdef';
-
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+            'HTTP_REFERER' => 'http://shaarli/subfolder/?searchtags=abcdef',
+            'SCRIPT_NAME' => '/subfolder/index.php',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123'),
@@ -109,22 +102,22 @@ class DeleteBookmarkTest extends TestCase
             (new Bookmark())->setId(789)->setUrl('http://domain.tld')->setTitle('Title 789'),
         ];
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('get')
             ->withConsecutive([123], [456], [789])
             ->willReturnOnConsecutiveCalls(...$bookmarks)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('remove')
             ->withConsecutive(...array_map(function (Bookmark $bookmark): array {
                 return [$bookmark, false];
             }, $bookmarks))
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
@@ -147,7 +140,7 @@ class DeleteBookmarkTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(3))
             ->method('executeHooks')
             ->with('delete_link')
@@ -166,24 +159,19 @@ class DeleteBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->willThrowException(new BookmarkNotFoundException())
         ;
-        $this->container->bookmarkService->expects(static::never())->method('remove');
-        $this->container->bookmarkService->expects(static::never())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::never())->method('remove');
+        $this->container->get('bookmarkService')->expects(static::never())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
@@ -196,7 +184,7 @@ class DeleteBookmarkTest extends TestCase
             })
         ;
         // Make sure that PluginManager hook is not triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::never())
             ->method('executeHooks')
             ->with('delete_link')
@@ -215,21 +203,16 @@ class DeleteBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123 456 789'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123'),
             (new Bookmark())->setId(789)->setUrl('http://domain.tld')->setTitle('Title 789'),
         ];
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('get')
             ->withConsecutive([123], [456], [789])
@@ -243,16 +226,16 @@ class DeleteBookmarkTest extends TestCase
                 throw new BookmarkNotFoundException();
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(2))
             ->method('remove')
             ->withConsecutive(...array_map(function (Bookmark $bookmark): array {
                 return [$bookmark, false];
             }, $bookmarks))
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
@@ -275,13 +258,13 @@ class DeleteBookmarkTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is not triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(2))
             ->method('executeHooks')
             ->with('delete_link')
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier 456 could not be found.'])
@@ -300,16 +283,11 @@ class DeleteBookmarkTest extends TestCase
     {
         $parameters = ['id' => 'nope not an ID'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -326,10 +304,10 @@ class DeleteBookmarkTest extends TestCase
      */
     public function testDeleteEmptyId(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -351,22 +329,17 @@ class DeleteBookmarkTest extends TestCase
             'source' => 'bookmarklet',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService->method('get')->with('123')->willReturn(
+        $this->container->get('bookmarkService')->method('get')->with('123')->willReturn(
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
         );
-        $this->container->bookmarkService->expects(static::once())->method('remove');
+        $this->container->get('bookmarkService')->expects(static::once())->method('remove');
 
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->willReturnCallback(function (): BookmarkFormatter {
@@ -393,22 +366,17 @@ class DeleteBookmarkTest extends TestCase
             'source' => 'batch',
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService->method('get')->with('123')->willReturn(
+        $this->container->get('bookmarkService')->method('get')->with('123')->willReturn(
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
         );
-        $this->container->bookmarkService->expects(static::once())->method('remove');
+        $this->container->get('bookmarkService')->expects(static::once())->method('remove');
 
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->willReturnCallback(function (): BookmarkFormatter {

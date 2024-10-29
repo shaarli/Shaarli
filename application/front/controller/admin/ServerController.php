@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Helper\ApplicationUtils;
 use Shaarli\Helper\FileUtils;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Render\TemplatePage;
 
 /**
  * Slim controller used to handle Server administration page, and actions.
@@ -26,7 +27,7 @@ class ServerController extends ShaarliAdminController
     public function index(Request $request, Response $response): Response
     {
         $releaseUrl = ApplicationUtils::$GITHUB_URL . '/releases/';
-        if ($this->container->conf->get('updates.check_updates', true)) {
+        if ($this->container->get('conf')->get('updates.check_updates', true)) {
             $latestVersion = 'v' . ApplicationUtils::getVersion(
                 ApplicationUtils::$GIT_RAW_URL . '/release/' . ApplicationUtils::$VERSION_FILE
             );
@@ -40,7 +41,7 @@ class ServerController extends ShaarliAdminController
         $phpEol = new \DateTimeImmutable(ApplicationUtils::getPhpEol(PHP_VERSION));
 
         $permissions = array_merge(
-            ApplicationUtils::checkResourcePermissions($this->container->conf),
+            ApplicationUtils::checkResourcePermissions($this->container->get('conf')),
             ApplicationUtils::checkDatastoreMutex()
         );
 
@@ -52,17 +53,17 @@ class ServerController extends ShaarliAdminController
         $this->assignView('release_url', $releaseUrl);
         $this->assignView('latest_version', $latestVersion);
         $this->assignView('current_version', $currentVersion);
-        $this->assignView('thumbnails_mode', $this->container->conf->get('thumbnails.mode'));
-        $this->assignView('index_url', index_url($this->container->environment));
-        $this->assignView('client_ip', client_ip_id($this->container->environment));
-        $this->assignView('trusted_proxies', $this->container->conf->get('security.trusted_proxies', []));
+        $this->assignView('thumbnails_mode', $this->container->get('conf')->get('thumbnails.mode'));
+        $this->assignView('index_url', index_url($request->getServerParams()));
+        $this->assignView('client_ip', client_ip_id($request->getServerParams()));
+        $this->assignView('trusted_proxies', $this->container->get('conf')->get('security.trusted_proxies', []));
 
         $this->assignView(
             'pagetitle',
-            t('Server administration') . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            t('Server administration') . ' - ' . $this->container->get('conf')->get('general.title', 'Shaarli')
         );
 
-        return $response->write($this->render('server'));
+        return $this->respondWithTemplate($response, TemplatePage::SERVER);
     }
 
     /**
@@ -72,19 +73,19 @@ class ServerController extends ShaarliAdminController
     {
         $exclude = ['.htaccess'];
 
-        if ($request->getQueryParam('type') === static::CACHE_THUMB) {
-            $folders = [$this->container->conf->get('resource.thumbnails_cache')];
+        if (($request->getQueryParams()['type'] ?? null) === static::CACHE_THUMB) {
+            $folders = [$this->container->get('conf')->get('resource.thumbnails_cache')];
 
             $this->saveWarningMessage(
                 t('Thumbnails cache has been cleared.') . ' ' .
-                '<a href="' . $this->container->basePath . '/admin/thumbnails">' .
+                '<a href="' . $this->container->get('basePath') . '/admin/thumbnails">' .
                     t('Please synchronize them.') .
                 '</a>'
             );
         } else {
             $folders = [
-                $this->container->conf->get('resource.page_cache'),
-                $this->container->conf->get('resource.raintpl_tmp'),
+                $this->container->get('conf')->get('resource.page_cache'),
+                $this->container->get('conf')->get('resource.raintpl_tmp'),
             ];
 
             $this->saveSuccessMessage(t('Shaarli\'s cache folder has been cleared!'));

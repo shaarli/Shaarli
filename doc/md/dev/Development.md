@@ -679,8 +679,8 @@ This method must return an array of routes, each entry must contain the followin
      It will be later prefixed by `/plugin/<plugin name>/`.
   - `callable` string, function name or FQN class's method to execute, e.g. `demo_plugin_custom_controller`.
 
-Callable functions or methods must have `Slim\Http\Request` and `Slim\Http\Response` parameters
-and return a `Slim\Http\Response`. We recommend creating a dedicated class and extend either
+Callable functions or methods must have `ServerRequestInterface as Request` and `ResponseInterface as Response` parameters
+and return a `ResponseInterface`. We recommend creating a dedicated class and extend either
 `ShaarliVisitorController` or `ShaarliAdminController` to use helper functions they provide.
 
 A dedicated plugin template is available for rendering content: `pluginscontent.html` using `content` placeholder.

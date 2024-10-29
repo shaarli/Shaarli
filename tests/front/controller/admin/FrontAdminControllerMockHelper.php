@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Admin;
 
-use Shaarli\Container\ShaarliTestContainer;
 use Shaarli\Front\Controller\Visitor\FrontControllerMockHelper;
 use Shaarli\History;
 
 /**
  * Trait FrontControllerMockHelper
  *
- * Helper trait used to initialize the ShaarliContainer and mock its services for admin controller tests.
+ * Helper trait used to initialize the Container and mock its services for admin controller tests.
  *
- * @property ShaarliTestContainer $container
+ * @property Container $container
  */
 trait FrontAdminControllerMockHelper
 {
@@ -28,10 +27,9 @@ trait FrontAdminControllerMockHelper
     {
         $this->parentCreateContainer();
 
-        $this->container->history = $this->createMock(History::class);
-
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
-        $this->container->sessionManager->method('checkToken')->willReturn(true);
+        $this->container->set('history', $this->createMock(History::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(true);
     }
 
 
@@ -43,13 +41,13 @@ trait FrontAdminControllerMockHelper
      */
     protected function assignSessionVars(array &$variables): void
     {
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::atLeastOnce())
             ->method('setSessionParameter')
             ->willReturnCallback(function ($key, $value) use (&$variables) {
                 $variables[$key] = $value;
 
-                return $this->container->sessionManager;
+                return $this->container->get('sessionManager');
             })
         ;
     }

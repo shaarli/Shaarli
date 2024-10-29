@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Shaarli\Front\Controller\Admin;
 
 use DateTime;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\Bookmark;
 use Shaarli\Render\TemplatePage;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ExportController
@@ -23,9 +23,10 @@ class ExportController extends ShaarliAdminController
      */
     public function index(Request $request, Response $response): Response
     {
-        $this->assignView('pagetitle', t('Export') . ' - ' . $this->container->conf->get('general.title', 'Shaarli'));
+        $this->assignView('pagetitle', t('Export') . ' - ' . $this->container->get('conf')
+                ->get('general.title', 'Shaarli'));
 
-        return $response->write($this->render(TemplatePage::EXPORT));
+        return $this->respondWithTemplate($response, TemplatePage::EXPORT);
     }
 
     /**
@@ -36,7 +37,7 @@ class ExportController extends ShaarliAdminController
     {
         $this->checkToken($request);
 
-        $selection = $request->getParam('selection');
+        $selection = $request->getParsedBody()['selection'] ?? null;
 
         if (empty($selection)) {
             $this->saveErrorMessage(t('Please select an export mode.'));
@@ -44,18 +45,19 @@ class ExportController extends ShaarliAdminController
             return $this->redirect($response, '/admin/export');
         }
 
-        $prependNoteUrl = filter_var($request->getParam('prepend_note_url') ?? false, FILTER_VALIDATE_BOOLEAN);
+        $prependNoteUrl = filter_var($request->getParsedBody()['prepend_note_url'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         try {
-            $formatter = $this->container->formatterFactory->getFormatter('raw');
+            $formatter = $this->container->get('formatterFactory')->getFormatter('raw');
 
+            $a = index_url($request->getServerParams());
             $this->assignView(
                 'links',
-                $this->container->netscapeBookmarkUtils->filterAndFormat(
+                $this->container->get('netscapeBookmarkUtils')->filterAndFormat(
                     $formatter,
                     $selection,
                     $prependNoteUrl,
-                    index_url($this->container->environment)
+                    index_url($request->getServerParams())
                 )
             );
         } catch (\Exception $exc) {
@@ -75,6 +77,6 @@ class ExportController extends ShaarliAdminController
         $this->assignView('eol', PHP_EOL);
         $this->assignView('selection', $selection);
 
-        return $response->write($this->render(TemplatePage::NETSCAPE_EXPORT_BOOKMARKS));
+        return $this->respondWithTemplate($response, TemplatePage::NETSCAPE_EXPORT_BOOKMARKS);
     }
 }

@@ -11,8 +11,7 @@ use Shaarli\Front\Controller\Admin\ShaarePublishController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Http\MetadataRetriever;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class DisplayCreateFormTest extends TestCase
 {
@@ -23,10 +22,11 @@ class DisplayCreateFormTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
-        $this->container->metadataRetriever = $this->createMock(MetadataRetriever::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
+        $this->container->set('metadataRetriever', $this->createMock(MetadataRetriever::class));
         $this->controller = new ShaarePublishController($this->container);
     }
 
@@ -36,10 +36,6 @@ class DisplayCreateFormTest extends TestCase
      */
     public function testDisplayCreateFormWithUrlAndWithMetadataRetrieval(): void
     {
-        $this->container->environment = [
-            'HTTP_REFERER' => $referer = 'http://shaarli/subfolder/controller/?searchtag=abc'
-        ];
-
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
@@ -48,15 +44,19 @@ class DisplayCreateFormTest extends TestCase
         $remoteTitle = 'Remote Title';
         $remoteDesc = 'Sometimes the meta description is relevant.';
         $remoteTags = 'abc def';
+        $referer = 'http://shaarli/subfolder/controller/?searchtag=abc';
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($url): ?string {
+        $query = http_build_query(['post' => $url]);
+        $serverParams = ['HTTP_REFERER' => $referer];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+
+        /*$request->method('getParam')->willReturnCallback(function (string $key) use ($url): ?string {
             return $key === 'post' ? $url : null;
-        });
-        $response = new Response();
+        });*/
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $param, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $param, $default) {
             if ($param === 'general.enable_async_metadata') {
                 return false;
             }
@@ -64,20 +64,20 @@ class DisplayCreateFormTest extends TestCase
             return $default;
         });
 
-        $this->container->metadataRetriever->expects(static::once())->method('retrieve')->willReturn([
+        $this->container->get('metadataRetriever')->expects(static::once())->method('retrieve')->willReturn([
             'title' => $remoteTitle,
             'description' => $remoteDesc,
             'tags' => $remoteTags,
         ]);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->willReturn($tags = ['tag1' => 2, 'tag2' => 1])
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_editlink'], ['render_includes'])
@@ -118,32 +118,30 @@ class DisplayCreateFormTest extends TestCase
      */
     public function testDisplayCreateFormWithUrlAndWithoutMetadata(): void
     {
-        $this->container->environment = [
-            'HTTP_REFERER' => $referer = 'http://shaarli/subfolder/controller/?searchtag=abc'
-        ];
 
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
         $url = 'http://url.tld/other?part=3&utm_ad=pay#hash';
+        $referer = 'http://shaarli/subfolder/controller/?searchtag=abc';
         $expectedUrl = str_replace('&utm_ad=pay', '', $url);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) use ($url): ?string {
-            return $key === 'post' ? $url : null;
-        });
-        $response = new Response();
+        $query = http_build_query(['post' => $url]);
+        $serverParams = ['HTTP_REFERER' => $referer];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-        $this->container->metadataRetriever->expects(static::never())->method('retrieve');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('metadataRetriever')->expects(static::never())->method('retrieve');
+
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('bookmarksCountPerTag')
             ->willReturn($tags = ['tag1' => 2, 'tag2' => 1])
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['render_editlink'], ['render_includes'])
@@ -198,13 +196,9 @@ class DisplayCreateFormTest extends TestCase
         ];
         $expectedUrl = str_replace('&utm_ad=pay', '', $parameters['post']);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            });
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -231,11 +225,11 @@ class DisplayCreateFormTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->httpAccess->expects(static::never())->method('getHttpResponse');
-        $this->container->httpAccess->expects(static::never())->method('getCurlDownloadCallback');
+        $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
+        $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -259,16 +253,12 @@ class DisplayCreateFormTest extends TestCase
         $this->assignTemplateVars($assignedVariables);
 
         $url = 'magnet://kubuntu.torrent';
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($url): ?string {
-                return $key === 'post' ? $url : null;
-            });
-        $response = new Response();
+        $query = http_build_query(['post' => $url]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->httpAccess->expects(static::never())->method('getHttpResponse');
-        $this->container->httpAccess->expects(static::never())->method('getCurlDownloadCallback');
+        $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
+        $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -287,8 +277,8 @@ class DisplayCreateFormTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->expects(static::atLeastOnce())
             ->method('get')->willReturnCallback(function (string $key): ?string {
                 if ($key === 'formatter') {
@@ -299,8 +289,8 @@ class DisplayCreateFormTest extends TestCase
             })
         ;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->displayCreateForm($request, $response);
 
@@ -321,18 +311,14 @@ class DisplayCreateFormTest extends TestCase
         $url = 'http://url.tld/other?part=3&utm_ad=pay#hash';
         $expectedUrl = str_replace('&utm_ad=pay', '', $url);
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($url): ?string {
-                return $key === 'post' ? $url : null;
-            });
-        $response = new Response();
+        $query = http_build_query(['post' => $url]);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->httpAccess->expects(static::never())->method('getHttpResponse');
-        $this->container->httpAccess->expects(static::never())->method('getCurlDownloadCallback');
+        $this->container->get('httpAccess')->expects(static::never())->method('getHttpResponse');
+        $this->container->get('httpAccess')->expects(static::never())->method('getCurlDownloadCallback');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByUrl')
             ->with($expectedUrl)

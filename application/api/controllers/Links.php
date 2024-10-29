@@ -2,11 +2,12 @@
 
 namespace Shaarli\Api\Controllers;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Api\ApiUtils;
 use Shaarli\Api\Exceptions\ApiBadParametersException;
 use Shaarli\Api\Exceptions\ApiLinkNotFoundException;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Routing\RouteContext;
 
 /**
  * Class Links
@@ -35,17 +36,17 @@ class Links extends ApiController
      */
     public function getLinks($request, $response)
     {
-        $private = $request->getParam('visibility');
+        $private = $request->getQueryParams()['visibility'] ?? null;
 
         // Return bookmarks from the {offset}th link, starting from 0.
-        $offset = $request->getParam('offset');
+        $offset = $request->getQueryParams()['offset'] ?? null;
         if (! empty($offset) && ! ctype_digit($offset)) {
             throw new ApiBadParametersException('Invalid offset');
         }
         $offset = ! empty($offset) ? intval($offset) : 0;
 
         // limit parameter is either a number of bookmarks or 'all' for everything.
-        $limit = $request->getParam('limit');
+        $limit = $request->getQueryParams()['limit'] ?? null;
         if (empty($limit)) {
             $limit = self::$DEFAULT_LIMIT;
         } elseif (ctype_digit($limit)) {
@@ -58,8 +59,8 @@ class Links extends ApiController
 
         $searchResult = $this->bookmarkService->search(
             [
-                'searchtags' => $request->getParam('searchtags', ''),
-                'searchterm' => $request->getParam('searchterm', ''),
+                'searchtags' => $request->getQueryParams()['searchtags'] ?? '',
+                'searchterm' => $request->getQueryParams()['searchterm'] ?? '',
             ],
             $private,
             false,
@@ -73,14 +74,14 @@ class Links extends ApiController
         );
 
         // 'environment' is set by Slim and encapsulate $_SERVER.
-        $indexUrl = index_url($this->ci['environment']);
+        $indexUrl = index_url($request->getServerParams());
 
         $out = [];
         foreach ($searchResult->getBookmarks() as $bookmark) {
             $out[] = ApiUtils::formatLink($bookmark, $indexUrl);
         }
 
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)->withStatus(200);
     }
 
     /**
@@ -100,10 +101,10 @@ class Links extends ApiController
         if ($id === null || ! $this->bookmarkService->exists($id)) {
             throw new ApiLinkNotFoundException();
         }
-        $index = index_url($this->ci['environment']);
+        $index = index_url($request->getServerParams());
         $out = ApiUtils::formatLink($this->bookmarkService->get($id), $index);
 
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)->withStatus(200);
     }
 
     /**
@@ -127,18 +128,20 @@ class Links extends ApiController
             ! empty($bookmark->getUrl())
             && ! empty($dup = $this->bookmarkService->findByUrl($bookmark->getUrl()))
         ) {
-            return $response->withJson(
-                ApiUtils::formatLink($dup, index_url($this->ci['environment'])),
-                409,
+            return $this->respondWithJson(
+                $response,
+                ApiUtils::formatLink($dup, index_url($request->getServerParams())),
                 $this->jsonStyle
-            );
+            )->withStatus(409);
         }
 
         $this->bookmarkService->add($bookmark);
-        $out = ApiUtils::formatLink($bookmark, index_url($this->ci['environment']));
-        $redirect = $this->ci->router->pathFor('getLink', ['id' => $bookmark->getId()]);
-        return $response->withAddedHeader('Location', $redirect)
-                        ->withJson($out, 201, $this->jsonStyle);
+        $out = ApiUtils::formatLink($bookmark, index_url($request->getServerParams()));
+        $routeParser = $request->getAttribute(RouteContext::ROUTE_PARSER);
+        $redirect = $routeParser->relativeUrlFor('getLink', ['id' => $bookmark->getId()]);
+
+        return $this->respondWithJson($response, $out, $this->jsonStyle)
+            ->withAddedHeader('Location', $redirect)->withStatus(201);
     }
 
     /**
@@ -159,7 +162,7 @@ class Links extends ApiController
             throw new ApiLinkNotFoundException();
         }
 
-        $index = index_url($this->ci['environment']);
+        $index = index_url($request->getServerParams());
         $data = $request->getParsedBody();
 
         $requestBookmark = ApiUtils::buildBookmarkFromRequest(
@@ -173,11 +176,11 @@ class Links extends ApiController
             && ! empty($dup = $this->bookmarkService->findByUrl($requestBookmark->getUrl()))
             && $dup->getId() != $id
         ) {
-            return $response->withJson(
+            return $this->respondWithJson(
+                $response,
                 ApiUtils::formatLink($dup, $index),
-                409,
                 $this->jsonStyle
-            );
+            )->withStatus(409);
         }
 
         $responseBookmark = $this->bookmarkService->get($id);
@@ -185,7 +188,8 @@ class Links extends ApiController
         $this->bookmarkService->set($responseBookmark);
 
         $out = ApiUtils::formatLink($responseBookmark, $index);
-        return $response->withJson($out, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $out, $this->jsonStyle)
+            ->withStatus(200);
     }
 
     /**

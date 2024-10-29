@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use Psr\Http\Message\ResponseInterface as Response;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class TagControllerTest extends TestCase
 {
@@ -16,6 +16,7 @@ class TagControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new TagController($this->container);
@@ -23,10 +24,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithReferer(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -39,10 +43,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndExistingSearch(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -55,8 +62,12 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutRefererAndExistingSearch(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -69,10 +80,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagRemoveLegacyQueryParam(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&addtag=abc'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&addtag=abc'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -85,10 +99,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagResetPagination(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&page=12'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def&page=12'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -101,10 +118,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithRefererAndEmptySearch(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags='];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags='
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['newTag' => 'abc'];
 
@@ -117,10 +137,13 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithReferer(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->addTag($request, $response, []);
 
@@ -131,8 +154,8 @@ class TagControllerTest extends TestCase
 
     public function testAddTagWithoutNewTagWithoutReferer(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->addTag($request, $response, []);
 
@@ -143,10 +166,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutMatchingTag(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtags=def'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -159,10 +185,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagsearch(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -175,8 +204,8 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutReferer(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $tags = ['tag' => 'abc'];
 
@@ -189,10 +218,13 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTag(): void
     {
-        $this->container->environment = ['HTTP_REFERER' => 'http://shaarli/controller/?searchtag=abc'];
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_NAME' => 'shaarli',
+            'SERVER_PORT' => 80,
+            'HTTP_REFERER' => 'http://shaarli/controller/?searchtag=abc'
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->removeTag($request, $response, []);
 
@@ -203,8 +235,8 @@ class TagControllerTest extends TestCase
 
     public function testRemoveTagWithoutTagWithoutReferer(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->removeTag($request, $response, []);
 

@@ -27,7 +27,7 @@ class BookmarkMarkdownExtraFormatterTest extends TestCase
      */
     public function setUp(): void
     {
-        copy('tests/utils/config/configJson.json.php', self::$testConf . '.json.php');
+        copy(__DIR__ . '/../utils/config/configJson.json.php', self::$testConf . '.json.php');
         $this->conf = new ConfigManager(self::$testConf);
         $this->formatter = new BookmarkMarkdownExtraFormatter($this->conf, true);
     }

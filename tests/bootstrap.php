@@ -1,9 +1,11 @@
 <?php
 
-require_once 'vendor/autoload.php';
+$rootPath = __DIR__ . '/../';
+require_once  $rootPath . 'vendor/autoload.php';
 
 use Shaarli\Tests\Utils\ReferenceSessionIdHashes;
 
+const SHAARLI_VERSION = 'dev';
 $conf = new \Shaarli\Config\ConfigManager('tests/utils/config/configJson');
 new \Shaarli\Languages('en', $conf);
 
@@ -16,27 +18,28 @@ if (!function_exists('is_iterable')) {
 }
 
 // raw functions
-require_once 'application/config/ConfigPlugin.php';
-require_once 'application/bookmark/LinkUtils.php';
-require_once 'application/http/UrlUtils.php';
-require_once 'application/http/HttpUtils.php';
-require_once 'application/Utils.php';
-require_once 'application/TimeZone.php';
-require_once 'tests/utils/CurlUtils.php';
-require_once 'tests/utils/RainTPL.php';
+require_once $rootPath . 'application/config/ConfigPlugin.php';
+require_once $rootPath . 'application/bookmark/LinkUtils.php';
+require_once $rootPath . 'application/http/UrlUtils.php';
+require_once $rootPath . 'application/http/HttpUtils.php';
+require_once $rootPath . 'application/Utils.php';
+require_once $rootPath . 'application/TimeZone.php';
+require_once $rootPath . 'tests/utils/CurlUtils.php';
+require_once $rootPath . 'tests/utils/RainTPL.php';
+
 
 // TODO: remove this after fixing UT
-require_once 'tests/TestCase.php';
-require_once 'tests/container/ShaarliTestContainer.php';
-require_once 'tests/front/controller/visitor/FrontControllerMockHelper.php';
-require_once 'tests/front/controller/admin/FrontAdminControllerMockHelper.php';
-require_once 'tests/updater/DummyUpdater.php';
-require_once 'tests/utils/FakeApplicationUtils.php';
-require_once 'tests/utils/FakeBookmarkService.php';
-require_once 'tests/utils/FakeConfigManager.php';
-require_once 'tests/utils/ReferenceHistory.php';
-require_once 'tests/utils/ReferenceLinkDB.php';
-require_once 'tests/utils/ReferenceSessionIdHashes.php';
+require_once $rootPath . 'tests/TestCase.php';
+require_once $rootPath . 'tests/api/ApiUtilsTest.php';
+require_once $rootPath . 'tests/front/controller/visitor/FrontControllerMockHelper.php';
+require_once $rootPath . 'tests/front/controller/admin/FrontAdminControllerMockHelper.php';
+require_once $rootPath . 'tests/updater/DummyUpdater.php';
+require_once $rootPath . 'tests/utils/FakeApplicationUtils.php';
+require_once $rootPath . 'tests/utils/FakeBookmarkService.php';
+require_once $rootPath . 'tests/utils/FakeConfigManager.php';
+require_once $rootPath . 'tests/utils/ReferenceHistory.php';
+require_once $rootPath . 'tests/utils/ReferenceLinkDB.php';
+require_once $rootPath . 'tests/utils/ReferenceSessionIdHashes.php';
 
 ReferenceSessionIdHashes::genAllHashes();
 

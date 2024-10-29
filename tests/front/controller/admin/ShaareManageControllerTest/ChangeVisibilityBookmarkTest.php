@@ -14,8 +14,7 @@ use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class ChangeVisibilityBookmarkTest extends TestCase
 {
@@ -26,9 +25,10 @@ class ChangeVisibilityBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareManageController($this->container);
     }
 
@@ -39,34 +39,31 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(false);
+        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
+            ->setPrivate(false);
 
         static::assertFalse($bookmark->isPrivate());
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
             ->willReturnCallback(function () use ($bookmark): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -87,32 +84,28 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123', 'newVisibility' => 'public'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true);
 
         static::assertTrue($bookmark->isPrivate());
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
-            ->willReturn(new BookmarkRawFormatter($this->container->conf, true))
+            ->willReturn(new BookmarkRawFormatter($this->container->get('conf'), true))
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -133,32 +126,32 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query)
 
-        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true);
+
+        ;
+        $response = $this->responseFactory->createResponse();
+
+        $bookmark = (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')
+            ->setPrivate(true);
 
         static::assertTrue($bookmark->isPrivate());
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, false);
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, false);
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
-            ->willReturn(new BookmarkRawFormatter($this->container->conf, true))
+            ->willReturn(new BookmarkRawFormatter($this->container->get('conf'), true))
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -179,14 +172,9 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123 456 789', 'newVisibility' => 'private'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(false),
@@ -194,30 +182,30 @@ class ChangeVisibilityBookmarkTest extends TestCase
             (new Bookmark())->setId(789)->setUrl('http://domain.tld')->setTitle('Title 789')->setPrivate(false),
         ];
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('get')
             ->withConsecutive([123], [456], [789])
             ->willReturnOnConsecutiveCalls(...$bookmarks)
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('set')
             ->withConsecutive(...array_map(function (Bookmark $bookmark): array {
                 return [$bookmark, false];
             }, $bookmarks))
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
-            ->willReturn(new BookmarkRawFormatter($this->container->conf, true))
+            ->willReturn(new BookmarkRawFormatter($this->container->get('conf'), true))
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(3))
             ->method('executeHooks')
             ->with('save_link')
@@ -240,32 +228,27 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123', 'newVisibility' => 'private'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->willThrowException(new BookmarkNotFoundException())
         ;
-        $this->container->bookmarkService->expects(static::never())->method('set');
-        $this->container->bookmarkService->expects(static::never())->method('save');
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->get('bookmarkService')->expects(static::never())->method('set');
+        $this->container->get('bookmarkService')->expects(static::never())->method('save');
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->expects(static::once())
             ->method('getFormatter')
             ->with('raw')
-            ->willReturn(new BookmarkRawFormatter($this->container->conf, true))
+            ->willReturn(new BookmarkRawFormatter($this->container->get('conf'), true))
         ;
 
         // Make sure that PluginManager hook is not triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::never())
             ->method('executeHooks')
             ->with('save_link')
@@ -284,21 +267,16 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123 456 789', 'newVisibility' => 'public'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
         $bookmarks = [
             (new Bookmark())->setId(123)->setUrl('http://domain.tld')->setTitle('Title 123')->setPrivate(true),
             (new Bookmark())->setId(789)->setUrl('http://domain.tld')->setTitle('Title 789')->setPrivate(false),
         ];
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(3))
             ->method('get')
             ->withConsecutive([123], [456], [789])
@@ -312,23 +290,23 @@ class ChangeVisibilityBookmarkTest extends TestCase
                 throw new BookmarkNotFoundException();
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(2))
             ->method('set')
             ->withConsecutive(...array_map(function (Bookmark $bookmark): array {
                 return [$bookmark, false];
             }, $bookmarks))
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
 
         // Make sure that PluginManager hook is not triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::exactly(2))
             ->method('executeHooks')
             ->with('save_link')
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier 456 could not be found.'])
@@ -347,16 +325,11 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => 'nope not an ID', 'newVisibility' => 'private'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -373,10 +346,10 @@ class ChangeVisibilityBookmarkTest extends TestCase
      */
     public function testChangeVisibilityEmptyId(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid bookmark ID provided.'])
@@ -395,16 +368,11 @@ class ChangeVisibilityBookmarkTest extends TestCase
     {
         $parameters = ['id' => '123', 'newVisibility' => 'invalid'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $query = http_build_query($parameters);
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli?' . $query);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Invalid visibility provided.'])

@@ -2,9 +2,10 @@
 
 namespace Shaarli\Api\Controllers;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Shaarli\Bookmark\BookmarkFilter;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\ResponseUtils;
 
 /**
  * Class Info
@@ -39,6 +40,6 @@ class Info extends ApiController
             ],
         ];
 
-        return $response->withJson($info, 200, $this->jsonStyle);
+        return $this->respondWithJson($response, $info, $this->jsonStyle)->withStatus(200);
     }
 }

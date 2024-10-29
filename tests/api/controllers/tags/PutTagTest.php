@@ -2,19 +2,19 @@
 
 namespace Shaarli\Api\Controllers;
 
+use DI\Container as DIContainer;
 use malkusch\lock\mutex\NoMutex;
+use Psr\Container\ContainerInterface as Container;
 use Shaarli\Api\Exceptions\ApiBadParametersException;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Bookmark\LinkDB;
 use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Tests\Utils\ReferenceHistory;
 use Shaarli\Tests\Utils\ReferenceLinkDB;
-use Slim\Container;
 use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class PutTagTest extends \Shaarli\TestCase
 {
@@ -39,7 +39,7 @@ class PutTagTest extends \Shaarli\TestCase
     protected $refDB = null;
 
     /**
-     * @var HistoryController instance.
+     * @var History instance.
      */
     protected $history;
 
@@ -71,6 +71,7 @@ class PutTagTest extends \Shaarli\TestCase
      */
     protected function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $mutex = new NoMutex();
         $this->conf = new ConfigManager('tests/utils/config/configJson');
         $this->conf->set('resource.datastore', self::$testDatastore);
@@ -88,10 +89,10 @@ class PutTagTest extends \Shaarli\TestCase
             true
         );
 
-        $this->container = new Container();
-        $this->container['conf'] = $this->conf;
-        $this->container['db'] = $this->bookmarkService;
-        $this->container['history'] = $this->history;
+        $this->container = new DIContainer();
+        $this->container->set('conf', $this->conf);
+        $this->container->set('db', $this->bookmarkService);
+        $this->container->set('history', $this->history);
 
         $this->controller = new Tags($this->container);
     }
@@ -110,15 +111,16 @@ class PutTagTest extends \Shaarli\TestCase
      */
     public function testPutLinkValid()
     {
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
         $tagName = 'gnu';
         $update = ['name' => $newName = 'newtag'];
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($update);
+        $request = $this->requestFactory->createRequest('PUT', 'http://shaarli')
+            ->withParsedBody($update);
 
-        $response = $this->controller->putTag($request, new Response(), ['tagName' => $tagName]);
+        $response = $this->controller->putTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_TAG, count($data));
@@ -153,14 +155,15 @@ class PutTagTest extends \Shaarli\TestCase
         $this->assertEquals(1, $tags[$newName]);
         $this->assertEquals(2, $tags[$tagName]);
 
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
         $update = ['name' => $newName];
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($update);
+        $request = $this->requestFactory->createRequest('PUT', 'http://shaarli')
+            ->withParsedBody($update);
 
-        $response = $this->controller->putTag($request, new Response(), ['tagName' => $tagName]);
+        $response = $this->controller->putTag(
+            $request,
+            $this->responseFactory->createResponse(),
+            ['tagName' => $tagName]
+        );
         $this->assertEquals(200, $response->getStatusCode());
         $data = json_decode((string) $response->getBody(), true);
         $this->assertEquals(self::NB_FIELDS_TAG, count($data));
@@ -186,20 +189,12 @@ class PutTagTest extends \Shaarli\TestCase
         $tags = $this->bookmarkService->bookmarksCountPerTag();
         $this->assertEquals(2, $tags[$tagName]);
 
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
-        $request = Request::createFromEnvironment($env);
-
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
         $update = ['name' => $newName];
-        $request = Request::createFromEnvironment($env);
-        $request = $request->withParsedBody($update);
+        $request = $this->requestFactory->createRequest('PUT', 'http://shaarli')
+            ->withParsedBody($update);
 
         try {
-            $this->controller->putTag($request, new Response(), ['tagName' => $tagName]);
+            $this->controller->putTag($request, $this->responseFactory->createResponse(), ['tagName' => $tagName]);
         } catch (ApiBadParametersException $e) {
             $tags = $this->bookmarkService->bookmarksCountPerTag();
             $this->assertEquals(2, $tags[$tagName]);
@@ -215,11 +210,8 @@ class PutTagTest extends \Shaarli\TestCase
         $this->expectException(\Shaarli\Api\Exceptions\ApiTagNotFoundException::class);
         $this->expectExceptionMessage('Tag not found');
 
-        $env = Environment::mock([
-            'REQUEST_METHOD' => 'PUT',
-        ]);
-        $request = Request::createFromEnvironment($env);
+        $request = $this->requestFactory->createRequest('PUT', 'http://shaarli');
 
-        $this->controller->putTag($request, new Response(), ['tagName' => 'nopenope']);
+        $this->controller->putTag($request, $this->responseFactory->createResponse(), ['tagName' => 'nopenope']);
     }
 }

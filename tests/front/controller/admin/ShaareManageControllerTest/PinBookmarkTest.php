@@ -11,8 +11,7 @@ use Shaarli\Front\Controller\Admin\ShaareManageController;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Shaarli\Tests\Utils\FakeRequest;
 
 class PinBookmarkTest extends TestCase
 {
@@ -23,9 +22,10 @@ class PinBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaareManageController($this->container);
     }
 
@@ -38,8 +38,8 @@ class PinBookmarkTest extends TestCase
     {
         $id = 123;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $bookmark = (new Bookmark())
             ->setId(123)
@@ -48,11 +48,12 @@ class PinBookmarkTest extends TestCase
             ->setSticky($sticky)
         ;
 
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(123)->willReturn($bookmark);
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, true);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(123)
+            ->willReturn($bookmark);
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, true);
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::once())
             ->method('executeHooks')
             ->with('save_link')
@@ -79,10 +80,10 @@ class PinBookmarkTest extends TestCase
     {
         $id = 'invalid';
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier invalid could not be found.'])
@@ -99,10 +100,10 @@ class PinBookmarkTest extends TestCase
      */
     public function testDisplayEditFormIdNotProvided(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier  could not be found.'])
@@ -121,17 +122,17 @@ class PinBookmarkTest extends TestCase
     {
         $id = 123;
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->with($id)
             ->willThrowException(new BookmarkNotFoundException())
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->expects(static::once())
             ->method('setSessionParameter')
             ->with(SessionManager::KEY_ERROR_MESSAGES, ['Bookmark with identifier 123 could not be found.'])

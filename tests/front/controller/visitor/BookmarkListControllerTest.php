@@ -10,9 +10,8 @@ use Shaarli\Bookmark\SearchResult;
 use Shaarli\Config\ConfigManager;
 use Shaarli\Security\LoginManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class BookmarkListControllerTest extends TestCase
 {
@@ -23,6 +22,7 @@ class BookmarkListControllerTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
         $this->controller = new BookmarkListController($this->container);
@@ -36,10 +36,14 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->with(
@@ -56,7 +60,7 @@ class BookmarkListControllerTest extends TestCase
                 (new Bookmark())->setId(3)->setUrl('http://url3.tld')->setTitle('Title 3'),
             ], 0, 2));
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->willReturnCallback(function (string $parameter, $default = null) {
                 if ('LINKS_PER_PAGE' === $parameter) {
@@ -104,17 +108,15 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) {
-            if ('page' === $key) {
-                return '2';
-            }
+        $query = http_build_query(['page' => 2]);
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-            return null;
-        });
-        $response = new Response();
-
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->with(
@@ -132,7 +134,7 @@ class BookmarkListControllerTest extends TestCase
             ], 2, 2))
         ;
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->willReturnCallback(function (string $parameter, $default = null) {
                 if ('LINKS_PER_PAGE' === $parameter) {
@@ -174,20 +176,16 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key) {
-            if ('searchtags' === $key) {
-                return 'abc@def';
-            }
-            if ('searchterm' === $key) {
-                return 'ghi jkl';
-            }
+        $query = http_build_query(['searchtags' => 'abc@def', 'searchterm' => 'ghi jkl']);
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
 
-            return null;
-        });
-        $response = new Response();
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->sessionManager
+        $this->container->get('sessionManager')
             ->method('getSessionParameter')
             ->willReturnCallback(function (string $key, $default) {
                 if ('LINKS_PER_PAGE' === $key) {
@@ -204,7 +202,7 @@ class BookmarkListControllerTest extends TestCase
             })
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->with(
@@ -241,10 +239,14 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash)
@@ -276,10 +278,10 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash)
@@ -308,13 +310,15 @@ class BookmarkListControllerTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $request = $this->createMock(Request::class);
-        $request->method('getParam')->willReturnCallback(function (string $key, $default = null) use ($privateKey) {
-            return $key === 'key' ? $privateKey : $default;
-        });
-        $response = new Response();
+        $query = http_build_query(['key' => $privateKey]);
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->with($hash, $privateKey)
@@ -334,14 +338,18 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromLinkList(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->method('get')
             ->willReturnCallback(function (string $key, $default) {
                 if ($key === 'thumbnails.mode') {
@@ -354,14 +362,14 @@ class BookmarkListControllerTest extends TestCase
             })
         ;
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')
             ->expects(static::exactly(2))
             ->method('get')
             ->withConsecutive(['https://url2.tld'], ['https://url4.tld'])
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('search')
             ->willReturn(SearchResult::getSearchResult([
@@ -372,12 +380,12 @@ class BookmarkListControllerTest extends TestCase
                 (new Bookmark())->setId(2)->setUrl('ftp://url5.tld', ['ftp'])->setTitle('Title 5'),
             ]))
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::exactly(2))
             ->method('set')
             ->withConsecutive([$b1, false], [$b2, false])
         ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
+        $this->container->get('bookmarkService')->expects(static::once())->method('save');
 
         $result = $this->controller->index($request, $response);
 
@@ -390,14 +398,18 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromPermalink(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->method('get')
             ->willReturnCallback(function (string $key, $default) {
                 if ($key === 'thumbnails.mode') {
@@ -410,16 +422,17 @@ class BookmarkListControllerTest extends TestCase
             })
         ;
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer->expects(static::once())->method('get')->withConsecutive(['https://url.tld']);
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')->expects(static::once())->method('get')
+            ->withConsecutive(['https://url.tld']);
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->willReturn($bookmark = (new Bookmark())->setId(2)->setUrl('https://url.tld')->setTitle('Title 1'))
         ;
-        $this->container->bookmarkService->expects(static::once())->method('set')->with($bookmark, true);
-        $this->container->bookmarkService->expects(static::never())->method('save');
+        $this->container->get('bookmarkService')->expects(static::once())->method('set')->with($bookmark, true);
+        $this->container->get('bookmarkService')->expects(static::never())->method('save');
 
         $result = $this->controller->permalink($request, $response, ['hash' => 'abc']);
 
@@ -432,14 +445,18 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testThumbnailUpdateFromPermalinkAsync(): void
     {
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')
             ->method('get')
             ->willReturnCallback(function (string $key, $default) {
                 if ($key === 'thumbnails.mode') {
@@ -452,16 +469,16 @@ class BookmarkListControllerTest extends TestCase
             })
         ;
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer->expects(static::never())->method('get');
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')->expects(static::never())->method('get');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('findByHash')
             ->willReturn((new Bookmark())->setId(2)->setUrl('https://url.tld')->setTitle('Title 1'))
         ;
-        $this->container->bookmarkService->expects(static::never())->method('set');
-        $this->container->bookmarkService->expects(static::never())->method('save');
+        $this->container->get('bookmarkService')->expects(static::never())->method('set');
+        $this->container->get('bookmarkService')->expects(static::never())->method('save');
 
         $result = $this->controller->permalink($request, $response, ['hash' => 'abc']);
 
@@ -474,10 +491,11 @@ class BookmarkListControllerTest extends TestCase
     public function testLegacyControllerPermalink(): void
     {
         $hash = 'abcdef';
-        $this->container->environment['QUERY_STRING'] = $hash;
-
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $serverParams = [
+            'QUERY_STRING' => $hash,
+        ];
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli', $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -490,9 +508,13 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testLegacyControllerDoPage(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->with('do')->willReturn('picwall');
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['do' => 'picwall']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -505,9 +527,13 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testLegacyControllerUnknownDoPage(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParam')->with('do')->willReturn('nope');
-        $response = new Response();
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['do' => 'nope']);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->index($request, $response);
 
@@ -520,12 +546,17 @@ class BookmarkListControllerTest extends TestCase
      */
     public function testLegacyControllerGetParameter(): void
     {
-        $request = $this->createMock(Request::class);
-        $request->method('getQueryParams')->willReturn(['post' => $url = 'http://url.tld']);
-        $response = new Response();
+        $url = 'http://url.tld';
+        $serverParams = [
+            'SERVER_PORT' => 80,
+            'SERVER_NAME' => 'shaarli',
+        ];
+        $query = http_build_query(['post' => $url]);
+        $request = $this->serverRequestFactory->createServerRequest('GET', 'http://shaarli?' . $query, $serverParams);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
-        $this->container->loginManager->method('isLoggedIn')->willReturn(true);
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
+        $this->container->get('loginManager')->method('isLoggedIn')->willReturn(true);
 
         $result = $this->controller->index($request, $response);
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Shaarli\Front\Controller\Visitor;
 
+use DI\Container as DIContainer;
 use Shaarli\Bookmark\BookmarkServiceInterface;
 use Shaarli\Config\ConfigManager;
-use Shaarli\Container\ShaarliTestContainer;
 use Shaarli\Formatter\BookmarkFormatter;
 use Shaarli\Formatter\BookmarkRawFormatter;
 use Shaarli\Formatter\FormatterFactory;
@@ -19,14 +19,14 @@ use Shaarli\Security\SessionManager;
 /**
  * Trait FrontControllerMockHelper
  *
- * Helper trait used to initialize the ShaarliContainer and mock its services for controller tests.
+ * Helper trait used to initialize the Container and mock its services for controller tests.
  *
- * @property ShaarliTestContainer $container
+ * @property Container $container
  * @package Shaarli\Front\Controller
  */
 trait FrontControllerMockHelper
 {
-    /** @var ShaarliTestContainer */
+    /** @var Container */
     protected $container;
 
     /**
@@ -34,23 +34,24 @@ trait FrontControllerMockHelper
      */
     protected function createContainer(): void
     {
-        $this->container = $this->createMock(ShaarliTestContainer::class);
+        $this->container = new DIContainer();
 
-        $this->container->loginManager = $this->createMock(LoginManager::class);
+        $this->container->set('loginManager', $this->createMock(LoginManager::class));
 
         // Config
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $parameter, $default) {
+        $conf = $this->createMock(ConfigManager::class);
+        $conf->method('get')->willReturnCallback(function (string $parameter, $default) {
             if ($parameter === 'general.tags_separator') {
                 return '@';
             }
 
             return $default === null ? $parameter : $default;
         });
+        $this->container->set('conf', $conf);
 
         // PageBuilder
-        $this->container->pageBuilder = $this->createMock(PageBuilder::class);
-        $this->container->pageBuilder
+        $this->container->set('pageBuilder', $this->createMock(PageBuilder::class));
+        $this->container->get('pageBuilder')
             ->method('render')
             ->willReturnCallback(function (string $template): string {
                 return $template;
@@ -58,36 +59,27 @@ trait FrontControllerMockHelper
         ;
 
         // Plugin Manager
-        $this->container->pluginManager = $this->createMock(PluginManager::class);
+        $this->container->set('pluginManager', $this->createMock(PluginManager::class));
 
         // BookmarkService
-        $this->container->bookmarkService = $this->createMock(BookmarkServiceInterface::class);
+        $this->container->set('bookmarkService', $this->createMock(BookmarkServiceInterface::class));
 
         // Formatter
-        $this->container->formatterFactory = $this->createMock(FormatterFactory::class);
-        $this->container->formatterFactory
+        $this->container->set('formatterFactory', $this->createMock(FormatterFactory::class));
+        $this->container->get('formatterFactory')
             ->method('getFormatter')
             ->willReturnCallback(function (): BookmarkFormatter {
-                return new BookmarkRawFormatter($this->container->conf, true);
+                return new BookmarkRawFormatter($this->container->get('conf'), true);
             })
         ;
 
         // CacheManager
-        $this->container->pageCacheManager = $this->createMock(PageCacheManager::class);
+        $this->container->set('pageCacheManager', $this->createMock(PageCacheManager::class));
 
         // SessionManager
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
 
-        // $_SERVER
-        $this->container->environment = [
-            'SERVER_NAME' => 'shaarli',
-            'SERVER_PORT' => '80',
-            'REQUEST_URI' => '/subfolder/daily-rss',
-            'REMOTE_ADDR' => '1.2.3.4',
-            'SCRIPT_NAME' => '/subfolder/index.php',
-        ];
-
-        $this->container->basePath = '/subfolder';
+        $this->container->set('basePath', '/subfolder');
     }
 
     /**
@@ -97,7 +89,7 @@ trait FrontControllerMockHelper
      */
     protected function assignTemplateVars(array &$variables): void
     {
-        $this->container->pageBuilder
+        $this->container->get('pageBuilder')
             ->method('assign')
             ->willReturnCallback(function ($key, $value) use (&$variables) {
                 $variables[$key] = $value;

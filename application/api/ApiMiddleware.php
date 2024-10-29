@@ -3,13 +3,14 @@
 namespace Shaarli\Api;
 
 use malkusch\lock\mutex\FlockMutex;
+use Psr\Container\ContainerInterface as Container;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Shaarli\Api\Exceptions\ApiAuthorizationException;
 use Shaarli\Api\Exceptions\ApiException;
 use Shaarli\Bookmark\BookmarkFileService;
 use Shaarli\Config\ConfigManager;
-use Slim\Container;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 /**
  * Class ApiMiddleware
@@ -43,7 +44,7 @@ class ApiMiddleware
      *
      * @param Container $container instance.
      */
-    public function __construct($container)
+    public function __construct(Container $container)
     {
         $this->container = $container;
         $this->conf = $this->container->get('conf');
@@ -62,13 +63,12 @@ class ApiMiddleware
      *
      * @return Response response.
      */
-    public function __invoke($request, $response, $next)
+    public function __invoke(Request $request, RequestHandler $handler): Response
     {
         try {
             $this->checkRequest($request);
-            $response = $next($request, $response);
+            $response = $handler->handle($request);
         } catch (ApiException $e) {
-            $e->setResponse($response);
             $e->setDebug($this->conf->get('dev.debug', false));
             $response = $e->getApiResponse();
         }
@@ -111,7 +111,7 @@ class ApiMiddleware
     {
         if (
             !$request->hasHeader('Authorization')
-            && !isset($this->container->environment['REDIRECT_HTTP_AUTHORIZATION'])
+            && !isset($request->getServerParams()['REDIRECT_HTTP_AUTHORIZATION'])
         ) {
             throw new ApiAuthorizationException('JWT token not provided');
         }
@@ -120,8 +120,8 @@ class ApiMiddleware
             throw new ApiAuthorizationException('Token secret must be set in Shaarli\'s administration');
         }
 
-        if (isset($this->container->environment['REDIRECT_HTTP_AUTHORIZATION'])) {
-            $authorization = $this->container->environment['REDIRECT_HTTP_AUTHORIZATION'];
+        if (isset($request->getServerParams()['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $authorization = $request->getServerParams()['REDIRECT_HTTP_AUTHORIZATION'];
         } else {
             $authorization = $request->getHeaderLine('Authorization');
         }
@@ -150,6 +150,6 @@ class ApiMiddleware
             new FlockMutex(fopen(SHAARLI_MUTEX_FILE, 'r'), 2),
             true
         );
-        $this->container['db'] = $linkDb;
+        $this->container->set('db', $linkDb);
     }
 }

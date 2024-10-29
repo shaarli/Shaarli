@@ -12,7 +12,8 @@ use Shaarli\Config\ConfigManager;
 use Shaarli\History;
 use Shaarli\Plugin\PluginManager;
 use Shaarli\TestCase;
-use Slim\Http\UploadedFile;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Factory\UploadedFileFactory;
 
 /**
  * Utility function to load a file's metadata in a $_FILES-like array
@@ -23,11 +24,15 @@ use Slim\Http\UploadedFile;
  */
 function file2array($filename)
 {
-    return new UploadedFile(
-        __DIR__ . '/input/' . $filename,
-        $filename,
-        null,
-        filesize(__DIR__ . '/input/' . $filename)
+    $uploadedFileFactory = new UploadedFileFactory();
+    $streamFactory = new StreamFactory();
+    $streamFile = $streamFactory->createStreamFromFile(__DIR__ . '/input/' . $filename);
+
+    return $uploadedFileFactory->createUploadedFile(
+        $streamFile,
+        $streamFile->getSize(),
+        UPLOAD_ERR_OK,
+        $filename
     );
 }
 
@@ -40,7 +45,7 @@ class BookmarkImportTest extends TestCase
     /**
      * @var string datastore to test write operations
      */
-    protected static $testDatastore = 'sandbox/datastore.php';
+    protected static $testDatastore = __DIR__ . '/../../sandbox/datastore.php';
 
     /**
      * @var string History file path
@@ -92,7 +97,10 @@ class BookmarkImportTest extends TestCase
      */
     protected function setUp(): void
     {
+
         $mutex = new NoMutex();
+        $folder = dirname(self::$testDatastore);
+        file_exists($folder) || mkdir($folder, 0755, true);
         if (file_exists(self::$testDatastore)) {
             unlink(self::$testDatastore);
         }

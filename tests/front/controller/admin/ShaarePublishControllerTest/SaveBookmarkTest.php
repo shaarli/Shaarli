@@ -12,9 +12,8 @@ use Shaarli\Front\Exception\WrongTokenException;
 use Shaarli\Http\HttpAccess;
 use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
+use Shaarli\Tests\Utils\FakeRequest;
 use Shaarli\Thumbnailer;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
 class SaveBookmarkTest extends TestCase
 {
@@ -25,9 +24,10 @@ class SaveBookmarkTest extends TestCase
 
     public function setUp(): void
     {
+        $this->initRequestResponseFactories();
         $this->createContainer();
 
-        $this->container->httpAccess = $this->createMock(HttpAccess::class);
+        $this->container->set('httpAccess', $this->createMock(HttpAccess::class));
         $this->controller = new ShaarePublishController($this->container);
     }
 
@@ -46,14 +46,10 @@ class SaveBookmarkTest extends TestCase
             'returnurl' => 'http://shaarli/subfolder/admin/add-shaare'
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters) {
             static::assertSame($parameters['lf_url'], $bookmark->getUrl());
@@ -63,7 +59,7 @@ class SaveBookmarkTest extends TestCase
             static::assertTrue($bookmark->isPrivate());
         };
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('addOrSet')
             ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
@@ -76,7 +72,7 @@ class SaveBookmarkTest extends TestCase
                 return $bookmark;
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('set')
             ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
@@ -91,7 +87,7 @@ class SaveBookmarkTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['save_link'])
@@ -132,14 +128,10 @@ class SaveBookmarkTest extends TestCase
             'returnurl' => 'http://shaarli/subfolder/?page=2'
         ];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $checkBookmark = function (Bookmark $bookmark) use ($parameters, $id) {
             static::assertSame($id, $bookmark->getId());
@@ -150,13 +142,13 @@ class SaveBookmarkTest extends TestCase
             static::assertTrue($bookmark->isPrivate());
         };
 
-        $this->container->bookmarkService->expects(static::atLeastOnce())->method('exists')->willReturn(true);
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')->expects(static::atLeastOnce())->method('exists')->willReturn(true);
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('get')
             ->willReturn((new Bookmark())->setId($id)->setUrl('http://other.url'))
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('addOrSet')
             ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
@@ -167,7 +159,7 @@ class SaveBookmarkTest extends TestCase
                 return $bookmark;
             })
         ;
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('set')
             ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
@@ -182,7 +174,7 @@ class SaveBookmarkTest extends TestCase
         ;
 
         // Make sure that PluginManager hook is triggered
-        $this->container->pluginManager
+        $this->container->get('pluginManager')
             ->expects(static::atLeastOnce())
             ->method('executeHooks')
             ->withConsecutive(['save_link'])
@@ -213,17 +205,14 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_url' => 'http://url.tld/other?part=3#hash'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $response = $this->responseFactory->createResponse();
+
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ($key === 'thumbnails.mode') {
                 return Thumbnailer::MODE_ALL;
             } elseif ($key === 'general.enable_async_metadata') {
@@ -233,15 +222,15 @@ class SaveBookmarkTest extends TestCase
             return $default;
         });
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')
             ->expects(static::once())
             ->method('get')
             ->with($parameters['lf_url'])
             ->willReturn($thumb = 'http://thumb.url')
         ;
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('addOrSet')
             ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($thumb): Bookmark {
@@ -263,17 +252,14 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_id' => '0'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->bookmarkService->expects(static::once())->method('exists')->with(0)->willReturn(true);
-        $this->container->bookmarkService->expects(static::once())->method('get')->with(0)->willReturn(new Bookmark());
+        $this->container->get('bookmarkService')->expects(static::once())->method('exists')->with(0)->willReturn(true);
+        $this->container->get('bookmarkService')->expects(static::once())->method('get')->with(0)
+            ->willReturn(new Bookmark());
 
         $result = $this->controller->save($request, $response);
 
@@ -287,17 +273,13 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['lf_url' => 'http://url.tld/other?part=3#hash'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
-        $this->container->conf = $this->createMock(ConfigManager::class);
-        $this->container->conf->method('get')->willReturnCallback(function (string $key, $default) {
+        $this->container->set('conf', $this->createMock(ConfigManager::class));
+        $this->container->get('conf')->method('get')->willReturnCallback(function (string $key, $default) {
             if ($key === 'thumbnails.mode') {
                 return Thumbnailer::MODE_ALL;
             } elseif ($key === 'general.enable_async_metadata') {
@@ -307,10 +289,10 @@ class SaveBookmarkTest extends TestCase
             return $default;
         });
 
-        $this->container->thumbnailer = $this->createMock(Thumbnailer::class);
-        $this->container->thumbnailer->expects(static::never())->method('get');
+        $this->container->set('thumbnailer', $this->createMock(Thumbnailer::class));
+        $this->container->get('thumbnailer')->expects(static::never())->method('get');
 
-        $this->container->bookmarkService
+        $this->container->get('bookmarkService')
             ->expects(static::once())
             ->method('addOrSet')
             ->willReturnCallback(function (Bookmark $bookmark): Bookmark {
@@ -332,14 +314,10 @@ class SaveBookmarkTest extends TestCase
     {
         $parameters = ['source' => 'bookmarklet'];
 
-        $request = $this->createMock(Request::class);
-        $request
-            ->method('getParam')
-            ->willReturnCallback(function (string $key) use ($parameters): ?string {
-                return $parameters[$key] ?? null;
-            })
-        ;
-        $response = new Response();
+        $serverParams = ['SERVER_PORT' => 80, 'SERVER_NAME' => 'shaarli'];
+        $request = $this->serverRequestFactory->createServerRequest('POST', 'http://shaarli', $serverParams)
+            ->withParsedBody($parameters);
+        $response = $this->responseFactory->createResponse();
 
         $result = $this->controller->save($request, $response);
 
@@ -352,14 +330,14 @@ class SaveBookmarkTest extends TestCase
      */
     public function testSaveBookmarkWrongToken(): void
     {
-        $this->container->sessionManager = $this->createMock(SessionManager::class);
-        $this->container->sessionManager->method('checkToken')->willReturn(false);
+        $this->container->set('sessionManager', $this->createMock(SessionManager::class));
+        $this->container->get('sessionManager')->method('checkToken')->willReturn(false);
 
-        $this->container->bookmarkService->expects(static::never())->method('addOrSet');
-        $this->container->bookmarkService->expects(static::never())->method('set');
+        $this->container->get('bookmarkService')->expects(static::never())->method('addOrSet');
+        $this->container->get('bookmarkService')->expects(static::never())->method('set');
 
-        $request = $this->createMock(Request::class);
-        $response = new Response();
+        $request = $this->requestFactory->createRequest('GET', 'http://shaarli');
+        $response = $this->responseFactory->createResponse();
 
         $this->expectException(WrongTokenException::class);
 
