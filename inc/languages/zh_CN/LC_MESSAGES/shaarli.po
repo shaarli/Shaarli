@@ -1214,15 +1214,21 @@ msgstr "添加默认标签"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:14
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:79
-msgid "shaare"
-msgid_plural "shaares"
+msgid "total shaare"
+msgid_plural "total shaares"
 msgstr[0] "条记录"
 
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:18
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:83
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:16
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:81
 msgid "private link"
 msgid_plural "private links"
 msgstr[0] "私有链接"
+
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:20
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:85
+msgid "shaare"
+msgid_plural "shaares"
+msgstr[0] "条记录"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:30
 #: tmp/page.header.cedf684561d925457130839629000a81.rtpl.php:123

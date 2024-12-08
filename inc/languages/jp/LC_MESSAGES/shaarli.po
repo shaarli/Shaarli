@@ -1181,8 +1181,8 @@ msgstr[1] "検索"
 #~ msgid "Install"
 #~ msgstr "インストール"
 
-#~ msgid "shaare"
-#~ msgid_plural "shaares"
+#~ msgid "total shaare"
+#~ msgid_plural "total shaares"
 #~ msgstr[0] "共有"
 #~ msgstr[1] "共有"
 
@@ -1190,6 +1190,11 @@ msgstr[1] "検索"
 #~ msgid_plural "private links"
 #~ msgstr[0] "プライベートリンク"
 #~ msgstr[1] "プライベートリンク"
+
+#~ msgid "shaare"
+#~ msgid_plural "shaares"
+#~ msgstr[0] "共有"
+#~ msgstr[1] "共有"
 
 #~ msgid "Search text"
 #~ msgstr "文字列で検索"

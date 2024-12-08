@@ -1409,17 +1409,24 @@ msgstr "Pré-requis serveur"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:14
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:79
-msgid "shaare"
-msgid_plural "shaares"
-msgstr[0] "shaare"
-msgstr[1] "shaares"
+msgid "total shaare"
+msgid_plural "total shaares"
+msgstr[0] "shaare au total"
+msgstr[1] "shaares au total"
 
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:18
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:83
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:16
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:81
 msgid "private link"
 msgid_plural "private links"
 msgstr[0] "lien privé"
 msgstr[1] "liens privés"
+
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:20
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:85
+msgid "shaare"
+msgid_plural "shaares"
+msgstr[0] "shaare"
+msgstr[1] "shaares"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:30
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:123

@@ -1391,19 +1391,27 @@ msgstr "Системные требования"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:14
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:79
-msgid "shaare"
-msgid_plural "shaares"
+msgid "total shaare"
+msgid_plural "total shaares"
 msgstr[0] "закладка"
 msgstr[1] "закладки"
 msgstr[2] "закладок"
 
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:18
-#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:83
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:16
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:81
 msgid "private link"
 msgid_plural "private links"
 msgstr[0] "личная ссылка"
 msgstr[1] "личные ссылки"
 msgstr[2] "личных ссылок"
+
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:20
+#: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:85
+msgid "shaare"
+msgid_plural "shaares"
+msgstr[0] "закладка"
+msgstr[1] "закладки"
+msgstr[2] "закладок"
 
 #: tmp/linklist.b91ef64efc3688266305ea9b42e5017e.rtpl.php:30
 #: tmp/page.header.b91ef64efc3688266305ea9b42e5017e.rtpl.php:123
