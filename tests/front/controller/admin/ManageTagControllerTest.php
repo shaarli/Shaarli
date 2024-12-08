@@ -13,6 +13,12 @@ use Shaarli\Security\SessionManager;
 use Shaarli\TestCase;
 use Slim\Http\Request;
 use Slim\Http\Response;
+// These are declared for the bookmark service
+use malkusch\lock\mutex\NoMutex;
+use Shaarli\History;
+use Shaarli\Plugin\PluginManager;
+use Shaarli\Tests\Utils\FakeBookmarkService;
+use Shaarli\Tests\Utils\ReferenceLinkDB;
 
 class ManageTagControllerTest extends TestCase
 {
@@ -21,11 +27,46 @@ class ManageTagControllerTest extends TestCase
     /** @var ManageTagController */
     protected $controller;
 
+    /** @var string Path of test data store */
+    protected static $testDatastore = 'sandbox/datastore.php';
+
+    /** @var BookmarkServiceInterface instance */
+    protected $bookmarkService;
+
+    /** @var BookmarkFilter instance */
+    protected $linkFilter;
+
+    /** @var ReferenceLinkDB instance */
+    protected static $refDB;
+
+    /** @var PluginManager */
+    protected static $pluginManager;
+
     public function setUp(): void
     {
         $this->createContainer();
 
         $this->controller = new ManageTagController($this->container);
+
+        $mutex = new NoMutex();
+        $conf = new ConfigManager('tests/utils/config/configJson');
+        $conf->set('resource.datastore', self::$testDatastore);
+        static::$pluginManager = new PluginManager($conf);
+        self::$refDB = new ReferenceLinkDB();
+        self::$refDB->write(self::$testDatastore);
+        $history = new History('sandbox/history.php');
+        $this->container->bookmarkService = new FakeBookmarkService(
+            $conf,
+            static::$pluginManager,
+            $history,
+            $mutex,
+            true
+        );
+        $this->linkFilter = new BookmarkFilter(
+            $this->container->bookmarkService->getBookmarks(),
+            $conf,
+            static::$pluginManager
+        );
     }
 
     /**
@@ -80,10 +121,23 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
+        $this->assertEquals(
+            3,
+            count($this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'cartoon'))
+        );
+        $this->assertEquals(
+            4,
+            count($this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'web'))
+        );
+        $this->assertEquals(
+            2,
+            count($this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'cartoon web'))
+        );
+
         $requestParameters = [
             'renametag' => 'rename',
-            'fromtag' => 'old-tag',
-            'totag' => 'new-tag',
+            'fromtag' => 'cartoon',
+            'totag' => 'web',
         ];
         $request = $this->createMock(Request::class);
         $request
@@ -94,36 +148,33 @@ class ManageTagControllerTest extends TestCase
             })
         ;
         $response = new Response();
-
-        $bookmark1 = $this->createMock(Bookmark::class);
-        $bookmark2 = $this->createMock(Bookmark::class);
-        $this->container->bookmarkService
-            ->expects(static::once())
-            ->method('search')
-            ->with(['searchtags' => 'old-tag'], BookmarkFilter::$ALL, true)
-            ->willReturnCallback(function () use ($bookmark1, $bookmark2): SearchResult {
-                $bookmark1->expects(static::once())->method('renameTag')->with('old-tag', 'new-tag');
-                $bookmark2->expects(static::once())->method('renameTag')->with('old-tag', 'new-tag');
-
-                return SearchResult::getSearchResult([$bookmark1, $bookmark2]);
-            })
-        ;
-        $this->container->bookmarkService
-            ->expects(static::exactly(2))
-            ->method('set')
-            ->withConsecutive([$bookmark1, false], [$bookmark2, false])
-        ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
-
         $result = $this->controller->save($request, $response);
-
         static::assertSame(302, $result->getStatusCode());
-        static::assertSame(['/subfolder/?searchtags=new-tag'], $result->getHeader('location'));
+        static::assertSame(['/subfolder/?searchtags=web'], $result->getHeader('location'));
 
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_SUCCESS_MESSAGES, $session);
-        static::assertSame(['The tag was renamed in 2 bookmarks.'], $session[SessionManager::KEY_SUCCESS_MESSAGES]);
+        static::assertSame(['The tag was renamed in 3 bookmarks.'], $session[SessionManager::KEY_SUCCESS_MESSAGES]);
+
+        $this->assertEquals(
+            0,
+            count($this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'cartoon'))
+        );
+        $new = $this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'web');
+        $this->assertEquals(
+            5,
+            count($new)
+        );
+
+        // Make sure there are no duplicate tags
+        foreach ($new as $bookmark) {
+            $tags = $bookmark->getTags();
+            $this->assertEquals(
+                count($tags),
+                count(array_unique($tags))
+            );
+        }
     }
 
     /**
@@ -134,10 +185,16 @@ class ManageTagControllerTest extends TestCase
         $session = [];
         $this->assignSessionVars($session);
 
+        $this->assertEquals(
+            3,
+            count($this->linkFilter->filter(BookmarkFilter::$FILTER_TAG, 'cartoon'))
+        );
+
         $requestParameters = [
             'deletetag' => 'delete',
-            'fromtag' => 'old-tag',
+            'fromtag' => 'cartoon',
         ];
+
         $request = $this->createMock(Request::class);
         $request
             ->expects(static::atLeastOnce())
@@ -148,26 +205,6 @@ class ManageTagControllerTest extends TestCase
         ;
         $response = new Response();
 
-        $bookmark1 = $this->createMock(Bookmark::class);
-        $bookmark2 = $this->createMock(Bookmark::class);
-        $this->container->bookmarkService
-            ->expects(static::once())
-            ->method('search')
-            ->with(['searchtags' => 'old-tag'], BookmarkFilter::$ALL, true)
-            ->willReturnCallback(function () use ($bookmark1, $bookmark2): SearchResult {
-                $bookmark1->expects(static::once())->method('deleteTag')->with('old-tag');
-                $bookmark2->expects(static::once())->method('deleteTag')->with('old-tag');
-
-                return SearchResult::getSearchResult([$bookmark1, $bookmark2]);
-            })
-        ;
-        $this->container->bookmarkService
-            ->expects(static::exactly(2))
-            ->method('set')
-            ->withConsecutive([$bookmark1, false], [$bookmark2, false])
-        ;
-        $this->container->bookmarkService->expects(static::once())->method('save');
-
         $result = $this->controller->save($request, $response);
 
         static::assertSame(302, $result->getStatusCode());
@@ -176,7 +213,7 @@ class ManageTagControllerTest extends TestCase
         static::assertArrayNotHasKey(SessionManager::KEY_ERROR_MESSAGES, $session);
         static::assertArrayNotHasKey(SessionManager::KEY_WARNING_MESSAGES, $session);
         static::assertArrayHasKey(SessionManager::KEY_SUCCESS_MESSAGES, $session);
-        static::assertSame(['The tag was removed from 2 bookmarks.'], $session[SessionManager::KEY_SUCCESS_MESSAGES]);
+        static::assertSame(['The tag was removed from 3 bookmarks.'], $session[SessionManager::KEY_SUCCESS_MESSAGES]);
     }
 
     /**

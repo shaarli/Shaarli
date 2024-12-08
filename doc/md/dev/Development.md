@@ -277,7 +277,7 @@ Unit tests can be run inside [Docker](../Docker.md) containers.
 
 Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under commonLinux environments. Dockerfiles are provided for the following environments:
 
-- [`alpine316`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine316/Dockerfile) - [Alpine Linux 3.16](https://www.alpinelinux.org/downloads/)
+- [`alpine319`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine319/Dockerfile) - [Alpine Linux 3.19](https://www.alpinelinux.org/downloads/)
 - [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
 - [`debian9`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian9/Dockerfile) - [Debian 9 Stretch](https://wiki.debian.org/DebianStretch) (oldstable)
 - [`ubuntu16`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/ubuntu16/Dockerfile) - [Ubuntu 16.04 Xenial Xerus](https://releases.ubuntu.com/16.04/) (old LTS)
@@ -404,7 +404,7 @@ GitHub allows drafting the release notes for the upcoming release, from the [Rel
 - add a new section for the future unreleased version
 
 ```bash
-## [v0.x.y](https://github.com/shaarli/Shaarli/releases/tag/v0.x.y) - UNRELEASES
+## [v0.x.y](https://github.com/shaarli/Shaarli/releases/tag/v0.x.y) - UNRELEASED
 
 ### Added
 
@@ -424,12 +424,13 @@ GitHub allows drafting the release notes for the upcoming release, from the [Rel
 
 ```bash
 $ make generate_authors
-$ git commit -s -m "Update AUTHORS"
+$ git add AUTHORS
+$ git commit -m "doc: update AUTHORS"
 ```
 
 ### Create and merge a Pull Request
 
-Create a Pull Request to marge changes from your remote, into `master` in the community Shaarli repository, and have it merged.
+Create a Pull Request to merge changes from your remote, into `master` in the community Shaarli repository, and have it merged.
 
 
 ### Create the release branch and update shaarli_version.php
@@ -453,7 +454,7 @@ $ make test
 # Bump shaarli_version.php from dev to 0.x.0, **without the v**
 $ vim shaarli_version.php doc/conf.py README.md
 $ git add shaarli_version doc/conf.py README.md
-$ git commit -s -m "Bump Shaarli version to v0.x.0"
+$ git commit -m "bump Shaarli version to v0.x.0"
 $ git push upstream v0.x
 ```
 
@@ -612,8 +613,8 @@ Complete list:
 Example:
 
 ```php
-if ($data['_PAGE_'] === TemplatePage::LINKLIST && $data['LOGGEDIN'] === true) {
-    // Do something for logged in users when the link list is rendered
+if ($data['_PAGE_'] === TemplatePage::LINKLIST && $data['_LOGGEDIN_'] === true) {
+    // Do something for logged-in users when the link list is rendered
 }
 ```
 

@@ -194,11 +194,13 @@ sasslint:
 ##
 
 # trivy version (https://github.com/aquasecurity/trivy/releases)
-TRIVY_VERSION=0.44.0
+TRIVY_VERSION=0.56.2
 # default trivy exit code when vulnerabilities are found
 TRIVY_EXIT_CODE=1
 # default docker image to scan with trivy
 TRIVY_TARGET_DOCKER_IMAGE=ghcr.io/shaarli/shaarli:latest
+# branch on which test_trivy_repo should be run. leave undefined for the current branch
+#TRIVY_TARGET_BRANCH=origin/release
 
 ### download trivy vulneravbility scanner
 download_trivy:
@@ -211,5 +213,9 @@ test_trivy_docker: download_trivy
 
 ### run trivy vulnerability scanner on composer/yarn dependency trees
 test_trivy_repo: download_trivy
+ifdef TRIVY_TARGET_BRANCH
+	git checkout $(TRIVY_TARGET_BRANCH) composer.lock
+	git checkout $(TRIVY_TARGET_BRANCH) yarn.lock
+endif
 	./trivy --exit-code $(TRIVY_EXIT_CODE) fs composer.lock
 	./trivy --exit-code $(TRIVY_EXIT_CODE) fs yarn.lock

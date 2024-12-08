@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM docker.io/debian:stretch
 MAINTAINER Shaarli Community
 
 ENV TERM dumb

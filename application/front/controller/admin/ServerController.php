@@ -36,7 +36,7 @@ class ServerController extends ShaarliAdminController
         }
 
         $currentVersion = ApplicationUtils::getVersion('./shaarli_version.php');
-        $currentVersion = $currentVersion === 'dev' ? $currentVersion : 'v' . $currentVersion;
+        $currentVersion = ApplicationUtils::isDevVersion($currentVersion) ? $currentVersion : 'v' . $currentVersion;
         $phpEol = new \DateTimeImmutable(ApplicationUtils::getPhpEol(PHP_VERSION));
 
         $permissions = array_merge(

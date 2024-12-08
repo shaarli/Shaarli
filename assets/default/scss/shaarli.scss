@@ -19,8 +19,8 @@ $orange: #f89406;
 $blue: #0b5ea6;
 $background-color: #d0d0d0;
 $background-linklist-info: #ddd;
-$light-shadow: rgba(255, 255, 255, .078);
-$dark-shadow: rgba(0, 0, 0, .298);
+$light-shadow: rgba(255, 255, 255, 7.8%);
+$dark-shadow: rgba(0, 0, 0, 29.8%);
 $warning-text: #97600d;
 $form-input-border: #d8d8d8;
 $form-input-background: #eee;
@@ -66,7 +66,7 @@ pre {
 }
 
 @font-face {
-  font-family: 'Roboto';
+  font-family: Roboto;
   font-weight: 400;
   font-style: normal;
   src:
@@ -76,7 +76,7 @@ pre {
 }
 
 @font-face {
-  font-family: 'Roboto';
+  font-family: Roboto;
   font-weight: 700;
   font-style: normal;
   src:
@@ -187,6 +187,7 @@ body,
   z-index: 999;
   background: var(--main-color);
   width: 100%;
+
   // Hack to transition with auto height: http://stackoverflow.com/a/8331169/1484919
   max-height: 45px;
   overflow: hidden;
@@ -320,7 +321,7 @@ body,
 
   input {
     &[type='text'] {
-      border: medium none currentColor;
+      border: medium none currentcolor;
       border-radius: 2px;
       box-shadow: 0 1px 0 $light-shadow, 0 1px 1px $dark-shadow inset;
       background: $almost-white;
@@ -329,7 +330,7 @@ body,
       height: 30px;
       color: $dark-grey;
 
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $light-grey;
       }
     }
@@ -392,7 +393,7 @@ body,
 }
 
 %subheader-form-input {
-  border: medium none currentColor;
+  border: medium none currentcolor;
   border-radius: 2px;
   box-shadow: 0 1px 0 $light-shadow, 0 1px 4px $dark-shadow inset;
   background: $almost-white;
@@ -416,7 +417,7 @@ body,
     &[type='password'] {
       @extend %subheader-form-input;
 
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $dark-grey;
       }
     }
@@ -472,7 +473,7 @@ body,
       width: 200px;
 
       // because chrome
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $light-grey;
       }
     }
@@ -518,7 +519,7 @@ body,
 
   input {
     &[type='text'] {
-      border: medium none currentColor;
+      border: medium none currentcolor;
       border-radius: 2px;
       box-shadow: 0 1px 0 $light-shadow, 0 1px 1px $dark-shadow inset;
       background: $almost-white;
@@ -527,13 +528,13 @@ body,
       height: 30px;
       color: $dark-grey;
 
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $light-grey;
       }
     }
 
     &[type='submit'] {
-      border: medium none currentColor;
+      border: medium none currentcolor;
       border-radius: 2px;
       background: $almost-white;
       padding: 0 10px;
@@ -637,7 +638,7 @@ body,
       @extend %linksperpage-button;
 
       margin: 0;
-      border: medium none currentColor;
+      border: medium none currentcolor;
       background: $almost-white;
       padding: 4px 5px 3px 8px;
       height: 20px;
@@ -995,7 +996,7 @@ body,
     &[type='text'] {
       @extend %page-form-input;
 
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $light-grey;
       }
     }
@@ -1003,7 +1004,7 @@ body,
     &[type='password'] {
       @extend %page-form-input;
 
-      &::-webkit-input-placeholder {
+      &::placeholder {
         color: $light-grey;
       }
     }
@@ -1530,9 +1531,6 @@ form {
 .b-lazy {
   transition: opacity 500ms ease-in-out;
   opacity: 0;
-  -webkit-transition: opacity 500ms ease-in-out;
-  -moz-transition: opacity 500ms ease-in-out;
-  -o-transition: opacity 500ms ease-in-out;
   min-width: 1px;
   min-height: 1px;
 
@@ -1622,11 +1620,6 @@ form {
       color: var(--dark-main-color);
     }
   }
-}
-
-// Fix empty bookmarklet name in Firefox
-.pure-button {
-  -moz-user-select: auto;
 }
 
 .tag-sort {
@@ -1790,7 +1783,7 @@ input[name='save_edit_batch'] {
   &::after {
     content: "";
     flex-grow: 1;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 35%);
     height: 1px;
     font-size: 0;
     line-height: 0;
@@ -1811,7 +1804,7 @@ input[name='save_edit_batch'] {
   height: 100%;
   width: 100%;
   z-index: 998;
-  background-color: rgba(0, 0, 0, .75);
+  background-color: rgba(0, 0, 0, 75%);
   color: #fff;
 
   .screen-center {

@@ -51,7 +51,11 @@ function showQrCode(caller,loading)
     element.id = 'permalinkQrcode';
 
 	// Make QR-Code div commit sepuku when clicked:
-    if ( element.attachEvent ){
+    if (element.addEventListener) {
+        element.addEventListener('click', function() {
+            this.parentNode.removeChild(this);
+        });
+    } else if (element.attachEvent) {
         element.attachEvent('onclick', 'this.parentNode.removeChild(this);' );
 
     } else {
@@ -89,3 +93,18 @@ function removeQrcode()
     }
     return false;
 }
+
+// Create "click" event listeners for QR-Code display action
+function setQrCodeClickEvent()
+{
+    const qrcode_collec = document.getElementsByClassName("qrcode");
+
+    Array.from(qrcode_collec).forEach(function(element) {
+        element.addEventListener('click', function() {
+            showQrCode(this);
+            return false;
+        });
+    });
+}
+
+setQrCodeClickEvent();

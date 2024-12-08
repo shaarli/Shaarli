@@ -127,22 +127,21 @@ Receiving objects: 100% (3015/3015), 2.59 MiB | 918.00 KiB/s, done.
 Resolving deltas: 100% (1899/1899), completed with 48 local objects.
 From https://github.com/shaarli/Shaarli
  * [new branch]      master     -> origin/master
- * [new branch]      stable     -> origin/stable
 [...]
  * [new tag]         v0.6.4     -> v0.6.4
  * [new tag]         v0.7.0     -> v0.7.0
 ```
 
-### Step 2: use the stable community branch
+### Step 2: use the release community branch
 
 ```bash
-$ git checkout origin/stable -b stable
-Branch stable set up to track remote branch stable from origin.
-Switched to a new branch 'stable'
+$ git checkout origin/release -b release
+Branch release set up to track remote branch release from origin.
+Switched to a new branch 'release'
 
 $ git branch -vv
   master 029f75f [sebsauvage/master] Update README.md
-* stable 890afc3 [origin/stable] Merge pull request #509 from ArthurHoaro/v0.6.5
+* release 890afc3 [origin/release] Merge tag 'v0.13.0' into release
 ```
 
 Shaarli >= `v0.8.x`: install/update third-party PHP dependencies using [Composer](https://getcomposer.org/):

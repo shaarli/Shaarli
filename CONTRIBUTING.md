@@ -13,8 +13,8 @@ Check the [milestones](https://github.com/shaarli/Shaarli/milestones) to see wha
 
  * The issues list should preferably contain **only tasks that can be actioned immediately**. Anyone should be able to open the issues list, pick one and start working on it immediately.
  * If you have a clear idea of a **feature you expect, or have a specific bug/defect to report**, [search the issues list, both open and closed](https://github.com/shaarli/Shaarli/issues?q=is%3Aissue) to check if it has been discussed, and comment on the appropriate issue. If you can't find one, please open a [new issue](https://github.com/shaarli/Shaarli/issues/new)
- * **General discussions** fit in #44 so that we don't follow a slope where users and contributors have to track 90 "maybe" items in the bug tracker. Separate issues about clear, separate steps can be opened after discussion.
- * You can also join instant discussion at https://gitter.im/shaarli/Shaarli, or via IRC as described [here](https://github.com/shaarli/Shaarli/issues/44#issuecomment-77745105)
+ * The **[general discussion](https://github.com/shaarli/Shaarli/issues/308)** issue can be used for general announcements or project-related discussion.
+ * You can also join instant discussion at https://gitter.im/shaarli/Shaarli.
  
 ### Documentation
 

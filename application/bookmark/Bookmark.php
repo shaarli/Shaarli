@@ -505,7 +505,7 @@ class Bookmark
     }
 
     /**
-     * Rename a tag in tags list.
+     * Rename a tag in tags list. If the new tag already exists, merge them
      *
      * @param string $fromTag
      * @param string $toTag
@@ -513,7 +513,11 @@ class Bookmark
     public function renameTag(string $fromTag, string $toTag): void
     {
         if (($pos = array_search($fromTag, $this->tags ?? [])) !== false) {
-            $this->tags[$pos] = trim($toTag);
+            if (in_array($toTag, $this->tags ?? []) !== false) {
+                $this->deleteTag($fromTag);
+            } else {
+                $this->tags[$pos] = trim($toTag);
+            }
         }
     }
 

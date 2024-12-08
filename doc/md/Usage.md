@@ -23,6 +23,7 @@ While logged in to your Shaarli, you can add, edit or delete Shaares:
 
 The `Shaare a new link` dialog also allows you to create multiple bookmarks at once (unfold the `bulk creation` section and add one URL per line).
 
+
 ### Tags
 
 Tags can be be used to organize and categorize your Shaares:
@@ -37,6 +38,13 @@ Tags can be be used to organize and categorize your Shaares:
 Additional filter buttons can be found at the top left of the Shaare list **only when logged in**:
 
 - **Only show private Shaares:** Private shares can be searched by clicking the `only show private links` toggle button top left of the Shaares list (only when logged in)
+
+
+### Sticky Shaares
+
+Enabling the _Sticky_ mode on a Shaare will make it "stick" to the top of the Shaares list (first item of the first page), bypassing the normal sort order (most recent first). DIsabling the _Sticky_ mode will move back the Shaare to its initial position on the link list.
+
+Sticky-ing a Shaare does not bypass active filters/search terms.
 
 
 ### Permalinks
@@ -62,6 +70,8 @@ Shaarli can be used as a minimal blog, notepad, pastebin...: While adding or edi
 Both exclude patterns and exact searches can be combined with normal searches (example `"exact search" term otherterm -notthis "very exact" stuff -notagain`). Only AND (and NOT) text search is currently supported.
 
 Active search terms are displayed on top of the link list. To remove terms/tags from the current search, click the `x` next to any of them, or simply clear text/tag search fields.
+
+Shaarli's search can be added to your Web browser's search engines by clicking the `+` Shaarli icon in your browser's search engine selector ([example for Firefox](https://support.mozilla.org/en-US/kb/add-or-remove-search-engine-firefox#w_add-a-search-engine-from-the-search-bar)).
 
 
 ### Tag cloud

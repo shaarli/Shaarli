@@ -202,7 +202,7 @@ MDPrivateKeys RSA 4096
         </FilesMatch>
     </Directory>
     
-    <FilesMatch ".*\.(?!(ico|css|js|gif|jpe?g|png|ttf|oet|woff2?)$)[^\.]*$">
+    <FilesMatch ".*\.(?!(ico|css|js|gif|jpe?g|png|svg|ttf|oet|woff2?)$)[^\.]*$">
         Require all denied
     </FilesMatch>
 
@@ -212,7 +212,7 @@ MDPrivateKeys RSA 4096
         Require all granted
     </Files>
 
-    <FilesMatch "\.(?:ico|css|js|gif|jpe?g|png|ttf|oet|woff2)$">
+    <FilesMatch "\.(?:ico|css|js|gif|jpe?g|png|svg|ttf|oet|woff2)$">
         # allow client-side caching of static files
         Header set Cache-Control "max-age=2628000, public, must-revalidate, proxy-revalidate"
     </FilesMatch>
@@ -319,7 +319,7 @@ server {
     }
 
     # allow client-side caching of static files
-    location ~* \.(?:ico|css|js|gif|jpe?g|png|ttf|oet|woff2?)$ {
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|svg|ttf|oet|woff2?)$ {
         expires    max;
         add_header Cache-Control "public, must-revalidate, proxy-revalidate";
         # HTTP 1.0 compatibility

@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM docker.io/debian:jessie
 MAINTAINER Shaarli Community
 
 ENV TERM dumb

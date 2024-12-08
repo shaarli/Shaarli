@@ -59,6 +59,12 @@ class MetadataRetriever
         if (!empty($title) && strtolower($charset) !== 'utf-8') {
             $title = mb_convert_encoding($title, 'utf-8', $charset);
         }
+        if (!empty($description) && strtolower($charset) !== 'utf-8') {
+            $description = mb_convert_encoding($description, 'utf-8', $charset);
+        }
+        if (!empty($tags) && strtolower($charset) !== 'utf-8') {
+            $tags = mb_convert_encoding($tags, 'utf-8', $charset);
+        }
 
         return array_map([$this, 'cleanMetadata'], [
             'title' => $title,
