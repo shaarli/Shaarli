@@ -211,7 +211,7 @@ var run_playideos = (function () {
         }
     }
     if (!o) {
-        t("plugins/playvideos/jquery-1.11.2.min.js", function () {
+        t("node_modules/jquery/dist/jquery.min.js", function () {
             return e(jQuery.noConflict(true))
         })
     }
