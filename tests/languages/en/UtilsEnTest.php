@@ -23,7 +23,7 @@ class UtilsEnTest extends UtilsTest
         $current = get_locale(LC_ALL);
         autoLocale('en_US.UTF-8');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
-        $this->assertRegExp('/January 2, 2017 (at )?8:11:12 PM GMT\+0?3(:00)?/', format_date($date, true, true));
+        $this->assertRegExp('/January 2, 2017 (at )?8:11:12 PM GMT\+0?3(:00)?/', format_date($date, true, true));
         setlocale(LC_ALL, $current);
     }
 
