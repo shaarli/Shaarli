@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
     colors="true">
+  <coverage includeUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">application</directory>
+    </include>
+  </coverage>
   <testsuites>
     <testsuite name="unit-tests">
       <directory>tests</directory>
@@ -18,10 +23,4 @@
       <directory>tests/languages/fr</directory>
     </testsuite>
   </testsuites>
-
-  <filter>
-    <whitelist addUncoveredFilesFromWhitelist="true">
-      <directory suffix=".php">application</directory>
-    </whitelist>
-  </filter>
 </phpunit>
