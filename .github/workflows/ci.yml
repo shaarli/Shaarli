@@ -36,7 +36,7 @@ jobs:
         run: composer config --unset platform && composer config platform.php ${{ matrix.php-versions }}
 
       - name: Update dependencies for PHP 8.x
-        if: ${{ matrix.php-versions == '8.0' || matrix.php-versions == '8.1' }}
+        if: ${{ startsWith(matrix.php-versions, '8.') }}
         run: |
           composer update && \
           composer remove --dev phpunit/phpunit && \
@@ -44,7 +44,7 @@ jobs:
           composer require --dev phpunit/phpunit ^9.0
 
       - name: Update dependencies for PHP 7.x
-        if: ${{ matrix.php-versions != '8.0' && matrix.php-versions != '8.1' }}
+        if: ${{ startsWith(matrix.php-versions, '7.') }}
         run: composer update
 
       - name: Clean up
