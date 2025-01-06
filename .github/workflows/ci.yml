@@ -37,11 +37,7 @@ jobs:
 
       - name: Update dependencies for PHP 8.x
         if: ${{ startsWith(matrix.php-versions, '8.') }}
-        run: |
-          composer update && \
-          composer remove --dev phpunit/phpunit && \
-          composer require --dev phpunit/php-text-template ^2.0 && \
-          composer require --dev phpunit/phpunit ^9.0
+        run: composer update
 
       - name: Update dependencies for PHP 7.x
         if: ${{ startsWith(matrix.php-versions, '7.') }}

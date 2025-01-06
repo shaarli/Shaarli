@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e37830ae8a7cbd6670f0493c3d90c618",
+    "content-hash": "2c29cdd24964c6eb4bceb3508a4c5801",
     "packages": [
         {
             "name": "arthurhoaro/web-thumbnailer",
@@ -3308,9 +3308,9 @@
         "ext-json": "*",
         "ext-zlib": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "7.4.33"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
