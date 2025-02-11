@@ -231,7 +231,7 @@ function get_http_response_fallback(
  */
 function get_redirected_headers($url, $redirectionLimit = 3)
 {
-    $headers = get_headers($url, 1);
+    $headers = get_headers($url, true);
     if (!empty($headers['location']) && empty($headers['Location'])) {
         $headers['Location'] = $headers['location'];
     }
