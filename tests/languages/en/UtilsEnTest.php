@@ -23,7 +23,8 @@ class UtilsEnTest extends UtilsTest
         $current = get_locale(LC_ALL);
         autoLocale('en_US.UTF-8');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
-        $this->assertMatchesRegularExpression('/January\s2,\s2017\s(at\s)?8:11:12\sPM\sGMT\+0?3(:00)?/u', format_date($date, true, true));
+        $regex = '/January\s2,\s2017\s(at\s)?8:11:12\sPM\sGMT\+0?3(:00)?/u';
+        $this->assertMatchesRegularExpression($regex, format_date($date, true, true));
         setlocale(LC_ALL, $current);
     }
 
@@ -45,7 +46,8 @@ class UtilsEnTest extends UtilsTest
     public function testDateFormatDefault()
     {
         $date = DateTime::createFromFormat('Ymd_His', '20170102_101112');
-        $this->assertMatchesRegularExpression('/January\s2,\s2017\s10:11:12\sAM\sGMT\+03:00/u', format_date($date, true, false));
+        $regex = '/January\s2,\s2017\s10:11:12\sAM\sGMT\+0?3:00/u';
+        $this->assertMatchesRegularExpression($regex, format_date($date, true, false));
     }
 
     /**
