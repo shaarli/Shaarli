@@ -16,6 +16,7 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [clickat](https://forge.tourmentine.com/n/shaarli-plugin-clickat) by [@n](https://forge.tourmentine.com/n): Makes Twitter and Fediverse addresses clickable.
 - [clickcounter](https://github.com/waschinski/shaarli-clickcounter) by [@waschinski](https://github.com/waschinski): Shaarli plugin that counts how often links have been clicked
 - [code-coloration](https://github.com/ArthurHoaro/code-coloration) by [@ArthurHoaro](https://github.com/ArthurHoaro): client side code syntax highlighter.
+- [colorscheme](https://github.com/kcaran/shaarli-plugin-colorscheme) by [@kcaran](https://github.com/kcaran): Displays colors in #xxyyzz format as an inline sample block.
 - [custom-css](https://github.com/immanuelfodor/shaarli-custom-css) by [@immanuelfodor](https://github.com/immanuelfodor) - Customize the look and feel of the UI with custom CSS rules
 - [disqus](https://github.com/kalvn/shaarli-plugin-disqus) by [@kalvn](https://github.com/kalvn): Adds Disqus comment system to your Shaarli.
 - [emojione](https://github.com/immanuelfodor/emojione) by [@immanuelfodor](https://github.com/immanuelfodor) - Resurrected fork of the original emojione project
@@ -34,6 +35,8 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [social](https://github.com/alexisju/social) by [@alexisju](https://github.com/alexisju): share links to social networks.
 - [targetblank](https://github.com/waschinski/shaarli-targetblank) by [@waschinski](https://github.com/waschinski): Shaarli plugin to open all external links in new tabs/windows
 - [webhooks](https://gitlab.com/flow.gunso/shaarli-webhooks) by [@flow.gunso](https://gitlab.com/flow.gunso) - Shaarli plugin that enables user-defined callback URL, i.e. webhooks, for specific Shaarli events (link saving, deletion...)
+- [youtube](https://github.com/kcaran/shaarli-plugin-youtube) by [@kcaran](https://github.com/kcaran) - Shaarli plugin that that retrieves summary and metadata information for youtube videos. A YouTube Data API key is required.
+
 
 
 ### Themes
@@ -42,6 +45,7 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [ManufacturaInd/shaarli-2004licious-theme](https://github.com/ManufacturaInd/shaarli-2004licious-theme) - A template/theme as a humble homage to the early looks of the del.icio.us site
 - [RolandTi/shaarli-stack](https://github.com/RolandTi/shaarli-stack) - A miminalist template/theme for Shaarli
 - [xfnw/shaarli-default-dark](https://github.com/xfnw/shaarli-default-dark) - The default theme but nice and dark for your eyeballs
+- [kcaran/shirley-template](https://github.com/kcaran/shirley-template) - A responsive theme that is feature-compatible with the default theme and supports the latest version of Shaarli.
 - [mrjovanovic/serious-theme-shaarli](https://github.com/mrjovanovic/serious-theme-shaarli) - A serious theme for Shaarli (custom CSS)
 
 
