@@ -45,7 +45,7 @@ class UtilsEnTest extends UtilsTest
     public function testDateFormatDefault()
     {
         $date = DateTime::createFromFormat('Ymd_His', '20170102_101112');
-        $this->assertRegExp('January\s2,\s2017\s10:11:12\sAM\sGMT+03:00', format_date($date, true, false));
+        $this->assertRegExp('/January\s2,\s2017\s10:11:12\sAM\sGMT+03:00/', format_date($date, true, false));
     }
 
     /**
@@ -54,7 +54,7 @@ class UtilsEnTest extends UtilsTest
     public function testDateFormatDefaultNoTime()
     {
         $date = DateTime::createFromFormat('Ymd_His', '20170201_101112');
-        $this->assertRegExp('February\s1,\s2017', format_date($date, false, false));
+        $this->assertRegExp('/February\s1,\s2017/', format_date($date, false, false));
     }
 
     /**
