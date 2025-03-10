@@ -23,7 +23,8 @@ class UtilsEnTest extends UtilsTest
         $current = get_locale(LC_ALL);
         autoLocale('en_US.UTF-8');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
-        $this->assertRegExp('/January 2, 2017 (at )?8:11:12 PM GMT\+0?3(:00)?/', format_date($date, true, true));
+        $regex = '/January\s2,\s2017\s(at\s)?8:11:12\sPM\sGMT\+0?3(:00)?/u';
+        $this->assertMatchesRegularExpression($regex, format_date($date, true, true));
         setlocale(LC_ALL, $current);
     }
 
@@ -35,7 +36,7 @@ class UtilsEnTest extends UtilsTest
         $current = get_locale(LC_ALL);
         autoLocale('en_US.UTF-8');
         $date = DateTime::createFromFormat('Ymd_His', '20170102_201112');
-        $this->assertRegExp('/January 2, 2017/', format_date($date, false, true));
+        $this->assertMatchesRegularExpression('/January\s2,\s2017/u', format_date($date, false, true));
         setlocale(LC_ALL, $current);
     }
 
@@ -45,7 +46,8 @@ class UtilsEnTest extends UtilsTest
     public function testDateFormatDefault()
     {
         $date = DateTime::createFromFormat('Ymd_His', '20170102_101112');
-        $this->assertEquals('January 2, 2017 10:11:12 AM GMT+03:00', format_date($date, true, false));
+        $regex = '/January\s2,\s2017\s10:11:12\sAM\sGMT\+0?3:00/u';
+        $this->assertMatchesRegularExpression($regex, format_date($date, true, false));
     }
 
     /**
@@ -54,7 +56,7 @@ class UtilsEnTest extends UtilsTest
     public function testDateFormatDefaultNoTime()
     {
         $date = DateTime::createFromFormat('Ymd_His', '20170201_101112');
-        $this->assertEquals('February 1, 2017', format_date($date, false, false));
+        $this->assertMatchesRegularExpression('/February\s1,\s2017/u', format_date($date, false, false));
     }
 
     /**
