@@ -2,31 +2,26 @@ name: Shaarli CI
 on: [push, pull_request]
 jobs:
   php:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         php-versions: ['7.4', '8.0', '8.1', '8.2']
     name: PHP ${{ matrix.php-versions }}
     steps:
-      - name: Set locales
-        run: |
-          sudo locale-gen de_DE.utf8 && \
-          sudo locale-gen en_US.utf8 && \
-          sudo locale-gen fr_FR.utf8 && \
-          sudo dpkg-reconfigure --frontend=noninteractive locales
-
-      - name: Install Gettext
-        run: sudo apt-get install gettext
-
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Gettext
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y gettext
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: gd, xml, curl, mbstring, intl, gettext
+          extensions: gd, xml, curl, mbstring, intl, gettext, ldap
           tools: composer:v2
 
       - name: Check PHP version
@@ -36,7 +31,7 @@ jobs:
         run: composer config --unset platform && composer config platform.php ${{ matrix.php-versions }}
 
       - name: Update dependencies for PHP 8.x
-        if: ${{ matrix.php-versions == '8.0' || matrix.php-versions == '8.1' }}
+        if: ${{ matrix.php-versions != '7.4' }}
         run: |
           composer update && \
           composer remove --dev phpunit/phpunit && \
@@ -44,8 +39,24 @@ jobs:
           composer require --dev phpunit/phpunit ^9.0
 
       - name: Update dependencies for PHP 7.x
-        if: ${{ matrix.php-versions != '8.0' && matrix.php-versions != '8.1' }}
-        run: composer update
+        if: ${{ matrix.php-versions == '7.4' }}
+        run: |
+             composer update && \
+             echo php -v
+
+      - name: Install locales
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y locales
+
+      - name: Set locales
+        run: |
+          sudo locale-gen de_DE.utf8 && \
+          sudo locale-gen en_US.utf8 && \
+          sudo locale-gen fr_FR.utf8
+
+      - name: Check locales
+        run: locale -a
 
       - name: Clean up
         run: make clean
