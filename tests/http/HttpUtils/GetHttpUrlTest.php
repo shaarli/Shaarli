@@ -33,7 +33,7 @@ class GetHttpUrlTest extends \Shaarli\TestCase
     public function testGetInvalidRemoteUrl()
     {
         list($headers, $content) = @get_http_response('http://non.existent', 1);
-        $this->assertStringContainsString('curl_exec() error: Resolving timed out after ', $headers[0] );
+        $this->assertStringContainsString('curl_exec() error: Resolving timed out after ', $headers[0]);
         $this->assertFalse($content);
     }
 
