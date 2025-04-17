@@ -4,7 +4,7 @@ Adds a `► Play Videos` button to [Shaarli](https://github.com/shaarli/Shaarli)
 
 <!-- TODO screenshot -->
 
-This uses code from https://zaius.github.io/youtube_playlist/ and is currently only compatible with Youtube videos.
+This plugin is currently only compatible with Youtube videos.
 
 #### Installation and setup
 
@@ -29,10 +29,6 @@ You may place the `Header` directive in the `<Directory...` section of your [web
 File: youtube_playlist.js
 Copyright: (c) 2010-2014, David Kelso <david@kelso.id.au>
 License: The ISC License (http://opensource.org/licenses/ISC)
-
-Files: jquery*.js
-License: MIT License (http://opensource.org/licenses/MIT)
-Copyright: (C) jQuery Foundation and other contributors, https://jquery.com/download/
 
 -----------------------------------------------------
 
