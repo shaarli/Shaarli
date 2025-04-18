@@ -1,47 +1,41 @@
-let pluginInstances = {};
+/* global YT */
+const pluginInstances = {};
 const $input = document.querySelector('#playvideos');
-$input.addEventListener('click', (e) => {
-  e.preventDefault();
-  pluginInstances.instance = new PlayVideos();
-});
 
 class PlayVideos {
-  
-  links = [];
-  ytInstance;
-
   constructor() {
+    this.links = [];
+    this.ytInstance = null;
+
     this.getAllVideos();
     this.createDom();
 
     if (!document.head.querySelector('script[src="//www.youtube.com/iframe_api"]')) {
-      this.getScript('//www.youtube.com/iframe_api');
+      this.getScript('https://www.youtube.com/iframe_api');
     } else {
-      this.initiateInstance();
+      this.initiateInstance().bind(this);
     }
 
-    window.onYouTubeIframeAPIReady = this.initiateInstance;
+    window.onYouTubeIframeAPIReady = this.initiateInstance.bind(this);
   }
 
-  getAllVideos = () => {
-    const reg = new RegExp("https?://(www.)?youtube.com/");
+  getAllVideos() {
+    const regEx = /https?:\/\/(www.)?youtube.com\//;
     const ids = [];
     document.querySelectorAll('a[href^="http"]').forEach(($elm) => {
-      if (!$elm.getAttribute("href").match(reg)) {
-        return
+      if (!$elm.getAttribute('href').match(regEx)) {
+        return;
       }
-      const n = $elm.href.replace(/^.*v=/, "").replace(/\&.*$/, "");
+      const n = $elm.href.replace(/^.*v=/, '').replace(/&.*$/, '');
       ids.push(n);
     });
-    
+
     // remove duplicates
-    this.links = ids.filter(function(item, pos) {
-      return ids.indexOf(item) == pos;
-    })
+    this.links = ids.filter((item, pos) => ids.indexOf(item) === pos);
   }
 
-  createDom = () => {
-    let $bg = document.createElement('div');
+  createDom() {
+    const $bg = document.createElement('div');
     $bg.id = 'player-background';
     $bg.style.position = 'fixed';
     $bg.style.top = 0;
@@ -54,30 +48,30 @@ class PlayVideos {
     $bg.style.height = '100%';
     $bg.style.backgroundColor = 'rgba(0,0,0,.8)';
     $bg.tabIndex = 0;
-    $bg.addEventListener('keyup', this.keybControl);
-    $bg.addEventListener('click', this.destroyInstance);
+    $bg.addEventListener('keyup', this.keybControl.bind(this));
+    $bg.addEventListener('click', this.destroyInstance.bind(this));
 
-    let $box = document.createElement('div');
+    const $box = document.createElement('div');
     $box.id = 'player-content';
 
-    let $boxFrame = document.createElement('div');
+    const $boxFrame = document.createElement('div');
     $boxFrame.id = 'player-frame';
     $box.appendChild($boxFrame);
 
-    let $playerNavigation = document.createElement('div');
+    const $playerNavigation = document.createElement('div');
     $playerNavigation.id = 'player-navigation';
     $playerNavigation.style.display = 'flex';
     $playerNavigation.style.justifyContent = 'space-between';
     $playerNavigation.style.alignItems = 'center';
 
-    let $prev = document.createElement('button');
+    const $prev = document.createElement('button');
     $prev.innerText = 'previous';
     $prev.dataset.dir = 'prev';
     $prev.addEventListener('click', this.nextPrev.bind(this));
 
     $playerNavigation.appendChild($prev);
-    
-    let $next = document.createElement('button');
+
+    const $next = document.createElement('button');
     $next.innerText = 'next';
     $next.dataset.dir = 'next';
     $next.addEventListener('click', this.nextPrev.bind(this));
@@ -91,15 +85,15 @@ class PlayVideos {
     $bg.focus();
   }
 
-  keybControl = (e) => {
+  keybControl(e) {
     switch (e.keyCode) {
       case 27: // esc
         this.destroyInstance();
         break;
-      case 39: //right 
+      case 39: // right
         document.querySelector('#player-navigation button[data-dir="next"]').click();
         break;
-      case 37: //left 
+      case 37: // left
         document.querySelector('#player-navigation button[data-dir="prev"]').click();
         break;
       default:
@@ -107,78 +101,86 @@ class PlayVideos {
     }
   }
 
-  nextPrev( e ) {
+  nextPrev(e) {
     e.preventDefault();
     e.stopPropagation();
-    const dir = e.target.dataset.dir;
-    const currentIndex = this.links.findIndex( (i) => i == this.ytInstance.getVideoData()['video_id']);
-    
-    if ( dir == 'next' && this.links[currentIndex + 1] ) {
+    const { dir } = e.target.dataset;
+    const currentIndex = this.links.findIndex((i) => i === this.ytInstance.getVideoData().video_id);
+
+    if (dir === 'next' && this.links[currentIndex + 1]) {
       this.ytInstance.loadVideoById(this.links[currentIndex + 1]);
-    } else if (dir == 'next') {
+    } else if (dir === 'next') {
       this.ytInstance.loadVideoById(this.links[0]);
     }
 
-    if ( dir == 'prev' && this.links[currentIndex - 1]) {
+    if (dir === 'prev' && this.links[currentIndex - 1]) {
       this.ytInstance.loadVideoById(this.links[currentIndex - 1]);
-    } else if (dir == 'prev') {
+    } else if (dir === 'prev') {
       this.ytInstance.loadVideoById(this.links[this.links.length - 1]);
     }
   }
 
-  getScript = url => new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = url;
-    script.async = true;
-    script.onerror = reject;
-    script.onload = script.onreadystatechange = function() {
-      const loadState = this.readyState;
-      if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-      script.onload = script.onreadystatechange = null;
-      resolve();
-    }
-    document.head.appendChild(script)
-  })
-
-  destroyInstance = () => {
-    this.ytInstance.destroy()
-    document.querySelector('#player-background').remove();
-    delete(pluginInstances.instance);
+  async getScript(url) {
+    const urlPromise = await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = url;
+      script.async = true;
+      script.onerror = reject;
+      script.onreadystatechange = () => {
+        const loadState = this.readyState;
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return;
+        script.onload = script.onreadystatechange || null;
+        resolve();
+      };
+      script.onload = script.onreadystatechange;
+      document.head.appendChild(script);
+    });
+    return urlPromise;
   }
 
-  initiateInstance = () => {
+  destroyInstance() {
+    this.ytInstance.destroy();
+    document.querySelector('#player-background').remove();
+    delete (pluginInstances.instance);
+  }
+
+  initiateInstance() {
     this.ytInstance = new YT.Player('player-frame', {
-      height: "390",
-      width: "640",
+      height: '390',
+      width: '640',
       videoId: this.links[0],
       events: {
-          onReady: this.ytReady,
-          onError: this.ytError,
-          onStateChange: this.ytStateChange
-      }
-    })
+        onReady: this.ytReady,
+        onError: this.ytError,
+        onStateChange: this.ytStateChange,
+      },
+    });
   }
 
-  ytReady = (e) => {
+  static ytReady(e) {
     e.target.playVideo();
   }
-  
-  ytError = (e) => {
+
+  static ytError(e) {
     const errors = {
-      2: "invalid video id",
-      5: "video not supported in html5",
-      100: "video removed or private",
-      101: "video not embedable",
-      150: "video not embedable"
+      2: 'invalid video id',
+      5: 'video not supported in html5',
+      100: 'video removed or private',
+      101: 'video not embedable',
+      150: 'video not embedable',
     };
-    console.log("Error", errors[e.data] || "unknown error");
+    console.log('Error', errors[e.data] || 'unknown error');
     document.querySelector('#player-navigation button[data-dir="next"]').click();
   }
 
-  ytStateChange = (e) => {
-    if (e.data === YT.PlayerState.ENDED) {
+  static ytStateChange(e) {
+    if (e.data === window.YT.PlayerState.ENDED) {
       document.querySelector('#player-navigation button[data-dir="next"]').click();
     }
-  };
-
+  }
 }
+
+$input.addEventListener('click', (e) => {
+  e.preventDefault();
+  pluginInstances.instance = new PlayVideos();
+});
