@@ -8,6 +8,7 @@
     "blazy": "^1.8.2",
     "fork-awesome": "^1.2.0",
     "he": "^1.2.0",
+    "jquery": "^3.7.1",
     "pure-extras": "^1.0.0",
     "purecss": "^3.0.0"
   },

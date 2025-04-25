@@ -51,7 +51,7 @@ class PluginPlayvideosTest extends \Shaarli\TestCase
 
         $data = hook_playvideos_render_footer($data);
         $this->assertEquals($str, $data[$str]);
-        $this->assertEquals(2, count($data['js_files']));
+        $this->assertEquals(1, count($data['js_files']));
 
         $data = [$str => $str];
         $data['_PAGE_'] = $str;
