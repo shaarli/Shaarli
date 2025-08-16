@@ -210,7 +210,7 @@ class NetscapeBookmarkUtils
         $skipCount = 0,
         $duration = 0
     ) {
-        $status = sprintf(t('File %s (%d bytes) '), $filename, $filesize);
+        $status = sprintf(t('File %s (%d bytes) '), escape($filename), $filesize);
         if ($importCount == 0 && $overwriteCount == 0 && $skipCount == 0) {
             $status .= t('has an unknown file format. Nothing was imported.');
         } else {

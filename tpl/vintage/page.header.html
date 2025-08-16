@@ -2,8 +2,12 @@
 <div id="logo" title="Share your links !" onclick="document.location='{$titleLink}';"></div>
 
 <div id="linkcount" class="nomobile">
-    {if="!empty($linkcount)"}{$linkcount} links{/if}<br>
-    {if="!empty($privateLinkcount)"}{$privateLinkcount} private links{/if}
+  {if="$is_logged_in"}
+  {$linkcount} links<br>
+  {$privateLinkcount} private links
+  {else}
+  {$publicLinkcount} links
+  {/if}
 </div>
 
 <div id="menu">

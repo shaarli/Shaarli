@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 jobs:
   docker-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

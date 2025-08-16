@@ -8,7 +8,7 @@ on:
       - release
 jobs:
   docker-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get the tag name
         run: echo "REF=${GITHUB_REF##*/}" >> $GITHUB_ENV

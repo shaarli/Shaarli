@@ -49,7 +49,7 @@ Sticky-ing a Shaare does not bypass active filters/search terms.
 
 ### Permalinks
 
-Permalinks are fixed, short links attached to each Shaare. Editing a Shaare will not change it's permalink, each permalink always points to the latest revision of a Shaare.
+Permalinks are fixed, short links attached to each Shaare. Editing a Shaare will not change its permalink, each permalink always points to the latest revision of a Shaare.
 
 
 ### Text-only (note) Shaares

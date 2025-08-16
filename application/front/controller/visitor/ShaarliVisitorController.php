@@ -61,6 +61,7 @@ abstract class ShaarliVisitorController
         $this->assignView('template', $template);
 
         $this->assignView('linkcount', $this->container->bookmarkService->count(BookmarkFilter::$ALL));
+        $this->assignView('publicLinkcount', $this->container->bookmarkService->count(BookmarkFilter::$PUBLIC));
         $this->assignView('privateLinkcount', $this->container->bookmarkService->count(BookmarkFilter::$PRIVATE));
 
         $this->executeDefaultHooks($template);

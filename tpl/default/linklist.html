@@ -7,11 +7,11 @@
 {include="page.header"}
 
 <div class="linkcount pure-u-0 pure-u-lg-visible">
-  {if="!empty($linkcount)"}
+  {if="$is_logged_in"}
   <span class="strong">{$linkcount}</span> {function="t('shaare', 'shaares', $linkcount)"}
-  {if="$privateLinkcount>0"}
   <br><span class="strong">{$privateLinkcount}</span> {function="t('private link', 'private links', $privateLinkcount)"}
-  {/if}
+  {else}
+  <span class="strong">{$publicLinkcount}</span> {function="t('shaare', 'shaares', $publicLinkcount)"}
   {/if}
 </div>
 
@@ -56,11 +56,11 @@
     <div class="pure-u-lg-2-24 pure-u-1-24"></div>
     <div id="link-count-content" class="pure-u-lg-20-24 pure-u-22-24">
       <div class="linkcount pure-u-lg-0 center">
-        {if="!empty($linkcount)"}
+        {if="$is_logged_in"}
         <span class="strong">{$linkcount}</span> {function="t('shaare', 'shaares', $linkcount)"}
-        {if="$privateLinkcount>0"}
         &middot; <span class="strong">{$privateLinkcount}</span> {function="t('private link', 'private links', $privateLinkcount)"}
-        {/if}
+        {else}
+        <span class="strong">{$publicLinkcount}</span> {function="t('shaare', 'shaares', $publicLinkcount)"}
         {/if}
       </div>
 

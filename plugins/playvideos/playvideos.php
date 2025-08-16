@@ -44,7 +44,6 @@ function hook_playvideos_render_header($data)
 function hook_playvideos_render_footer($data)
 {
     if ($data['_PAGE_'] == TemplatePage::LINKLIST) {
-        $data['js_files'][] = PluginManager::$PLUGINS_PATH . '/playvideos/jquery-1.11.2.min.js';
         $data['js_files'][] = PluginManager::$PLUGINS_PATH . '/playvideos/youtube_playlist.js';
     }
 

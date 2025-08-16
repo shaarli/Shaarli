@@ -87,7 +87,7 @@ class TagCloudController extends ShaarliVisitorController
         $searchTags = !empty($searchTags) ? trim(str_replace($tagsSeparator, ' ', $searchTags)) . ' - ' : '';
         $this->assignView(
             'pagetitle',
-            $searchTags . t('Tag ' . $type) . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
+            escape($searchTags) . t('Tag ' . $type) . ' - ' . $this->container->conf->get('general.title', 'Shaarli')
         );
 
         return $response->write($this->render('tag.' . $type));

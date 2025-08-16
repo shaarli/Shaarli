@@ -6,7 +6,7 @@ on:
 
 jobs:
   trivy-repo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: trivy scan (release composer/yarn dependencies)
     steps:
       - name: Checkout
@@ -16,7 +16,7 @@ jobs:
       - name: Run trivy scanner on repository
         run: make test_trivy_repo TRIVY_TARGET_BRANCH=origin/release TRIVY_EXIT_CODE=1
   trivy-docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: trivy scan (release docker image)
     steps:
       - name: Checkout

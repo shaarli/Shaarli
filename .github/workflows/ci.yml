@@ -2,32 +2,30 @@ name: Shaarli CI
 on: [push, pull_request]
 jobs:
   php:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['7.4', '8.0', '8.1', '8.2']
+        php-versions: ['8.1', '8.2', '8.3', '8.4']
     name: PHP ${{ matrix.php-versions }}
     steps:
-      - name: Set locales
-        run: |
-          sudo locale-gen de_DE.utf8 && \
-          sudo locale-gen en_US.utf8 && \
-          sudo locale-gen fr_FR.utf8 && \
-          sudo dpkg-reconfigure --frontend=noninteractive locales
-
-      - name: Install Gettext
-        run: sudo apt-get install gettext
-
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Gettext
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y gettext
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: gd, xml, curl, mbstring, intl, gettext
+          extensions: gd, xml, curl, mbstring, intl, gettext, ldap
           tools: composer:v2
+
+      - name: Allow APT Release label changes # workaround for https://github.com/oerdnj/deb.sury.org/issues/2295
+        run: echo 'Acquire::AllowReleaseInfoChange::Label "true";' | sudo tee /etc/apt/apt.conf.d/label_change
 
       - name: Check PHP version
         run: php -v
@@ -36,16 +34,22 @@ jobs:
         run: composer config --unset platform && composer config platform.php ${{ matrix.php-versions }}
 
       - name: Update dependencies for PHP 8.x
-        if: ${{ matrix.php-versions == '8.0' || matrix.php-versions == '8.1' }}
         run: |
-          composer update && \
-          composer remove --dev phpunit/phpunit && \
-          composer require --dev phpunit/php-text-template ^2.0 && \
-          composer require --dev phpunit/phpunit ^9.0
+          composer update
 
-      - name: Update dependencies for PHP 7.x
-        if: ${{ matrix.php-versions != '8.0' && matrix.php-versions != '8.1' }}
-        run: composer update
+      - name: Install locales
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y locales
+
+      - name: Set locales
+        run: |
+          sudo locale-gen de_DE.utf8 && \
+          sudo locale-gen en_US.utf8 && \
+          sudo locale-gen fr_FR.utf8
+
+      - name: Check locales
+        run: locale -a
 
       - name: Clean up
         run: make clean
@@ -60,7 +64,7 @@ jobs:
         run: make all_tests
 
   node:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,7 +87,7 @@ jobs:
         run: make sasslint
 
   python:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -97,7 +101,7 @@ jobs:
         run: make htmldoc
 
   trivy-repo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
