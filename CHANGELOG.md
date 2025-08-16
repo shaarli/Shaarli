@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
-## [v0.15.0](https://github.com/shaarli/Shaarli/releases/tag/v0.15.0) - UNRELEASED
+## [v0.15.0](https://github.com/shaarli/Shaarli/releases/tag/v0.15.0) - 2025-08-16
 
 ### Added
 
@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 * fix insufficient filename sanitization in bookmarks import form
 * fix reflected XSS via searchtags parameter*
 * keep private links number private
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.14.0...v0.15.0
+
 
 ------------------------
 
