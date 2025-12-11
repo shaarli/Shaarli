@@ -112,7 +112,7 @@
              value="{$search_tags}"
              {/if}
       autocomplete="off" data-multiple data-autofirst data-minChars="1"
-      data-list="{loop="$tags"}{$key}, {/loop}"
+      data-list="{loop="$tags"}{$key|escape}, {/loop}"
       >
       <button type="submit" class="search-button" aria-label="{'Search'|t}"><i class="fa fa-search" aria-hidden="true"></i></button>
     </form>
@@ -157,7 +157,7 @@
                 aria-label="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
                 placeholder="{$value === 'add' ? t('Tag to add') : t('Tag to delete')}"
                 autocomplete="off" data-multiple data-autofirst data-minChars="1"
-                data-list="{loop="$tags"}{$key}, {/loop}"
+                data-list="{loop="$tags"}{$key|escape}, {/loop}"
               >
               <input type="hidden" name="action" value="{$value}" />
               <input type="hidden" name="id" value="" />
