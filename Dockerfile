@@ -25,7 +25,7 @@ RUN cd shaarli \
 
 # Stage 4:
 # - Shaarli image
-FROM docker.io/alpine:3.20.8
+FROM docker.io/alpine:3.21.5
 LABEL maintainer="Shaarli Community"
 
 RUN apk --no-cache del icu-data-en \
