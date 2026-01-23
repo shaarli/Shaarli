@@ -33,16 +33,18 @@ Supported PHP versions:
 
 Version | Status | Shaarli compatibility
 :---:|:---:|:---:
+8.4 | Supported | Yes
+8.3 | Supported | Yes
 8.2 | Supported | Yes
 8.1 | Supported | Yes
-8.0 | EOL: 2023-11-26| Yes
-7.4 | EOL: 2022-11-28 | Yes
+8.0 | EOL: 2023-11-26 | Yes (up to Shaarli 0.14.x)
+7.4 | EOL: 2022-11-28 | Yes (up to Shaarli 0.14.x)
 7.3 | EOL: 2021-12-06 | Yes (up to Shaarli 0.12.2)
 7.2 | EOL: 2020-11-30 | Yes (up to Shaarli 0.12.2)
 7.1 | EOL: 2019-12-01 | Yes (up to Shaarli 0.12.2)
 7.0 | EOL: 2018-12-03 | Yes (up to Shaarli 0.10.x)
 5.6 | EOL: 2018-12-31 | Yes (up to Shaarli 0.10.x)
-5.5 | EOL: 2016-07-10 | Yes
+5.5 | EOL: 2016-07-10 | Yes (up to Shaarli 0.8.x)
 5.4 | EOL: 2015-09-14 | Yes (up to Shaarli 0.8.x)
 5.3 | EOL: 2014-08-14 | Yes (up to Shaarli 0.8.x)
 
