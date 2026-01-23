@@ -20,7 +20,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
     "file-loader": "^6.2.0",
-    "glob": "^10.3.15",
+    "glob": "^10.5.0",
     "micromatch": "^4.0.8",
     "mini-css-extract-plugin": "^2.9.0",
     "sass": "^1.77.2",

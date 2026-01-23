@@ -25,7 +25,7 @@ RUN cd shaarli \
 
 # Stage 4:
 # - Shaarli image
-FROM docker.io/alpine:3.19.7
+FROM docker.io/alpine:3.23.2
 LABEL maintainer="Shaarli Community"
 
 RUN apk --no-cache del icu-data-en \
@@ -33,31 +33,31 @@ RUN apk --no-cache del icu-data-en \
         ca-certificates \
         icu-data-full \
         nginx \
-        php82 \
-        php82-ctype \
-        php82-curl \
-        php82-fpm \
-        php82-gd \
-        php82-gettext \
-        php82-iconv \
-        php82-intl \
-        php82-json \
-        php82-ldap \
-        php82-mbstring \
-        php82-openssl \
-        php82-session \
-        php82-xml \
-        php82-simplexml \
-        php82-zlib \
+        php84 \
+        php84-ctype \
+        php84-curl \
+        php84-fpm \
+        php84-gd \
+        php84-gettext \
+        php84-iconv \
+        php84-intl \
+        php84-json \
+        php84-ldap \
+        php84-mbstring \
+        php84-openssl \
+        php84-session \
+        php84-xml \
+        php84-simplexml \
+        php84-zlib \
         s6
 
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
-COPY .docker/php-fpm.conf /etc/php82/php-fpm.conf
+COPY .docker/php-fpm.conf /etc/php84/php-fpm.conf
 COPY .docker/services.d /etc/services.d
 
-RUN rm -rf /etc/php82/php-fpm.d/www.conf \
-    && sed -i 's/post_max_size.*/post_max_size = 10M/' /etc/php82/php.ini \
-    && sed -i 's/upload_max_filesize.*/upload_max_filesize = 10M/' /etc/php82/php.ini
+RUN rm -rf /etc/php84/php-fpm.d/www.conf \
+    && sed -i 's/post_max_size.*/post_max_size = 10M/' /etc/php84/php.ini \
+    && sed -i 's/upload_max_filesize.*/upload_max_filesize = 10M/' /etc/php84/php.ini
 
 
 WORKDIR /var/www

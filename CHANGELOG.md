@@ -6,6 +6,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
+## [v0.16.0](https://github.com/shaarli/Shaarli/releases/tag/v0.16.0) - 2026-11-24
+
+Small release focused on infrastructure/CI improvements and Docker/security updates.
+
+### Deprecated
+
+* `v0.x` branches and tags will no longer be maintained after `v0.16`. Always upgrade to the latest [release](https://github.com/shaarli/Shaarli/releases) to receive bugfixes and security patches.
+
+### Changed
+
+* docker: update PHP to v8.4
+* docker: update base alpine image to v3.23.2
+* ci: use composer install for reproducible builds
+* build/docs: simplify release procedure
+* docs: update PHP version compatibility table
+
+### Security
+
+* fix stored XSS via suggested tags ([GHSA-g3xq-mj52-f8pg](https://github.com/shaarli/Shaarli/security/advisories/GHSA-g3xq-mj52-f8pg))
+* build(deps): update frontend build dependencies (js-yaml/glob)
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.15.0...v0.16.0
+
+------------------------
+
 ## [v0.15.0](https://github.com/shaarli/Shaarli/releases/tag/v0.15.0) - 2025-08-16
 
 ### Added
@@ -154,24 +179,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Bulk action: add or delete tag to multiple bookmarks
 - New Core Plugin: ReadItLater
-- Plugin system: allow plugins to provide custom routes 
+- Plugin system: allow plugins to provide custom routes
 - Support search highlights when matching URL content
 - Support for OR (~) and optional AND (+) operators for tag search
 - Russian translation
 - Chinese translation
 - Export:
   - Export: set a bookmark's LAST_MODIFIED attribute to its update timestamp
-  - Export: set a bookmark's PRIVATE attribute using an integer value 
+  - Export: set a bookmark's PRIVATE attribute using an integer value
 - Add an additional free disk space check before saving the datastore
 - curl: support HTTP/2 response code header
 - CI:
   - Build and push Docker images through Github Actions
   - push container images to github registry in addition to dockerhub
-- Documentation: 
+- Documentation:
   - Add '206 not acceptable' to the Troubleshooting section
   - Add mention to Shaarli Archiver
   - doc: add note to adjust proxy timeouts or PHP max execution time
-  - doc: shaarli configuration: mention file:/// URIs 
+  - doc: shaarli configuration: mention file:/// URIs
   - add "formatter" key to example config.json.php
 
 ## Changed
@@ -181,26 +206,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update Japanese translations
 - Update German translations
 - Templates: Inject current template name
-- format_date: include timezone in IntlDateFormatter object 
+- format_date: include timezone in IntlDateFormatter object
 - Handle pagination through BookmarkService
 - autocapitalize off for username input
 - More intuitive label for plugin checkboxes
-- Simple and uniform localized website title 
+- Simple and uniform localized website title
 - Use rewrited version of Netscape Bookmark Parser
 - tests/makefile: rewrite translate target to be compatible with busybox
 - PubSubHub Plugin: make 1 external call per request
-- Docker: 
+- Docker:
   - newer alpine (for newer PHP) and apk upgrade
   - Dockerfile.armhf: upgrade python2 -> python3
   - Dockerfile: add php8-gettext package
   - update s6 service definition to use php-fpm8
   - install php8-ldap in Docker images
-- CI: 
+- CI:
   - use Github Action instead of Travis CI
-  - use the yarnpkg command instead of yarn 
+  - use the yarnpkg command instead of yarn
   - tools: github actions: fix PHP 8.0 tests
   - github actions: add tests for PHP 8.2
-- Documentation: 
+- Documentation:
   - apache: explicitely ste index.php as DirectoryIndex
   - bookmarklet is now working on github.com
   - LDAP login support, update php requirements list
@@ -213,11 +238,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Error handling if the datastore mutex is not working
 - Synchronous metadata retrieval is failing in strict mode
 - Improve metadata extraction
-- Typo: 'Authentication' -> 
+- Typo: 'Authentication' ->
 - default_colors plugin: update CSS file on color change
 - API: POST/PUT Link - properly parse tags string
-- Error when using bulk shaare with a single URL 
-- Bulk Shaare: 
+- Error when using bulk shaare with a single URL
+- Bulk Shaare:
   - use unique HTML ID
   - error with a single URL
   - redirection with ending slash
@@ -232,14 +257,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Do not display deprecated warnings by default
 - Fix a bug when using '/' as a tag separator
 - Fix Logger exception: gracefully handle permission issue
-- Documentation: 
+- Documentation:
   - plugins.md: fix link casing
 
 ## Removed
 
 - Daily RSS: Remove relative description (today, yesterday)
-- Documentation: 
-  - remove the markdown plugin from the plugins list 
+- Documentation:
+  - remove the markdown plugin from the plugins list
   - remove duplicate "general" key in example config.php.json
 
 ------------------------

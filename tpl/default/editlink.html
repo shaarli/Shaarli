@@ -58,7 +58,7 @@
       </div>
       <div class="{if="$retrieve_description"}{$asyncLoadClass}{/if}">
         <input type="text" name="lf_tags" id="lf_tags{$batchId}" value="{$link.tags}" class="lf_input autofocus"
-          data-list="{loop="$tags"}{$key}, {/loop}" data-multiple data-autofirst autocomplete="off" >
+          data-list="{loop="$tags"}{$key|escape}, {/loop}" data-multiple data-autofirst autocomplete="off" >
         <div class="icon-container">
           <i class="loader"></i>
         </div>

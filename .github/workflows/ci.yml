@@ -6,6 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # NOTE: When updating PHP versions, also update doc/md/Server-configuration.md
         php-versions: ['8.1', '8.2', '8.3', '8.4']
     name: PHP ${{ matrix.php-versions }}
     steps:
@@ -30,12 +31,12 @@ jobs:
       - name: Check PHP version
         run: php -v
 
-      - name: Setup Composer from PHP version + update
+      - name: Setup Composer platform config
         run: composer config --unset platform && composer config platform.php ${{ matrix.php-versions }}
 
-      - name: Update dependencies for PHP 8.x
+      - name: Install Composer dependencies
         run: |
-          composer update
+          composer install --no-interaction --prefer-dist
 
       - name: Install locales
         run: |
