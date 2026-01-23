@@ -136,6 +136,20 @@ release_zip: composer_dependencies htmldoc translate build_frontend
 	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)tpl/
 	rm -rf $(ARCHIVE_PREFIX)
 
+### bump version number in all relevant files
+bump_version:
+ifndef VERSION
+	$(error VERSION is not set. Usage: make bump_version VERSION=x.y.z)
+endif
+	@echo "Bumping version to $(VERSION)..."
+	@sed -i 's|/\* .* \*/|/* $(VERSION) */|' shaarli_version.php
+	@sed -i "s/^version = '.*'/version = '$(VERSION)'/" doc/conf.py
+	@sed -i "s/^release = '.*'/release = '$(VERSION)'/" doc/conf.py
+	@sed -i "s|/badge/release-v[^-]*-|/badge/release-v$(VERSION)-|" README.md
+	@sed -i "s|/releases/tag/v[0-9.]*|/releases/tag/v$(VERSION)|" README.md
+	@echo "Version bumped to $(VERSION)"
+	@echo "Please review the changes with 'git diff' before committing."
+
 ##
 # Targets for repository and documentation maintenance
 ##

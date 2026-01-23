@@ -395,13 +395,13 @@ This guide assumes that you have:
 
 ### Release notes and `CHANGELOG.md`
 
-GitHub allows drafting the release notes for the upcoming release, from the [Releases](https://github.com/shaarli/Shaarli/releases) page. This way, the release note can be drafted while contributions are merged to `master`. See https://keepachangelog.com/en/0.3.0/ for changelog formatting.
-
-`CHANGELOG.md` should contain the same information as the release note draft for the upcoming version. Update it to:
+Update `CHANGELOG.md` to:
 
 - add new entries (additions, fixes, etc.)
 - mark the current version as released by setting its date and link
 - add a new section for the future unreleased version
+
+See https://keepachangelog.com/en/0.3.0/ for changelog formatting.
 
 ```bash
 ## [v0.x.y](https://github.com/shaarli/Shaarli/releases/tag/v0.x.y) - UNRELEASED
@@ -420,20 +420,12 @@ GitHub allows drafting the release notes for the upcoming release, from the [Rel
 
 ```
 
-### Update the list of Git contributors
-
-```bash
-$ make generate_authors
-$ git add AUTHORS
-$ git commit -m "doc: update AUTHORS"
-```
-
 ### Create and merge a Pull Request
 
 Create a Pull Request to merge changes from your remote, into `master` in the community Shaarli repository, and have it merged.
 
 
-### Create the release branch and update shaarli_version.php
+### Create the release branch and update version
 
 ```bash
 # fetch latest changes from master to your local copy
@@ -451,10 +443,11 @@ $ git merge master
 # Check that everything went fine:
 $ make test
 
-# Bump shaarli_version.php from dev to 0.x.0, **without the v**
-$ vim shaarli_version.php doc/conf.py README.md
-$ git add shaarli_version doc/conf.py README.md
-$ git commit -m "bump Shaarli version to v0.x.0"
+# Update AUTHORS and bump version to 0.x.0 (without the v prefix)
+$ make generate_authors
+$ make bump_version VERSION=0.x.0
+$ git add AUTHORS shaarli_version.php doc/conf.py README.md
+$ git commit -m "Release v0.x.0"
 $ git push upstream v0.x
 ```
 
@@ -474,26 +467,11 @@ git tag -s -m "Release v0.5.0" v0.5.0
 git push --tags upstream
 ```
 
-Here is how to verify a signed tag. [`v0.5.0`](https://github.com/shaarli/Shaarli/releases/tag/v0.5.0) is the first GPG-signed tag pushed on the Community Shaarli. Let's have a look at its signature!
-
-```bash
-# update the list of available tags
-git fetch upstream
-
-# get the SHA1 reference of the tag
-git show-ref tags/v0.5.0
-# gives: f7762cf803f03f5caf4b8078359a63783d0090c1 refs/tags/v0.5.0
-
-# verify the tag signature information
-git verify-tag f7762cf803f03f5caf4b8078359a63783d0090c1
-# gpg: Signature made Thu 30 Jul 2015 11:46:34 CEST using RSA key ID 4100DF6F
-# gpg: Good signature from "VirtualTam <virtualtam@flibidi.net>" [ultimate]
-```
-
 ### Publish the GitHub release
 
-- In the `master` banch, update version badges in `README.md` to point to the newly released Shaarli version
-- Update the previously drafted [release](https://github.com/shaarli/Shaarli/releases) (notes, tag) and publish it
+- In the `master` branch, update version badges in `README.md` to point to the newly released Shaarli version
+- Create a new [release](https://github.com/shaarli/Shaarli/releases) and copy the release notes from `CHANGELOG.md`
+- Set the appropriate tag and publish the release
 - Profit!
 
 
