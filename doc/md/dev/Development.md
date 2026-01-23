@@ -420,20 +420,12 @@ GitHub allows drafting the release notes for the upcoming release, from the [Rel
 
 ```
 
-### Update the list of Git contributors
-
-```bash
-$ make generate_authors
-$ git add AUTHORS
-$ git commit -m "doc: update AUTHORS"
-```
-
 ### Create and merge a Pull Request
 
 Create a Pull Request to merge changes from your remote, into `master` in the community Shaarli repository, and have it merged.
 
 
-### Create the release branch and update shaarli_version.php
+### Create the release branch and update version
 
 ```bash
 # fetch latest changes from master to your local copy
@@ -451,10 +443,11 @@ $ git merge master
 # Check that everything went fine:
 $ make test
 
-# Bump version to 0.x.0 (without the v prefix)
+# Update AUTHORS and bump version to 0.x.0 (without the v prefix)
+$ make generate_authors
 $ make bump_version VERSION=0.x.0
-$ git add shaarli_version.php doc/conf.py README.md
-$ git commit -m "bump Shaarli version to v0.x.0"
+$ git add AUTHORS shaarli_version.php doc/conf.py README.md
+$ git commit -m "Release v0.x.0"
 $ git push upstream v0.x
 ```
 
@@ -529,7 +522,6 @@ make test
 # push the latest branch
 git push upstream release
 ```
-
 
 ## Plugin system
 
