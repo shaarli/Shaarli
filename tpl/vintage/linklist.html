@@ -22,7 +22,7 @@
                     value="{$search_tags}"
                 {/if}
                 autocomplete="off" data-multiple data-minChars="1"
-                data-list="{loop="$tags"}{$key}, {/loop}"
+                data-list="{loop="$tags"}{$key|escape}, {/loop}"
             >
             <input type="submit" value="Search" class="bigbutton">
         </form>
