@@ -467,22 +467,6 @@ git tag -s -m "Release v0.5.0" v0.5.0
 git push --tags upstream
 ```
 
-Here is how to verify a signed tag. [`v0.5.0`](https://github.com/shaarli/Shaarli/releases/tag/v0.5.0) is the first GPG-signed tag pushed on the Community Shaarli. Let's have a look at its signature!
-
-```bash
-# update the list of available tags
-git fetch upstream
-
-# get the SHA1 reference of the tag
-git show-ref tags/v0.5.0
-# gives: f7762cf803f03f5caf4b8078359a63783d0090c1 refs/tags/v0.5.0
-
-# verify the tag signature information
-git verify-tag f7762cf803f03f5caf4b8078359a63783d0090c1
-# gpg: Signature made Thu 30 Jul 2015 11:46:34 CEST using RSA key ID 4100DF6F
-# gpg: Good signature from "VirtualTam <virtualtam@flibidi.net>" [ultimate]
-```
-
 ### Publish the GitHub release
 
 - In the `master` branch, update version badges in `README.md` to point to the newly released Shaarli version
