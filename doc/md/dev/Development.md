@@ -451,9 +451,9 @@ $ git merge master
 # Check that everything went fine:
 $ make test
 
-# Bump shaarli_version.php from dev to 0.x.0, **without the v**
-$ vim shaarli_version.php doc/conf.py README.md
-$ git add shaarli_version doc/conf.py README.md
+# Bump version to 0.x.0 (without the v prefix)
+$ make bump_version VERSION=0.x.0
+$ git add shaarli_version.php doc/conf.py README.md
 $ git commit -m "bump Shaarli version to v0.x.0"
 $ git push upstream v0.x
 ```
@@ -492,7 +492,7 @@ git verify-tag f7762cf803f03f5caf4b8078359a63783d0090c1
 
 ### Publish the GitHub release
 
-- In the `master` banch, update version badges in `README.md` to point to the newly released Shaarli version
+- In the `master` branch, update version badges in `README.md` to point to the newly released Shaarli version
 - Update the previously drafted [release](https://github.com/shaarli/Shaarli/releases) (notes, tag) and publish it
 - Profit!
 
@@ -529,6 +529,7 @@ make test
 # push the latest branch
 git push upstream release
 ```
+
 
 ## Plugin system
 
