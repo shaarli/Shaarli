@@ -94,6 +94,11 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [Bookmark Archiver](https://github.com/ArchiveBox/ArchiveBox) - Save an archived copy of all websites starred using browser bookmarks/Shaarli/Delicious/Instapaper/Unmark.it/Pocket/Pinboard. Outputs browseable html.
 
 
+### iOS Shortcut
+
+- [+Shaarli](https://www.icloud.com/shortcuts/b0219ecae2db4c539c0aed8221b5eda4) - Related Blog Post: [Save in Shaarli Shortcut](https://initialcharge.net/2021/02/shaarli-shortcut/)
+
+
 ## Alternatives to Shaarli
 
 See [awesome-selfhosted: bookmarks & link sharing](https://awesome-selfhosted.net/tags/bookmarks-and-link-sharing.html).
