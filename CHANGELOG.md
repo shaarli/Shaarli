@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
+## [v0.16.1](https://github.com/shaarli/Shaarli/releases/tag/v0.16.1) - 2026-11-24
+
+### Fixed
+
+* fix Docker container failing to start (`/bin/s6-svscan: no such file or directory`)
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.0...v0.16.1
+
+------------------------
+
 ## [v0.16.0](https://github.com/shaarli/Shaarli/releases/tag/v0.16.0) - 2026-11-24
 
 Small release focused on infrastructure/CI improvements and Docker/security updates.
