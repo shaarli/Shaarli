@@ -461,6 +461,7 @@ git checkout v0.5
 git pull upstream v0.5
 
 # create a signed tag
+# you may need to export GPG_TTY=$(tty) on a headless build machine
 git tag -s -m "Release v0.5.0" v0.5.0
 
 # push the tag to upstream
