@@ -2,8 +2,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 project = 'shaarli'
 author = 'shaarli community'
-version = '0.16.0'
-release = '0.16.0'
+version = '0.16.1'
+release = '0.16.1'
 copyright = '2011-2023, the shaarli community'
 language = 'en'
 html_title = 'Shaarli documentation'

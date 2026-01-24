@@ -72,5 +72,5 @@ VOLUME /var/www/shaarli/data
 
 EXPOSE 80
 
-ENTRYPOINT ["/bin/s6-svscan", "/etc/services.d"]
+ENTRYPOINT ["/usr/bin/s6-svscan", "/etc/services.d"]
 CMD []
