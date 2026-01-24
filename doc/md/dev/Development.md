@@ -485,8 +485,8 @@ Release archives will contain Shaarli code plus all required third-party librari
  `git checkout` the appropriate branch, then:
 
 ```bash
-# checkout the appropriate branch
-git checkout 0.x.y
+# checkout the appropriate tag
+git checkout v0.x.y
 # generate zip archives
 make release_archive
 ```
