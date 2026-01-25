@@ -389,9 +389,15 @@ This guide assumes that you have:
 - maintainer permissions on the main Shaarli repository, to:
     - push the signed tag
     - create a new release
-- [Composer](https://getcomposer.org/) needs to be installed
-- The [venv](https://docs.python.org/3/library/venv.html) Python 3 module needs to be installed for HTML documentation generation.
-- Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
+- installed necessary build dependencies
+
+```bash
+# on Debian-based systems
+sudo apt install composer yarnpkg gettext phpunit yarnpkg php8.2-mbstring php8.2-gd php8.2-intl php8.2-curl php8.2-gettext php8.2-ldap
+make composer_dependencies_dev
+```
+
+Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
 
 ### Release notes and `CHANGELOG.md`
 
