@@ -457,12 +457,12 @@ Git [tags](https://git-scm.com/book/en/v2/Distributed-Git-Maintaining-a-Project)
 
 ```bash
 # update your local copy
-git checkout v0.5
-git pull upstream v0.5
+git checkout v0.x
+git pull upstream v0.x
 
 # create a signed tag
 # you may need to export GPG_TTY=$(tty) on a headless build machine
-git tag -s -m "Release v0.5.0" v0.5.0
+git tag -s -m "Release v0.x.y" v0.x.y
 
 # push the tag to upstream
 git push --tags upstream
