@@ -211,6 +211,18 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
             '$1',
             $description
         );
+        $allowedProtocols = $this->allowedProtocols;
+        $description = preg_replace_callback(
+            '#<a\s[^>]*href="([^"]*)"#is',
+            function ($match) use ($allowedProtocols) {
+                if (startsWith($match[1], '.')) {
+                    return $match[0];
+                }
+                $sanitized = whitelist_protocols($match[1], $allowedProtocols);
+                return str_replace($match[1], $sanitized, $match[0]);
+            },
+            $description
+        );
         return $description;
     }
 
