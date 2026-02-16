@@ -64,7 +64,7 @@ function createAwesompleteInstance(element, separator, tags = []) {
     awesome.input.value = `${before}${text}${separator}`;
   };
   // Highlight found items
-  awesome.item = (text, input) => Awesomplete.ITEM(text, input.match(new RegExp(`[^${separator}]*$`))[0]);
+  awesome.item = (text, input) => Awesomplete.ITEM(he.encode(text), input.match(new RegExp(`[^${separator}]*$`))[0]);
   // Don't display already selected items
   // WARNING: pseudo classes does not seem to work with string litterals...
   const reg = new RegExp(`([^${separator}]+)${separator}`, 'g');
