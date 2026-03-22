@@ -13,7 +13,7 @@ Once your Shaarli instance is installed, the file `data/config.json.php` is gene
 
 Some settings can be configured directly from a web browser by accesing the `Tools` menu. Values are read/written to/from the configuration file.
 
-![](https://i.imgur.com/boaaibC.png)
+![](../images/boaaibC.png)
 
 ### LDAP
 

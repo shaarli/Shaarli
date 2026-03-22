@@ -736,8 +736,8 @@ Triggered on every page - allows plugins to add content in page headers.
   - `buttons_toolbar`: after the list of buttons in the header.
   - `fields_toolbar`: after search fields in the header. Note: This will only be called in linklist.
 
-![buttons_toolbar_example](https://i.imgur.com/ssJUOrt.png)
-![fields_toolbar_example](https://i.imgur.com/3GMifI2.png)
+![buttons_toolbar_example](../../images/ssJUOrt.png)
+![fields_toolbar_example](../../images/3GMifI2.png)
 
 
 #### render_includes
@@ -759,7 +759,7 @@ Triggered on every page - allows plugins to add content in page footer and inclu
   - `endofpage`: called at the end of the page.
   - `js_files`: called at the end of the page, to include custom JS scripts. Note: only add the path of the JS file. E.g: `plugins/demo_plugin/custom_demo.js`.
 
-![text_example](https://i.imgur.com/L5S2YEH.png)
+![text_example](../../images/L5S2YEH.png)
 
 
 #### render_linklist
@@ -775,10 +775,10 @@ Triggered when `linklist` is displayed (list of links, permalink, search, tag fi
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![action_plugin_example](https://i.imgur.com/Q12PWg0.png)
-![link_plugin_example](https://i.imgur.com/3oDPhWx.png)
-![plugin_start_zone_example](https://i.imgur.com/OVBkGy3.png)
-![plugin_end_zone_example](https://i.imgur.com/6IoRuop.png)
+![action_plugin_example](../../images/Q12PWg0.png)
+![link_plugin_example](../../images/3oDPhWx.png)
+![plugin_start_zone_example](../../images/OVBkGy3.png)
+![plugin_end_zone_example](../../images/6IoRuop.png)
 
 
 #### render_editlink
@@ -791,7 +791,7 @@ Triggered when the link edition form is displayed - allows to add fields in the 
 - Template placeholders: items can be displayed in templates by adding an entry in `$data['<placeholder>']` array. List of placeholders:
   - `edit_link_plugin`: after tags field.
 
-![edit_link_plugin_example](https://i.imgur.com/5u17Ens.png)
+![edit_link_plugin_example](../../images/5u17Ens.png)
 
 
 #### render_tools
@@ -804,7 +804,7 @@ Triggered when the "tools" page is displayed - allows to add content at the end 
 - Template placeholders: items can be displayed in templates by adding an entry in `$data['<placeholder>']` array. List of placeholders:
   - `tools_plugin`: at the end of the page.
 
-![tools_plugin_example](https://i.imgur.com/Bqhu9oQ.png)
+![tools_plugin_example](../../images/Bqhu9oQ.png)
 
 
 #### render_picwall
@@ -818,7 +818,7 @@ Triggered when picwall is displayed - allows to add content at the top and botto
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![plugin_start_end_zone_example](https://i.imgur.com/tVTQFER.png)
+![plugin_start_end_zone_example](../../images/tVTQFER.png)
 
 
 #### render_tagcloud
@@ -834,7 +834,7 @@ Triggered when tagcloud is displayed - allows to add content at the top and bott
 - For each tag, the following placeholder can be used:
   - `tag_plugin`: after each tag
 
-![plugin_start_end_zone_example](https://i.imgur.com/vHmyT3a.png)
+![plugin_start_end_zone_example](../../images/vHmyT3a.png)
 
 
 #### render_taglist
@@ -863,7 +863,7 @@ Triggered when tagcloud is displayed - allows to add content at the top and bott
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![link_plugin_example](https://i.imgur.com/hzhMfSZ.png)
+![link_plugin_example](../../images/hzhMfSZ.png)
 
 
 #### render_feed
