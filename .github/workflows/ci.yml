@@ -73,19 +73,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
-      - name: Yarn install
-        run: yarnpkg install
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Verify successful frontend builds
-        run: yarnpkg run build
-
-      - name: JS static analysis
-        run: make eslint
-
-      - name: Linter for SASS syntax
-        run: make sasslint
+      - name: Build frontend and run linters
+        run: make build_frontend eslint sasslint
 
   python:
     runs-on: ubuntu-24.04

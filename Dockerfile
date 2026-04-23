@@ -16,9 +16,11 @@ RUN cd shaarli \
 
 # Stage 3:
 # - Frontend dependencies
-FROM docker.io/node:18-alpine as node
+FROM docker.io/node:22-alpine as node
 COPY --from=composer /app/shaarli shaarli
 RUN cd shaarli \
+    && corepack enable \
+    && corepack prepare yarn@4.1.0 --activate \
     && yarnpkg install \
     && yarnpkg run build \
     && rm -rf node_modules
