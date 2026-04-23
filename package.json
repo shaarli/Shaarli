@@ -1,5 +1,6 @@
 {
   "name": "shaarli",
+  "packageManager": "yarn@4.1.0",
   "description": "Shaarli frontend",
   "author": "The Shaarli Community",
   "license": "SEE LICENSE IN COPYING",
