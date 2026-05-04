@@ -33,7 +33,7 @@
             <label for="lf_tags"><i>Tags</i></label>
             <div class="{if="$retrieve_description"}{$asyncLoadClass}{/if}">
               <input type="text" name="lf_tags" id="lf_tags" value="{$link.tags}" class="lf_input"
-                data-list="{loop="$tags"}{$key}, {/loop}" data-multiple autocomplete="off" >
+                data-list="{loop="$tags"}{$key|escape}, {/loop}" data-multiple autocomplete="off" >
               <div class="icon-container">
                 <i class="loader"></i>
               </div>
