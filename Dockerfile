@@ -54,6 +54,9 @@ RUN apk --no-cache del icu-data-en \
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
 COPY .docker/php-fpm.conf /etc/php84/php-fpm.conf
 COPY .docker/services.d /etc/services.d
+COPY .docker/localbin/check-ipv6.sh /usr/local/bin/check-ipv6.sh
+
+RUN chmod +x /usr/local/bin/check-ipv6.sh
 
 RUN rm -rf /etc/php84/php-fpm.d/www.conf \
     && sed -i 's/post_max_size.*/post_max_size = 10M/' /etc/php84/php.ini \
