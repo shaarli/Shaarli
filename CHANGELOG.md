@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - UNRELEASED
+## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - 2025-05-23
 
 ### Security
 - fix(xss): encode tag text in Awesomplete autocomplete suggestions
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - doc: add documentation for running GitHub Actions locally with `act`
 - doc: add documentation for GPG_TTY on headless build environments
 
-**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.0...v0.16.1
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.1...v0.16.2
 
 ------------------------
 
