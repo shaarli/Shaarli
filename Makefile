@@ -190,10 +190,10 @@ translate:
 	done;
 
 ### Run ESLint check against Shaarli's JS files
-eslint:
-	@yarnpkg run eslint -c .dev/.eslintrc.js assets/vintage/js/
-	@yarnpkg run eslint -c .dev/.eslintrc.js assets/default/js/
-	@yarnpkg run eslint -c .dev/.eslintrc.js assets/common/js/
+eslint: frontend_dependencies
+	@yarnpkg exec eslint assets/vintage/js/
+	@yarnpkg exec eslint assets/default/js/
+	@yarnpkg exec eslint assets/common/js/
 
 ### Run CSSLint check against Shaarli's SCSS files
 sasslint:
@@ -204,7 +204,7 @@ sasslint:
 ##
 
 # trivy version (https://github.com/aquasecurity/trivy/releases)
-TRIVY_VERSION=0.56.2
+TRIVY_VERSION=0.69.3
 # default trivy exit code when vulnerabilities are found
 TRIVY_EXIT_CODE=1
 # default docker image to scan with trivy

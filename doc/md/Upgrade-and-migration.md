@@ -12,6 +12,8 @@ Shaarli stores all user data and [configuration](Shaarli-configuration.md) under
 
 ```bash
 sudo cp -r /var/www/shaarli.mydomain.org/data ~/shaarli-data-backup
+# verify backup was successful
+sudo ls -la ~/shaarli-data-backup
 ```
 
 ## Upgrading from ZIP archives
@@ -24,20 +26,21 @@ cd ~
 wget https://github.com/shaarli/Shaarli/releases/download/v0.X.Y/shaarli-v0.X.Y-full.zip
 unzip shaarli-v0.X.Y-full.zip
 
-# overwrite your Shaarli installation with the new release **All data will be lost, see _Backup your data_ above.**
+# overwrite your Shaarli installation with the new release
+# WARNING: --delete will remove ALL files not in the source, including your data directory
 sudo rsync -avP --delete Shaarli/ /var/www/shaarli.mydomain.org/
+
+# restore backups of the data directory
+sudo cp -r ~/shaarli-data-backup/* /var/www/shaarli.mydomain.org/data/
 
 # restore file permissions as described on the installation page
 sudo chown -R root:www-data /var/www/shaarli.mydomain.org
 sudo chmod -R g+rX /var/www/shaarli.mydomain.org
 sudo chmod -R g+rwX /var/www/shaarli.mydomain.org/{cache/,data/,pagecache/,tmp/}
 
-# restore backups of the data directory
-sudo cp -r ~/shaarli-data-backup/* /var/www/shaarli.mydomain.org/data/
-
 # If you use gettext mode for translations (not the default), reload your web server.
-sudo systemctl restart apache2
-sudo systemctl restart nginx
+sudo systemctl reload apache2
+sudo systemctl reload nginx
 ```
 
 If you don't have shell access (eg. on shared hosting), backup the shaarli data directory, download the ZIP archive locally, extract it, upload it to the server using file transfer, and restore the data directory backup.
@@ -61,7 +64,7 @@ sudo composer install --no-dev
 sudo make translate
 
 # If you use translations in gettext mode (not the default), reload your web server.
-sudo systemctl reload apache
+sudo systemctl reload apache2
 sudo systemctl reload nginx
 
 # update front-end dependencies (Shaarli >= v0.10.0)
