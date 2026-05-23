@@ -275,7 +275,7 @@ $ vendor/bin/phpunit --group WIP tests/
 
 Unit tests can be run inside [Docker](../Docker.md) containers.
 
-Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under commonLinux environments. Dockerfiles are provided for the following environments:
+Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under common Linux environments. Dockerfiles are provided for the following environments:
 
 - [`alpine323`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine321/Dockerfile) - [Alpine Linux 3.23](https://www.alpinelinux.org/downloads/)
 - [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
@@ -307,6 +307,27 @@ composer install --prefer-dist
 docker run -v $PWD:/shaarli shaarli-test:debian9 docker_test
 # run the full test campaign
 docker run -v $PWD:/shaarli shaarli-test:debian9 docker_all_tests
+```
+
+### Building and testing the Docker image locally
+
+To build and test the full Shaarli Docker image from the current source:
+
+```bash
+# Build the image
+docker build -t shaarli:dev .
+
+# Run it locally (data persists in a named volume)
+docker run --name shaarli-test -p 8080:80 -v shaarli-data:/var/www/shaarli/data shaarli:dev
+```
+
+Then visit `http://localhost:8080` to verify the application works correctly. The `-v` flag mounts the data directory as a named volume, so bookmarks persist across container restarts.
+
+```bash
+# stop the test container with Ctrl+C, then delete it
+docker rm shaarli-test
+# delete the persistent volume (optional, removes all stored bookmarks)
+docker volume rm shaarli-data
 ```
 
 ## GnuPG Signature
