@@ -16,16 +16,18 @@ RUN cd shaarli \
 
 # Stage 3:
 # - Frontend dependencies
-FROM docker.io/node:18-alpine as node
+FROM docker.io/node:22-alpine as node
 COPY --from=composer /app/shaarli shaarli
 RUN cd shaarli \
+    && corepack enable \
+    && corepack prepare yarn@4.1.0 --activate \
     && yarnpkg install \
     && yarnpkg run build \
     && rm -rf node_modules
 
 # Stage 4:
 # - Shaarli image
-FROM docker.io/alpine:3.23.2
+FROM docker.io/alpine:3.23.3
 LABEL maintainer="Shaarli Community"
 
 RUN apk --no-cache del icu-data-en \

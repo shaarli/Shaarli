@@ -275,7 +275,7 @@ $ vendor/bin/phpunit --group WIP tests/
 
 Unit tests can be run inside [Docker](../Docker.md) containers.
 
-Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under commonLinux environments. Dockerfiles are provided for the following environments:
+Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under common Linux environments. Dockerfiles are provided for the following environments:
 
 - [`alpine323`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine321/Dockerfile) - [Alpine Linux 3.23](https://www.alpinelinux.org/downloads/)
 - [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
@@ -307,6 +307,27 @@ composer install --prefer-dist
 docker run -v $PWD:/shaarli shaarli-test:debian9 docker_test
 # run the full test campaign
 docker run -v $PWD:/shaarli shaarli-test:debian9 docker_all_tests
+```
+
+### Building and testing the Docker image locally
+
+To build and test the full Shaarli Docker image from the current source:
+
+```bash
+# Build the image
+docker build -t shaarli:dev .
+
+# Run it locally (data persists in a named volume)
+docker run --name shaarli-test -p 8080:80 -v shaarli-data:/var/www/shaarli/data shaarli:dev
+```
+
+Then visit `http://localhost:8080` to verify the application works correctly. The `-v` flag mounts the data directory as a named volume, so bookmarks persist across container restarts.
+
+```bash
+# stop the test container with Ctrl+C, then delete it
+docker rm shaarli-test
+# delete the persistent volume (optional, removes all stored bookmarks)
+docker volume rm shaarli-data
 ```
 
 ## GnuPG Signature
@@ -389,9 +410,15 @@ This guide assumes that you have:
 - maintainer permissions on the main Shaarli repository, to:
     - push the signed tag
     - create a new release
-- [Composer](https://getcomposer.org/) needs to be installed
-- The [venv](https://docs.python.org/3/library/venv.html) Python 3 module needs to be installed for HTML documentation generation.
-- Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
+- installed necessary build dependencies
+
+```bash
+# on Debian-based systems
+sudo apt install composer yarnpkg gettext phpunit yarnpkg php8.2-mbstring php8.2-gd php8.2-intl php8.2-curl php8.2-gettext php8.2-ldap
+make composer_dependencies_dev
+```
+
+Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
 
 ### Release notes and `CHANGELOG.md`
 
@@ -457,11 +484,12 @@ Git [tags](https://git-scm.com/book/en/v2/Distributed-Git-Maintaining-a-Project)
 
 ```bash
 # update your local copy
-git checkout v0.5
-git pull upstream v0.5
+git checkout v0.x
+git pull upstream v0.x
 
 # create a signed tag
-git tag -s -m "Release v0.5.0" v0.5.0
+# you may need to export GPG_TTY=$(tty) on a headless build machine
+git tag -s -m "Release v0.x.y" v0.x.y
 
 # push the tag to upstream
 git push --tags upstream
@@ -485,8 +513,8 @@ Release archives will contain Shaarli code plus all required third-party librari
  `git checkout` the appropriate branch, then:
 
 ```bash
-# checkout the appropriate branch
-git checkout 0.x.y
+# checkout the appropriate tag
+git checkout v0.x.y
 # generate zip archives
 make release_archive
 ```
@@ -729,8 +757,8 @@ Triggered on every page - allows plugins to add content in page headers.
   - `buttons_toolbar`: after the list of buttons in the header.
   - `fields_toolbar`: after search fields in the header. Note: This will only be called in linklist.
 
-![buttons_toolbar_example](https://i.imgur.com/ssJUOrt.png)
-![fields_toolbar_example](https://i.imgur.com/3GMifI2.png)
+![buttons_toolbar_example](../../images/ssJUOrt.png)
+![fields_toolbar_example](../../images/3GMifI2.png)
 
 
 #### render_includes
@@ -752,7 +780,7 @@ Triggered on every page - allows plugins to add content in page footer and inclu
   - `endofpage`: called at the end of the page.
   - `js_files`: called at the end of the page, to include custom JS scripts. Note: only add the path of the JS file. E.g: `plugins/demo_plugin/custom_demo.js`.
 
-![text_example](https://i.imgur.com/L5S2YEH.png)
+![text_example](../../images/L5S2YEH.png)
 
 
 #### render_linklist
@@ -768,10 +796,10 @@ Triggered when `linklist` is displayed (list of links, permalink, search, tag fi
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![action_plugin_example](https://i.imgur.com/Q12PWg0.png)
-![link_plugin_example](https://i.imgur.com/3oDPhWx.png)
-![plugin_start_zone_example](https://i.imgur.com/OVBkGy3.png)
-![plugin_end_zone_example](https://i.imgur.com/6IoRuop.png)
+![action_plugin_example](../../images/Q12PWg0.png)
+![link_plugin_example](../../images/3oDPhWx.png)
+![plugin_start_zone_example](../../images/OVBkGy3.png)
+![plugin_end_zone_example](../../images/6IoRuop.png)
 
 
 #### render_editlink
@@ -784,7 +812,7 @@ Triggered when the link edition form is displayed - allows to add fields in the 
 - Template placeholders: items can be displayed in templates by adding an entry in `$data['<placeholder>']` array. List of placeholders:
   - `edit_link_plugin`: after tags field.
 
-![edit_link_plugin_example](https://i.imgur.com/5u17Ens.png)
+![edit_link_plugin_example](../../images/5u17Ens.png)
 
 
 #### render_tools
@@ -797,7 +825,7 @@ Triggered when the "tools" page is displayed - allows to add content at the end 
 - Template placeholders: items can be displayed in templates by adding an entry in `$data['<placeholder>']` array. List of placeholders:
   - `tools_plugin`: at the end of the page.
 
-![tools_plugin_example](https://i.imgur.com/Bqhu9oQ.png)
+![tools_plugin_example](../../images/Bqhu9oQ.png)
 
 
 #### render_picwall
@@ -811,7 +839,7 @@ Triggered when picwall is displayed - allows to add content at the top and botto
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![plugin_start_end_zone_example](https://i.imgur.com/tVTQFER.png)
+![plugin_start_end_zone_example](../../images/tVTQFER.png)
 
 
 #### render_tagcloud
@@ -827,7 +855,7 @@ Triggered when tagcloud is displayed - allows to add content at the top and bott
 - For each tag, the following placeholder can be used:
   - `tag_plugin`: after each tag
 
-![plugin_start_end_zone_example](https://i.imgur.com/vHmyT3a.png)
+![plugin_start_end_zone_example](../../images/vHmyT3a.png)
 
 
 #### render_taglist
@@ -856,7 +884,7 @@ Triggered when tagcloud is displayed - allows to add content at the top and bott
   - `plugin_start_zone`: before displaying the template content.
   - `plugin_end_zone`: after displaying the template content.
 
-![link_plugin_example](https://i.imgur.com/hzhMfSZ.png)
+![link_plugin_example](../../images/hzhMfSZ.png)
 
 
 #### render_feed

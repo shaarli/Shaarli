@@ -4,9 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - UNRELEASED
+
+### Security
+- fix(xss): encode tag text in Awesomplete autocomplete suggestions
+- fix(xss): sanitize href protocols in rendered Markdown HTML
+- fix(xss): sanitize thumbnail update DOM insertions
+- update vulnerable frontend/npm dependencies
+
+### Changed
+- build: update frontend tooling to Yarn 4.x and Node.js 22
+
+### Added
+- doc: add documentation for building/testing Docker image locally
+- doc: add documentation for running GitHub Actions locally with `act`
+- doc: add documentation for GPG_TTY on headless build environments
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.0...v0.16.1
+
 ------------------------
 
-## [v0.16.1](https://github.com/shaarli/Shaarli/releases/tag/v0.16.1) - 2026-11-24
+## [v0.16.1](https://github.com/shaarli/Shaarli/releases/tag/v0.16.1) - 2026-01-24
 
 ### Fixed
 
@@ -16,7 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
-## [v0.16.0](https://github.com/shaarli/Shaarli/releases/tag/v0.16.0) - 2026-11-24
+## [v0.16.0](https://github.com/shaarli/Shaarli/releases/tag/v0.16.0) - 2026-01-24
 
 Small release focused on infrastructure/CI improvements and Docker/security updates.
 
