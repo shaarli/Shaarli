@@ -462,7 +462,7 @@ git pull upstream master
 # If releasing a new minor version, create a release branch
 $ git checkout -b v0.x
 # Otherwise just use the existing one
-$ git checkout v0.x
+$ git checkout --track upstream/v0.x
 
 # Get the latest changes
 $ git merge master
@@ -515,6 +515,8 @@ Release archives will contain Shaarli code plus all required third-party librari
 ```bash
 # checkout the appropriate tag
 git checkout v0.x.y
+# clean previous build artifacts
+make clean && git clean -xdiff
 # generate zip archives
 make release_archive
 ```
