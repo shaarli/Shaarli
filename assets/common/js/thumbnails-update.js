@@ -27,10 +27,12 @@ function updateThumb(basePath, ids, i, elements) {
       const { response } = xhr;
       i += 1;
       elements.progressBar.style.width = `${(i * 100) / ids.length}%`;
-      elements.current.innerHTML = i;
-      elements.title.innerHTML = response.title;
+      elements.current.textContent = i;
+      elements.title.textContent = response.title;
       if (response.thumbnail !== false) {
-        elements.thumbnail.innerHTML = `<img src="${basePath}/${response.thumbnail}">`;
+        const img = document.createElement('img');
+        img.src = `${basePath}/${response.thumbnail}`;
+        elements.thumbnail.replaceChildren(img);
       }
       if (i < ids.length) {
         updateThumb(basePath, ids, i, elements);
