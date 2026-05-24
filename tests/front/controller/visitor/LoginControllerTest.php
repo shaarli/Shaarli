@@ -201,14 +201,11 @@ class LoginControllerTest extends TestCase
         $this->container->loginManager->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
 
         $this->container->sessionManager->expects(static::never())->method('extendSession');
-        $this->container->sessionManager->expects(static::once())->method('destroy');
         $this->container->sessionManager
             ->expects(static::once())
             ->method('cookieParameters')
             ->with(0, '/subfolder/', 'shaarli')
         ;
-        $this->container->sessionManager->expects(static::once())->method('start');
-        $this->container->sessionManager->expects(static::once())->method('regenerateId')->with(true);
 
         $result = $this->controller->login($request, $response);
 
@@ -268,14 +265,11 @@ class LoginControllerTest extends TestCase
         $this->container->loginManager->expects(static::once())->method('checkCredentials')->willReturn(true);
         $this->container->loginManager->method('getStaySignedInToken')->willReturn(bin2hex(random_bytes(8)));
 
-        $this->container->sessionManager->expects(static::once())->method('destroy');
         $this->container->sessionManager
             ->expects(static::once())
             ->method('cookieParameters')
             ->with(42, '/subfolder/', 'shaarli')
         ;
-        $this->container->sessionManager->expects(static::once())->method('start');
-        $this->container->sessionManager->expects(static::once())->method('regenerateId')->with(true);
         $this->container->sessionManager->expects(static::once())->method('extendSession')->willReturn(42);
 
         $this->container->cookieManager = $this->createMock(CookieManager::class);

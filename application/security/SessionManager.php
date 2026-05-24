@@ -61,6 +61,11 @@ class SessionManager
         if (!isset($this->session['LINKS_PER_PAGE'])) {
             $this->session['LINKS_PER_PAGE'] = $this->conf->get('general.links_per_page', 20);
         }
+
+        if (!empty($this->session['expires_on']) && $this->session['expires_on'] >= (time() + self::$SHORT_TIMEOUT)) {
+            // We deduce from the session-stored 'expires_on' value if we are currently in a staySignedIn state:
+            $this->staySignedIn = true;
+        }
     }
 
     /**
@@ -305,5 +310,13 @@ class SessionManager
     public function regenerateId(bool $deleteOldSession = false): bool
     {
         return session_regenerate_id($deleteOldSession);
+    }
+
+    /*
+     * Useful for debugging, to get the current state
+     */
+    public function getStaySignedIn(): bool
+    {
+        return $this->staySignedIn;
     }
 }
