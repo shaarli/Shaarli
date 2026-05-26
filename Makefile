@@ -24,13 +24,6 @@ docker_%:
 ##
 PHPCS := $(BIN)/phpcs
 
-# Use GNU Tar where available
-ifneq (, $(shell which gtar))
-TAR := gtar
-else
-TAR := tar
-endif
-
 code_sniffer:
 	@$(PHPCS)
 
@@ -100,7 +93,7 @@ composer_dependencies_dev: clean
 ARCHIVE_VERSION := shaarli-$$(git describe)-full
 ARCHIVE_PREFIX=Shaarli/
 
-release_archive: release_tar release_zip
+release_archive: release_zip
 
 ### download 3rd-party PHP libraries
 composer_dependencies: clean
@@ -114,15 +107,6 @@ frontend_dependencies:
 ### Build frontend dependencies
 build_frontend: frontend_dependencies
 	yarnpkg run build
-
-### generate a release tarball and include 3rd-party dependencies and translations
-release_tar: composer_dependencies htmldoc translate build_frontend
-	umask 0022; \
-	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).tar HEAD; \
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/; \
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/; \
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/; \
-	gzip $(ARCHIVE_VERSION).tar
 
 ### generate a release zip and include 3rd-party dependencies and translations
 release_zip: composer_dependencies htmldoc translate build_frontend
