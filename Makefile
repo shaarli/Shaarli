@@ -24,19 +24,19 @@ docker_%:
 ##
 PHPCS := $(BIN)/phpcs
 
-code_sniffer:
+code_sniffer: composer_dependencies_dev
 	@$(PHPCS)
 
 ### - errors by Git author
-code_sniffer_blame:
+code_sniffer_blame: composer_dependencies_dev
 	@$(PHPCS) --report-gitblame
 
 ### - all errors/warnings
-code_sniffer_full:
+code_sniffer_full: composer_dependencies_dev
 	@$(PHPCS) --report-full --report-width=200
 
 ### - errors grouped by kind
-code_sniffer_source:
+code_sniffer_source: composer_dependencies_dev
 	@$(PHPCS) --report-source || exit 0
 
 ##
@@ -78,7 +78,7 @@ locale_test_%:
 all_tests: test locale_test_de_DE locale_test_en_US locale_test_fr_FR
 
 ### download 3rd-party PHP libraries, including dev dependencies
-composer_dependencies_dev: clean
+composer_dependencies_dev:
 	composer install --prefer-dist
 
 ##
@@ -143,7 +143,7 @@ endif
 
 ### remove all unversioned files
 clean:
-	@git clean -df
+	@git clean -xdff
 	@rm -rf sandbox trivy*
 
 ### generate the AUTHORS file from Git commit information
