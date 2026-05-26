@@ -117,24 +117,27 @@ build_frontend: frontend_dependencies
 
 ### generate a release tarball and include 3rd-party dependencies and translations
 release_tar: composer_dependencies htmldoc translate build_frontend
-	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).tar HEAD
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/
+	umask 0022; \
+	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).tar HEAD; \
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/; \
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/; \
+	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/; \
 	gzip $(ARCHIVE_VERSION).tar
 
 ### generate a release zip and include 3rd-party dependencies and translations
 release_zip: composer_dependencies htmldoc translate build_frontend
-	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).zip -9 HEAD
-	mkdir -p $(ARCHIVE_PREFIX)/doc
-	mkdir -p $(ARCHIVE_PREFIX)/vendor
-	rsync -a doc/html/ $(ARCHIVE_PREFIX)doc/html/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)doc/
-	rsync -a vendor/ $(ARCHIVE_PREFIX)vendor/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)vendor/
-	rsync -a tpl/ $(ARCHIVE_PREFIX)tpl/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)tpl/
-	rm -rf $(ARCHIVE_PREFIX)
+	(umask 0022; \
+	mkdir -p $(ARCHIVE_PREFIX); \
+	git archive HEAD | tar -C $(ARCHIVE_PREFIX) -x; \
+	mkdir -p $(ARCHIVE_PREFIX)/doc; \
+	mkdir -p $(ARCHIVE_PREFIX)/vendor; \
+	rsync -a doc/html/ $(ARCHIVE_PREFIX)doc/html/; \
+	rsync -a vendor/ $(ARCHIVE_PREFIX)vendor/; \
+	rsync -a tpl/ $(ARCHIVE_PREFIX)tpl/; \
+	find $(ARCHIVE_PREFIX) -type d -exec chmod 755 {} +; \
+	find $(ARCHIVE_PREFIX) -type f -exec chmod 644 {} +; \
+	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX); \
+	rm -rf $(ARCHIVE_PREFIX))
 
 ### bump version number in all relevant files
 bump_version:
