@@ -418,8 +418,6 @@ sudo apt install composer yarnpkg gettext phpunit yarnpkg php8.2-mbstring php8.2
 make composer_dependencies_dev
 ```
 
-Make sure you have GNU `tar` installed (not BSD `tar`). On macOS, you can install it with `brew install gnu-tar`.
-
 ### Release notes and `CHANGELOG.md`
 
 Update `CHANGELOG.md` to:
@@ -521,7 +519,7 @@ make clean && git clean -xdiff
 make release_archive
 ```
 
-This will create `shaarli-v0.x.y-full.tar`, `shaarli-v0.x.y-full.zip`. These archives need to be manually uploaded on the previously created GitHub [release](https://github.com/shaarli/Shaarli/releases).
+This will create `shaarli-v0.x.y-full.zip`. This archive needs to be manually uploaded on the previously created GitHub [release](https://github.com/shaarli/Shaarli/releases).
 
 
 ### Update the `release` branch
