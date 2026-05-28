@@ -63,7 +63,7 @@ $logger = new Logger(
     !$conf->get('dev.debug') ? LogLevel::INFO : LogLevel::DEBUG,
     ['filename' => basename($conf->get('resource.log'))]
 );
-$sessionManager = new SessionManager($_SESSION, $conf, session_save_path());
+$sessionManager = new SessionManager($conf, $logger, $_SESSION, session_save_path());
 $sessionManager->initialize();
 $cookieManager = new CookieManager($_COOKIE);
 $banManager = new BanManager(

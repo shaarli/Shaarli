@@ -82,11 +82,11 @@ class LoginController extends ShaarliVisitorController
             return $this->index($request, $response);
         }
 
-        $this->container->loginManager->handleSuccessfulLogin($this->container->environment);
-
         $cookiePath = $this->container->basePath . '/';
         $expirationTime = $this->saveLongLastingSession($request, $cookiePath);
         $this->renewUserSession($cookiePath, $expirationTime);
+
+        $this->container->loginManager->handleSuccessfulLogin($this->container->environment);
 
         // Force referer from given return URL
         $this->container->environment['HTTP_REFERER'] = $request->getParam('returnurl');
@@ -133,7 +133,7 @@ class LoginController extends ShaarliVisitorController
         $this->container->cookieManager->setCookieParameter(
             CookieManager::STAY_SIGNED_IN,
             $this->container->loginManager->getStaySignedInToken(),
-            $expirationTime,
+            $expirationTime,  // This expirationTime is currently never checked by Shaarli
             $cookiePath
         );
 
@@ -142,6 +142,11 @@ class LoginController extends ShaarliVisitorController
 
     protected function renewUserSession(string $cookiePath, int $expirationTime): void
     {
+        // Quoting https://www.php.net/manual/en/features.session.security.management.php
+        // "Session IDs must be regenerated when user privileges are elevated,
+        // such as after authenticating. session_regenerate_id()
+        // must be called prior to setting the authentication information to $_SESSION."
+        $this->container->sessionManager->regenerateId(true);
         // Send cookie with the new expiration date to the browser
         $this->container->sessionManager->cookieParameters(
             $expirationTime,

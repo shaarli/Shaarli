@@ -2,6 +2,7 @@
 
 namespace Shaarli\Security;
 
+use Psr\Log\LoggerInterface;
 use Shaarli\FakeConfigManager;
 use Shaarli\TestCase;
 use Shaarli\Tests\Utils\ReferenceSessionIdHashes;
@@ -41,8 +42,9 @@ class SessionManagerTest extends TestCase
             'credentials.salt' => 'salt',
             'security.session_protection_disabled' => false,
         ]);
+        $mockLogger = $this->createMock(LoggerInterface::class);
         $this->session = [];
-        $this->sessionManager = new SessionManager($this->session, $this->conf, 'session_path');
+        $this->sessionManager = new SessionManager($this->conf, $mockLogger, $this->session, 'session_path');
     }
 
     /**
@@ -67,7 +69,8 @@ class SessionManagerTest extends TestCase
                 $token => 1,
             ],
         ];
-        $sessionManager = new SessionManager($session, $this->conf, 'session_path');
+        $mockLogger = $this->createMock(LoggerInterface::class);
+        $sessionManager = new SessionManager($this->conf, $mockLogger, $session, 'session_path');
 
         // check and destroy the token
         $this->assertTrue($sessionManager->checkToken($token));
@@ -157,9 +160,9 @@ class SessionManagerTest extends TestCase
     /**
      * Store login information after a successful login
      */
-    public function testStoreLoginInfo()
+    public function testStoreSessionInfo()
     {
-        $this->sessionManager->storeLoginInfo('ip_id');
+        $this->sessionManager->storeSessionInfo('ip_id');
 
         $this->assertGreaterThan(time(), $this->session['expires_on']);
         $this->assertEquals('ip_id', $this->session['ip']);
