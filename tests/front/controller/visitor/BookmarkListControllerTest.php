@@ -267,6 +267,39 @@ class BookmarkListControllerTest extends TestCase
     }
 
     /**
+     * Test displaying a permalink with a malicious title (XSS prevention).
+     */
+    public function testPermalinkXssPrevention(): void
+    {
+        $hash = 'abcdef';
+        $maliciousTitle = '</title><script>alert(1)</script><title>';
+
+        $assignedVariables = [];
+        $this->assignTemplateVars($assignedVariables);
+
+        $request = $this->createMock(Request::class);
+        $response = new Response();
+
+        $this->container->bookmarkService
+            ->expects(static::once())
+            ->method('findByHash')
+            ->with($hash)
+            ->willReturn((new Bookmark())->setId(123)->setTitle($maliciousTitle)->setUrl('http://url1.tld'))
+        ;
+
+        $result = $this->controller->permalink($request, $response, ['hash' => $hash]);
+
+        static::assertSame(200, $result->getStatusCode());
+        static::assertSame('linklist', (string) $result->getBody());
+
+        // Title must be HTML-escaped, not rendered raw
+        static::assertSame(
+            '&lt;/title&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;title&gt; - Shaarli',
+            $assignedVariables['pagetitle']
+        );
+    }
+
+    /**
      * Test displaying a permalink with an unknown small hash : renders a 404 template error
      */
     public function testPermalinkNotFound(): void

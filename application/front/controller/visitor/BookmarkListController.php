@@ -147,7 +147,8 @@ class BookmarkListController extends ShaarliVisitorController
         $data = array_merge(
             $this->initializeTemplateVars(),
             [
-                'pagetitle' => $bookmark->getTitle() . ' - ' . $this->container->conf->get('general.title', 'Shaarli'),
+                'pagetitle' => escape($bookmark->getTitle())
+                    . ' - ' . $this->container->conf->get('general.title', 'Shaarli'),
                 'links' => [$formatter->format($bookmark)],
             ]
         );
