@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v0.16.3](https://github.com/shaarli/Shaarli/releases/tag/v0.16.3) - UNRELEASED
+
+### Security
+- fix(xss): escape bookmark title in permalink pagetitle
+
+### Removed
+- build/release: no longer build .tar.gz full release archives, only provide .zip
+
+### Changed
+- build: improve `make clean` target to remove all untracked/ignored files
+- build: gitignore .yarn directory
+
+### Fixed
+- build: fix inconsistent file permissions in release archives (Fixes #2214)
+- doc: fix issues in the release procedure
+
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.2...v0.16.3
+
+------------------------
+
 ## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - 2025-05-23
 
 ### Security
