@@ -54,6 +54,7 @@ tpl/*
 
 # Front end
 node_modules
+/.yarn
 tpl/default/js
 tpl/default/css
 tpl/default/fonts

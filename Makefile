@@ -24,26 +24,19 @@ docker_%:
 ##
 PHPCS := $(BIN)/phpcs
 
-# Use GNU Tar where available
-ifneq (, $(shell which gtar))
-TAR := gtar
-else
-TAR := tar
-endif
-
-code_sniffer:
+code_sniffer: composer_dependencies_dev
 	@$(PHPCS)
 
 ### - errors by Git author
-code_sniffer_blame:
+code_sniffer_blame: composer_dependencies_dev
 	@$(PHPCS) --report-gitblame
 
 ### - all errors/warnings
-code_sniffer_full:
+code_sniffer_full: composer_dependencies_dev
 	@$(PHPCS) --report-full --report-width=200
 
 ### - errors grouped by kind
-code_sniffer_source:
+code_sniffer_source: composer_dependencies_dev
 	@$(PHPCS) --report-source || exit 0
 
 ##
@@ -68,7 +61,7 @@ check_permissions:
 # See phpunit.xml for configuration
 # https://phpunit.de/manual/current/en/appendixes.configuration.html
 ##
-test: translate
+test: composer_dependencies_dev translate
 	@echo "-------"
 	@echo "PHPUNIT"
 	@echo "-------"
@@ -85,7 +78,7 @@ locale_test_%:
 all_tests: test locale_test_de_DE locale_test_en_US locale_test_fr_FR
 
 ### download 3rd-party PHP libraries, including dev dependencies
-composer_dependencies_dev: clean
+composer_dependencies_dev:
 	composer install --prefer-dist
 
 ##
@@ -100,7 +93,7 @@ composer_dependencies_dev: clean
 ARCHIVE_VERSION := shaarli-$$(git describe)-full
 ARCHIVE_PREFIX=Shaarli/
 
-release_archive: release_tar release_zip
+release_archive: release_zip
 
 ### download 3rd-party PHP libraries
 composer_dependencies: clean
@@ -115,26 +108,20 @@ frontend_dependencies:
 build_frontend: frontend_dependencies
 	yarnpkg run build
 
-### generate a release tarball and include 3rd-party dependencies and translations
-release_tar: composer_dependencies htmldoc translate build_frontend
-	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).tar HEAD
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^vendor|$(ARCHIVE_PREFIX)vendor|" vendor/
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^doc/html|$(ARCHIVE_PREFIX)doc/html|" doc/html/
-	$(TAR) rvf $(ARCHIVE_VERSION).tar --transform "s|^tpl|$(ARCHIVE_PREFIX)tpl|" tpl/
-	gzip $(ARCHIVE_VERSION).tar
-
 ### generate a release zip and include 3rd-party dependencies and translations
 release_zip: composer_dependencies htmldoc translate build_frontend
-	git archive --prefix=$(ARCHIVE_PREFIX) -o $(ARCHIVE_VERSION).zip -9 HEAD
-	mkdir -p $(ARCHIVE_PREFIX)/doc
-	mkdir -p $(ARCHIVE_PREFIX)/vendor
-	rsync -a doc/html/ $(ARCHIVE_PREFIX)doc/html/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)doc/
-	rsync -a vendor/ $(ARCHIVE_PREFIX)vendor/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)vendor/
-	rsync -a tpl/ $(ARCHIVE_PREFIX)tpl/
-	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX)tpl/
-	rm -rf $(ARCHIVE_PREFIX)
+	(umask 0022; \
+	mkdir -p $(ARCHIVE_PREFIX); \
+	git archive HEAD | tar -C $(ARCHIVE_PREFIX) -x; \
+	mkdir -p $(ARCHIVE_PREFIX)/doc; \
+	mkdir -p $(ARCHIVE_PREFIX)/vendor; \
+	rsync -a doc/html/ $(ARCHIVE_PREFIX)doc/html/; \
+	rsync -a vendor/ $(ARCHIVE_PREFIX)vendor/; \
+	rsync -a tpl/ $(ARCHIVE_PREFIX)tpl/; \
+	find $(ARCHIVE_PREFIX) -type d -exec chmod 755 {} +; \
+	find $(ARCHIVE_PREFIX) -type f -exec chmod 644 {} +; \
+	zip -r $(ARCHIVE_VERSION).zip $(ARCHIVE_PREFIX); \
+	rm -rf $(ARCHIVE_PREFIX))
 
 ### bump version number in all relevant files
 bump_version:
@@ -156,7 +143,7 @@ endif
 
 ### remove all unversioned files
 clean:
-	@git clean -df
+	@git clean -xdff
 	@rm -rf sandbox trivy*
 
 ### generate the AUTHORS file from Git commit information
