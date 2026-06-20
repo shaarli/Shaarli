@@ -79,5 +79,9 @@
           "Shaarli\\Tests\\": "tests",
           "Shaarli\\Tests\\Utils\\": "tests/utils"
         }
+    },
+    "scripts": {
+        "datastore2json": "php -f datastore2json.php",
+        "json2datastore": "php -f json2datastore.php"
     }
 }
