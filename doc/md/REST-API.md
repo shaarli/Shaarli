@@ -80,7 +80,7 @@ var_dump(getInfo($baseUrl, $secret));
 [header].[payload].[signature]
 ```
 
-##### Header
+#### Header
 
 Shaarli only allow one hash algorithm, so the header will always be the same:
 
@@ -97,7 +97,7 @@ Encoded in base64, it gives:
 ewogICAgICAgICJ0eXAiOiAiSldUIiwKICAgICAgICAiYWxnIjogIkhTNTEyIgogICAgfQ==
 ```
 
-##### Payload
+#### Payload
 
 Token expiration: To avoid infinite token validity, JWT tokens must include their creation date in UNIX timestamp format (timezone independent - UTC) under the key `iat` (issued at) field ([1](https://datatracker.ietf.org/doc/html/rfc7519)). This token will be valid during **9 minutes**.
 
@@ -107,7 +107,7 @@ Token expiration: To avoid infinite token validity, JWT tokens must include thei
 }
 ```
 
-##### Signature
+#### Signature
 
 The signature authenticates the token validity. It contains the base64 of the header and the body, separated by a dot `.`, hashed in SHA512 with the API secret available in Shaarli administration page.
 
@@ -117,7 +117,6 @@ Example signature with PHP:
 $content = base64_encode($header) . '.' . base64_encode($payload);
 $signature = hash_hmac('sha512', $content, $secret);
 ```
-
 
 
 ## Troubleshooting
