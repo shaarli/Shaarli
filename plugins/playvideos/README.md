@@ -13,12 +13,12 @@ This is a default Shaarli plugin, you just have to enable it. See [Shaarli confi
 
 #### Troubleshooting
 
-If your server has [Content Security Policy](http://content-security-policy.com/) headers enabled, this may prevent the script from loading fully. You should relax the CSP in your server settings. Example CSP rule for apache2:
+If your server has [Content Security Policy](https://content-security-policy.com/) headers enabled, this may prevent the script from loading fully. This plugin only requires to accept content from Youtube servers, so simply allow `https://www.youtube.com` as source for `script-src` and `frame-src` in your server settings. Example CSP rule for apache2:
 
 ```apache
 <Directory /path/to/shaarli>
     # Required for playvideos plugin
-    Header set Content-Security-Policy "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com 'unsafe-eval'"
+    Header set Content-Security-Policy "default-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://www.youtube.com; connect-src 'self'; frame-src 'self' https://www.youtube.com; img-src 'self' data:; style-src 'self'; font-src 'self'"
 </Directory>
 ```
 
