@@ -106,7 +106,7 @@ class LoginManager
         if ($this->staySignedInToken === $this->cookieManager->getCookieParameter(CookieManager::STAY_SIGNED_IN)) {
             // The user client has a valid stay-signed-in cookie
             // Session information is updated with the current client information
-            $this->sessionManager->storeLoginInfo($clientIpId);
+            $this->sessionManager->storeSessionInfo($clientIpId);
         } elseif (
             $this->sessionManager->hasSessionExpired()
             || $this->sessionManager->hasClientIpChanged($clientIpId)
@@ -154,8 +154,8 @@ class LoginManager
                     || (true === $useLdapLogin && $this->checkCredentialsFromLdap($login, $password))
                 )
             ) {
-                $this->sessionManager->storeLoginInfo($clientIpId);
-                $this->logger->info(format_log('Login successful', $clientIpId));
+                $this->sessionManager->storeSessionInfo($clientIpId);
+                $this->logger->info(format_log('Login successful for user ' . $login, $clientIpId));
 
                 return true;
             }

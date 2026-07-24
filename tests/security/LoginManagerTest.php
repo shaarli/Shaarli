@@ -95,14 +95,15 @@ class LoginManagerTest extends TestCase
         $this->cookieManager->method('getCookieParameter')->willReturnCallback(function (string $key) {
             return $this->cookie[$key] ?? null;
         });
-        $this->sessionManager = new SessionManager($this->session, $this->configManager, 'session_path');
+        $mockLogger = $this->createMock(LoggerInterface::class);
+        $this->sessionManager = new SessionManager($this->configManager, $mockLogger, $this->session, 'session_path');
         $this->banManager = $this->createMock(BanManager::class);
         $this->loginManager = new LoginManager(
             $this->configManager,
             $this->sessionManager,
             $this->cookieManager,
             $this->banManager,
-            $this->createMock(LoggerInterface::class)
+            $mockLogger
         );
         $this->server['REMOTE_ADDR'] = $this->ipAddr;
     }
