@@ -96,7 +96,7 @@ abstract class ShaarliVisitorController
         }
     }
 
-    protected function executePageHooks(string $hook, array &$data, string $template = null): void
+    protected function executePageHooks(string $hook, array &$data, ?string $template = null): void
     {
         $this->container->pluginManager->executeHooks(
             $hook,
@@ -141,7 +141,7 @@ abstract class ShaarliVisitorController
         Response $response,
         array $loopTerms = [],
         array $clearParams = [],
-        string $anchor = null
+        ?string $anchor = null
     ): Response {
         $defaultPath = $this->container->basePath . '/';
         $referer = $this->container->environment['HTTP_REFERER'] ?? null;

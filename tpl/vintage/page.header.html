@@ -1,5 +1,5 @@
 
-<div id="logo" title="Share your links !" onclick="document.location='{$titleLink}';"></div>
+<div id="logo" title="Share your links !" onclick="document.location='{$titleLink|escape}';"></div>
 
 <div id="linkcount" class="nomobile">
   {if="$is_logged_in"}

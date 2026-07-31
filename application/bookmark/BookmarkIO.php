@@ -52,7 +52,7 @@ class BookmarkIO
      *
      * @param ConfigManager $conf instance
      */
-    public function __construct(ConfigManager $conf, Mutex $mutex = null)
+    public function __construct(ConfigManager $conf, ?Mutex $mutex = null)
     {
         if ($mutex === null) {
             // This should only happen with legacy classes

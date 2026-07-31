@@ -73,7 +73,7 @@ class Updater
      *
      * @throws UpdaterException If something went wrong.
      */
-    public function update(string $basePath = null)
+    public function update(?string $basePath = null)
     {
         $updatesRan = [];
 

@@ -87,3 +87,39 @@ function whitelist_protocols($url, $protocols)
     }
     return $url;
 }
+
+/**
+ * Check if a URL resolves to a private, loopback, or reserved IP address.
+ *
+ * @param string $url URL to check
+ *
+ * @return bool false if the resolved IP is private/loopback/reserved, true otherwise
+ */
+function is_safe_url($url)
+{
+    $parsed = parse_url($url);
+    if (!isset($parsed['host'])) {
+        return false;
+    }
+
+    $host = $parsed['host'];
+    $ip = filter_var($host, FILTER_VALIDATE_IP) ? $host : gethostbyname($host);
+
+    return !is_private_ip($ip);
+}
+
+/**
+ * Check if an IPv4 address is private, loopback, link-local, or reserved.
+ *
+ * @param string $ip IP address to check
+ *
+ * @return bool true if the IP is private/reserved
+ */
+function is_private_ip($ip)
+{
+    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return true; // Not a valid IPv4 — fail closed
+    }
+
+    return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+}

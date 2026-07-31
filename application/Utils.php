@@ -12,7 +12,7 @@
  *
  * @return string Formatted message to log
  */
-function format_log(string $message, string $clientIp = null): string
+function format_log(string $message, ?string $clientIp = null): string
 {
     $out = $message;
 

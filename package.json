@@ -13,7 +13,7 @@
     "purecss": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.10",
+    "@babel/core": "^7.29.6",
     "@babel/preset-env": "^7.26.9",
     "@eslint/js": "^9.39.4",
     "babel-loader": "^10.0.0",

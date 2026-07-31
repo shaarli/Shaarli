@@ -50,7 +50,7 @@ class DailyPageHelper
     public static function extractRequestedDateTime(
         string $type,
         ?string $requestedDate,
-        Bookmark $latestBookmark = null
+        ?Bookmark $latestBookmark = null
     ): DateTimeImmutable {
         $format = static::getFormatByType($type);
         if (empty($requestedDate)) {
@@ -228,7 +228,7 @@ class DailyPageHelper
      *
      * @throws Exception Type not supported.
      */
-    public static function getCacheDatePeriodByType(string $type, DateTimeImmutable $requested = null): DatePeriod
+    public static function getCacheDatePeriodByType(string $type, ?DateTimeImmutable $requested = null): DatePeriod
     {
         $requested = $requested ?? new DateTimeImmutable();
 

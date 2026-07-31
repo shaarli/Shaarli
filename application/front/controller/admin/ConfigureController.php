@@ -75,7 +75,12 @@ class ConfigureController extends ShaarliAdminController
 
         $this->container->conf->set('general.timezone', $tz);
         $this->container->conf->set('general.title', escape($request->getParam('title')));
-        $this->container->conf->set('general.header_link', escape($request->getParam('titleLink')));
+        $allowedProtocols = $this->container->conf->get('security.allowed_protocols', []);
+        $allowedProtocols = is_array($allowedProtocols) ? $allowedProtocols : [];
+        $this->container->conf->set(
+            'general.header_link',
+            escape(whitelist_protocols($request->getParam('titleLink'), $allowedProtocols))
+        );
         $this->container->conf->set('general.retrieve_description', !empty($request->getParam('retrieveDescription')));
         $this->container->conf->set('resource.theme', escape($request->getParam('theme')));
         $this->container->conf->set(

@@ -107,7 +107,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     /**
      * @inheritDoc
      */
-    public function findByHash(string $hash, string $privateKey = null): Bookmark
+    public function findByHash(string $hash, ?string $privateKey = null): Bookmark
     {
         $bookmark = $this->bookmarkFilter->filter(BookmarkFilter::$FILTER_HASH, $hash);
         // PHP 7.3 introduced array_key_first() to avoid this hack
@@ -136,7 +136,7 @@ class BookmarkFileService implements BookmarkServiceInterface
      */
     public function search(
         array $request = [],
-        string $visibility = null,
+        ?string $visibility = null,
         bool $caseSensitive = false,
         bool $untaggedOnly = false,
         bool $ignoreSticky = false,
@@ -173,7 +173,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     /**
      * @inheritDoc
      */
-    public function get(int $id, string $visibility = null): Bookmark
+    public function get(int $id, ?string $visibility = null): Bookmark
     {
         if (! isset($this->bookmarks[$id])) {
             throw new BookmarkNotFoundException();
@@ -274,7 +274,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     /**
      * @inheritDoc
      */
-    public function exists(int $id, string $visibility = null): bool
+    public function exists(int $id, ?string $visibility = null): bool
     {
         if (! isset($this->bookmarks[$id])) {
             return false;
@@ -298,7 +298,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     /**
      * @inheritDoc
      */
-    public function count(string $visibility = null): int
+    public function count(?string $visibility = null): int
     {
         return $this->search([], $visibility)->getResultCount();
     }
@@ -321,7 +321,7 @@ class BookmarkFileService implements BookmarkServiceInterface
     /**
      * @inheritDoc
      */
-    public function bookmarksCountPerTag(array $filteringTags = [], string $visibility = null): array
+    public function bookmarksCountPerTag(array $filteringTags = [], ?string $visibility = null): array
     {
         $searchResult = $this->search(['searchtags' => $filteringTags], $visibility);
         $tags = [];
