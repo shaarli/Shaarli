@@ -58,7 +58,7 @@ class PageCacheManager
      *
      * @return CachedPage
      */
-    public function getCachePage(string $pageUrl, DatePeriod $validityPeriod = null): CachedPage
+    public function getCachePage(string $pageUrl, ?DatePeriod $validityPeriod = null): CachedPage
     {
         return new CachedPage(
             $this->pageCacheDir,

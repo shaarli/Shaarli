@@ -56,6 +56,7 @@ function updateThumb(basePath, divElement, id) {
 
 (() => {
   const basePath = document.querySelector('input[name="js_base_path"]').value;
+  const token = document.querySelector('#token')?.value || '';
 
   /*
    * METADATA FOR EDIT BOOKMARK PAGE
@@ -74,7 +75,7 @@ function updateThumb(basePath, divElement, id) {
       const url = form.querySelector('input[name="lf_url"]').value;
 
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${basePath}/admin/metadata?url=${encodeURI(url)}`, true);
+      xhr.open('GET', `${basePath}/admin/metadata?url=${encodeURI(url)}&token=${encodeURIComponent(token)}`, true);
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
       xhr.onload = () => {
         const result = JSON.parse(xhr.response);

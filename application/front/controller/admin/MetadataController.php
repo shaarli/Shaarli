@@ -17,10 +17,17 @@ class MetadataController extends ShaarliAdminController
      */
     public function ajaxRetrieveTitle(Request $request, Response $response): Response
     {
+        $this->checkToken($request);
+
         $url = $request->getParam('url');
 
-        // Only try to extract metadata from URL with HTTP(s) scheme
-        if (!empty($url) && strpos(get_url_scheme($url) ?: '', 'http') !== false) {
+        // Only try to extract metadata from URL with exact HTTP(s) scheme
+        $scheme = get_url_scheme($url);
+        if (
+            !empty($url)
+            && in_array(strtolower($scheme), ['http', 'https'], true)
+            && is_safe_url($url)
+        ) {
             return $response->withJson($this->container->metadataRetriever->retrieve($url));
         }
 

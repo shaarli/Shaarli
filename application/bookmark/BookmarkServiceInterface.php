@@ -27,7 +27,7 @@ interface BookmarkServiceInterface
      *
      * @throws \Exception
      */
-    public function findByHash(string $hash, string $privateKey = null);
+    public function findByHash(string $hash, ?string $privateKey = null);
 
     /**
      * @param $url
@@ -50,7 +50,7 @@ interface BookmarkServiceInterface
      */
     public function search(
         array $request = [],
-        string $visibility = null,
+        ?string $visibility = null,
         bool $caseSensitive = false,
         bool $untaggedOnly = false,
         bool $ignoreSticky = false,
@@ -69,7 +69,7 @@ interface BookmarkServiceInterface
      * @throws BookmarkNotFoundException
      * @throws \Exception
      */
-    public function get(int $id, string $visibility = null);
+    public function get(int $id, ?string $visibility = null);
 
     /**
      * Updates an existing bookmark (depending on its ID).
@@ -129,7 +129,7 @@ interface BookmarkServiceInterface
      *
      * @return bool
      */
-    public function exists(int $id, string $visibility = null): bool;
+    public function exists(int $id, ?string $visibility = null): bool;
 
     /**
      * Return the number of available bookmarks for given visibility.
@@ -138,7 +138,7 @@ interface BookmarkServiceInterface
      *
      * @return int Number of bookmarks
      */
-    public function count(string $visibility = null): int;
+    public function count(?string $visibility = null): int;
 
     /**
      * Write the datastore.

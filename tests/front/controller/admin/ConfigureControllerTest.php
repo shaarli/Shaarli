@@ -80,7 +80,7 @@ class ConfigureControllerTest extends TestCase
             'continent' => 'Europe',
             'city' => 'Moscow',
             'title' => 'Shaarli',
-            'titleLink' => './',
+            'titleLink' => '/',
             'retrieveDescription' => 'on',
             'theme' => 'vintage',
             'disablesessionprotection' => null,

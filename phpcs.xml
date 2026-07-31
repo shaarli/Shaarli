@@ -14,6 +14,7 @@
 
   <rule ref="PSR12"/>
   <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+  <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue"/>
 
   <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
     <!--  index.php bootstraps everything, so yes mixed symbols with side effects  -->

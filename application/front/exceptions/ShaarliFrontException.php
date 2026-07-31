@@ -16,7 +16,7 @@ use Throwable;
 class ShaarliFrontException extends \Exception
 {
     /** Override parent constructor to force $message and $httpCode parameters to be set. */
-    public function __construct(string $message, int $httpCode, Throwable $previous = null)
+    public function __construct(string $message, int $httpCode, ?Throwable $previous = null)
     {
         parent::__construct($message, $httpCode, $previous);
     }

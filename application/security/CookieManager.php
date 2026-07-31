@@ -26,7 +26,7 @@ class CookieManager
         return $this;
     }
 
-    public function getCookieParameter(string $key, string $default = null): ?string
+    public function getCookieParameter(string $key, ?string $default = null): ?string
     {
         return $this->cookies[$key] ?? $default;
     }

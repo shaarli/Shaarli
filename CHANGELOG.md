@@ -4,7 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [v0.16.3](https://github.com/shaarli/Shaarli/releases/tag/v0.16.3) - UNRELEASED
+------------------------
+
+## [v0.17.0](https://github.com/shaarli/Shaarli/releases/tag/v0.17.0) - UNRELEASED
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.4...v0.17.0
+
+------------------------
+
+## [v0.16.4](https://github.com/shaarli/Shaarli/releases/tag/v0.16.4) - 2026-07-31
+
+### Security
+
+* prevent `/admin/metadata` endpoint from fetching metadata from private/reserved IPs (SSRF), including through redirects or DNS rebinding, require CSRF token
+* fix stored XSS via `general.header_link` configuration value, sanitize against `javascript:` URIs
+* update npm dependencies
+
+### Fixed
+
+* fix nullable type deprecation warnings from PHP 8.4
+
+### Changed
+
+* refactor Docker documentation
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.3...v0.16.4
+
+------------------------
+
+
+## [v0.16.3](https://github.com/shaarli/Shaarli/releases/tag/v0.16.3) - 2026-06-28
 
 ### Security
 - fix(xss): escape bookmark title in permalink pagetitle
@@ -25,7 +54,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
-## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - 2025-05-23
+## [v0.16.2](https://github.com/shaarli/Shaarli/releases/tag/v0.16.2) - 2026-05-23
 
 ### Security
 - fix(xss): encode tag text in Awesomplete autocomplete suggestions

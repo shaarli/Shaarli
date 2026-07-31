@@ -38,7 +38,7 @@ class FormatterFactory
      *
      * @return BookmarkFormatter instance.
      */
-    public function getFormatter(string $type = null): BookmarkFormatter
+    public function getFormatter(?string $type = null): BookmarkFormatter
     {
         $type = $type ? $type : $this->conf->get('formatter', 'default');
         $className = '\\Shaarli\\Formatter\\Bookmark' . ucfirst($type) . 'Formatter';

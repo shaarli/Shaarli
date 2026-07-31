@@ -49,7 +49,7 @@ class ShaarliVisitorControllerTest extends TestCase
                 Response $response,
                 array $loopTerms = [],
                 array $clearParams = [],
-                string $anchor = null
+                ?string $anchor = null
             ): Response {
                 return parent::redirectFromReferer($request, $response, $loopTerms, $clearParams, $anchor);
             }
