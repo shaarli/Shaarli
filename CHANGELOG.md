@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.17.0](https://github.com/shaarli/Shaarli/releases/tag/v0.17.0) - UNRELEASED
 
-**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.4...v0.17.0
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.5...v0.17.0
+
+------------------------
+
+## [v0.16.5](https://github.com/shaarli/Shaarli/releases/tag/v0.16.5) - 2026-07-31
+
+### Fixed
+
+* fix wrong token error when saving links after metadata retrieval
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.4...v0.16.5
 
 ------------------------
 
