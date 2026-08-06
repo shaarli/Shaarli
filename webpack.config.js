@@ -54,7 +54,15 @@ module.exports = [
               loader: MiniCssExtractPlugin.loader,
             },
             'css-loader',
-            'sass-loader',
+            {
+              loader: 'sass-loader',
+              options: {
+                // Sass emits BOM for CSS with non-ASCII characters in production.
+                // PostCSS 8.5.24+ preserves BOMs, which breaks @font-face parsing.
+                // See: https://github.com/postcss/postcss/issues/2122
+                sassOptions: { charset: false },
+              },
+            },
           ],
         },
         {
@@ -126,7 +134,12 @@ module.exports = [
               loader: MiniCssExtractPlugin.loader,
             },
             'css-loader',
-            'sass-loader',
+            {
+              loader: 'sass-loader',
+              options: {
+                sassOptions: { charset: false },
+              },
+            },
           ],
         },
         {
