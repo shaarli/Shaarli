@@ -41,6 +41,7 @@ See [REST API](REST-API.md) for a list of official and community clients.
 
 ### Themes
 
+- [gruenheit/origr3n](https://github.com/gruenheit/origr3n) - A dark-first theme for Shaarli with timeline view, search overlay (`/` shortcut), and i18n support (DE/EN)
 - [kalvn/Shaarli-Material](https://github.com/kalvn/Shaarli-Material) - A theme (template) based on Google's Material Design for Shaarli, the superfast delicious clone
 - [ManufacturaInd/shaarli-2004licious-theme](https://github.com/ManufacturaInd/shaarli-2004licious-theme) - A template/theme as a humble homage to the early looks of the del.icio.us site
 - [RolandTi/shaarli-stack](https://github.com/RolandTi/shaarli-stack) - A miminalist template/theme for Shaarli
