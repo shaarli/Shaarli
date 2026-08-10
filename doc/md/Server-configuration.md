@@ -74,6 +74,14 @@ Some [plugins](Plugins.md) may require additional configuration.
 - [PHP 5 Changelog](https://www.php.net/ChangeLog-5.php)
 - [PHP: Bugs](https://bugs.php.net/)
 
+#### Configuring session max duration
+
+Shaarli relies on PHP native [session handling](https://www.php.net/manual/en/book.session.php) based on `$SESSION`. A base Shaarli session lasts 1 hour.
+
+Due to this, the session duration is limited by the value of [`session.gc_maxlifetime`](https://www.php.net/manual/en/session.configuration.php#ini.session.gc-maxlifetime) (unit: minutes) set in your PHP configuration (_e.g._ `php.ini`). Its default value is `24min`.
+
+If you want to benefit from Shaarli _stay-signed-in_ feature that only terminates your session after one year of inactivity, you should set `session.gc_maxlifetime` to `525600` (1 year).
+
 
 ## SSL/TLS (HTTPS)
 

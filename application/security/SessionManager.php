@@ -2,6 +2,7 @@
 
 namespace Shaarli\Security;
 
+use Psr\Log\LoggerInterface;
 use Shaarli\Config\ConfigManager;
 
 /**
@@ -35,6 +36,9 @@ class SessionManager
     /** @var string */
     protected $savePath;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * Constructor
      *
@@ -42,11 +46,12 @@ class SessionManager
      * @param ConfigManager $conf     ConfigManager instance
      * @param string        $savePath Session save path returned by builtin function session_save_path()
      */
-    public function __construct(&$session, $conf, string $savePath)
+    public function __construct($conf, $logger, &$session, string $savePath)
     {
         $this->session = &$session;
         $this->conf = $conf;
         $this->savePath = $savePath;
+        $this->logger = $logger;
     }
 
     /**
@@ -60,6 +65,10 @@ class SessionManager
 
         if (!isset($this->session['LINKS_PER_PAGE'])) {
             $this->session['LINKS_PER_PAGE'] = $this->conf->get('general.links_per_page', 20);
+        }
+        if (!empty($this->session['expires_on']) && $this->session['expires_on'] >= (time() + self::$SHORT_TIMEOUT)) {
+            // We deduce from the session-stored 'expires_on' value if we are currently in a staySignedIn state:
+            $this->setStaySignedIn(true);
         }
     }
 
@@ -135,11 +144,11 @@ class SessionManager
     }
 
     /**
-     * Store user login information after a successful login
+     * Store user login information on every page load when logged-in
      *
      * @param string $clientIpId Client IP address identifier
      */
-    public function storeLoginInfo($clientIpId)
+    public function storeSessionInfo($clientIpId)
     {
         $this->session['ip'] = $clientIpId;
         $this->session['username'] = $this->conf->get('credentials.login');
@@ -164,15 +173,26 @@ class SessionManager
      *
      * @return int New session expiration time
      */
-    protected function extendTimeValidityBy($duration)
+    protected function extendTimeValidityBy($durationSecs)
     {
-        $expirationTime = time() + $duration;
+        $phpSessionLifetimeMin = $this->getPhpSessionLifetimeMin();
+        if ($durationSecs > $phpSessionLifetimeMin * 60) {
+            $this->logger->warning("PHP session lifetime (session.gc_maxlifetime=" . $phpSessionLifetimeMin . "min)"
+                . " is lower than Shaarli session duration (" . $durationSecs / 60 . "min)");
+        }
+        $expirationTime = time() + $durationSecs;
         $this->session['expires_on'] = $expirationTime;
         return $expirationTime;
     }
 
+    protected function getPhpSessionLifetimeMin()
+    {
+        return intval(ini_get("session.gc_maxlifetime"));
+    }
+
     /**
      * Logout a user by unsetting all login information
+     * Currently called on every page if user is not logged-in!
      *
      * See:
      * - https://secure.php.net/manual/en/function.setcookie.php
@@ -197,6 +217,7 @@ class SessionManager
     public function hasSessionExpired()
     {
         if (empty($this->session['expires_on'])) {
+            // This is the case if the visitor is simply not logged in
             return true;
         }
         if (time() >= $this->session['expires_on']) {
@@ -305,5 +326,13 @@ class SessionManager
     public function regenerateId(bool $deleteOldSession = false): bool
     {
         return session_regenerate_id($deleteOldSession);
+    }
+
+    /*
+     * Useful for debugging, to get the current state
+     */
+    public function getStaySignedIn(): bool
+    {
+        return $this->staySignedIn;
     }
 }
