@@ -16,7 +16,7 @@ use Shaarli\Bookmark\Exception\InvalidBookmarkException;
  *
  * @package Shaarli\Bookmark
  */
-class Bookmark
+class Bookmark implements \JsonSerializable
 {
     /** @var string Date format used in string (former ID format) */
     public const LINK_DATE_FORMAT = 'Ymd_His';
@@ -542,5 +542,21 @@ class Bookmark
             unset($this->tags[$pos]);
             $this->tags = array_values($this->tags);
         }
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'id' => $this->id,
+            'shortUrl' => $this->shortUrl,
+            'url' => $this->url,
+            'title' => $this->title,
+            'description' => $this->description,
+            'tags' => $this->tags,
+            'sticky' => $this->sticky,
+            'created' => $this->created,
+            'updated' => $this->updated,
+            'private' => $this->private,
+        ];
     }
 }
