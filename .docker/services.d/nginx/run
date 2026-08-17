@@ -1,2 +1,13 @@
-#!/bin/execlineb -P
-nginx
+#!/bin/sh
+
+if /usr/local/bin/check-ipv6.sh; then
+  echo "IPv6 is available, starting nginx with IPv6 support"
+  exec nginx
+else
+  echo "IPv6 is not available, starting nginx without IPv6 support"
+
+  # Remove the default IPv6 listen directive from nginx.conf to avoid bind errors
+  sed -i '/^[[:space:]]*listen[[:space:]]*\[::\]:80;/d' /etc/nginx/nginx.conf
+  
+  exec nginx
+fi
