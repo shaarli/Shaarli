@@ -35,7 +35,7 @@ class PictureWallController extends ShaarliVisitorController
 
         // Get only bookmarks which have a thumbnail.
         // Note: we do not retrieve thumbnails here, the request is too heavy.
-        $formatter = $this->container->formatterFactory->getFormatter('raw');
+        $formatter = $this->container->formatterFactory->getFormatter();
         foreach ($bookmarks as $key => $bookmark) {
             if (!empty($bookmark->getThumbnail())) {
                 $links[] = $formatter->format($bookmark);

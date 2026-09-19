@@ -276,44 +276,6 @@ To run all tests annotated with `@group WIP`:
 $ vendor/bin/phpunit --group WIP tests/
 ```
 
-### Running tests inside Docker containers
-
-Unit tests can be run inside [Docker](../Docker.md) containers.
-
-Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under common Linux environments. Dockerfiles are provided for the following environments:
-
-- [`alpine324`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine324/Dockerfile) - [Alpine Linux 3.24](https://www.alpinelinux.org/downloads/)
-- [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
-- [`debian9`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian9/Dockerfile) - [Debian 9 Stretch](https://wiki.debian.org/DebianStretch) (oldstable)
-- [`ubuntu16`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/ubuntu16/Dockerfile) - [Ubuntu 16.04 Xenial Xerus](https://releases.ubuntu.com/16.04/) (old LTS)
-
-Each image provides:
-- a base Linux OS
-- Shaarli PHP dependencies (OS packages)
-- test PHP dependencies (OS packages)
-- Composer
-- Tests that run inside the container using a standard Linux user account (running tests as `root` would bypass permission checks and may hide issues)
-
-Build a test image:
-
-```bash
-# build the Debian 9 Docker image
-cd /path/to/shaarli/tests/docker/debian9
-docker build -t shaarli-test:debian9 .
-```
-
-Run unit tests in a container:
-
-```bash
-cd /path/to/shaarli
-# install/update 3rd-party test dependencies
-composer install --prefer-dist
-# run tests using the freshly built image
-docker run -v $PWD:/shaarli shaarli-test:debian9 docker_test
-# run the full test campaign
-docker run -v $PWD:/shaarli shaarli-test:debian9 docker_all_tests
-```
-
 ### Building and testing the Docker image locally
 
 To build and test the full Shaarli Docker image from the current source:

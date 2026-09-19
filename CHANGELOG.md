@@ -10,6 +10,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 **Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.17.0
 
+------------------------
+
+## [v0.16.7](https://github.com/shaarli/Shaarli/releases/tag/v0.16.7) - 2026-09-19
+
+### Changed
+
+* docker: update base alpine image to 3.24.2
+* tests: cleanup: remove obsolete test Dockerfiles and documentation
+
+### Security
+
+* fix: prevent stored XSS in Picture Wall via bookmark title
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.17.0
+
 
 ------------------------
 
