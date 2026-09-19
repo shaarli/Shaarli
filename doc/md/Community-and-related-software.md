@@ -41,6 +41,7 @@ See [REST API](REST-API.md) for a list of official and community clients.
 
 ### Themes
 
+- [gruenheit/origr3n](https://github.com/gruenheit/origr3n) - A dark-first theme for Shaarli with timeline view, search overlay (`/` shortcut), and i18n support (DE/EN)
 - [kalvn/Shaarli-Material](https://github.com/kalvn/Shaarli-Material) - A theme (template) based on Google's Material Design for Shaarli, the superfast delicious clone
 - [ManufacturaInd/shaarli-2004licious-theme](https://github.com/ManufacturaInd/shaarli-2004licious-theme) - A template/theme as a humble homage to the early looks of the del.icio.us site
 - [RolandTi/shaarli-stack](https://github.com/RolandTi/shaarli-stack) - A miminalist template/theme for Shaarli
@@ -92,6 +93,11 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [mknexen/shaarli-api](https://github.com/mknexen/shaarli-api) - A REST API for Shaarli
 - [Self dead link](https://framagit.org/qwertygc/shaarli-dev-code/blob/master/self-dead-link.php) - Detect dead links on shaarli. This version use the database of shaarli. [Another version](https://framagit.org/qwertygc/shaarli-dev-code/blob/master/dead-link.php), can be used for other shaarli instances (but is more resource consuming).
 - [Bookmark Archiver](https://github.com/ArchiveBox/ArchiveBox) - Save an archived copy of all websites starred using browser bookmarks/Shaarli/Delicious/Instapaper/Unmark.it/Pocket/Pinboard. Outputs browseable html.
+
+
+### iOS Shortcut
+
+- [+Shaarli](https://www.icloud.com/shortcuts/b0219ecae2db4c539c0aed8221b5eda4) - Related Blog Post: [Save in Shaarli Shortcut](https://initialcharge.net/2021/02/shaarli-shortcut/)
 
 
 ## Alternatives to Shaarli

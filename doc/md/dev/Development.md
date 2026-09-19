@@ -155,7 +155,12 @@ See [`.github/workflows/`](https://github.com/shaarli/Shaarli/tree/master/.githu
 
 ## Documentation
 
-[Sphinx](https://www.sphinx-doc.org/en/master/) is used to convert markdown documentation to HTML pages. The [public documentation](https://shaarli.readthedocs.io/en/master/) website is rendered and hosted by [readthedocs.org](https://readthedocs.org/). A copy of the documentation is also included in prebuilt [release archives](https://github.com/shaarli/Shaarli/releases) (`doc/html/` path in your Shaarli installation). To generate the HTML documentation locally, run `make htmldoc`.
+* [Sphinx](https://www.sphinx-doc.org/en/master/) is used to convert markdown documentation in `doc/md/` to HTML pages.
+* The [public documentation](https://shaarli.readthedocs.io/en/master/) website is rendered and hosted by [readthedocs.org](https://readthedocs.org/).
+* A copy of the documentation is also included in prebuilt [release archives](https://github.com/shaarli/Shaarli/releases) (`doc/html/` path in your Shaarli installation).
+* To edit the documentation, please edit the appropriate `doc/md/*.md` files
+* To generate the HTML documentation locally, run `make htmldoc`.
+* Submit your changes as a Pull Request
 
 
 ## Static analysis
@@ -277,7 +282,7 @@ Unit tests can be run inside [Docker](../Docker.md) containers.
 
 Test Dockerfiles are located under `tests/docker/<distribution>/Dockerfile`, and can be used to build Docker images to run Shaarli test suites under common Linux environments. Dockerfiles are provided for the following environments:
 
-- [`alpine323`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine321/Dockerfile) - [Alpine Linux 3.23](https://www.alpinelinux.org/downloads/)
+- [`alpine324`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/alpine324/Dockerfile) - [Alpine Linux 3.24](https://www.alpinelinux.org/downloads/)
 - [`debian8`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian8/Dockerfile) - [Debian 8 Jessie](https://wiki.debian.org/DebianJessie) (oldoldstable)
 - [`debian9`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/debian9/Dockerfile) - [Debian 9 Stretch](https://wiki.debian.org/DebianStretch) (oldstable)
 - [`ubuntu16`](https://github.com/shaarli/Shaarli/blob/master/tests/docker/ubuntu16/Dockerfile) - [Ubuntu 16.04 Xenial Xerus](https://releases.ubuntu.com/16.04/) (old LTS)
@@ -329,6 +334,25 @@ docker rm shaarli-test
 # delete the persistent volume (optional, removes all stored bookmarks)
 docker volume rm shaarli-data
 ```
+
+### Updating frontend dependencies
+
+If vulnerabilities are reported against frontend dependencies, the following check will fail:
+```
+$ make test_trivy_repo
+```
+
+Update npm dependencies:
+
+```bash
+$ cd /path/to/shaarli
+$ yarn install
+# verify the lockfile is stable (no modifications on a second run):
+$ yarn install
+```
+
+Yarn will resolve to the latest versions satisfying the semver ranges in `package.json`. If a dependency's constraint is too restrictive, update the constraint in `package.json` first, and run `yarn install`.
+
 
 ## GnuPG Signature
 

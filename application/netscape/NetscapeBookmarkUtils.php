@@ -156,7 +156,13 @@ class NetscapeBookmarkUtils
                 $link->setUpdated(new DateTime());
                 $overwriteCount++;
             } else {
-                $newLinkDate = new DateTime('@' . $bkm['dateCreated']);
+                if (empty($bkm['dateCreated'])) {
+                    // Some browsers (e.g. Safari) export bookmarks without an
+                    // ADD_DATE attribute: fall back to the current date/time.
+                    $newLinkDate = new DateTime();
+                } else {
+                    $newLinkDate = new DateTime('@' . $bkm['dateCreated']);
+                }
                 $newLinkDate->setTimezone(new DateTimeZone(date_default_timezone_get()));
                 $link->setCreated($newLinkDate);
             }

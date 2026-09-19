@@ -142,14 +142,15 @@ class LoginController extends ShaarliVisitorController
 
     protected function renewUserSession(string $cookiePath, int $expirationTime): void
     {
-        // Send cookie with the new expiration date to the browser
-        $this->container->sessionManager->destroy();
+        // Quoting https://www.php.net/manual/en/features.session.security.management.php
+        // "Session IDs must be regenerated when user privileges are elevated,
+        // such as after authenticating. session_regenerate_id()
+        // must be called prior to setting the authentication information to \$_SESSION."
+        $this->container->sessionManager->regenerateId(true);
         $this->container->sessionManager->cookieParameters(
             $expirationTime,
             $cookiePath,
             $this->container->environment['SERVER_NAME']
         );
-        $this->container->sessionManager->start();
-        $this->container->sessionManager->regenerateId(true);
     }
 }

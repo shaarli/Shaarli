@@ -143,7 +143,7 @@ class SessionManager
     {
         $this->session['ip'] = $clientIpId;
         $this->session['username'] = $this->conf->get('credentials.login');
-        $this->extendTimeValidityBy(self::$SHORT_TIMEOUT);
+        $this->extendSession();
     }
 
     /**

@@ -8,7 +8,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [v0.17.0](https://github.com/shaarli/Shaarli/releases/tag/v0.17.0) - UNRELEASED
 
-**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.5...v0.17.0
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.17.0
+
+
+------------------------
+
+## [v0.16.6](https://github.com/shaarli/Shaarli/releases/tag/v0.16.6) - 2026-09-19
+
+### Changed
+
+* docker: update base alpine image to v3.24.1
+* build(deps): update vulnerable npm dependencies
+* doc: add section on updating frontend dependencies
+
+### Fixed
+
+* doc: fix CONTRIBUTING.md procedures and links
+
+### Security
+
+- prevent path disclosure via array injection in search parameters ([GHSA-v88g-xgpq-qx3w](https://github.com/shaarli/Shaarli/security/advisories/GHSA-v88g-xgpq-qx3w))
+
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.5...v0.16.6
 
 ------------------------
 
