@@ -116,10 +116,10 @@ class PageBuilder
         $this->tpl->assign('is_logged_in', $this->isLoggedIn);
         $this->tpl->assign('feedurl', escape(index_url($_SERVER)));
         $searchcrits = ''; // Search criteria
-        if (!empty($_GET['searchtags'])) {
+        if (!empty($_GET['searchtags']) && is_string($_GET['searchtags'])) {
             $searchcrits .= '&searchtags=' . urlencode($_GET['searchtags']);
         }
-        if (!empty($_GET['searchterm'])) {
+        if (!empty($_GET['searchterm']) && is_string($_GET['searchterm'])) {
             $searchcrits .= '&searchterm=' . urlencode($_GET['searchterm']);
         }
         $this->tpl->assign('searchcrits', $searchcrits);

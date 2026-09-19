@@ -202,8 +202,5 @@ try {
     $response = $app->run(true);
     $app->respond($response);
 } catch (Throwable $e) {
-    die(nl2br(
-        'An unexpected error happened, and the error template could not be displayed.' . PHP_EOL . PHP_EOL .
-        exception2text($e)
-    ));
+    die('An unexpected error happened, and the error template could not be displayed.');
 }

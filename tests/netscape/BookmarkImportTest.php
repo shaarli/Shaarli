@@ -440,6 +440,36 @@ class BookmarkImportTest extends TestCase
     }
 
     /**
+     * Import bookmarks that do not provide a creation date.
+     *
+     * Some browsers (e.g. Safari) export Netscape bookmark files without the
+     * ADD_DATE attribute. The parser then returns a null date, which used to
+     * abort the whole import with a DateTime parsing error. Such bookmarks must
+     * be imported using the current date as a fallback.
+     *
+     * @see https://github.com/shaarli/Shaarli/issues/2152
+     */
+    public function testImportBookmarkWithoutCreationDate()
+    {
+        $files = file2array('netscape_nodate.htm');
+        $this->assertStringMatchesFormat(
+            'File netscape_nodate.htm (286 bytes) was successfully processed in %d seconds:'
+            . ' 1 bookmarks imported, 0 bookmarks overwritten, 0 bookmarks skipped.',
+            $this->netscapeBookmarkUtils->import([], $files)
+        );
+
+        $this->assertEquals(1, $this->bookmarkService->count());
+
+        $bookmark = $this->bookmarkService->findByUrl('https://no.date.tld');
+        $this->assertEquals(0, $bookmark->getId());
+        $this->assertEquals('Bookmark without date', $bookmark->getTitle());
+        $this->assertEquals('safari import', $bookmark->getTagsString());
+        // A missing creation date falls back to the current date/time.
+        $this->assertTrue(new DateTime('-5 seconds') < $bookmark->getCreated());
+        $this->assertTrue(new DateTime('+1 minute') > $bookmark->getCreated());
+    }
+
+    /**
      * Overwrite private bookmarks so they become public
      */
     public function testOverwriteAsPublic()
