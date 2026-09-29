@@ -404,7 +404,7 @@ sudo apt install composer yarnpkg gettext phpunit yarnpkg php8.2-mbstring php8.2
 make composer_dependencies_dev
 ```
 
-### Release notes and `CHANGELOG.md`
+### Release notes, AUTHORS and CHANGELOG
 
 Update `CHANGELOG.md` to:
 
@@ -431,9 +431,15 @@ See https://keepachangelog.com/en/0.3.0/ for changelog formatting.
 
 ```
 
+Update the `AUTHORS` file:
+
+```bash
+$ make generate_authors
+```
+
 ### Create and merge a Pull Request
 
-Create a Pull Request to merge changes from your remote, into `master` in the community Shaarli repository, and have it merged.
+Create a Pull Request to merge `CHANGELOG.md` and `AUTHORS` changes from your remote, into `master` in the community Shaarli repository, and have it merged.
 
 
 ### Create the release branch and update version
@@ -454,10 +460,9 @@ $ git merge master
 # Check that everything went fine:
 $ make test
 
-# Update AUTHORS and bump version to 0.x.0 (without the v prefix)
-$ make generate_authors
+# Bump version to 0.x.0 (without the v prefix)
 $ make bump_version VERSION=0.x.0
-$ git add AUTHORS shaarli_version.php doc/conf.py README.md
+$ git add shaarli_version.php doc/conf.py README.md
 $ git commit -m "Release v0.x.0"
 $ git push upstream v0.x
 ```

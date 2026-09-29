@@ -4,6 +4,9 @@ namespace Shaarli\Formatter;
 
 use Shaarli\Config\ConfigManager;
 use Shaarli\Formatter\Parsedown\ShaarliParsedown;
+use HTMLPurifier;
+use HTMLPurifier_Config;
+use HTMLPurifier_ConfigSchema;
 
 /**
  * Class BookmarkMarkdownFormatter
@@ -180,50 +183,52 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
     }
 
     /**
-     * Remove dangerous HTML tags (tags, iframe, etc.).
-     * Doesn't affect <code> content (already escaped by Parsedown).
+     * Sanitize bookmark description HTML using HTMLPurifier.
+     * Strips disallowed tags, event handlers, and non-whitelisted protocols.
      *
      * @param string $description input description text.
      *
-     * @return string given string escaped.
+     * @return string sanitized HTML.
      */
     protected function sanitizeHtml($description)
     {
-        $escapeTags = [
-            'script',
-            'style',
-            'link',
-            'iframe',
-            'frameset',
-            'frame',
-        ];
-        foreach ($escapeTags as $tag) {
-            $description = preg_replace_callback(
-                '#<\s*' . $tag . '[^>]*>(.*</\s*' . $tag . '[^>]*>)?#is',
-                function ($match) {
-                    return escape($match[0]);
-                },
-                $description
-            );
+        // Build a fresh config schema (not cached) so we can mutate it without
+        // triggering HTMLPurifier's "config is finalised" error.
+        $schema = HTMLPurifier_ConfigSchema::makeFromSerial();
+        $config = new HTMLPurifier_Config($schema);
+
+        // Disable the serializer cache so we don't need a writable temp dir.
+        $config->set('Cache.DefinitionImpl', null);
+
+        // Whitelist the exact set of elements and attributes that Markdown/
+        // MarkdownExtra can emit. Anything not listed is stripped.
+        //
+        // Syntax: "element[allowed_attrs]" or just "element".
+        // - Elements like p, br, ul, li, table cells have no attributes.
+        // - a allows href, title, target, rel (standard link attributes).
+        // - abbr allows title (the abbreviation definition).
+        // - h1-h6, div, span allow class (for ParsedownExtra's {.class} syntax).
+        $config->set('HTML.Allowed', implode(',', [
+            'p[class],br,strong,em,code,span[class],hr',
+            'h1[class],h2[class],h3[class],h4[class],h5[class],h6[class]',
+            'a[href|title|target|rel]',
+            'ul,ol,li,dl,dt,dd,blockquote,pre',
+            'table,thead,tbody,tfoot,tr,th,td',
+            'abbr[title],sub,sup,q,kbd,samp,var,tt,address',
+            'div[class]',
+        ]));
+
+        // Build the allowed URI scheme list. Always include http/https/mailto/ftp,
+        // then add any extras the admin configured (e.g. ssh, git).
+        $schemes = ['http' => true, 'https' => true, 'mailto' => true, 'ftp' => true];
+        foreach ($this->allowedProtocols as $protocol) {
+            $schemes[$protocol] = true;
         }
-        $description = preg_replace(
-            '#(<[^>]+\s)on[a-z]*="?[^ "]*"?#is',
-            '$1',
-            $description
-        );
-        $allowedProtocols = $this->allowedProtocols;
-        $description = preg_replace_callback(
-            '#<a\s[^>]*href="([^"]*)"#is',
-            function ($match) use ($allowedProtocols) {
-                if (startsWith($match[1], '.')) {
-                    return $match[0];
-                }
-                $sanitized = whitelist_protocols($match[1], $allowedProtocols);
-                return str_replace($match[1], $sanitized, $match[0]);
-            },
-            $description
-        );
-        return $description;
+        $config->set('URI.AllowedSchemes', $schemes);
+
+        // Parse the HTML, strip everything not in the whitelist, and return the
+        // cleaned string.
+        return (new HTMLPurifier($config))->purify($description);
     }
 
     protected function reverseEscapedHtml($description)

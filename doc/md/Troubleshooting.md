@@ -226,7 +226,6 @@ sudo systemctl restart apache2
 
 If the solutions above did not help, please:
 
-- Come and ask question on the [Gitter chat](https://app.gitter.im/#/room/#shaarli_Shaarli:gitter.im)
 - Search for [issues](https://github.com/shaarli/Shaarli/issues) and [Pull Requests](https://github.com/shaarli/Shaarli/pulls)
     - if you find one that is related to the issue, feel free to comment and provide additional details (host/Shaarli setup...)
     - check issues labeled [`feature`](https://github.com/shaarli/Shaarli/labels/feature), [`enhancement`](https://github.com/shaarli/Shaarli/labels/enhancement), and [`plugin`](https://github.com/shaarli/Shaarli/labels/plugin) if you would like a feature added to Shaarli.
@@ -234,3 +233,5 @@ If the solutions above did not help, please:
         - _what happens?_ - display glitches, invalid data, security flaws...
         - _what is your configuration?_  - OS, server version, activated extensions, web browser...
         - _is it reproducible?_
+   - alternatively, use [discussions](https://github.com/shaarli/Shaarli/discussions)
+
