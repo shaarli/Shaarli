@@ -6,17 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
-## [v0.17.0](https://github.com/shaarli/Shaarli/releases/tag/v0.17.0) - UNRELEASED
+## [v0.16.8](https://github.com/shaarli/Shaarli/releases/tag/v0.16.8) - UNRELEASED
 
 ### Removed
 
-* tools: close Gitter instant messaging channel
+* doc: close Gitter instant messaging channel
 
 ### Changed
 
 * update development/release documentation
 
-**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.17.0
+### Security
+
+* fix: prevent XSS via malicious meta tags in MardownExtra formatter
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.7...v0.16.8
 
 ------------------------
 
@@ -31,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 * fix: prevent stored XSS in Picture Wall via bookmark title
 
-**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.17.0
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.6...v0.16.7
 
 
 ------------------------
