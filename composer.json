@@ -25,6 +25,7 @@
         "arthurhoaro/web-thumbnailer": "^2.0",
         "erusev/parsedown": "^1.6",
         "erusev/parsedown-extra": "^0.8.1",
+        "ezyang/htmlpurifier": "^4.19",
         "gettext/gettext": "^4.4",
         "katzgrau/klogger": "^1.2",
         "malkusch/lock": "^2.1",

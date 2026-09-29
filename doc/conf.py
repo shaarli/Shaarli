@@ -2,9 +2,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 project = 'shaarli'
 author = 'shaarli community'
-version = '0.16.7'
-release = '0.16.7'
-copyright = '2011-2023, the shaarli community'
+version = 'dev'
+release = 'dev'
+copyright = '2011-2026, the shaarli community'
 language = 'en'
 html_title = 'Shaarli documentation'
 html_theme = 'furo'
