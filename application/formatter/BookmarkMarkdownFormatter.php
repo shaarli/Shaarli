@@ -212,6 +212,7 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
             'p[class],br,strong,em,code,span[class],hr',
             'h1[class],h2[class],h3[class],h4[class],h5[class],h6[class]',
             'a[href|title|target|rel]',
+            'img[src|alt]',
             'ul,ol,li,dl,dt,dd,blockquote,pre',
             'table,thead,tbody,tfoot,tr,th,td',
             'abbr[title],sub,sup,q,kbd,samp,var,tt,address',
