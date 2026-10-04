@@ -43,7 +43,7 @@ class DisplayCreateFormTest extends TestCase
         $assignedVariables = [];
         $this->assignTemplateVars($assignedVariables);
 
-        $url = 'http://url.tld/other?part=3&utm_ad=pay#hash';
+        $url = 'http://8.8.8.8/other?part=3&utm_ad=pay#hash';
         $expectedUrl = str_replace('&utm_ad=pay', '', $url);
         $remoteTitle = 'Remote Title';
         $remoteDesc = 'Sometimes the meta description is relevant.';

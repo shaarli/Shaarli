@@ -199,7 +199,9 @@ class ShaarePublishController extends ShaarliAdminController
             if (
                 true !== $this->container->conf->get('general.enable_async_metadata', true)
                 && empty($title)
-                && strpos(get_url_scheme($url) ?: '', 'http') !== false
+                && !empty($url)
+                && in_array(strtolower(get_url_scheme($url) ?: ''), ['http', 'https'], true)
+                && is_safe_url($url)
             ) {
                 $metadata = $this->container->metadataRetriever->retrieve($url);
             }
