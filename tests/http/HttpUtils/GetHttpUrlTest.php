@@ -33,8 +33,31 @@ class GetHttpUrlTest extends \Shaarli\TestCase
     public function testGetInvalidRemoteUrl()
     {
         list($headers, $content) = @get_http_response('http://non.existent', 1);
-        $this->assertFalse($headers);
+        // DNS resolution  for non.existent returns empty records, request should be blocked
+        $this->assertStringContainsString('Blocked', $headers[0]);
         $this->assertFalse($content);
+    }
+
+    /**
+     * Literal private/reserved IP addresses ann IPv6 addresses are blocked by is_safe_url()
+     */
+    public function testIsSafeUrlBlocksPrivateLiteralIPs()
+    {
+        // IPv4 private ranges
+        $this->assertFalse(is_safe_url('http://127.0.0.1/'));
+        $this->assertFalse(is_safe_url('http://192.168.1.1/'));
+        $this->assertFalse(is_safe_url('http://10.0.0.1/'));
+        $this->assertFalse(is_safe_url('http://172.16.0.1/'));
+
+        // IPv6 loopback and private ranges
+        $this->assertFalse(is_safe_url('http://[::1]/'));
+        $this->assertFalse(is_safe_url('http://[fe80::1]/'));
+        $this->assertFalse(is_safe_url('http://[fc00::1]/'));
+        // Public IPv6 is also blocked (is_private_ip treats all IPv6 as private)
+        $this->assertFalse(is_safe_url('http://[2001:4860:4860::8888]/'));
+
+        // Public IPv4 passes
+        $this->assertTrue(is_safe_url('http://8.8.8.8/'));
     }
 
     /**
