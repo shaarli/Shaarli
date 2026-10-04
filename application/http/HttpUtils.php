@@ -74,15 +74,20 @@ function get_http_response(
         return [[0 => 'curl_init() error'], false];
     }
 
-    _setCurlOptions(
-        $ch,
-        $timeout,
-        $maxBytes,
-        $userAgent,
-        $acceptLanguage,
-        $curlHeaderFunction,
-        $curlWriteFunction
-    );
+    if (
+        !_setCurlOptions(
+            $ch,
+            $timeout,
+            $maxBytes,
+            $userAgent,
+            $acceptLanguage,
+            $curlHeaderFunction,
+            $curlWriteFunction
+        )
+    ) {
+        curl_close($ch);
+        return [[0 => 'Blocked: DNS pin could not be established'], false];
+    }
 
     $response = curl_exec($ch);
     $errorNo = curl_errno($ch);
@@ -115,15 +120,20 @@ function get_http_response(
             return [[0 => 'curl_init() error on redirect'], false];
         }
 
-        _setCurlOptions(
-            $ch,
-            $timeout,
-            $maxBytes,
-            $userAgent,
-            $acceptLanguage,
-            $curlHeaderFunction,
-            $curlWriteFunction
-        );
+        if (
+            !_setCurlOptions(
+                $ch,
+                $timeout,
+                $maxBytes,
+                $userAgent,
+                $acceptLanguage,
+                $curlHeaderFunction,
+                $curlWriteFunction
+            )
+        ) {
+            curl_close($ch);
+            return [[0 => 'Blocked: DNS pin could not be established'], false];
+        }
 
         $response = curl_exec($ch);
         $errorNo = curl_errno($ch);
@@ -193,6 +203,7 @@ function get_http_response(
  * @param string   $acceptLanguage  Accept-Language header
  * @param callable $headerFunction  CURLOPT_HEADERFUNCTION callback
  * @param callable $writeFunction   CURLOPT_WRITEFUNCTION callback
+ * @return bool true on success, false if the request should be blocked
  */
 function _setCurlOptions(
     $ch,
@@ -225,6 +236,9 @@ function _setCurlOptions(
             }
             if (!empty($resolveEntries)) {
                 curl_setopt($ch, CURLOPT_RESOLVE, $resolveEntries);
+            } else {
+                error_log('Blocked: DNS pin could not be established for ' . $host);
+                return false;
             }
         }
     }
@@ -264,6 +278,8 @@ function _setCurlOptions(
             return ($downloaded > $maxBytes) ? 1 : 0;
         }
     );
+
+    return true;
 }
 
 /**
