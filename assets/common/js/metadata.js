@@ -56,7 +56,31 @@ function updateThumb(basePath, divElement, id) {
 
 (() => {
   const basePath = document.querySelector('input[name="js_base_path"]').value;
-  const token = document.querySelector('#token')?.value || '';
+
+  /**
+   * Fetch a fresh CSRF token from /admin/token, then call the callback.
+   * If the token fetch fails (e.g. session expired), the callback is not called.
+   *
+   * @param {function} callback - Receives the fresh token string
+   */
+  function withFreshToken(callback) {
+    const xhrToken = new XMLHttpRequest();
+    xhrToken.open('GET', `${basePath}/admin/token`, true);
+    xhrToken.timeout = 10000;
+    xhrToken.onload = () => {
+      if (xhrToken.status === 200) {
+        callback(xhrToken.responseText.trim());
+      } else {
+        console.warn(
+          'Failed to fetch CSRF token (status ' + xhrToken.status + '). Metadata retrieval skipped.',
+        );
+      }
+    };
+    xhrToken.onerror = () => {
+      console.warn('Failed to fetch CSRF token (network error). Metadata retrieval skipped.');
+    };
+    xhrToken.send();
+  }
 
   /*
    * METADATA FOR EDIT BOOKMARK PAGE
@@ -74,23 +98,25 @@ function updateThumb(basePath, divElement, id) {
 
       const url = form.querySelector('input[name="lf_url"]').value;
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${basePath}/admin/metadata?url=${encodeURI(url)}&token=${encodeURIComponent(token)}`, true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.onload = () => {
-        const result = JSON.parse(xhr.response);
-        Object.keys(result).forEach((key) => {
-          if (result[key] !== null && result[key].length) {
-            const element = form.querySelector(`input[name="lf_${key}"], textarea[name="lf_${key}"]`);
-            if (element != null && element.value.length === 0) {
-              element.value = he.decode(result[key]);
+      withFreshToken((token) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${basePath}/admin/metadata?url=${encodeURI(url)}&token=${encodeURIComponent(token)}`, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = () => {
+          const result = JSON.parse(xhr.response);
+          Object.keys(result).forEach((key) => {
+            if (result[key] !== null && result[key].length) {
+              const element = form.querySelector(`input[name="lf_${key}"], textarea[name="lf_${key}"]`);
+              if (element != null && element.value.length === 0) {
+                element.value = he.decode(result[key]);
+              }
             }
-          }
-        });
-        clearLoaders(loaders);
-      };
+          });
+          clearLoaders(loaders);
+        };
 
-      xhr.send();
+        xhr.send();
+      });
     });
   }
 
