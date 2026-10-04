@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
+## [v0.16.9](https://github.com/shaarli/Shaarli/releases/tag/v0.16.9) - 2026-10-04
+
+### Fixed
+
+- fix markdown image rendering in descriptions
+
+### Security
+
+- prevent DNS rebinding protection bypass in metadata fetcher when `dns_get_records` returns only private IP records
+- add missing add `is_safe_url` check to `ShaarePublishController`
+- re-add CSRF token check to `/admin/metadata` endpoint
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.8...v0.16.9
+
+------------------------
+
 ## [v0.16.8](https://github.com/shaarli/Shaarli/releases/tag/v0.16.8) - 2026-09-29
 
 ### Removed
