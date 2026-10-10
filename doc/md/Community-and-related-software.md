@@ -27,12 +27,14 @@ See [REST API](REST-API.md) for a list of official and community clients.
 - [markdown-toolbar](https://github.com/immanuelfodor/shaarli-markdown-toolbar) by [@immanuelfodor](https://github.com/immanuelfodor) - Easily insert markdown syntax into the Description field when editing a Shaare.
 - [offen](https://github.com/waschinski/shaarli-offen/) by [@waschinski](https://github.com/waschinski) - Shaarli plugin that adds Offen analytics tracking code to Shaarli pages.
 - [related](https://github.com/ilesinge/shaarli-related) by [@ilesinge](https://github.com/ilesinge) - Show related Shaares based on the number of identical tags.
+- [shaare_images](https://github.com/gruenheit/shaarli-plugin-shaare-images) by [@gruenheit](https://github.com/gruenheit) - Lets you embed an image by URL in a Shaare's description; the image is downloaded once and cached locally, so the Shaare keeps its image even if the original source later disappears.
 - [shaargem](https://forge.tourmentine.com/n/shaarli-plugin-shaargem) by [@n](https://forge.tourmentine.com/n): Allow to shaare gemini capsules.
 - [shaarli-descriptor](https://github.com/immanuelfodor/shaarli-descriptor) by [@immanuelfodor](https://github.com/immanuelfodor) - Customize the default height/number of rows of the Description field when editing a Shaare.
 - [shaarli2mastodon](https://github.com/kalvn/shaarli2mastodon) by [@kalvn](https://github.com/kalvn) - This Shaarli plugin allows you to automatically publish links you post on your Mastodon timeline.
 - [shaarli2bluesky](https://github.com/kalvn/shaarli2bluesky) by [@kalvn](https://github.com/kalvn) - Automatically post your links from Shaarli to Bluesky.
 - [shaarli2twitter](https://github.com/ArthurHoaro/shaarli2twitter) by [@ArthurHoaro](https://github.com/ArthurHoaro) - Automatically tweet your Shaares from Shaarli
 - [social](https://github.com/alexisju/social) by [@alexisju](https://github.com/alexisju): share links to social networks.
+- [sort_tags](https://github.com/gruenheit/shaarli-plugin-sort-tags) by [@gruenheit](https://github.com/gruenheit) - Sorts a bookmark's tags alphabetically (locale-aware, case-insensitive) whenever it is saved.
 - [targetblank](https://github.com/waschinski/shaarli-targetblank) by [@waschinski](https://github.com/waschinski): Shaarli plugin to open all external links in new tabs/windows
 - [webhooks](https://gitlab.com/flow.gunso/shaarli-webhooks) by [@flow.gunso](https://gitlab.com/flow.gunso) - Shaarli plugin that enables user-defined callback URL, i.e. webhooks, for specific Shaarli events (link saving, deletion...)
 - [youtube](https://github.com/kcaran/shaarli-plugin-youtube) by [@kcaran](https://github.com/kcaran) - Shaarli plugin that that retrieves summary and metadata information for youtube videos. A YouTube Data API key is required.
