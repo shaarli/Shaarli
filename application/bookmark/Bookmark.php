@@ -512,11 +512,16 @@ class Bookmark
      */
     public function renameTag(string $fromTag, string $toTag): void
     {
+        $toTag = trim($toTag);
+        if ($fromTag === $toTag) {
+            return;
+        }
+
         if (($pos = array_search($fromTag, $this->tags ?? [])) !== false) {
             if (in_array($toTag, $this->tags ?? []) !== false) {
                 $this->deleteTag($fromTag);
             } else {
-                $this->tags[$pos] = trim($toTag);
+                $this->tags[$pos] = $toTag;
             }
         }
     }

@@ -411,6 +411,19 @@ class BookmarkTest extends TestCase
     }
 
     /**
+     * Test renameTag() with the same tag name: the tag must be kept (issue #2153)
+     */
+    public function testRenameTagSameName()
+    {
+        $bookmark = new Bookmark();
+        $bookmark->setTags(['tag1', 'tag2', 'chair']);
+        $bookmark->renameTag('chair', 'chair');
+        $this->assertEquals(['tag1', 'tag2', 'chair'], $bookmark->getTags());
+        $bookmark->renameTag('tag1', ' tag1 ');
+        $this->assertEquals(['tag1', 'tag2', 'chair'], $bookmark->getTags());
+    }
+
+    /**
      * Test deleteTag()
      */
     public function testDeleteTag()
