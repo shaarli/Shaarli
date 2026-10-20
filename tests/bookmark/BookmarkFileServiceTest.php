@@ -321,6 +321,25 @@ class BookmarkFileServiceTest extends TestCase
     }
 
     /**
+     * Test numeric tags keep their name in the tags count, instead of being replaced by 0, 1, 2...
+     */
+    public function testNumericTagsKeepTheirNameInCount()
+    {
+        foreach ([['2023', 'web'], ['2012', 'web'], ['2023']] as $i => $tags) {
+            $bookmark = new Bookmark();
+            $bookmark->setUrl('https://domain.tld/numeric' . $i);
+            $bookmark->setTitle('Numeric tags ' . $i);
+            $bookmark->setTags($tags);
+            $this->privateLinkDB->add($bookmark);
+        }
+
+        $tags = $this->privateLinkDB->bookmarksCountPerTag();
+
+        $this->assertSame(2, $tags['2023']);
+        $this->assertSame(1, $tags['2012']);
+    }
+
+    /**
      * Test set() method for a bookmark fully built
      */
     public function testSetFull()
