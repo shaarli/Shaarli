@@ -350,14 +350,16 @@ class BookmarkFileService implements BookmarkServiceInterface
          * Formerly used arsort(), which doesn't define the sort behaviour for equal values.
          * Also, this function doesn't produce the same result between PHP 5.6 and 7.
          *
-         * So we now use array_multisort() to sort tags by DESC occurrences,
-         * then ASC alphabetically for equal values.
+         * So we now sort tags by DESC occurrences, then ASC alphabetically for equal values.
+         * array_multisort() can't be used here: it re-indexes numeric keys, which would replace
+         * numeric tags (e.g. `2023`) with 0, 1, 2...
          *
          * @see https://github.com/shaarli/Shaarli/issues/1142
          */
-        $keys = array_keys($tags);
-        $tmpTags = array_combine($keys, $keys);
-        array_multisort($tags, SORT_DESC, $tmpTags, SORT_ASC, $tags);
+        $counts = $tags;
+        uksort($tags, function ($a, $b) use ($counts) {
+            return $counts[$b] <=> $counts[$a] ?: $a <=> $b;
+        });
 
         return $tags;
     }
