@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
+## [v0.16.10](https://github.com/shaarli/Shaarli/releases/tag/v0.16.10) - 2026-10-22
+
+### Changed
+
+- doc: plugins/playvideos: update Content-Security-Policy (CSP) documentation
+
+### Security
+
+- update vulnerable npm build dependencies
+- rebuild Docker image against latest alpine:3.24.2 (PHP [CVE-2026-109618](https://nvd.nist.gov/vuln/detail/cve-2026-109618), [CVE-2026-109619](https://nvd.nist.gov/vuln/detail/cve-2026-109619))
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.9...v0.16.10
+
+------------------------
+
 ## [v0.16.9](https://github.com/shaarli/Shaarli/releases/tag/v0.16.9) - 2026-10-04
 
 ### Fixed
