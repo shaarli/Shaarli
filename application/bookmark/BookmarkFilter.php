@@ -98,7 +98,8 @@ class BookmarkFilter
             case self::$FILTER_HASH:
                 return $this->filterSmallHash($request);
             case self::$FILTER_TAG | self::$FILTER_TEXT: // == "vuotext"
-                $noRequest = empty($request) || (empty($request[0]) && empty($request[1]));
+                $hasTags = !empty($request[0]) || ($request[0] ?? null) === '0';
+                $noRequest = empty($request) || (!$hasTags && empty($request[1]));
                 if ($noRequest) {
                     if ($untaggedonly) {
                         return $this->filterUntagged($visibility);
@@ -110,7 +111,7 @@ class BookmarkFilter
                 } else {
                     $filtered = $this->bookmarks;
                 }
-                if (!empty($request[0])) {
+                if ($hasTags) {
                     $filtered = (new BookmarkFilter($filtered, $this->conf, $this->pluginManager))
                         ->filterTags($request[0], $casesensitive, $visibility)
                     ;
@@ -481,7 +482,7 @@ class BookmarkFilter
     protected function tag2regex(string $tag): string
     {
         $tagsSeparator = $this->conf->get('general.tags_separator', ' ');
-        if (!$tag || $tag === "-" || $tag === "*" || $tag[0] === "~") {
+        if ($tag === '' || $tag === "-" || $tag === "*" || $tag[0] === "~") {
             // nothing to search, return empty regex
             return '';
         }
