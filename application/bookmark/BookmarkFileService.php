@@ -378,7 +378,7 @@ class BookmarkFileService implements BookmarkServiceInterface
         foreach ($this->search([], null, false, false, true)->getBookmarks() as $bookmark) {
             if ($to < $bookmark->getCreated()) {
                 $next = $bookmark->getCreated();
-            } elseif ($from < $bookmark->getCreated() && $to > $bookmark->getCreated()) {
+            } elseif ($from <= $bookmark->getCreated() && $to >= $bookmark->getCreated()) {
                 $out[] = $bookmark;
             } else {
                 if ($previous !== null) {
