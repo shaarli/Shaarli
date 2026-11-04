@@ -25,6 +25,11 @@ It runs the latest development version of Shaarli and is updated/reset daily.
 
 Login: `demo`; Password: `demo`
 
+## One-Click Deploy
+
+<a href="https://repocloud.io/details/Shaarli/"><img src="https://d16t0pc4846x52.cloudfront.net/deploylobe.svg" alt="Deploy on RepoCloud" height="42"></a>
+<a href="https://railway.com/deploy/shaarli"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="42"></a>
+
 ### License
 
 Shaarli is [Free Software](http://en.wikipedia.org/wiki/Free_software). See [COPYING](COPYING) for a detail of the contributors and licenses for each individual component.
