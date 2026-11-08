@@ -213,6 +213,8 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
             'h1[class],h2[class],h3[class],h4[class],h5[class],h6[class]',
             'a[href|title|target|rel]',
             'img[src|alt]',
+            'video[src|width|height|controls]',
+            'source[src|type|media]',
             'ul,ol,li,dl,dt,dd,blockquote,pre',
             'table,thead,tbody,tfoot,tr,th,td',
             'abbr[title],sub,sup,q,kbd,samp,var,tt,address',
@@ -226,6 +228,22 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
             $schemes[$protocol] = true;
         }
         $config->set('URI.AllowedSchemes', $schemes);
+
+        // Register unsupported HTML5 tags in HTMLPurifier HTML definition.
+        // getHTMLDefinition(true) finalizes the config, so keep it after
+        // the set() calls above.
+        $definition = $config->getHTMLDefinition(true);
+        $definition->addElement('video', 'Block', 'Flow', 'Common', [
+            'src'      => 'URI',
+            'width'    => 'Length',
+            'height'   => 'Length',
+            'controls' => 'Bool',
+        ]);
+        $definition->addElement('source', 'Block', 'Empty', 'Common', [
+            'src'   => 'URI',
+            'type'  => 'Text',
+            'media' => 'Text',
+        ]);
 
         // Parse the HTML, strip everything not in the whitelist, and return the
         // cleaned string.
