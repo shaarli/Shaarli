@@ -37,6 +37,13 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
     protected $allowedProtocols;
 
     /**
+     * @var HTMLPurifier|null Shared HTMLPurifier instance (lazy-initialized).
+     *                        Reusing one instance avoids the heavy per-call
+     *                        initialization cost of HTMLPurifier.
+     */
+    protected static $purifier = null;
+
+    /**
      * LinkMarkdownFormatter constructor.
      *
      * @param ConfigManager $conf instance
@@ -192,44 +199,47 @@ class BookmarkMarkdownFormatter extends BookmarkDefaultFormatter
      */
     protected function sanitizeHtml($description)
     {
-        // Build a fresh config schema (not cached) so we can mutate it without
-        // triggering HTMLPurifier's "config is finalised" error.
-        $schema = HTMLPurifier_ConfigSchema::makeFromSerial();
-        $config = new HTMLPurifier_Config($schema);
+        if (self::$purifier === null) {
+            // Build a fresh config schema (not cached) so we can mutate it without
+            // triggering HTMLPurifier's "config is finalised" error.
+            $schema = HTMLPurifier_ConfigSchema::makeFromSerial();
+            $config = new HTMLPurifier_Config($schema);
 
-        // Disable the serializer cache so we don't need a writable temp dir.
-        $config->set('Cache.DefinitionImpl', null);
+            // Disable the serializer cache so we don't need a writable temp dir.
+            $config->set('Cache.DefinitionImpl', null);
 
-        // Whitelist the exact set of elements and attributes that Markdown/
-        // MarkdownExtra can emit. Anything not listed is stripped.
-        //
-        // Syntax: "element[allowed_attrs]" or just "element".
-        // - Elements like p, br, ul, li, table cells have no attributes.
-        // - a allows href, title, target, rel (standard link attributes).
-        // - abbr allows title (the abbreviation definition).
-        // - h1-h6, div, span allow class (for ParsedownExtra's {.class} syntax).
-        $config->set('HTML.Allowed', implode(',', [
-            'p[class],br,strong,em,code,span[class],hr',
-            'h1[class],h2[class],h3[class],h4[class],h5[class],h6[class]',
-            'a[href|title|target|rel]',
-            'img[src|alt]',
-            'ul,ol,li,dl,dt,dd,blockquote,pre',
-            'table,thead,tbody,tfoot,tr,th,td',
-            'abbr[title],sub,sup,q,kbd,samp,var,tt,address',
-            'div[class]',
-        ]));
+            // Whitelist the exact set of elements and attributes that Markdown/
+            // MarkdownExtra can emit. Anything not listed is stripped.
+            //
+            // Syntax: "element[allowed_attrs]" or just "element".
+            // - Elements like p, br, ul, li, table cells have no attributes.
+            // - a allows href, title, target, rel (standard link attributes).
+            // - abbr allows title (the abbreviation definition).
+            // - h1-h6, div, span allow class (for ParsedownExtra's {.class} syntax).
+            $config->set('HTML.Allowed', implode(',', [
+                'p[class],br,strong,em,code,span[class],hr',
+                'h1[class],h2[class],h3[class],h4[class],h5[class],h6[class]',
+                'a[href|title|target|rel]',
+                'img[src|alt]',
+                'ul,ol,li,dl,dt,dd,blockquote,pre',
+                'table,thead,tbody,tfoot,tr,th,td',
+                'abbr[title],sub,sup,q,kbd,samp,var,tt,address',
+                'div[class]',
+            ]));
 
-        // Build the allowed URI scheme list. Always include http/https/mailto/ftp,
-        // then add any extras the admin configured (e.g. ssh, git).
-        $schemes = ['http' => true, 'https' => true, 'mailto' => true, 'ftp' => true];
-        foreach ($this->allowedProtocols as $protocol) {
-            $schemes[$protocol] = true;
+            // Build the allowed URI scheme list. Always include http/https/mailto/ftp,
+            // then add any extras the admin configured (e.g. ssh, git).
+            $schemes = ['http' => true, 'https' => true, 'mailto' => true, 'ftp' => true];
+            foreach ($this->allowedProtocols as $protocol) {
+                $schemes[$protocol] = true;
+            }
+            $config->set('URI.AllowedSchemes', $schemes);
+
+            // Parse once and reuse for all descriptions.
+            self::$purifier = new HTMLPurifier($config);
         }
-        $config->set('URI.AllowedSchemes', $schemes);
 
-        // Parse the HTML, strip everything not in the whitelist, and return the
-        // cleaned string.
-        return (new HTMLPurifier($config))->purify($description);
+        return self::$purifier->purify($description);
     }
 
     protected function reverseEscapedHtml($description)
