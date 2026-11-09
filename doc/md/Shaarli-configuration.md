@@ -198,7 +198,7 @@ Additional settings applied to formatters.
     - **auto** or **php** (default): Use the PHP implementation of gettext (slower)
     - **gettext**: Use PHP builtin gettext extension
     (faster, but requires `php-gettext` to be installed and to reload the web server on update)
-- **extension**: Translation extensions for custom themes or plugins.
+- **extensions**: Translation extensions for custom themes or plugins.
 Must be an associative array: `translation domain => translation path`.
 
 ### Updates
