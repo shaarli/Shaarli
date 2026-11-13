@@ -1,2 +1,3 @@
-#!/bin/execlineb -P
-nginx
+#!/bin/sh
+/usr/local/bin/check-ipv6.sh
+exec nginx
