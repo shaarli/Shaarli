@@ -1,6 +1,8 @@
 # Reverse proxy
 
-If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) (i.e. there is a proxy server between clients and the web server hosting Shaarli), configure it accordingly. See [Reverse proxy](Reverse-proxy.md) configuration. In this example:
+If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) (i.e. there is a proxy server between clients and the web server hosting Shaarli), configure it accordingly.
+
+In this example:
 
 - The Shaarli application server exposes port `10080` to the proxy (for example docker container started with `--publish 127.0.0.1:10080:80`).
 - The Shaarli application server runs at `127.0.0.1` (container). Replace with the server's IP address if running on a different machine.
@@ -85,11 +87,15 @@ backend shaarli
     mode http
     option http-server-close
     option forwardfor
-    reqadd X-Forwarded-Proto: https
+    http-request set-header X-Forwarded-Proto https
+    http-request set-header X-Forwarded-Host %[req.hdr(host)]
+    http-request set-header X-Forwarded-Port 443
     server shaarli1 127.0.0.1:10080
 ```
 
-- [HAProxy documentation](https://cbonte.github.io/haproxy-dconv/)
+N.b.: the `X-Forwarded-Port` header is optional. If your frontend listens on a non-standard port, use `%[dst_port]` instead of a fixed value.
+
+- [HAProxy documentation](https://docs.haproxy.org/)
 
 ## Nginx
 
