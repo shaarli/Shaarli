@@ -1228,6 +1228,27 @@ class BookmarkFileServiceTest extends TestCase
     }
 
     /**
+     * Test find by dates includes bookmarks created exactly at the start or at the end of the time period.
+     */
+    public function testFilterByDateIncludesTimePeriodBounds(): void
+    {
+        $bookmarks = $this->privateLinkDB->findByDate(
+            DateTime::createFromFormat('Ymd_His', '20121206_142300'),
+            DateTime::createFromFormat('Ymd_His', '20121206_172539'),
+            $before,
+            $after
+        );
+
+        static::assertCount(3, $bookmarks);
+
+        static::assertSame(1, $bookmarks[0]->getId());
+        static::assertSame(9, $bookmarks[1]->getId());
+        static::assertSame(4, $bookmarks[2]->getId());
+        static::assertEquals(DateTime::createFromFormat('Ymd_His', '20100310_101010'), $before);
+        static::assertEquals(DateTime::createFromFormat('Ymd_His', '20121206_182539'), $after);
+    }
+
+    /**
      * Test getLatest with a sticky bookmark: it should be ignored and return the latest by creation date instead.
      */
     public function testGetLatestWithSticky(): void
