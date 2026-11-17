@@ -79,7 +79,7 @@ class DailyPageHelper
      * Get the DateTime format used by provided type
      * Examples:
      *   - day: 20201016 (<year><month><day>)
-     *   - week: 202041 (<year><week number>)
+     *   - week: 202041 (<ISO year><ISO week number>)
      *   - month: 202010 (<year><month>)
      *
      * @param string $type month/week/day
@@ -96,7 +96,7 @@ class DailyPageHelper
             case static::MONTH:
                 return 'Ym';
             case static::WEEK:
-                return 'YW';
+                return 'oW';
             case static::DAY:
                 return 'Ymd';
             default:
