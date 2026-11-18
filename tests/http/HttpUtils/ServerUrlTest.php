@@ -40,6 +40,23 @@ class ServerUrlTest extends \Shaarli\TestCase
     }
 
     /**
+     * Use the Host header when the web server sets no server name
+     */
+    public function testEmptyServerNameUsesHost()
+    {
+        $this->assertEquals(
+            'http://127.0.0.1:8000',
+            server_url(
+                [
+                    'SERVER_NAME' => '',
+                    'SERVER_PORT' => '80',
+                    'HTTP_HOST' => '127.0.0.1:8000'
+                ]
+            )
+        );
+    }
+
+    /**
      * Detect a Proxy that sets Forwarded-Host
      */
     public function testHttpsProxyForwardedHost()
