@@ -63,31 +63,30 @@ class SaveBookmarkTest extends TestCase
             static::assertTrue($bookmark->isPrivate());
         };
 
+        $capturedBookmark = null;
         $this->container->bookmarkService
             ->expects(static::once())
             ->method('addOrSet')
-            ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
-                static::assertFalse($save);
-
-                $checkBookmark($bookmark);
-
-                $bookmark->setId($id);
-
-                return $bookmark;
-            })
+            ->willReturnCallback(
+                function (Bookmark $bookmark, bool $save) use (&$capturedBookmark, $checkBookmark, $id): Bookmark {
+                    static::assertFalse($save);
+                    $checkBookmark($bookmark);
+                    $bookmark->setId($id);
+                    $capturedBookmark = $bookmark;
+                    return $bookmark;
+                }
+            )
         ;
         $this->container->bookmarkService
             ->expects(static::once())
-            ->method('set')
-            ->willReturnCallback(function (Bookmark $bookmark, bool $save) use ($checkBookmark, $id): Bookmark {
-                static::assertTrue($save);
-
-                $checkBookmark($bookmark);
-
-                static::assertSame($id, $bookmark->getId());
-
-                return $bookmark;
-            })
+            ->method('save')
+            ->willReturnCallback(
+                function () use (&$capturedBookmark, $checkBookmark, $id): void {
+                    static::assertNotNull($capturedBookmark);
+                    static::assertSame($id, $capturedBookmark->getId());
+                    $checkBookmark($capturedBookmark);
+                }
+            )
         ;
 
         // Make sure that PluginManager hook is triggered

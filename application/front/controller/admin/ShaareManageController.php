@@ -53,6 +53,7 @@ class ShaareManageController extends ShaarliAdminController
 
             $data = $formatter->format($bookmark);
             $this->executePageHooks('delete_link', $data);
+            $this->container->history->deleteLink($bookmark);
             $this->container->bookmarkService->remove($bookmark, false);
             ++$count;
         }
@@ -129,6 +130,7 @@ class ShaareManageController extends ShaarliAdminController
             // To preserve backward compatibility with 3rd parties, plugins still use arrays
             $data = $formatter->format($bookmark);
             $this->executePageHooks('save_link', $data);
+            $this->container->history->updateLink($bookmark);
             $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
 
             $this->container->bookmarkService->set($bookmark, false);
@@ -272,6 +274,7 @@ class ShaareManageController extends ShaarliAdminController
             // To preserve backward compatibility with 3rd parties, plugins still use arrays
             $data = $formatter->format($bookmark);
             $this->executePageHooks('save_link', $data);
+            $this->container->history->updateLink($bookmark);
             $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
 
             $this->container->bookmarkService->set($bookmark, false);
