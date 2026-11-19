@@ -222,6 +222,9 @@ class LinkUtilsTest extends TestCase
 
         $html = '<meta content="Brief description" tag1="content1">';
         $this->assertFalse(html_extract_tag('description', $html));
+
+        $html = '<meta name="apple-mobile-web-app-title" content="Numerama">';
+        $this->assertFalse(html_extract_tag('title', $html));
     }
 
     /**
@@ -421,6 +424,34 @@ class LinkUtilsTest extends TestCase
         $this->assertEmpty($title);
         $this->assertEmpty($desc);
         $this->assertEmpty($keywords);
+    }
+
+    /**
+     * Test the download callback with an unrelated *-title meta tag before the title (#1934)
+     */
+    public function testCurlDownloadCallbackIgnoresUnrelatedTitleMeta(): void
+    {
+        $charset = 'utf-8';
+        $callback = get_curl_download_callback(
+            $charset,
+            $title,
+            $desc,
+            $keywords,
+            false,
+            ' '
+        );
+
+        $data = [
+            '<head><meta name="apple-mobile-web-app-title" content="Numerama">',
+            '<title>Aller sur Mars en 45 jours - Numerama</title>'
+                . '<svg><symbol id="logo-full"><title>Numerama</title></symbol></svg>',
+        ];
+
+        foreach ($data as $chunk) {
+            static::assertSame(strlen($chunk), $callback(null, $chunk));
+        }
+
+        static::assertSame('Aller sur Mars en 45 jours - Numerama', $title);
     }
 
     /**

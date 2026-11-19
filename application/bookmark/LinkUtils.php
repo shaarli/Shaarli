@@ -68,7 +68,9 @@ function html_extract_tag($tag, $html)
     $propertiesKey = ['property', 'name', 'itemprop'];
     $properties = implode('|', $propertiesKey);
     // We need a OR here to accept either 'property=og:noquote' or 'property="og:unrelated og:my-tag"'
-    $orCondition  = '["\']?(?:og:)?' . $tag . '["\']?|["\'][^\'"]*?(?:og:)?' . $tag . '[^\'"]*?[\'"]';
+    // The tag must be a whole word, so 'title' doesn't match 'apple-mobile-web-app-title'
+    $orCondition  = '["\']?(?:og:)?' . $tag . '["\']?|' .
+        '["\'][^\'"]*?(?<![\w-])(?:og:)?' . $tag . '(?![\w-])[^\'"]*?[\'"]';
     // Support quotes in double quoted content, and the other way around
     $content = 'content=(["\'])((?:(?!\1).)*)\1';
     // Try to retrieve OpenGraph tag.
