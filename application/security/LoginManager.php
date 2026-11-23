@@ -197,6 +197,10 @@ class LoginManager
      */
     public function checkCredentialsFromLdap($login, $password, $connect = null, $bind = null)
     {
+        if (!is_string($password) || $password === '') {
+            return false;
+        }
+
         $connect = $connect ?? function ($host) {
             $resource = ldap_connect($host);
 

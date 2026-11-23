@@ -239,13 +239,32 @@ class DailyPageHelperTest extends TestCase
     }
 
     /**
+     * The last days of December can be in week 1 of the next ISO year, and the first days of January in the
+     * last week of the previous one: the week key must use the ISO year.
+     */
+    public function testWeekKeyUsesTheIsoYear(): void
+    {
+        $format = DailyPageHelper::getFormatByType(DailyPageHelper::WEEK);
+
+        static::assertSame('202601', (new DateTime('2025-12-30'))->format($format));
+        static::assertSame('202653', (new DateTime('2027-01-01'))->format($format));
+        static::assertEquals(
+            new DateTime('2025-12-29'),
+            DailyPageHelper::getStartDateTimeByType(
+                DailyPageHelper::WEEK,
+                DailyPageHelper::extractRequestedDateTime(DailyPageHelper::WEEK, '202601')
+            )
+        );
+    }
+
+    /**
      * Data provider for testGetFormatByType() test method.
      */
     public function getFormatsByType(): array
     {
         return [
             [DailyPageHelper::DAY, 'Ymd'],
-            [DailyPageHelper::WEEK, 'YW'],
+            [DailyPageHelper::WEEK, 'oW'],
             [DailyPageHelper::MONTH, 'Ym'],
         ];
     }
