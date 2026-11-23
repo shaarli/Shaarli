@@ -480,6 +480,12 @@ function server_url($server)
         $scheme = 'https';
     }
 
+    // A web server without a server name (the Docker image's nginx) passes an empty
+    // SERVER_NAME: the Host header is then the only name, and it carries the port.
+    if (empty($server['SERVER_NAME']) && ! empty($server['HTTP_HOST'])) {
+        return $scheme . '://' . $server['HTTP_HOST'];
+    }
+
     // Do not append standard port values
     if (
         ($scheme == 'http' && $server['SERVER_PORT'] != '80')
