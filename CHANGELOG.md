@@ -6,6 +6,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ------------------------
 
+## [v0.16.11](https://github.com/shaarli/Shaarli/releases/tag/v0.16.11) - 2026-11-23
+
+### Changed
+
+- docker: update alpine base image to v3.24.3
+- improve HTMLPurifier markdown sanitization performance (cache instance)
+- doc: update translation setting key from "extension" to "extensions"
+
+### Fixed
+
+- do not delete a tag when renaming it to the same name
+- fix numeric tags not listed in the tag list
+- daily/weekly: include links saved exactly at the daily page period bounds
+- weekly: fix weekly page key for weeks spanning year boundaries (use ISO year instead of calendar year)
+- fix searching for tag `0`
+- doc: fix HAProxy configuration
+- doc: fix dead links to the certbot TLS config files
+
+### Security
+
+- reject empty passwords in LDAP authentication (GHSA-xqxc-g4w2-w7vv)
+- update vulnerable npm dependenciesbump glob from 10.5.0 to 14.0.6 to fix CVE-2026-118773
+
+**Full Changelog**: https://github.com/shaarli/Shaarli/compare/v0.16.10...v0.16.11
+
+------------------------
+
 ## [v0.16.10](https://github.com/shaarli/Shaarli/releases/tag/v0.16.10) - 2026-10-22
 
 ### Changed
