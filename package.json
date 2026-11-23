@@ -21,7 +21,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-import": "^2.29.1",
     "file-loader": "^6.2.0",
-    "glob": "^10.5.0",
+    "glob": "^14.0.2",
     "globals": "^17.5.0",
     "micromatch": "^4.0.8",
     "mini-css-extract-plugin": "^2.9.0",

@@ -191,6 +191,25 @@ class BookmarkFilterTest extends TestCase
     }
 
     /**
+     * Searching for the tag "0" must not be mistaken for an empty search
+     */
+    public function testFilterTagZeroIsNotAnEmptySearch()
+    {
+        $this->assertEquals(
+            0,
+            count(self::$linkFilter->filter(BookmarkFilter::$FILTER_TAG, '0', false))
+        );
+        $this->assertEquals(
+            0,
+            count(self::$linkFilter->filter(
+                BookmarkFilter::$FILTER_TAG | BookmarkFilter::$FILTER_TEXT,
+                ['0', ''],
+                false
+            ))
+        );
+    }
+
+    /**
      * Retrieve a link entry with its hash
      */
     public function testFilterSmallHash()

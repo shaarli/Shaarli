@@ -321,6 +321,25 @@ class BookmarkFileServiceTest extends TestCase
     }
 
     /**
+     * Test numeric tags keep their name in the tags count, instead of being replaced by 0, 1, 2...
+     */
+    public function testNumericTagsKeepTheirNameInCount()
+    {
+        foreach ([['2023', 'web'], ['2012', 'web'], ['2023']] as $i => $tags) {
+            $bookmark = new Bookmark();
+            $bookmark->setUrl('https://domain.tld/numeric' . $i);
+            $bookmark->setTitle('Numeric tags ' . $i);
+            $bookmark->setTags($tags);
+            $this->privateLinkDB->add($bookmark);
+        }
+
+        $tags = $this->privateLinkDB->bookmarksCountPerTag();
+
+        $this->assertSame(2, $tags['2023']);
+        $this->assertSame(1, $tags['2012']);
+    }
+
+    /**
      * Test set() method for a bookmark fully built
      */
     public function testSetFull()
@@ -1225,6 +1244,27 @@ class BookmarkFileServiceTest extends TestCase
         static::assertSame(11, $bookmarks[0]->getId());
         static::assertNull($before);
         static::assertEquals(DateTime::createFromFormat('Ymd_His', '20100310_101010'), $after);
+    }
+
+    /**
+     * Test find by dates includes bookmarks created exactly at the start or at the end of the time period.
+     */
+    public function testFilterByDateIncludesTimePeriodBounds(): void
+    {
+        $bookmarks = $this->privateLinkDB->findByDate(
+            DateTime::createFromFormat('Ymd_His', '20121206_142300'),
+            DateTime::createFromFormat('Ymd_His', '20121206_172539'),
+            $before,
+            $after
+        );
+
+        static::assertCount(3, $bookmarks);
+
+        static::assertSame(1, $bookmarks[0]->getId());
+        static::assertSame(9, $bookmarks[1]->getId());
+        static::assertSame(4, $bookmarks[2]->getId());
+        static::assertEquals(DateTime::createFromFormat('Ymd_His', '20100310_101010'), $before);
+        static::assertEquals(DateTime::createFromFormat('Ymd_His', '20121206_182539'), $after);
     }
 
     /**

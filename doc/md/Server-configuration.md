@@ -281,7 +281,7 @@ server {
     ssl_certificate      /etc/ssl/shaarli.mydomain.org.crt;
     ssl_certificate_key  /etc/ssl/private/shaarli.mydomain.org.key;
 
-    # Let's Encrypt SSL settings from https://github.com/certbot/certbot/blob/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
+    # Let's Encrypt SSL settings from https://github.com/certbot/certbot/blob/main/certbot/src/certbot/_internal/plugins/nginx/tls_configs/options-ssl-nginx.conf
     ssl_session_cache shared:le_nginx_SSL:10m;
     ssl_session_timeout 1440m;
     ssl_session_tickets off;

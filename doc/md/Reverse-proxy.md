@@ -1,6 +1,8 @@
 # Reverse proxy
 
-If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) (i.e. there is a proxy server between clients and the web server hosting Shaarli), configure it accordingly. See [Reverse proxy](Reverse-proxy.md) configuration. In this example:
+If Shaarli is hosted on a server behind a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) (i.e. there is a proxy server between clients and the web server hosting Shaarli), configure it accordingly.
+
+In this example:
 
 - The Shaarli application server exposes port `10080` to the proxy (for example docker container started with `--publish 127.0.0.1:10080:80`).
 - The Shaarli application server runs at `127.0.0.1` (container). Replace with the server's IP address if running on a different machine.
@@ -39,7 +41,7 @@ See also [proxy-related](https://github.com/shaarli/Shaarli/issues?utf8=%E2%9C%9
     SSLEngine             on
     SSLCertificateFile    /etc/letsencrypt/live/shaarli.mydomain.org/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/shaarli.mydomain.org/privkey.pem
-    # Let's Encrypt settings from https://github.com/certbot/certbot/blob/master/certbot-apache/certbot_apache/_internal/tls_configs/current-options-ssl-apache.conf
+    # Let's Encrypt settings from https://github.com/certbot/certbot/blob/main/certbot/src/certbot/_internal/plugins/apache/tls_configs/current-options-ssl-apache.conf
     SSLProtocol             all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
     SSLCipherSuite          ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
     SSLHonorCipherOrder     off
@@ -85,11 +87,15 @@ backend shaarli
     mode http
     option http-server-close
     option forwardfor
-    reqadd X-Forwarded-Proto: https
+    http-request set-header X-Forwarded-Proto https
+    http-request set-header X-Forwarded-Host %[req.hdr(host)]
+    http-request set-header X-Forwarded-Port 443
     server shaarli1 127.0.0.1:10080
 ```
 
-- [HAProxy documentation](https://cbonte.github.io/haproxy-dconv/)
+N.b.: the `X-Forwarded-Port` header is optional. If your frontend listens on a non-standard port, use `%[dst_port]` instead of a fixed value.
+
+- [HAProxy documentation](https://docs.haproxy.org/)
 
 ## Nginx
 
