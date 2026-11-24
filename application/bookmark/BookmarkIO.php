@@ -134,10 +134,17 @@ class BookmarkIO
                 throw new NotEnoughSpaceException();
             }
 
-            file_put_contents(
-                $this->datastore,
-                $data
-            );
+            // Write to a temporary file first, so that a process killed mid-write
+            // can't leave an empty or truncated datastore behind.
+            $tmpDatastore = dirname($this->datastore) . '/' . basename($this->datastore, '.php') . '.tmp.php';
+            if (file_put_contents($tmpDatastore, $data) !== strlen($data)) {
+                if (is_file($tmpDatastore)) {
+                    unlink($tmpDatastore);
+                }
+                throw new NotWritableDataStoreException($this->datastore);
+            }
+
+            rename($tmpDatastore, $this->datastore);
         });
     }
 
