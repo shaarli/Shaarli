@@ -14,7 +14,7 @@ use Shaarli\Bookmark\Exception\InvalidBookmarkException;
  *
  * @package Shaarli\Bookmark
  */
-class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
+class BookmarkArray implements \Iterator, \Countable, \ArrayAccess, \JsonSerializable
 {
     /**
      * @var Bookmark[]
@@ -260,5 +260,10 @@ class BookmarkArray implements \Iterator, \Countable, \ArrayAccess
             $this->urls[$bookmark->getUrl()] = $key;
             $this->ids[$bookmark->getId()] = $key;
         }
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->bookmarks;
     }
 }
