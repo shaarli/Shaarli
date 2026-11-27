@@ -470,6 +470,37 @@ class BookmarkImportTest extends TestCase
     }
 
     /**
+     * Browsers write the URL and title as HTML, with & as &amp;
+     */
+    public function testImportDecodesHtmlEntities()
+    {
+        $files = file2array('firefox_entities.htm');
+        $this->netscapeBookmarkUtils->import([], $files);
+
+        $bookmark = $this->bookmarkService->findByUrl('https://search.tld/?q=shaarli&page=2');
+        $this->assertNotNull($bookmark);
+        $this->assertEquals('Tom & Jerry\'s "search"', $bookmark->getTitle());
+    }
+
+    /**
+     * A bookmark stored with the encoded URL by an earlier import is still found
+     */
+    public function testReimportFindsBookmarkStoredWithHtmlEntities()
+    {
+        $bookmark = new Bookmark();
+        $bookmark->setUrl('https://search.tld/?q=shaarli&amp;page=2');
+        $bookmark->setTitle('Old import');
+        $this->bookmarkService->add($bookmark);
+
+        $files = file2array('firefox_entities.htm');
+        $this->assertStringMatchesFormat(
+            '%a 0 bookmarks imported, 0 bookmarks overwritten, 1 bookmarks skipped.',
+            $this->netscapeBookmarkUtils->import([], $files)
+        );
+        $this->assertEquals(1, $this->bookmarkService->count());
+    }
+
+    /**
      * Overwrite private bookmarks so they become public
      */
     public function testOverwriteAsPublic()

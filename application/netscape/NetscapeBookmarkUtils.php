@@ -129,6 +129,14 @@ class NetscapeBookmarkUtils
         $skipCount = 0;
 
         foreach ($bookmarks as $bkm) {
+            // Browsers write the URL and title as HTML, e.g. & as &amp;
+            $rawUrl = $bkm['url'];
+            foreach (['url', 'name'] as $field) {
+                if (is_string($bkm[$field] ?? null)) {
+                    $bkm[$field] = html_entity_decode($bkm[$field], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                }
+            }
+
             if ($forcedPrivateStatus == 'private') {
                 // all imported bookmarks are private
                 $isPrivate = true;
@@ -141,6 +149,10 @@ class NetscapeBookmarkUtils
             }
 
             $link = $this->bookmarkService->findByUrl($bkm['url']);
+            if ($link === null && $rawUrl !== $bkm['url']) {
+                // Imported before entities were decoded
+                $link = $this->bookmarkService->findByUrl($rawUrl);
+            }
             $existingLink = $link !== null;
             if (! $existingLink) {
                 $link = new Bookmark();
