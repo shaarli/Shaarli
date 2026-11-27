@@ -125,6 +125,7 @@ class ShaarePublishController extends ShaarliAdminController
         ) {
             $bookmark->setThumbnail($this->container->thumbnailer->get($bookmark->getUrl()));
         }
+        $isNew = null === $id;
         $this->container->bookmarkService->addOrSet($bookmark, false);
 
         // To preserve backward compatibility with 3rd parties, plugins still use arrays
@@ -133,7 +134,12 @@ class ShaarePublishController extends ShaarliAdminController
         $this->executePageHooks('save_link', $data);
 
         $bookmark->fromArray($data, $this->container->conf->get('general.tags_separator', ' '));
-        $this->container->bookmarkService->set($bookmark);
+        if ($isNew) {
+            $this->container->history->addLink($bookmark);
+            $this->container->bookmarkService->save();
+        } else {
+            $this->container->bookmarkService->set($bookmark);
+        }
 
         // If we are called from the bookmarklet, we must close the popup:
         if ($request->getParam('source') === 'bookmarklet') {
